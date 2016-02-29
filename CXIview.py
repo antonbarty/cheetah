@@ -1,8 +1,10 @@
 #
-# CXIview
-# A replacement for the IDL Cheetah file viewer
-# Based on peak_viewer_cxi by Valerio Mariani, CFEL, December 2015
+# pyCXIview
 #
+# Based on peak_viewer_cxi by Valerio Mariani, CFEL, December 2015
+# A replacement for the IDL Cheetah file viewer
+#
+
 import sys
 import h5py
 import numpy
@@ -11,127 +13,22 @@ import PyQt4.QtCore
 import PyQt4.QtGui
 import pyqtgraph
 
-import UI.pyCXIview
+from lib.cfel_geometry import *
+import UI.CXIview_ui
 
 
-def pixel_maps_from_geometry_file(fnam):
-    """
-    Return pixel and radius maps from the geometry file
-    
-    Input: geometry filename
-    
-    Output: x: slab-like pixel map with x coordinate of each slab pixel in the reference system of the detector
-            y: slab-like pixel map with y coordinate of each slab pixel in the reference system of the detector
-            z: slab-like pixel map with distance of each pixel from the center of the reference system.
-        
-    """
-    f = open(fnam, 'r')
-    f_lines = []
-    for line in f:
-        f_lines.append(line)
 
-    keyword_list = ['min_fs', 'min_ss', 'max_fs', 'max_ss', 'fs', 'ss', 'corner_x', 'corner_y']
-
-    detector_dict = {}
-
-    panel_lines = [ x for x in f_lines if '/' in x and len(x.split('/')) == 2 and x.split('/')[1].split('=')[0].strip() in keyword_list ]
-
-    for pline in panel_lines:
-        items = pline.split('=')[0].split('/')
-        panel = items[0].strip()
-        property = items[1].strip()
-        if property in keyword_list:
-            if panel not in detector_dict.keys():
-                detector_dict[panel] = {}
-            detector_dict[panel][property] = pline.split('=')[1].split(';')[0]
-
-
-    parsed_detector_dict = {}
-
-    for p in detector_dict.keys():
-
-        parsed_detector_dict[p] = {}
-
-        parsed_detector_dict[p]['min_fs'] = int( detector_dict[p]['min_fs'] )
-        parsed_detector_dict[p]['max_fs'] = int( detector_dict[p]['max_fs'] )
-        parsed_detector_dict[p]['min_ss'] = int( detector_dict[p]['min_ss'] )
-        parsed_detector_dict[p]['max_ss'] = int( detector_dict[p]['max_ss'] )
-        parsed_detector_dict[p]['fs'] = []
-        parsed_detector_dict[p]['fs'].append( float( detector_dict[p]['fs'].split('x')[0] ) )
-        parsed_detector_dict[p]['fs'].append( float( detector_dict[p]['fs'].split('x')[1].split('y')[0] ) )
-        parsed_detector_dict[p]['ss'] = []
-        parsed_detector_dict[p]['ss'].append( float( detector_dict[p]['ss'].split('x')[0] ) )
-        parsed_detector_dict[p]['ss'].append( float( detector_dict[p]['ss'].split('x')[1].split('y')[0] ) )
-        parsed_detector_dict[p]['corner_x'] = float( detector_dict[p]['corner_x'] )
-        parsed_detector_dict[p]['corner_y'] = float( detector_dict[p]['corner_y'] )
-
-    max_slab_fs = numpy.array([parsed_detector_dict[k]['max_fs'] for k in parsed_detector_dict.keys()]).max()
-    max_slab_ss = numpy.array([parsed_detector_dict[k]['max_ss'] for k in parsed_detector_dict.keys()]).max()
-
-
-    x = numpy.zeros((max_slab_ss+1, max_slab_fs+1), dtype=numpy.float32)
-    y = numpy.zeros((max_slab_ss+1, max_slab_fs+1), dtype=numpy.float32)
-
-    for p in parsed_detector_dict.keys():
-        # get the pixel coords for this asic
-        i, j = numpy.meshgrid( numpy.arange(parsed_detector_dict[p]['max_ss'] - parsed_detector_dict[p]['min_ss'] + 1),
-                               numpy.arange(parsed_detector_dict[p]['max_fs'] - parsed_detector_dict[p]['min_fs'] + 1), indexing='ij')
-
-        #
-        # make the y-x ( ss, fs ) vectors, using complex notation
-        dx  = parsed_detector_dict[p]['fs'][1] + 1J * parsed_detector_dict[p]['fs'][0]
-        dy  = parsed_detector_dict[p]['ss'][1] + 1J * parsed_detector_dict[p]['ss'][0]
-        r_0 = parsed_detector_dict[p]['corner_y'] + 1J * parsed_detector_dict[p]['corner_x']
-        #
-        r   = i * dy + j * dx + r_0
-        #
-        y[parsed_detector_dict[p]['min_ss']: parsed_detector_dict[p]['max_ss'] + 1, parsed_detector_dict[p]['min_fs']: parsed_detector_dict[p]['max_fs'] + 1] = r.real
-        x[parsed_detector_dict[p]['min_ss']: parsed_detector_dict[p]['max_ss'] + 1, parsed_detector_dict[p]['min_fs']: parsed_detector_dict[p]['max_fs'] + 1] = r.imag
-            
-    r = numpy.sqrt(numpy.square(x) + numpy.square(y))
-
-	# AB
-    #numpy.rint(x)
-    #numpy.rint(y)
-
-    return x, y, r
-
-
-def pixel_maps_for_img(geometry_filename):
-    x, y, r  = pixel_maps_from_geometry_file(geometry_filename)
-
-    # find the smallest size of cspad_geom that contains all
-    # xy values but is symmetric about the origin
-    N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
-    M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
-
-    # convert y x values to i j values
-    i = numpy.array(y, dtype=numpy.int) + N/2 - 1
-    j = numpy.array(x, dtype=numpy.int) + M/2 - 1
-
-    ij = (i.flatten(), j.flatten())
-    img_shape = (N, M)
-    return ij, img_shape    
-
-
-def extract_coffset_and_res(geometry_filename):
-    f = open(geometry_filename, 'r')
-    f_lines = []
-    for line in f:
-        f_lines.append(line)
-
-    coffset_lines = [ x for x in f_lines if 'coffset' in x]
-    coffset = float(coffset_lines[-1].split('=')[1])
-    res_lines = [ x for x in f_lines if 'res' in x]
-    res = float(res_lines[-1].split('=')[1])
-
-    return coffset, res
-
-
+#
+#	CXI viewer code
+#
 class CXIview(PyQt4.QtGui.QMainWindow):
     
+    #
+    # display the main image
+    #
     def draw_things(self):
         
+        # Retrieve data and calibration values
         img = self.hdf5_fh['/entry_1/data_1/data'][self.img_index, :, :]
         #time_string = self.hdf5_fh['/LCLS/eventTimeString'][self.img_index]
         #self.ui.timeStampLabel.setText(time_string)
@@ -140,9 +37,13 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * photon_energy)
         self.camera_length = 1e-3*self.hdf5_fh['/LCLS/detector_1/EncoderValue'][self.img_index] 
         
+        
         self.img_to_draw[self.pixel_maps[0], self.pixel_maps[1]] = img.ravel()
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
+        #self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False, levels=[0,1000])
+        self.ui.imageView.setLevels(0,1000) #, update=True)
 
+		# Draw peaks if needed
         if self.show_peaks == True:
 
             peak_x = []
@@ -164,30 +65,73 @@ class CXIview(PyQt4.QtGui.QMainWindow):
             self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 15, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
-
             self.peak_canvas.setData([])
 
+		# Set title
         self.setWindowTitle(title)
+    #end draw_things()
+    
 
-
+	#
+	# Go to the previous pattern 
+	#
     def previous_pattern(self):
 
-        if self.img_index == 0:
-            self.img_index = self.num_lines-1
-        else:
+        if self.img_index != 0:
             self.img_index -= 1
+        else:
+            self.img_index = self.num_lines-1
         self.draw_things()
+    #end previous_pattern()
 
 
+	#
+	# Go to the next pattern 
+	#
     def next_pattern(self):
 
-        if self.img_index == self.num_lines-1:
-            self.img_index = 0
-        else:
+        if self.img_index != self.num_lines-1:
             self.img_index += 1
+        else:
+            self.img_index = 0
         self.draw_things()
+    #end next_pattern()
+    
+
+    #
+	# Go to random pattern
+	#
+    def random_pattern(self):
+        pattern_to_jump = self.num_lines*numpy.random.random(1)[0]
+        pattern_to_jump = pattern_to_jump.astype(numpy.int64)
+        
+        if 0<pattern_to_jump<self.num_lines:
+            self.img_index = pattern_to_jump
+            self.draw_things()
+        else:
+            self.ui.jumpToLineEdit.setText(str(self.img_index))
+    #end random_pattern()
+    
+
+    #
+	# Shuffle (play random patterns)
+	#
+    #def shuffle(self):
+        # Fill in later
+    #end shuffle()
 
 
+    #
+	# Play (display patterns in order)
+	#
+    #def play(self):
+        # Fill in later
+    #end play()
+
+
+	#
+	# Go to particular pattern
+	#
     def jump_to_pattern(self):
         pattern_to_jump = int(self.ui.jumpToLineEdit.text())
         
@@ -196,17 +140,24 @@ class CXIview(PyQt4.QtGui.QMainWindow):
             self.draw_things()
         else:
             self.ui.jumpToLineEdit.setText(str(self.img_index))
+        #end jump_to_pattern()
+        
 
-
+	#
+	# Toggle show or hide peaks
+	#
     def showhidepeaks(self, state):
-
         if state == PyQt4.QtCore.Qt.Checked:
             self.show_peaks = True
         else:
             self.show_peaks = False
         self.draw_things()
+	#end showhidepeaks()
 
 
+	#
+	# Mouse clicked somewhere in the window
+	#
     def mouse_clicked(self, event):
         pos = event[0].pos()
         if self.ui.imageView.getView().sceneBoundingRect().contains(pos):
@@ -220,13 +171,17 @@ class CXIview(PyQt4.QtGui.QMainWindow):
             resolution = 10e9*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius/(self.camera_length+self.coffset))))            
             
             self.ui.pixelLabel.setText('Last clicked pixel:     x: %4i     y: %4i     value: %4i     resolution: %4.2f' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse,y_mouse], resolution))
+    #end mouse_clicked()
     
     
+    #
+    #	Initialisation function
+    #
     def __init__(self, geom_filename, img_filename, fh):
 
         super(CXIview, self).__init__()
         pyqtgraph.setConfigOption('background', 0.2)
-        self.ui = UI.pyCXIview.Ui_MainWindow()
+        self.ui = UI.CXIview_ui.Ui_MainWindow()
         self.ui. setupUi(self)
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
@@ -240,6 +195,9 @@ class CXIview(PyQt4.QtGui.QMainWindow):
 
         self.ui.previousPushButton.clicked.connect(self.previous_pattern)
         self.ui.nextPushButton.clicked.connect(self.next_pattern)
+        self.ui.randomPushButton.clicked.connect(self.random_pattern)
+        #self.ui.playPushButton.clicked.connect(self.play)
+        #self.ui.shufflePushButton.clicked.connect(self.shuffle)
         self.ui.peaksCheckBox.setChecked(True)
         self.ui.peaksCheckBox.stateChanged.connect(self.showhidepeaks)
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
@@ -267,17 +225,27 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         self.show_peaks = True
 
         self.draw_things()
-        
+    #end __init()__
+#end CXIview
 
+        
+#
+#	Main function defining this as a program to be called
+#
 if __name__ == '__main__':
     
     app = PyQt4.QtGui.QApplication(sys.argv)
+    
     if len(sys.argv) != 3:
         print('Usage: pyCXIview.py geom_file cxi_file')
         sys.exit()
+    #endif 
+        
     hdf5_fh = h5py.File(sys.argv[2], 'r')  
     ex = CXIview(sys.argv[1], sys.argv[2], hdf5_fh)
     ex.show()
+    
     ret = app.exec_()
     hdf5_fh.close()    
     sys.exit(ret)
+#end __main__
