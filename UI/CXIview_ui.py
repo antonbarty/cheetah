@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-# Form implementation generated from reading ui file 'CXIview.ui'
+# Form implementation generated from reading ui file 'cxiview.ui'
 #
 # Created by: PyQt4 UI code generator 4.11.4
 #

@@ -1,3 +1,4 @@
+#!./python
 #
 # CXIview
 #
@@ -17,7 +18,7 @@ import pyqtgraph
 import argparse
 
 
-import UI.CXIview_ui
+import UI.cxiview_ui
 import lib.cfel_colours
 from lib.cfel_geometry import *
 
@@ -26,7 +27,7 @@ from lib.cfel_geometry import *
 #
 #	CXI viewer code
 #
-class CXIview(PyQt4.QtGui.QMainWindow):
+class cxiview(PyQt4.QtGui.QMainWindow):
     
     #
     # display the main image
@@ -229,9 +230,9 @@ class CXIview(PyQt4.QtGui.QMainWindow):
     #
     def __init__(self, geom_filename, img_filename, fh):
 
-        super(CXIview, self).__init__()
+        super(cxiview, self).__init__()
         pyqtgraph.setConfigOption('background', 0.2)
-        self.ui = UI.CXIview_ui.Ui_MainWindow()
+        self.ui = UI.cxiview_ui.Ui_MainWindow()
         self.ui. setupUi(self)
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
@@ -290,7 +291,7 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         
         
     #end __init()__
-#end CXIview
+#end cxiview
 
         
 #
@@ -328,7 +329,7 @@ if __name__ == '__main__':
     app = PyQt4.QtGui.QApplication(sys.argv)    
         
     hdf5_fh = h5py.File(args.i, 'r')  
-    ex = CXIview(args.g, args.i, hdf5_fh)
+    ex = cxiview(args.g, args.i, hdf5_fh)
     ex.show()    
     ret = app.exec_()
 
