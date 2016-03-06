@@ -23,6 +23,8 @@ import argparse
 import UI.cxiview_ui
 import lib.cfel_colours
 from lib.cfel_geometry import *
+from lib.cfel_imgtools import *
+
 
 
 
@@ -43,7 +45,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.camera_length = 1e-3*self.hdf5_fh['/LCLS/detector_1/EncoderValue'][self.img_index] 
         #time_string = self.hdf5_fh['/LCLS/eventTimeString'][self.img_index]
         
+        # Set information
         title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
+        self.ui.jumpToLineEdit.setText(str(self.img_index))
+
         #self.ui.timeStampLabel.setText(time_string)
 
         
@@ -51,14 +56,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
         self.img_to_draw[self.pixel_maps[0], self.pixel_maps[1]] = img.ravel()
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
-        #self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False, levels=[0,1000])
 
-        # Histogram equalisation        
-        h, e = numpy.histogram(img.ravel(), bins=max(200, numpy.int_(img.max())), range=(0,img.max()))
-        c = h.cumsum()/h.sum()
-        w = numpy.where(c <= 0.999)
-        top = numpy.amax(w)
-        #print('Colour scale upper bound = ', top)
+
+        # Histogram equalisation (saturate top 0.1% of pixels)       
+        bottom, top  = histogram_clip_levels(img.ravel(),0.001)        
         self.ui.imageView.setLevels(0,top) #, update=True)
         
         # Static level
@@ -98,10 +99,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
         # Modifying the colour table - from Valerio - and it works
-        pos = numpy.array([0.0,0.5,1.0])
-        color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
-        self.new_color_map = pyqtgraph.ColorMap(pos,color)
-        self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
+        #pos = numpy.array([0.0,0.5,1.0])
+        #color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
+        #self.new_color_map = pyqtgraph.ColorMap(pos,color)
+        #self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
        
 
         # Draw peaks if needed
@@ -292,6 +293,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         
         # Try to set the colour table to inverse-BW
+        # Modifying the colour table - from Valerio - and it works
+        pos = numpy.array([0.0,0.5,1.0])
+        color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
+        self.new_color_map = pyqtgraph.ColorMap(pos,color)
+        self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
+
 
         # Scale QtGraph histogram to not auto-range
         #qt_Histogram = self.ui.imageView.ui.HistogramLUTItem()

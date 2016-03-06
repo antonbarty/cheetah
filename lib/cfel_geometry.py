@@ -9,16 +9,17 @@ import numpy
 import scipy.constants
 
 
-"""
-Return pixel and radius maps from CrystFEL format geometry file
-
-Input: geometry filename
-
-Output: x: slab-like pixel map with x coordinate of each slab pixel in the reference system of the detector
-        y: slab-like pixel map with y coordinate of each slab pixel in the reference system of the detector
-        z: slab-like pixel map with distance of each pixel from the center of the reference system.
-"""
 def pixelmap_from_CrystFEL_geometry_file(fnam):
+    """
+    Return pixel and radius maps from CrystFEL format geometry file
+    
+    Input: geometry filename
+    
+    Output: x: slab-like pixel map with x coordinate of each slab pixel in the reference system of the detector
+            y: slab-like pixel map with y coordinate of each slab pixel in the reference system of the detector
+            z: slab-like pixel map with distance of each pixel from the center of the reference system.
+    """
+
     f = open(fnam, 'r')
     f_lines = []
     for line in f:
@@ -92,11 +93,13 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
 
     return x, y, r
 
-"""
-Read Cheetah style pixelmap
-(HDF5 file with fields "x", "y" and "z" containing pixel coordinates in meters)
-"""
+
+
 def read_pixelmap(filename):
+    """
+    Read Cheetah style pixelmap
+    (HDF5 file with fields "x", "y" and "z" containing pixel coordinates in meters)
+    """
 
     # Open HDF5 pixelmap file
     fp = h5py.File(filename, 'r')     
@@ -117,11 +120,11 @@ def read_pixelmap(filename):
     return x, y, r
     
 
-"""
-Read geometry files and return pixel map
-A bit of a wrapper - determines file type and calls the appropriate routines
-"""
 def read_geometry(geometry_filename, format=format):
+    """
+    Read geometry files and return pixel map
+    Wrapper function for geometry file readers - determines file type and calls the appropriate routines
+    """
     
     # Later on we should determine the format automatically (eg: from filename extension)
     if format == 'pixelmap': 
@@ -137,8 +140,8 @@ def read_geometry(geometry_filename, format=format):
     M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
     N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
 
-    print(x.max(), x.min())
-    print(y.max(), y.min())
+    print('X range: ', x.max(), x.min())
+    print('Y range: ', y.max(), y.min())
 
     # convert x y values to i j values
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
@@ -150,11 +153,12 @@ def read_geometry(geometry_filename, format=format):
     return ij, img_shape    
 
 
-"""
-    Determine camera offset from geometry file
-    Pixelmaps do not have these values so we have a temporary hack in place
-"""
+
 def read_geometry_coffset_and_res(geometry_filename, format=format):
+    """
+        Determine camera offset from geometry file
+        Pixelmaps do not have these values so we have a temporary hack in place
+    """
     
     # Later on we should determine the format automatically (eg: from filename extension)
     if format == 'pixelmap': 
