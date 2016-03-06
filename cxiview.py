@@ -1,4 +1,4 @@
-#!./python
+#!//reg/g/cfel/anaconda/bin/python3
 #
 # CXIview
 #
@@ -6,6 +6,8 @@
 # Based on peak_viewer_cxi by Valerio Mariani, CFEL, December 2015
 # A replacement for the IDL Cheetah file viewer
 #
+#!/Applications/anaconda/bin/python3
+
 
 import sys
 import os
@@ -50,7 +52,17 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.img_to_draw[self.pixel_maps[0], self.pixel_maps[1]] = img.ravel()
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
         #self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False, levels=[0,1000])
-        self.ui.imageView.setLevels(0,1000) #, update=True)
+
+        # Histogram equalisation        
+        h, e = numpy.histogram(img.ravel(), bins=max(200, numpy.int_(img.max())), range=(0,img.max()))
+        c = h.cumsum()/h.sum()
+        w = numpy.where(c <= 0.999)
+        top = numpy.amax(w)
+        #print('Colour scale upper bound = ', top)
+        self.ui.imageView.setLevels(0,top) #, update=True)
+        
+        # Static level
+        #self.ui.imageView.setLevels(0,1000) #, update=True)
 
         # Set the histogram widget to not auto-scale so badly
         # http://www.pyqtgraph.org/documentation/graphicsItems/histogramlutitem.html#pyqtgraph.HistogramLUTItem
@@ -92,8 +104,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
        
 
-
-		# Draw peaks if needed
+        # Draw peaks if needed
         if self.show_peaks == True:
 
             peak_x = []
@@ -112,7 +123,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 peak_x.append(self.pixel_maps[0][peak_in_slab])
                 peak_y.append(self.pixel_maps[1][peak_in_slab])
 
-            self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 8, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
+            self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.peak_canvas.setData([])
@@ -239,6 +250,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         self.peak_canvas = pyqtgraph.ScatterPlotItem()
         self.ui.imageView.getView().addItem(self.peak_canvas)
+        #self.ui.imageView.getView().setRange(xRange=(0,1500))
+        #self.ui.imageView.getView().scaleBy(0.1)
 
         self.intregex = PyQt4.QtCore.QRegExp('[0-9]+')
         self.qtintvalidator = PyQt4.QtGui.QRegExpValidator()
@@ -249,10 +262,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.randomPushButton.clicked.connect(self.random_pattern)
         self.ui.playPushButton.clicked.connect(self.play)
         self.ui.shufflePushButton.clicked.connect(self.shuffle)
-        self.ui.peaksCheckBox.setChecked(True)
-        self.ui.peaksCheckBox.stateChanged.connect(self.showhidepeaks)
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
+
+        self.show_peaks = False
+        self.ui.peaksCheckBox.setChecked(False)
+        self.ui.peaksCheckBox.stateChanged.connect(self.showhidepeaks)
+
         
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
@@ -267,12 +283,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
 
-        self.ring_pen = pyqtgraph.mkPen('r', width=1.5)
-        self.circle_pen = pyqtgraph.mkPen('b', width=1.5)
+        self.ring_pen = pyqtgraph.mkPen('r', width=2)
+        self.circle_pen = pyqtgraph.mkPen('b', width=2)
         
         self.img_index = 0
         self.ui.jumpToLineEdit.setText(str(self.img_index))
-        self.show_peaks = True
 
         
         

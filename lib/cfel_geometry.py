@@ -134,15 +134,19 @@ def read_geometry(geometry_filename, format=format):
 
     # find the smallest size of cspad_geom that contains all
     # xy values but is symmetric about the origin
-    N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
     M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
+    N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
 
-    # convert y x values to i j values
-    i = numpy.array(y, dtype=numpy.int) + N/2 - 1
-    j = numpy.array(x, dtype=numpy.int) + M/2 - 1
+    print(x.max(), x.min())
+    print(y.max(), y.min())
+
+    # convert x y values to i j values
+    # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
+    i = numpy.array(x, dtype=numpy.int) + M/2 - 1
+    j = numpy.array(-y, dtype=numpy.int) + N/2 - 1
 
     ij = (i.flatten(), j.flatten())
-    img_shape = (N, M)
+    img_shape = (M, N)
     return ij, img_shape    
 
 

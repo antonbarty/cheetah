@@ -63,6 +63,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="playPushButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>100</width>
@@ -89,6 +92,9 @@
         </item>
         <item>
          <widget class="QPushButton" name="shufflePushButton">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="maximumSize">
            <size>
             <width>100</width>
@@ -101,9 +107,22 @@
          </widget>
         </item>
         <item>
-         <widget class="QCheckBox" name="peaksCheckBox">
+         <widget class="QLabel" name="jumpToLabel">
           <property name="text">
-           <string>Show/Hide Peaks</string>
+           <string>Jump To Frame:</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QLineEdit" name="jumpToLineEdit">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
          </widget>
         </item>
@@ -124,22 +143,9 @@
         <item>
          <layout class="QHBoxLayout" name="horizontalLayout3">
           <item>
-           <widget class="QLabel" name="jumpToLabel">
+           <widget class="QCheckBox" name="peaksCheckBox">
             <property name="text">
-             <string>Jump To Frame:</string>
-            </property>
-            <property name="alignment">
-             <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QLineEdit" name="jumpToLineEdit">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
+             <string>Show/Hide Peaks</string>
             </property>
            </widget>
           </item>
