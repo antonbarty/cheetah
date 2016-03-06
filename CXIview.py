@@ -1,20 +1,25 @@
 #
-# pyCXIview
+# CXIview
 #
+# Python/Qt viewer for .cxi files (and other files output by Cheetah)
 # Based on peak_viewer_cxi by Valerio Mariani, CFEL, December 2015
 # A replacement for the IDL Cheetah file viewer
 #
 
 import sys
+import os
 import h5py
 import numpy
 import scipy.constants
 import PyQt4.QtCore
 import PyQt4.QtGui
 import pyqtgraph
+import argparse
 
-from lib.cfel_geometry import *
+
 import UI.CXIview_ui
+import lib.cfel_colours
+from lib.cfel_geometry import *
 
 
 
@@ -30,18 +35,62 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         
         # Retrieve data and calibration values
         img = self.hdf5_fh['/entry_1/data_1/data'][self.img_index, :, :]
-        #time_string = self.hdf5_fh['/LCLS/eventTimeString'][self.img_index]
-        #self.ui.timeStampLabel.setText(time_string)
-        title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
         photon_energy = self.hdf5_fh['/LCLS/photon_energy_eV'][self.img_index]
         self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * photon_energy)
         self.camera_length = 1e-3*self.hdf5_fh['/LCLS/detector_1/EncoderValue'][self.img_index] 
+        #time_string = self.hdf5_fh['/LCLS/eventTimeString'][self.img_index]
         
+        title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
+        #self.ui.timeStampLabel.setText(time_string)
+
         
+        # Set the image
+        # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
         self.img_to_draw[self.pixel_maps[0], self.pixel_maps[1]] = img.ravel()
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
         #self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False, levels=[0,1000])
         self.ui.imageView.setLevels(0,1000) #, update=True)
+
+        # Set the histogram widget to not auto-scale so badly
+        # http://www.pyqtgraph.org/documentation/graphicsItems/histogramlutitem.html#pyqtgraph.HistogramLUTItem
+        hist = self.ui.imageView.getHistogramWidget()
+        hist.setHistogramRange(-100, 10000, padding=0.1)
+        #self.ui.imageView.ui.histogram.setHistogramRange(-100, 10000, padding=0.1)
+
+        # Edit the colour table (unduly complicated - edit the editor rather than load a table of values)
+        # http://www.pyqtgraph.org/documentation/graphicsItems/gradienteditoritem.html#pyqtgraph.GradientEditorItem.__init__
+        #self.ui.imageView.ui.GradientEditorItem.addTick(0.5,'#207020')
+        #grad = self.ui.imageView.getGradientWidget()
+
+        # Find gradient editor item reference
+        #grad =  self.ui.imageView.ui.histogram.gradient
+        
+         #self.ui.imageview.ui.histogram.gradient.setColorMap(colormap)
+        #col = grad.colorMap()
+        #grad.addTick(0.5,color=(1.0,0.0,0.0,1.0))
+        #grad.addTick(0.5,color='r')
+        #grad.item.addTick(1,color='r')
+
+        
+        #map = histogram
+        #map = self.ui.imageView.ui.gradient
+        #map = self.ui.imageView.ui.TickSliderItem().listTicks();
+
+        # Suggestion from https://groups.google.com/forum/#!topic/pyqtgraph/gEjC08Vb8NQ
+        #pos = numpy.array([0.0, 0.5, 1.0])
+        #color = numpy.array([[0,0,0,255], [255,128,0,255], [255,255,0,255]], dtype=numpy.ubyte)
+        #map = pyqtgraph.ColorMap(pos, color)
+        #lut = map.getLookupTable(0.0, 1.0, 256)
+        #self.ui.imageView.ui.setLookupTable(lut)
+
+
+        # Modifying the colour table - from Valerio - and it works
+        pos = numpy.array([0.0,0.5,1.0])
+        color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
+        self.new_color_map = pyqtgraph.ColorMap(pos,color)
+        self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
+       
+
 
 		# Draw peaks if needed
         if self.show_peaks == True:
@@ -62,13 +111,14 @@ class CXIview(PyQt4.QtGui.QMainWindow):
                 peak_x.append(self.pixel_maps[0][peak_in_slab])
                 peak_y.append(self.pixel_maps[1][peak_in_slab])
 
-            self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 15, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
+            self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 8, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.peak_canvas.setData([])
 
 		# Set title
         self.setWindowTitle(title)
+        
     #end draw_things()
     
 
@@ -114,24 +164,24 @@ class CXIview(PyQt4.QtGui.QMainWindow):
     
 
     #
-	# Shuffle (play random patterns)
-	#
-    #def shuffle(self):
-        # Fill in later
+    # Shuffle (play random patterns)
+    #
+    def shuffle(self):
+        print("Not yet implemented")
     #end shuffle()
 
 
     #
 	# Play (display patterns in order)
 	#
-    #def play(self):
-        # Fill in later
+    def play(self):
+        print("Not yet implemented")
     #end play()
 
 
-	#
-	# Go to particular pattern
-	#
+    #
+    # Go to particular pattern
+    #
     def jump_to_pattern(self):
         pattern_to_jump = int(self.ui.jumpToLineEdit.text())
         
@@ -143,9 +193,9 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         #end jump_to_pattern()
         
 
-	#
-	# Toggle show or hide peaks
-	#
+    #
+    # Toggle show or hide peaks
+    #
     def showhidepeaks(self, state):
         if state == PyQt4.QtCore.Qt.Checked:
             self.show_peaks = True
@@ -170,7 +220,7 @@ class CXIview(PyQt4.QtGui.QMainWindow):
                 
             resolution = 10e9*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius/(self.camera_length+self.coffset))))            
             
-            self.ui.pixelLabel.setText('Last clicked pixel:     x: %4i     y: %4i     value: %4i     resolution: %4.2f' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse,y_mouse], resolution))
+            self.ui.statusBar.setText('Last clicked pixel:     x: %4i     y: %4i     value: %4i     resolution: %4.2f' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse,y_mouse], resolution))
     #end mouse_clicked()
     
     
@@ -196,8 +246,8 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         self.ui.previousPushButton.clicked.connect(self.previous_pattern)
         self.ui.nextPushButton.clicked.connect(self.next_pattern)
         self.ui.randomPushButton.clicked.connect(self.random_pattern)
-        #self.ui.playPushButton.clicked.connect(self.play)
-        #self.ui.shufflePushButton.clicked.connect(self.shuffle)
+        self.ui.playPushButton.clicked.connect(self.play)
+        self.ui.shufflePushButton.clicked.connect(self.shuffle)
         self.ui.peaksCheckBox.setChecked(True)
         self.ui.peaksCheckBox.stateChanged.connect(self.showhidepeaks)
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
@@ -210,21 +260,35 @@ class CXIview(PyQt4.QtGui.QMainWindow):
         self.num_lines = self.hdf5_fh['/entry_1/data_1/data'].shape[0]
         self.slab_shape = (self.hdf5_fh['/entry_1/data_1/data'].shape[1],self.hdf5_fh['/entry_1/data_1/data'].shape[2])
 
-        self.pixel_maps, self.img_shape = pixel_maps_for_img(geom_filename)
-
-        #AB 
+        self.pixel_maps, self.img_shape = read_geometry(geom_filename, format='pixelmap')
         self.pixel_maps = numpy.int_(self.pixel_maps)
-        self.coffset, self.res = extract_coffset_and_res(geom_filename)
+        self.coffset, self.res = read_geometry_coffset_and_res(geom_filename, format='pixelmap')
+        
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
 
-        self.ring_pen = pyqtgraph.mkPen('r', width=2)
-        self.circle_pen = pyqtgraph.mkPen('b', width=2)
+        self.ring_pen = pyqtgraph.mkPen('r', width=1.5)
+        self.circle_pen = pyqtgraph.mkPen('b', width=1.5)
         
         self.img_index = 0
         self.ui.jumpToLineEdit.setText(str(self.img_index))
         self.show_peaks = True
 
+        
+        
+        # Try to set the colour table to inverse-BW
+
+        # Scale QtGraph histogram to not auto-range
+        #qt_Histogram = self.ui.imageView.ui.HistogramLUTItem()
+        #qt_Histogram.autoHistogramRange()
+        #qt_Histogram.setHistogramRange(-100, 10000, padding=0.1)
+        #self.ui.imageView.ui.HistogramLUTItem().setHistogramRange(-100, 10000, padding=0.1)
+        self.ui.imageView.ui.histogram.setHistogramRange(-100, 10000, padding=0.1)
+                
         self.draw_things()
+        self.ui.statusBar.setText('Ready') 
+        
+        
+        
     #end __init()__
 #end CXIview
 
@@ -234,18 +298,50 @@ class CXIview(PyQt4.QtGui.QMainWindow):
 #
 if __name__ == '__main__':
     
-    app = PyQt4.QtGui.QApplication(sys.argv)
+    #
+    #   Parse command line arguments
+    #    
+    parser = argparse.ArgumentParser(description='CFEL CXI file viewer')
+    parser.add_argument("-g", help="Geometry file (.geom/.h5)")
+    parser.add_argument("-i", help="Input file or directory (.cxi/.h5)")
+    parser.add_argument("-p", help="Circle peaks by default")
+    #parser.add_argument("-d", default="none", help="Directory to scan")
+    #parser.add_argument("--rmin", type=float, help="minimum pixel resolution cutoff")
+    #parser.add_argument("--nmax", default=np.inf, type=int, help="maximum number of peaks to read")
+    args = parser.parse_args()
     
-    if len(sys.argv) != 3:
-        print('Usage: pyCXIview.py geom_file cxi_file')
+    
+    # This bit may be irrelevent if we can make parser.parse_args() require this field    
+    if args.i is None:
+        print('Usage: CXIview.py -i cxi_file -g geom_file ')
         sys.exit()
+    #endif        
+    #if len(sys.argv) != 3:
+    #    print('Usage: pyCXIview.py geom_file cxi_file')
+    #    sys.exit()
     #endif 
+
+
+    #
+    #   Spawn the viewer
+    #        
+    app = PyQt4.QtGui.QApplication(sys.argv)    
         
-    hdf5_fh = h5py.File(sys.argv[2], 'r')  
-    ex = CXIview(sys.argv[1], sys.argv[2], hdf5_fh)
-    ex.show()
-    
+    hdf5_fh = h5py.File(args.i, 'r')  
+    ex = CXIview(args.g, args.i, hdf5_fh)
+    ex.show()    
     ret = app.exec_()
+
+    
+    #
+    # Cleanup on exit    
+    #
     hdf5_fh.close()    
+    app.exit()
+    
+    # This function does the following in an attempt to ‘safely’ terminate the process:
+    #   Invoke atexit callbacks
+    #   Close all open file handles
+    os._exit(ret)
     sys.exit(ret)
 #end __main__

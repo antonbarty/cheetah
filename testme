@@ -1,2 +1,7 @@
 
-python pyCXIview.py scratch/cxij4915-v12.geom scratch/cxik4516-r0048-class1.cxi 
+python CXIview.py -g scratch/cspad-geometry.h5 -i scratch/cxik4516-r0048-class1.cxi 
+
+# Boneyard
+#python CXIview.py -g scratch/cxij4915-v12.geom -i scratch/cxik4516-r0048-class1.cxi 
+#python CXIview.py scratch/cxij4915-v12.geom scratch/cxik4516-r0048-class1.cxi 
+

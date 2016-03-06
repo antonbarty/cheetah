@@ -4,7 +4,7 @@ CFEL colour table tools
 
 Created on Tue Mar  1 17:14:16 2016
 
-@author: Valerio Mariani and Anton Barty
+@author: Valerio Mariani 
 """
 
 import pyqtgraph
