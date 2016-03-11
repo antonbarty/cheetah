@@ -129,3 +129,68 @@ def pixel_remap(data, gx, gy, dx=1.0):
 
 
 
+def radial_average(data, r):
+    """
+    In IDL
+	;;
+	;;	Create radial distance array
+	;;
+		if keyword_set(x) AND keyword_set(y) then begin
+			d = sqrt(x*x+y*y)
+		endif $
+		else if n_elements(r) ne 0 then begin
+			d = r
+		endif $
+		else begin
+			s = size(data,/dim)
+			d = dist(s[0],s[1])
+			d = shift(d,s[0]/2,s[1]/2)
+		endelse
+  
+		if not keyword_set(binsize) then $
+			binsize = 1
+		
+	;;
+	;; Ignore regions of missing data
+	;;
+		tempdata = data
+		if keyword_set(missing) then begin
+			w = where(data ne missing)
+			if w[0] eq -1 then begin
+				print,'radial_average: All data is missing data!'
+				return, fltarr(max(d))
+			endif $
+			else begin
+				tempdata = data[w]
+				d = d[w]
+			endelse
+		endif
+
+	;;
+	;;	Sort distances
+	;;
+		dmin = 0
+		dmax = max(d)
+		hd = histogram(d, min=0, max=dmax, binsize=binsize, reverse_indices=ii, _extra=extra, locations=loc)
+
+	;;
+	;;	Output array
+	;;
+		avg = hd*0.
+
+	;;
+	;;	Compute radial average
+	;;
+		for i = 1, n_elements(hd)-1 do begin
+		  	if ii[i] NE ii[i+1] then $
+				avg[i] = total(tempdata[ii[ii[i]:ii[i+1]-1]])/hd[i]
+		endfor
+
+	;;
+	;;	Return radial average
+	;;
+		return, avg
+  """
+    print("Not yet implemented...")          
+  
+
