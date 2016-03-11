@@ -1,6 +1,8 @@
 #
-#	CrystFEL Geometry parser
-#	Valerio Mariani
+#   CrystFEL Geometry parser
+#   Mostly due to Valerio Mariani
+#
+#   Tested using Anaconda / Python 3.4
 #
 
 import sys
@@ -123,7 +125,8 @@ def read_pixelmap(filename):
 def read_geometry(geometry_filename, format=format):
     """
     Read geometry files and return pixel map
-    Wrapper function for geometry file readers - determines file type and calls the appropriate routines
+    Determines file type and calls the appropriate routine for reading the geometry
+    Note transposition and change of axes so that images appear the same orientation in hdfsee, cheetah/IDL and pyQtGraph
     """
     
     # Later on we should determine the format automatically (eg: from filename extension)
@@ -145,12 +148,17 @@ def read_geometry(geometry_filename, format=format):
 
     # convert x y values to i j values
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
-    i = numpy.array(x, dtype=numpy.int) + M/2 - 1
-    j = numpy.array(-y, dtype=numpy.int) + N/2 - 1
+    #
+    # Note to Valerio: 
+    # Do not convert to integer as we may want the actual pixel coordinates
+    # This also means do not center array here as we do this in pixel_remap
+    # Returning actual coordinates (x,y) is better for other operations such as radial averages
+    x = x
+    y = -y
+    xy = (x.flatten(), y.flatten())
 
-    ij = (i.flatten(), j.flatten())
     img_shape = (M, N)
-    return ij, img_shape    
+    return xy, img_shape    
 
 
 

@@ -1,12 +1,15 @@
-#!//reg/g/cfel/anaconda/bin/python3
+#!/reg/g/cfel/anaconda/bin/python3
 #
-# CXIview
+#   CXIview
+#   A python/Qt viewer for .cxi files (and other files output by Cheetah)
+#   A replacement for the IDL Cheetah file viewer
+#   Based on peak_viewer_cxi by Valerio Mariani, CFEL, December 2015
 #
-# Python/Qt viewer for .cxi files (and other files output by Cheetah)
-# Based on peak_viewer_cxi by Valerio Mariani, CFEL, December 2015
-# A replacement for the IDL Cheetah file viewer
+#   Tested using Anaconda / Python 3.4
 #
-#!/Applications/anaconda/bin/python3
+#   Top line (#!/reg/g/cfel/anaconda/bin/python3) needed for interface to IDL GUI at SLAC to work properly 
+#   !/Applications/anaconda/bin/python3
+
 
 
 import sys
@@ -24,6 +27,7 @@ import UI.cxiview_ui
 import lib.cfel_colours
 from lib.cfel_geometry import *
 from lib.cfel_imgtools import *
+from lib.cfel_filetools import *
 
 
 
@@ -38,23 +42,25 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     def draw_things(self):
         
-        # Retrieve data and calibration values
-        img = self.hdf5_fh['/entry_1/data_1/data'][self.img_index, :, :]
-        photon_energy = self.hdf5_fh['/LCLS/photon_energy_eV'][self.img_index]
+        # Retrieve image data 
+        img = read_cxi(self.filename, self.img_index)
+
+
+        # Retrieve resolution related stuff
+        photon_energy = read_cxi(self.filename, self.img_index, photon_energy=True)
+        camera_length = read_cxi(self.filename, self.img_index, camera_length=True)
+        camera_length *= 1e-3
         self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * photon_energy)
-        self.camera_length = 1e-3*self.hdf5_fh['/LCLS/detector_1/EncoderValue'][self.img_index] 
-        #time_string = self.hdf5_fh['/LCLS/eventTimeString'][self.img_index]
         
-        # Set information
+        
+        # Set title 
         title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
         self.ui.jumpToLineEdit.setText(str(self.img_index))
-
-        #self.ui.timeStampLabel.setText(time_string)
 
         
         # Set the image
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
-        self.img_to_draw[self.pixel_maps[0], self.pixel_maps[1]] = img.ravel()
+        self.img_to_draw = pixel_remap(img, self.pixel_map[0], self.pixel_map[1], dx=1.0)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
 
 
@@ -103,6 +109,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         #color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
         #self.new_color_map = pyqtgraph.ColorMap(pos,color)
         #self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
+
+        # Call colour tables by name        
+        #self.ui.imageView.ui.histogram.gradient.loadPreset('idl4')
        
 
         # Draw peaks if needed
@@ -111,18 +120,25 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             peak_x = []
             peak_y = []
 
-            n_peaks = self.hdf5_fh['/entry_1/result_1/nPeaks'][self.img_index]            
-            peak_x_data = self.hdf5_fh['/entry_1/result_1/peakXPosRaw'][self.img_index]
-            peak_y_data = self.hdf5_fh['/entry_1/result_1/peakYPosRaw'][self.img_index]
+            # Read peaks in raw coordinates
+            n_peaks, peak_xy = read_cxi(self.filename, self.img_index, peaks=True)
+            peak_x_data = peak_xy[0]
+            peak_y_data = peak_xy[1]
+
+            # The old way (read directly)            
+            #n_peaks = self.hdf5_fh['/entry_1/result_1/nPeaks'][self.img_index]            
+            #peak_x_data = self.hdf5_fh['/entry_1/result_1/peakXPosRaw'][self.img_index]
+            #peak_y_data = self.hdf5_fh['/entry_1/result_1/peakYPosRaw'][self.img_index]
             
-            for ind in range(0,n_peaks):
-                
+            
+            for ind in range(0,n_peaks):                
                 peak_fs = peak_x_data[ind]                
                 peak_ss = peak_y_data[ind]         
-               
+                
+                # Peak coordinate to pixel in image
                 peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(round(peak_fs))
-                peak_x.append(self.pixel_maps[0][peak_in_slab])
-                peak_y.append(self.pixel_maps[1][peak_in_slab])
+                peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
+                peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
 
             self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
 
@@ -240,7 +256,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     #	Initialisation function
     #
-    def __init__(self, geom_filename, img_filename, fh):
+    def __init__(self, geom_filename, img_filename):
 
         super(cxiview, self).__init__()
         pyqtgraph.setConfigOption('background', 0.2)
@@ -251,8 +267,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         self.peak_canvas = pyqtgraph.ScatterPlotItem()
         self.ui.imageView.getView().addItem(self.peak_canvas)
-        #self.ui.imageView.getView().setRange(xRange=(0,1500))
-        #self.ui.imageView.getView().scaleBy(0.1)
 
         self.intregex = PyQt4.QtCore.QRegExp('[0-9]+')
         self.qtintvalidator = PyQt4.QtGui.QRegExpValidator()
@@ -273,13 +287,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
-        self.hdf5_fh = fh
-        self.filename = img_filename
-        self.num_lines = self.hdf5_fh['/entry_1/data_1/data'].shape[0]
-        self.slab_shape = (self.hdf5_fh['/entry_1/data_1/data'].shape[1],self.hdf5_fh['/entry_1/data_1/data'].shape[2])
+        self.filename = img_filename        
+        self.slab_size = read_cxi(self.filename, slab_size=True)
+        self.num_lines = self.slab_size[0]
+        self.slab_shape = (self.slab_size[1],self.slab_size[2])
 
-        self.pixel_maps, self.img_shape = read_geometry(geom_filename, format='pixelmap')
-        self.pixel_maps = numpy.int_(self.pixel_maps)
+        self.pixel_map, self.img_shape = read_geometry(geom_filename, format='pixelmap')
         self.coffset, self.res = read_geometry_coffset_and_res(geom_filename, format='pixelmap')
         
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
@@ -329,6 +342,7 @@ if __name__ == '__main__':
     parser.add_argument("-i", help="Input file or directory (.cxi/.h5)")
     parser.add_argument("-p", help="Circle peaks by default")
     #parser.add_argument("-d", default="none", help="Directory to scan")
+    #parser.add_argument("-f", default="none", help="HDF5 field to read")
     #parser.add_argument("--rmin", type=float, help="minimum pixel resolution cutoff")
     #parser.add_argument("--nmax", default=np.inf, type=int, help="maximum number of peaks to read")
     args = parser.parse_args()
@@ -336,13 +350,9 @@ if __name__ == '__main__':
     
     # This bit may be irrelevent if we can make parser.parse_args() require this field    
     if args.i is None:
-        print('Usage: CXIview.py -i cxi_file -g geom_file ')
+        print('Usage: CXIview.py -i cxi_file -g geom_file [-d directory_to_scan] [-f HDF5 field]')
         sys.exit()
     #endif        
-    #if len(sys.argv) != 3:
-    #    print('Usage: pyCXIview.py geom_file cxi_file')
-    #    sys.exit()
-    #endif 
 
 
     #
@@ -350,8 +360,8 @@ if __name__ == '__main__':
     #        
     app = PyQt4.QtGui.QApplication(sys.argv)    
         
-    hdf5_fh = h5py.File(args.i, 'r')  
-    ex = cxiview(args.g, args.i, hdf5_fh)
+    #hdf5_fh = h5py.File(args.i, 'r')  
+    ex = cxiview(args.g, args.i)
     ex.show()    
     ret = app.exec_()
 
@@ -359,7 +369,7 @@ if __name__ == '__main__':
     #
     # Cleanup on exit    
     #
-    hdf5_fh.close()    
+    #hdf5_fh.close()    
     app.exit()
     
     # This function does the following in an attempt to ‘safely’ terminate the process:
