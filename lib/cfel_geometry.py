@@ -150,8 +150,8 @@ def read_geometry(geometry_filename, format=format):
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
     #
     # Note to Valerio: 
-    # Do not convert to integer as we may want the actual pixel coordinates
-    # This also means do not center array here as we do this in pixel_remap
+    # Do not add the offset to convert to image coordinates staring at (0,0) as we may want the actual pixel coordinates
+    # This means do not center array here --> it is done in pixel_remap instead
     # Returning actual coordinates (x,y) is better for other operations such as radial averages
     x = x
     y = -y

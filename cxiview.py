@@ -114,8 +114,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         #self.ui.imageView.ui.histogram.gradient.loadPreset('idl4')
        
 
-        # Draw peaks if needed
-        if self.show_peaks == True:
+        # Draw found peaks
+        if self.show_found_peaks == True:
 
             peak_x = []
             peak_y = []
@@ -140,20 +140,45 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
                 peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
 
-            self.peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = self.ring_pen, brush = (0,0,0,0), pxMode = False)
+            ring_pen = pyqtgraph.mkPen('r', width=2)
+            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
-            self.peak_canvas.setData([])
+            self.found_peak_canvas.setData([])
 
-		# Set title
-        self.setWindowTitle(title)
+        # Draw predicted peaks
+        """
+        if self.show_predicted_peaks == True:
+
+            peak_x = []
+            peak_y = []
+            
+            for ind in range(0,n_peaks):                
+                peak_fs = peak_x_data[ind]                
+                peak_ss = peak_y_data[ind]         
+                
+                # Peak coordinate to pixel in image
+                peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(round(peak_fs))
+                peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
+                peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
+
+            ring_pen = pyqtgraph.mkPen('b', width=2)
+            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
+
+        else:
+            self.predicted_peak_canvas.setData([])
+        """
         
+
+        # Set title
+        self.setWindowTitle(title)
+  
     #end draw_things()
     
 
-	#
-	# Go to the previous pattern 
-	#
+    #
+    # Go to the previous pattern 
+    #
     def previous_pattern(self):
 
         if self.img_index != 0:
@@ -225,18 +250,26 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     # Toggle show or hide peaks
     #
-    def showhidepeaks(self, state):
+    def showhidefoundpeaks(self, state):
         if state == PyQt4.QtCore.Qt.Checked:
-            self.show_peaks = True
+            self.show_found_peaks = True
         else:
-            self.show_peaks = False
+            self.show_found_peaks = False
         self.draw_things()
 	#end showhidepeaks()
 
+    def showhidepredictedpeaks(self, state):
+        if state == PyQt4.QtCore.Qt.Checked:
+            self.show_predicted_peaks = True
+        else:
+            self.show_predicted_peaks = False
+        self.draw_things()
+	#end showhidepredictedpeaks()
 
-	#
-	# Mouse clicked somewhere in the window
-	#
+
+    #
+    # Mouse clicked somewhere in the window
+    #
     def mouse_clicked(self, event):
         pos = event[0].pos()
         if self.ui.imageView.getView().sceneBoundingRect().contains(pos):
@@ -261,12 +294,18 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         super(cxiview, self).__init__()
         pyqtgraph.setConfigOption('background', 0.2)
         self.ui = UI.cxiview_ui.Ui_MainWindow()
-        self.ui. setupUi(self)
+        self.ui.setupUi(self)
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
 
-        self.peak_canvas = pyqtgraph.ScatterPlotItem()
-        self.ui.imageView.getView().addItem(self.peak_canvas)
+        # Found peaks
+        self.found_peak_canvas = pyqtgraph.ScatterPlotItem()
+        self.ui.imageView.getView().addItem(self.found_peak_canvas)
+
+        # Predicted peaks
+        #self.predicted_peak_canvas = pyqtgraph.ScatterPlotItem()
+        #self.ui.imageView.getView().addItem(self.predicted_peak_canvas)
+
 
         self.intregex = PyQt4.QtCore.QRegExp('[0-9]+')
         self.qtintvalidator = PyQt4.QtGui.QRegExpValidator()
@@ -280,9 +319,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
 
-        self.show_peaks = False
-        self.ui.peaksCheckBox.setChecked(False)
-        self.ui.peaksCheckBox.stateChanged.connect(self.showhidepeaks)
+        self.show_found_peaks = False
+        self.ui.foundPeaksCheckBox.setChecked(False)
+        self.ui.foundPeaksCheckBox.stateChanged.connect(self.showhidefoundpeaks)
+
+        self.show_predicted_peaks = False
+        self.ui.predictedPeaksCheckBox.setChecked(False)
+        self.ui.predictedPeaksCheckBox.stateChanged.connect(self.showhidepredictedpeaks)
 
         
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
@@ -297,7 +340,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
 
-        self.ring_pen = pyqtgraph.mkPen('r', width=2)
         self.circle_pen = pyqtgraph.mkPen('b', width=2)
         
         self.img_index = 0

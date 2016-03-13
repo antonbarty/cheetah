@@ -90,7 +90,6 @@ def write_h5(filename, field="data/data", compress=3):
 	H5G_CLOSE,group_id
 	H5F_CLOSE,fid 
      """
-          
 #end write_h5
 
      
@@ -156,8 +155,78 @@ def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, 
     data = hdf5_fh['/entry_1/data_1/data'][frameID, :, :]
     hdf5_fh.close()
     return data
-    
 #end read_cxi
 
 
+def find_cheetah_images(dir):
+    """
+    function find_cheetah_images, dir
+    
+    	file = ['']
+    	
+    	;; Find .cxi files
+    	cxifile = file_search(dir,"*.cxi",/fully_qualify)
+    	if n_elements(cxifile) ne 0 AND cxifile[0] ne '' then begin
+    		file_type = 'cxi'
+    		print,strcompress(string('CXI files: ', file_basename(cxifile)))
+    		total_nframes = 0
+    		index = 0
+    
+    		print, cxifile
+    		
+    		for i=0, n_elements(cxifile)-1 do begin
+    			nframes = read_cheetah_cxi(cxifile[i], /get_nframes)
+    
+    			;; Cross-check against number of non-zero elements in pixel size array
+    			;; (this is to avoid the blank frames problem when the file is not completed)
+    			if(nframes gt 0) then begin
+    				check = read_h5(cxifile[i], field = 'entry_1/instrument_1/detector_1/x_pixel_size')
+    				;;help, check
+    			
+    				w = where(check ne 0)
+    				if w[0] ne -1 then ncheck=n_elements(w) else ncheck=0
+    				if nframes gt ncheck then $
+    					nframes = ncheck
+    			endif
+    				
+    			print, strcompress(string('Number of frames in ', file_basename(cxifile[i]), ' = ', nframes))
+    
+    			if total_nframes eq 0 AND nframes gt 0 then begin
+    				file = replicate(cxifile[i], nframes)
+    				index = indgen(nframes)
+    				total_nframes += nframes
+    			endif $
+    			else if nframes ne 0 then begin
+    				file = [file, replicate(cxifile[i], nframes)]
+    				index = [index, indgen(nframes)]
+    				total_nframes += nframes
+    			endif
+    		endfor
+    	endif $
+    
+    	;; Find single frane .h5 files
+    	else begin
+    		file = file_search(dir,"LCLS*.h5",/fully_qualify)	
+    	 	if n_elements(file) eq 0 OR file[0] eq '' then begin
+    		 	message,'No files found in directory: '+dir, /info
+    	 	endif
+    		file_type = 'little_h5'
+    		index = intarr(n_elements(file))
+    		print,strcompress(string(n_elements(file),' files found'))
+    	endelse
+    
+    	;; Return result and indexes
+    	result = {	file_type : file_type, $
+    					file : file, $
+    					index : index $
+    				}
+    
+    	;; Debugging				
+    	;;print, result.file
+    	;;print, result.index
+    	
+    	return, result
+    end
+    """
+#end find_cheetah_images
     

@@ -30,7 +30,7 @@ def histogram_clip_levels(data, value):
     # Return suggested levels for image scaling
     #print("histogram_clip: ", bottom, top)    
     return bottom, top
-# end histogram_clip_levels
+#end histogram_clip_levels
 
 
 
@@ -125,7 +125,7 @@ def pixel_remap(data, gx, gy, dx=1.0):
     
     # Return remapped image
     return image
-# end pixel_remap
+#end pixel_remap
 
 
 
@@ -192,5 +192,51 @@ def radial_average(data, r):
 		return, avg
   """
     print("Not yet implemented...")          
-  
+#end radial_average
+    
 
+def write_png(filename, image):
+    """
+    ;;
+    ;;	Write <image> as a .png file using the current colour table 
+    ;;
+    ;;	There are two approaches:
+    ;;		True colour image (3-bit per pixel)
+    ;;		img=tvrd(true=1) 	produces [3,nx,ny] true-colour 
+    ;;		write_png, filename, img
+    ;;	OR
+    ;;		256-level indexed colour image
+    ;;		write_png, filename, data(byte), r,g,b
+    ;;
+    
+        
+    PRO write_png, filename, img, flip=flip, rv=rv, uint16=uint16
+    
+    	temp = float(img)
+    	if KEYWORD_SET(rv) then $
+    		temp = -temp
+    	if KEYWORD_SET(flip) then $
+    		temp=reverse(temp,2)
+    
+    	;; 16-bit greyscale
+    	if keyword_set(uint16) then begin
+    		temp -= min(temp)
+    		temp *= 65535./max(temp)
+    		temp = uint(temp)
+    		write_png,filename,temp
+    	endif $
+    	
+    	;;	Colour table PNG
+    	else begin
+    		tvlct,r,g,b,/get
+    		cts=size(r,/dim)
+    		temp = bytscl(temp, top=cts[0]-1)	
+    		write_png,filename,temp,r,g,b	
+    	endelse
+    end
+    """
+    
+    print("Not yet implemented...")    
+#end write_png
+
+      

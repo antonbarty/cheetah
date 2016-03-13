@@ -199,7 +199,11 @@
        </layout>
       </item>
       <item>
-       <widget class="ImageView" name="imageView"/>
+       <widget class="ImageView" name="imageView">
+        <property name="enabled">
+         <bool>false</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <layout class="QHBoxLayout" name="horizontalLayout2">
@@ -241,7 +245,7 @@
            </spacer>
           </item>
           <item>
-           <widget class="QCheckBox" name="peaksCheckBox">
+           <widget class="QCheckBox" name="foundPeaksCheckBox">
             <property name="maximumSize">
              <size>
               <width>150</width>
@@ -249,7 +253,23 @@
              </size>
             </property>
             <property name="text">
-             <string>Show peaks</string>
+             <string>Found peaks</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QCheckBox" name="predictedPeaksCheckBox">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>150</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>Predicted peaks</string>
             </property>
            </widget>
           </item>
@@ -265,7 +285,7 @@
              </size>
             </property>
             <property name="text">
-             <string>Show masks</string>
+             <string>Pixel masks</string>
             </property>
            </widget>
           </item>
