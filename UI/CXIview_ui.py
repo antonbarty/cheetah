@@ -117,7 +117,7 @@ class Ui_MainWindow(object):
         self.horizontalLayout.addItem(spacerItem)
         self.verticalLayout.addLayout(self.horizontalLayout)
         self.imageView = ImageView(self.centralwidget)
-        self.imageView.setEnabled(False)
+        self.imageView.setEnabled(True)
         self.imageView.setObjectName(_fromUtf8("imageView"))
         self.verticalLayout.addWidget(self.imageView)
         self.horizontalLayout2 = QtGui.QHBoxLayout()
