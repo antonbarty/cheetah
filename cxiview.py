@@ -189,9 +189,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #end previous_pattern()
 
 
-	#
-	# Go to the next pattern 
-	#
+    #
+    # Go to the next pattern 
+    #
     def next_pattern(self):
 
         if self.img_index != self.num_lines-1:
@@ -203,8 +203,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     
 
     #
-	# Go to random pattern
-	#
+    # Go to random pattern
+    #
     def random_pattern(self):
         pattern_to_jump = self.num_lines*numpy.random.random(1)[0]
         pattern_to_jump = pattern_to_jump.astype(numpy.int64)
@@ -226,8 +226,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
     #
-	# Play (display patterns in order)
-	#
+    # Play (display patterns in order)
+    #
     def play(self):
         print("Not yet implemented")
     #end play()
@@ -244,7 +244,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.draw_things()
         else:
             self.ui.jumpToLineEdit.setText(str(self.img_index))
-        #end jump_to_pattern()
+    #end jump_to_pattern()
         
 
     #
@@ -256,7 +256,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         else:
             self.show_found_peaks = False
         self.draw_things()
-	#end showhidepeaks()
+    #end showhidepeaks()
 
     def showhidepredictedpeaks(self, state):
         if state == PyQt4.QtCore.Qt.Checked:
@@ -264,7 +264,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         else:
             self.show_predicted_peaks = False
         self.draw_things()
-	#end showhidepredictedpeaks()
+    #end showhidepredictedpeaks()
 
 
     #
@@ -284,6 +284,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             
             self.ui.statusBar.setText('Last clicked pixel:     x: %4i     y: %4i     value: %4i     resolution: %4.2f' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse,y_mouse], resolution))
     #end mouse_clicked()
+    
     
     
     #
@@ -340,15 +341,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
 
-        self.circle_pen = pyqtgraph.mkPen('b', width=2)
-        
         self.img_index = 0
         self.ui.jumpToLineEdit.setText(str(self.img_index))
 
         
         
-        # Try to set the colour table to inverse-BW
-        # Modifying the colour table - from Valerio - and it works
+        # Set the colour table to inverse-BW
+        # Modify the colour table directly (thanks Valerio)
         pos = numpy.array([0.0,0.5,1.0])
         color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
         self.new_color_map = pyqtgraph.ColorMap(pos,color)
