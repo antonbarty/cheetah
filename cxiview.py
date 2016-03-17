@@ -113,6 +113,26 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Call colour tables by name        
         #self.ui.imageView.ui.histogram.gradient.loadPreset('idl4')
        
+       
+        # Draw pixel mask overlay
+        if self.show_masks == True:
+            mask_from_file = read_cxi(self.filename, self.img_index, mask=True)
+            bitmask = 0xFFFF
+            
+            mask_img = pixel_remap(mask_from_file, self.pixel_map[0], self.pixel_map[1], dx=1.0)
+            mask_img = numpy.int_(mask_img)
+            w = (mask_img & bitmask) != 0
+            mask_img[w] = 255
+            mask_img[~w] = 0
+            
+            self.mask_to_draw = numpy.zeros(mask_img.shape+(4,), dtype=numpy.uint8)
+            self.mask_to_draw[:,:,0] = mask_img
+            self.mask_to_draw[:,:,3] = 0.7*mask_img
+            self.mask_view.setImage(self.mask_to_draw, autoLevels=False, autoRange=False, opacity=1.0)
+        else:
+            self.mask_to_draw = numpy.zeros(self.img_shape+(4,), dtype=numpy.uint8)
+            self.mask_view.setImage(self.mask_to_draw, autoLevels=False, autoRange=False, opacity=0.0)
+       
 
         # Draw found peaks
         if self.show_found_peaks == True:
@@ -248,7 +268,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
 
     #
-    # Toggle show or hide peaks
+    # Toggle show or hide stuff
     #
     def showhidefoundpeaks(self, state):
         if state == PyQt4.QtCore.Qt.Checked:
@@ -265,6 +285,15 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.show_predicted_peaks = False
         self.draw_things()
     #end showhidepredictedpeaks()
+
+    def showhidemasks(self, state):
+        if state == PyQt4.QtCore.Qt.Checked:
+            self.show_masks = True
+        else:
+            self.show_masks = False
+        self.draw_things()
+    #end showhidemasks()
+
 
 
     #
@@ -298,6 +327,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
+        
+        # Masks
+        self.mask_view = pyqtgraph.ImageItem()
+        self.ui.imageView.getView().addItem(self.mask_view)
+
 
         # Found peaks
         self.found_peak_canvas = pyqtgraph.ScatterPlotItem()
@@ -328,6 +362,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.predictedPeaksCheckBox.setChecked(False)
         self.ui.predictedPeaksCheckBox.stateChanged.connect(self.showhidepredictedpeaks)
 
+        self.show_masks = False
+        self.ui.masksCheckBox.setChecked(False)
+        self.ui.masksCheckBox.stateChanged.connect(self.showhidemasks)
+        
         
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
@@ -340,6 +378,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.coffset, self.res = read_geometry_coffset_and_res(geom_filename, format='pixelmap')
         
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
+        self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
 
         self.img_index = 0
         self.ui.jumpToLineEdit.setText(str(self.img_index))
@@ -352,6 +391,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
         self.new_color_map = pyqtgraph.ColorMap(pos,color)
         self.ui.imageView.ui.histogram.gradient.setColorMap(self.new_color_map)
+
 
 
         # Scale QtGraph histogram to not auto-range
