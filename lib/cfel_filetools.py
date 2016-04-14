@@ -4,7 +4,6 @@
 #	Anton Barty
 #
 
-import numpy
 import h5py
 
 
@@ -125,7 +124,7 @@ def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, 
         return photon_energy
         
 
-    # Return photon energy    
+    # Return camera length
     if camera_length == True: 
         camera_length = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
         hdf5_fh.close()

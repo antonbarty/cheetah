@@ -17,15 +17,34 @@ def histogram_clip_levels(data, value):
     <value> is typically 0.001 or 0.01 (equivalent to clipping top and bottom 0.1% and 1% of pixels respectively)    
     """
     
+    # Histogram bounds
+    d_max = numpy.int_(data.max())
+    d_min = numpy.int_(data.min())
+    #print('Unclipped range = ',d_min, d_max)
+
+    
+    h_max = d_max + 1
+    h_min = min(0,d_min-1)
+    h_nbins = max(200, h_max)
+    h_range = (h_min, h_max)
+    #print('nbins=', h_nbins, 'range=',h_range)
+    
+    
     # Cumulative histogram
-    h, e = numpy.histogram(data, bins=max(200, numpy.int_(data.max())), range=(0,data.max()))
+    h, e = numpy.histogram(data, bins=h_nbins, range=h_range)
     c = h.cumsum()/h.sum()
 
     # Top and bottom <value> percentile
     w_top = numpy.where(c <= (1-value))
     w_bottom = numpy.where(c >= value)
-    top = numpy.amax(w_top)
-    bottom = numpy.amin(w_bottom)
+
+    i_top = numpy.amax(w_top)
+    i_bottom = numpy.amin(w_bottom)
+
+
+    bottom = e[i_bottom]
+    top = max(e[i_top], bottom+1)
+    #print('Clipped range = ',bottom, top)
     
     # Return suggested levels for image scaling
     #print("histogram_clip: ", bottom, top)    

@@ -5,10 +5,8 @@
 #   Tested using Anaconda / Python 3.4
 #
 
-import sys
 import h5py
 import numpy
-import scipy.constants
 
 
 def pixelmap_from_CrystFEL_geometry_file(fnam):
@@ -122,21 +120,29 @@ def read_pixelmap(filename):
     return x, y, r
     
 
-def read_geometry(geometry_filename, format=format):
+def read_geometry(geometry_filename):
     """
     Read geometry files and return pixel map
     Determines file type and calls the appropriate routine for reading the geometry
     Note transposition and change of axes so that images appear the same orientation in hdfsee, cheetah/IDL and pyQtGraph
     """
-    
-    # Later on we should determine the format automatically (eg: from filename extension)
-    if format == 'pixelmap': 
-        x, y, r  = read_pixelmap(geometry_filename)
+    # determine file format
+    if geometry_filename.endswith(".geom"):
+        format = 'CrystFEL'
+    elif geometry_filename.endswith(".h5"):
+        format = 'pixelmap'
+    else:
+        print("Unknown geometry file format: ", geometry_filename)
+        format = 'unknown'
+
+    # Read geometry, depending on format
+    if format == 'pixelmap':
+        x, y, r = read_pixelmap(geometry_filename)
     elif format == 'CrystFEL':
-        x, y, r  = pixelmap_from_CrystFEL_geometry_file(geometry_filename)
+        x, y, r = pixelmap_from_CrystFEL_geometry_file(geometry_filename)
     else:
         print('Unsupported geometry type')
-    #endif        
+    #endif      
 
     # find the smallest size of cspad_geom that contains all
     # xy values but is symmetric about the origin
@@ -159,16 +165,25 @@ def read_geometry(geometry_filename, format=format):
 
     img_shape = (M, N)
     return xy, img_shape    
+    #end read_geometry()
 
 
-
-def read_geometry_coffset_and_res(geometry_filename, format=format):
+def read_geometry_coffset_and_res(geometry_filename):
     """
         Determine camera offset from geometry file
         Pixelmaps do not have these values so we have a temporary hack in place
     """
-    
-    # Later on we should determine the format automatically (eg: from filename extension)
+    # determine file format
+    if geometry_filename.endswith(".geom"):
+        format = 'CrystFEL'
+    elif geometry_filename.endswith(".h5"):
+        format = 'pixelmap'
+    else:
+        print("Unknown geometry file format: ", geometry_filename)
+        format = 'unknown'
+
+
+    # Read camera offset, etc, 
     if format == 'pixelmap': 
         coffset = 0.591754
         res = 9090.91
@@ -190,4 +205,4 @@ def read_geometry_coffset_and_res(geometry_filename, format=format):
 
 
     return coffset, res
-    #end extract_coffset_and_res()
+    #end read_geometry_coffset_and_res()
