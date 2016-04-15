@@ -46,11 +46,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
         # Retrieve resolution related stuff
-        photon_energy = read_cxi(self.filename, self.img_index, photon_energy=True)
-        camera_length = read_cxi(self.filename, self.img_index, camera_length=True)
-        camera_length *= 1e-3
-        if (photon_energy > 0):
-            self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * photon_energy)
+        self.photon_energy = read_cxi(self.filename, self.img_index, photon_energy=True)
+        self.camera_length = read_cxi(self.filename, self.img_index, camera_length=True)
+        self.camera_length *= 1e-3
+        if (self.photon_energy > 0):
+            self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * self.photon_energy)
         else:
             self.lambd = 1e-10
         
@@ -258,14 +258,14 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     def shuffle(self):
         if self.shuffle_mode == False:
             self.shuffle_mode = True
-            self.ui.playPushButton.setText("Stop")
+            self.ui.shufflePushButton.setText("Stop")
             self.refresh_timer.timeout.connect(self.random_pattern)   
             self.random_pattern()
             self.refresh_timer.start(1000)
 
         else: 
             self.shuffle_mode = False
-            self.ui.playPushButton.setText("Shuffle")
+            self.ui.shufflePushButton.setText("Shuffle")
             self.refresh_timer.stop()
     #end shuffle()
 
@@ -427,12 +427,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.playPushButton.clicked.connect(self.play)
 
         
-
-        # On Macintosh and elsewhere, put menu inside the window
+        # Put menu inside the window on Macintosh and elsewhere
         self.ui.menuBar.setNativeMenuBar(False)
-        
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
+        #
+        # Use filename, directory, HDF5field from command line to figure out what we want to show
+        #
         self.filename = img_filename        
         self.slab_size = read_cxi(self.filename, slab_size=True)
         self.num_lines = self.slab_size[0]
@@ -480,22 +481,26 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 if __name__ == '__main__':
     
     #
-    #   Parse command line arguments
+    #   Use parser to process command line arguments
     #    
     parser = argparse.ArgumentParser(description='CFEL CXI file viewer')
-    parser.add_argument("-g", help="Geometry file (.geom/.h5)")
-    parser.add_argument("-i", help="Input file or directory (.cxi/.h5)")
-    parser.add_argument("-p", help="Circle peaks by default")
-    #parser.add_argument("-d", default="none", help="Directory to scan")
-    #parser.add_argument("-f", default="none", help="HDF5 field to read")
+    parser.add_argument("-g", default="none", help="Geometry file (.geom/.h5)")
+    parser.add_argument("-i", default="none", help="Input file or directory (.cxi/.h5)")
+    parser.add_argument("-d", default="none", help="Directory to scan")
+    parser.add_argument("-f", default="none", help="HDF5 field to read")
+    parser.add_argument("-p", default=False, help="Circle peaks by default")    
     #parser.add_argument("--rmin", type=float, help="minimum pixel resolution cutoff")
     #parser.add_argument("--nmax", default=np.inf, type=int, help="maximum number of peaks to read")
     args = parser.parse_args()
     
+    print("----------")    
+    print("Parsed command line arguments")
+    print(args)
+    print("----------")    
     
     # This bit may be irrelevent if we can make parser.parse_args() require this field    
-    if args.i is None:
-        print('Usage: CXIview.py -i cxi_file -g geom_file [-d directory_to_scan] [-f HDF5 field]')
+    if args.i == "none" and args.d == "none":
+        print('Usage: CXIview.py -i data_file -g geom_file [-d directory_to_scan] [-f HDF5 field]')
         sys.exit()
     #endif        
 
@@ -505,7 +510,6 @@ if __name__ == '__main__':
     #        
     app = PyQt4.QtGui.QApplication(sys.argv)    
         
-    #hdf5_fh = h5py.File(args.i, 'r')  
     ex = cxiview(args.g, args.i)
     ex.show()    
     ret = app.exec_()
@@ -514,7 +518,6 @@ if __name__ == '__main__':
     #
     # Cleanup on exit    
     #
-    #hdf5_fh.close()    
     app.exit()
     
     # This function does the following in an attempt to ‘safely’ terminate the process:
