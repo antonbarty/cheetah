@@ -10,25 +10,19 @@
 #   Top line (#!/reg/g/cfel/anaconda/bin/python3) needed for interface to IDL GUI at SLAC to work properly 
 #   !/Applications/anaconda/bin/python3
 
-
-
-import sys
+import argparse
 import os
-import numpy
-import scipy.constants
+import sys
+
 import PyQt4.QtCore
 import PyQt4.QtGui
 import pyqtgraph
-import argparse
-
+import scipy.constants
 
 import UI.cxiview_ui
-import lib.cfel_colours
+from lib.cfel_filetools import *
 from lib.cfel_geometry import *
 from lib.cfel_imgtools import *
-from lib.cfel_filetools import *
-
-
 
 
 #
@@ -44,7 +38,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Retrieve image data 
         img = read_cxi(self.filename, self.img_index)
 
-
         # Retrieve resolution related stuff
         self.photon_energy = read_cxi(self.filename, self.img_index, photon_energy=True)
         self.camera_length = read_cxi(self.filename, self.img_index, camera_length=True)
@@ -58,12 +51,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
         self.ui.jumpToLineEdit.setText(str(self.img_index))
 
-        
         # Set the image
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
         self.img_to_draw = pixel_remap(img, self.pixel_map[0], self.pixel_map[1], dx=1.0)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=True, autoRange=False)
-
 
         # Histogram equalisation (saturate top 0.1% of pixels)   
         if self.histogram_clip == True:
@@ -353,10 +344,15 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             x_mouse_centered = x_mouse - self.img_shape[0]/2 + 1
             y_mouse_centered = y_mouse - self.img_shape[0]/2 + 1
             radius = numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2) / self.res
-                
+            self.camera_z = (self.camera_length+self.coffset)
+            camera_z_mm = self.camera_z * 1e3
+            camera_z_in = camera_z_mm / 25.4
             resolution = 10e9*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius/(self.camera_length+self.coffset))))            
-            
-            self.ui.statusBar.setText('Last clicked pixel:     x: %4i     y: %4i     value: %4i     resolution: %4.2f' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse,y_mouse], resolution))
+
+            self.ui.statusBar.setText(
+                'Last clicked pixel:     x: %4i     y: %4i     z: %.2f in     value: %4i     resolution: %4.2f Å' % (
+                x_mouse_centered, y_mouse_centered, camera_z_in, self.img_to_draw[x_mouse, y_mouse], resolution))
+
     #end mouse_clicked()
     
     
@@ -364,7 +360,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     #	Initialisation function
     #
-    def __init__(self, geom_filename, img_filename):
+    def __init__(self, args):
+
+        # Extract info from command line arguments
+        geom_filename = args.g
+        img_file_pattern = args.i
+        img_h5_field = args.f
 
         super(cxiview, self).__init__()
         pyqtgraph.setConfigOption('background', 0.2)
@@ -413,28 +414,33 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         #self.ui.actionHistogram_clip.setEnabled(False)
         self.ui.actionHistogram_clip.setChecked(True)
         self.ui.actionHistogram_clip.triggered.connect(self.action_histclip)
-        
-        
+
         self.auto_levels = True
         self.ui.actionAuto_scale_levels.setChecked(True)
         self.ui.actionAuto_scale_levels.triggered.connect(self.action_autolevels)
 
-        # Flags needed for play and shuffle
+        # Flags needed for play and shuffle (can probably do this better)
         self.shuffle_mode = False
         self.play_mode = False 
         self.refresh_timer = PyQt4.QtCore.QTimer()
         self.ui.randomPushButton.clicked.connect(self.random_pattern)
         self.ui.playPushButton.clicked.connect(self.play)
 
-        
         # Put menu inside the window on Macintosh and elsewhere
         self.ui.menuBar.setNativeMenuBar(False)
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
-        #
+
         # Use filename, directory, HDF5field from command line to figure out what we want to show
-        #
-        self.filename = img_filename        
+        self.filename = img_file_pattern
+        self.nframes = read_cxi(self.filename, slab_size=True)
+        #self.filename, self.img_event, self.img_h5field = cxi_event_list(img_file_pattern, img_h5_field)
+        #self.nframes = self.img_fiename.shape()
+        print('Number of frames', self.nframes)
+
+
+
+        # Size of the first images to be read (assume all images have the same size)
         self.slab_size = read_cxi(self.filename, slab_size=True)
         self.num_lines = self.slab_size[0]
         self.slab_shape = (self.slab_size[1],self.slab_size[2])
@@ -510,8 +516,9 @@ if __name__ == '__main__':
     #        
     app = PyQt4.QtGui.QApplication(sys.argv)    
         
-    ex = cxiview(args.g, args.i)
-    ex.show()    
+    #ex = cxiview(args.g, args.i)
+    ex = cxiview(args)
+    ex.show()
     ret = app.exec_()
 
     

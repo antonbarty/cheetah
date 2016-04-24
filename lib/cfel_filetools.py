@@ -5,45 +5,62 @@
 #
 
 import h5py
+import glob
+
+def file_search(pattern, recursive=True, iterator=False):
+    """
+    IDL file_search() function replacement
+    Search for files matching a pattern
+    Ends up being a wrapper for glob functions in Py3.5+
+
+    :param pattern:
+    :param recursive: True/False (default=True, '**' matches directories)
+    :param iterator:
+    :return:
+    """
+    if iterator:
+        files = glob.iglob(pattern, recursive=recursive)
+    else:
+        files = glob.glob(pattern, recursive=recursive)
+    return files
+
 
 
 def read_h5(filename, field="/data/data"):
     """
     Read a simple HDF5 file
-    """
-   
-    """
-    To implement from IDL: dialog box for filename if not specified
-	if n_elements(filename) eq 0 then $
-		filename = dialog_pickfile()
-	if filename[0] eq '' then $
-		return, -1
-  	if NOT KEYWORD_SET(field) then $
-		field = '/data/data'
+
+    To implement from IDL: dialog box for filename if not specified:
+    if n_elements(filename) eq 0 then $
+        filename = dialog_pickfile()
+    if filename[0] eq '' then $
+        return, -1
+    if NOT KEYWORD_SET(field) then $
+        field = '/data/data'
     """
 
     # Open HDF5 file
-    fp = h5py.File(filename, 'r')     
-    
+    fp = h5py.File(filename, 'r')
+
     # Read the specified field
     data = fp[field][:]
-    
+
     # Close and clean up
-    fp.close()    
+    fp.close()
 
     # return
     return data
-#end read_h5
-    
-  
-  
-    
+
+
+# end read_h5
+
+
+
+
 def write_h5(filename, field="data/data", compress=3):
     """ 
     Write a simple HDF5 file
-    """
-    
-    """ 
+
     IDL code
     	if n_elements(filename) eq 0 then begin
 		print,'write_simple_hdf5: No filename specified...'
@@ -89,43 +106,51 @@ def write_h5(filename, field="data/data", compress=3):
 	H5G_CLOSE,group_id
 	H5F_CLOSE,fid 
      """
-#end write_h5
 
-     
+
+# end write_h5
+
+
 def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, camera_length=False, slab_size=False):
     """ 
     Read a frame from multi-event CXI file
     Also read mask and peak lists if requested
-    There is probably a smarter way to read the requested stuff at once and return it all at the same time from the same file handle (a job for later)
+    Would be smarter to read the requested stuff at once and return it all at the same time from the same file handle
+    :param filename:
+    :param frameID:
+    :param mask:
+    :param peaks:
+    :param photon_energy:
+    :param camera_length:
+    :param slab_size:
+    :return:
     """
-    
-    hdf5_fh = h5py.File(filename, 'r')      
-    
+
+    hdf5_fh = h5py.File(filename, 'r')
+
     # Return peak list
     if peaks == True:
-        n_peaks = hdf5_fh['/entry_1/result_1/nPeaks'][frameID]            
+        n_peaks = hdf5_fh['/entry_1/result_1/nPeaks'][frameID]
         peak_x_data = hdf5_fh['/entry_1/result_1/peakXPosRaw'][frameID]
         peak_y_data = hdf5_fh['/entry_1/result_1/peakYPosRaw'][frameID]
         peak_xy = (peak_x_data.flatten(), peak_y_data.flatten())
         hdf5_fh.close()
         return n_peaks, peak_xy
 
-
     # Return masks
     if mask == True:
         mask = hdf5_fh['/entry_1/data_1/mask'][frameID, :, :]
         hdf5_fh.close()
         return mask
-    
+
     # Return photon energy    
-    if photon_energy == True: 
+    if photon_energy == True:
         photon_energy = hdf5_fh['/LCLS/photon_energy_eV'][frameID]
         hdf5_fh.close()
         return photon_energy
-        
 
     # Return camera length
-    if camera_length == True: 
+    if camera_length == True:
         camera_length = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
         hdf5_fh.close()
         return camera_length
@@ -146,23 +171,58 @@ def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, 
         size = hdf5_fh['/entry_1/data_1/data'].shape
         hdf5_fh.close()
         return size
-        
-
 
     # Default is to return image data
-    #data = hdf5_fh['/entry_1/instrument_1/detector_1/detector_corrected/data'][frameID, :, :]
+    # data = hdf5_fh['/entry_1/instrument_1/detector_1/detector_corrected/data'][frameID, :, :]
     data = hdf5_fh['/entry_1/data_1/data'][frameID, :, :]
     hdf5_fh.close()
     return data
-#end read_cxi
+
+# end read_cxi
 
 
-def find_cheetah_images(dir):
+def list_events(pattern='./*.cxi', field='data/data'):
+    """
+    :param file_pattern: Single filename, or search string
+    :param hdf5_field: HDF5 field from which to draw data, can be different for each file, default='data/data'
+    :return: List of filenames, eventID and HDF5 field
+
+    Generate event list for cxiview
+    Logic:
+    - Find all files matching pattern
+    - if name is a directory find all files and events matching pattern within that directory
+    - if name is a file, find all events in file
+    """
+
+    # Find all files matching pattern
+
+    files = glob.glob(pattern, recursive=True)
+
+    for filename in glob.iglob(pattern, recursive=True):
+        print(filename)
+
+    #if nfiles == 0:
+    #    print('No files found matching pattern: ', file_pattern)
+
+    # Determine number of events in each file
+    #for (i=0; i<nfiles; i++):
+        # Here we need to add some logic depending on file type
+
+    #    n_events = slab_size[0]
+
+#        temp_f = array of filename
+ #       temp_e = index number
+  #      temp_h = hdf5_field
+
+        # Concatenate to array
+#        result_f = [result_f, temp_f]
+ ##      result_h = [result_h, temp_h]
+
     """
     function find_cheetah_images, dir
-    
+
     	file = ['']
-    	
+
     	;; Find .cxi files
     	cxifile = file_search(dir,"*.cxi",/fully_qualify)
     	if n_elements(cxifile) ne 0 AND cxifile[0] ne '' then begin
@@ -170,26 +230,26 @@ def find_cheetah_images(dir):
     		print,strcompress(string('CXI files: ', file_basename(cxifile)))
     		total_nframes = 0
     		index = 0
-    
+
     		print, cxifile
-    		
+
     		for i=0, n_elements(cxifile)-1 do begin
     			nframes = read_cheetah_cxi(cxifile[i], /get_nframes)
-    
+
     			;; Cross-check against number of non-zero elements in pixel size array
     			;; (this is to avoid the blank frames problem when the file is not completed)
     			if(nframes gt 0) then begin
     				check = read_h5(cxifile[i], field = 'entry_1/instrument_1/detector_1/x_pixel_size')
     				;;help, check
-    			
+
     				w = where(check ne 0)
     				if w[0] ne -1 then ncheck=n_elements(w) else ncheck=0
     				if nframes gt ncheck then $
     					nframes = ncheck
     			endif
-    				
+
     			print, strcompress(string('Number of frames in ', file_basename(cxifile[i]), ' = ', nframes))
-    
+
     			if total_nframes eq 0 AND nframes gt 0 then begin
     				file = replicate(cxifile[i], nframes)
     				index = indgen(nframes)
@@ -202,10 +262,10 @@ def find_cheetah_images(dir):
     			endif
     		endfor
     	endif $
-    
+
     	;; Find single frane .h5 files
     	else begin
-    		file = file_search(dir,"LCLS*.h5",/fully_qualify)	
+    		file = file_search(dir,"LCLS*.h5",/fully_qualify)
     	 	if n_elements(file) eq 0 OR file[0] eq '' then begin
     		 	message,'No files found in directory: '+dir, /info
     	 	endif
@@ -213,19 +273,22 @@ def find_cheetah_images(dir):
     		index = intarr(n_elements(file))
     		print,strcompress(string(n_elements(file),' files found'))
     	endelse
-    
+
     	;; Return result and indexes
     	result = {	file_type : file_type, $
     					file : file, $
     					index : index $
     				}
-    
-    	;; Debugging				
+
+    	;; Debugging
     	;;print, result.file
     	;;print, result.index
-    	
+
     	return, result
     end
     """
-#end find_cheetah_images
-    
+
+    return name
+# end find_cheetah_images
+
+
