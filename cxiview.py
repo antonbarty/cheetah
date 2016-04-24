@@ -362,6 +362,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     def __init__(self, args):
 
+        # Import CFEL colour scales
+        import lib.cfel_colours
+
         # Extract info from command line arguments
         geom_filename = args.g
         img_file_pattern = args.i
