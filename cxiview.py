@@ -35,12 +35,15 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     def draw_things(self):
         
-        # Retrieve image data 
-        img = read_cxi(self.filename, self.img_index)
+        # Retrieve CXI file data all at once
+        # (Saves opening and closing file many times)
+        cxi = read_cxi(self.filename, self.img_index,  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
+        img = cxi['data']
+
 
         # Retrieve resolution related stuff
-        self.photon_energy = read_cxi(self.filename, self.img_index, photon_energy=True)
-        self.camera_length = read_cxi(self.filename, self.img_index, camera_length=True)
+        self.photon_energy = cxi['photon_energy_eV']
+        self.camera_length = cxi['EncoderValue']
         self.camera_length *= 1e-3
         if (self.photon_energy > 0):
             self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * self.photon_energy)
@@ -53,7 +56,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Set the image
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
-        self.img_to_draw = pixel_remap(img, self.pixel_map[0], self.pixel_map[1], dx=1.0)
+        self.img_to_draw = pixel_remap(img, self.geometry['x'], self.geometry['y'], dx=1.0)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=True, autoRange=False)
 
         # Histogram equalisation (saturate top 0.1% of pixels)   
@@ -119,10 +122,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
        
         # Draw pixel mask overlay
         if self.show_masks == True:
-            mask_from_file = read_cxi(self.filename, self.img_index, mask=True)
+            #mask_from_file = read_cxi(self.filename, self.img_index, mask=True)
+            mask_from_file = cxi['mask']
             bitmask = 0xFFFF
-            
-            mask_img = pixel_remap(mask_from_file, self.pixel_map[0], self.pixel_map[1], dx=1.0)
+
+            mask_img = pixel_remap(mask_from_file, self.geometry['x'], self.geometry['y'], dx=1.0)
             mask_img = numpy.int_(mask_img)
             w = (mask_img & bitmask) != 0
             mask_img[w] = 255
@@ -144,15 +148,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             peak_y = []
 
             # Read peaks in raw coordinates
-            n_peaks, peak_xy = read_cxi(self.filename, self.img_index, peaks=True)
-            peak_x_data = peak_xy[0]
-            peak_y_data = peak_xy[1]
-
-            # The old way (read directly)            
-            #n_peaks = self.hdf5_fh['/entry_1/result_1/nPeaks'][self.img_index]            
-            #peak_x_data = self.hdf5_fh['/entry_1/result_1/peakXPosRaw'][self.img_index]
-            #peak_y_data = self.hdf5_fh['/entry_1/result_1/peakYPosRaw'][self.img_index]
-            
+            n_peaks = cxi['n_peaks']
+            peak_x_data = cxi['peakXPosRaw']
+            peak_y_data = cxi['peakYPosRaw']
             
             for ind in range(0,n_peaks):                
                 peak_fs = peak_x_data[ind]                
@@ -160,8 +158,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 
                 # Peak coordinate to pixel in image
                 peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(round(peak_fs))
-                peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
-                peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
+                peak_x.append(self.geometry['x'][peak_in_slab] + self.img_shape[0] / 2)
+                peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
 
             ring_pen = pyqtgraph.mkPen('r', width=2)
             self.found_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
@@ -343,11 +341,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             y_mouse = int(mouse_point.y()) 
             x_mouse_centered = x_mouse - self.img_shape[0]/2 + 1
             y_mouse_centered = y_mouse - self.img_shape[0]/2 + 1
-            radius = numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2) / self.res
-            self.camera_z = (self.camera_length+self.coffset)
+            radius = numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2) / self.geometry['res']
+            self.camera_z = (self.camera_length+self.geometry['coffset'])
             camera_z_mm = self.camera_z * 1e3
             camera_z_in = camera_z_mm / 25.4
-            resolution = 10e9*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius/(self.camera_length+self.coffset))))            
+            resolution = 10e9*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius/(self.camera_length+self.geometry['coffset']))))
 
             self.ui.statusBar.setText(
                 'Last clicked pixel:     x: %4i     y: %4i     z: %.2f in     value: %4i     resolution: %4.2f Å' % (
@@ -435,22 +433,27 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
         # Use filename, directory, HDF5field from command line to figure out what we want to show
-        self.filename = img_file_pattern
-        self.nframes = read_cxi(self.filename, slab_size=True)
+        #self.nframes = read_cxi(self.filename, slab_size=True)
         #self.filename, self.img_event, self.img_h5field = cxi_event_list(img_file_pattern, img_h5_field)
         #self.nframes = self.img_fiename.shape()
-        print('Number of frames', self.nframes)
 
 
 
         # Size of the first images to be read (assume all images have the same size)
-        self.slab_size = read_cxi(self.filename, slab_size=True)
+        self.filename = img_file_pattern
+        temp = read_cxi(self.filename, slab_size=True)
+        self.slab_size = temp['size']
         self.num_lines = self.slab_size[0]
+        self.nframes = self.slab_size[0]
         self.slab_shape = (self.slab_size[1],self.slab_size[2])
+        print('Number of frames', self.nframes)
 
-        self.pixel_map, self.img_shape = read_geometry(geom_filename)
-        self.coffset, self.res = read_geometry_coffset_and_res(geom_filename)
-        
+
+        # Load geometry
+        self.geometry = read_geometry(geom_filename)
+        self.img_shape = self.geometry['shape']
+
+
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
         self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
 

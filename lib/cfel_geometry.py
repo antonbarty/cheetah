@@ -94,6 +94,25 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
     return x, y, r
 
 
+def coffset_from_CrystFEL_geometry_file(fnam):
+    """
+    Read coffset from CrystFEL geometry file
+    :param fnam:
+    :return:
+    """
+    f = open(fnam, 'r')
+    f_lines = []
+    for line in f:
+        f_lines.append(line)
+    # endfor
+
+    coffset_lines = [x for x in f_lines if 'coffset' in x]
+    coffset = float(coffset_lines[-1].split('=')[1])
+    res_lines = [x for x in f_lines if 'res' in x]
+    res = float(res_lines[-1].split('=')[1])
+
+    return coffset, res
+
 
 def read_pixelmap(filename):
     """
@@ -136,12 +155,18 @@ def read_geometry(geometry_filename):
         format = 'unknown'
 
     # Read geometry, depending on format
-    if format == 'pixelmap':
-        x, y, r = read_pixelmap(geometry_filename)
-    elif format == 'CrystFEL':
+    if format == 'CrystFEL':
         x, y, r = pixelmap_from_CrystFEL_geometry_file(geometry_filename)
+        coffset, res = coffset_from_CrystFEL_geometry_file(geometry_filename)
+
+    elif format == 'pixelmap':
+        x, y, r = read_pixelmap(geometry_filename)
+        coffset = 0.591754
+        res = 9090.91
+
     else:
-        print('Unsupported geometry type')
+        print('Unsupported geometry type:', geometry_filename)
+        exit()
     #endif      
 
     # find the smallest size of cspad_geom that contains all
@@ -149,8 +174,9 @@ def read_geometry(geometry_filename):
     M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
     N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
 
-    print('X range: ', x.max(), x.min())
-    print('Y range: ', y.max(), y.min())
+    print('X range: ', x.min(), x.max())
+    print('Y range: ', y.min(), y.max())
+    print('R range: ', r.min(), r.max())
 
     # convert x y values to i j values
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
@@ -161,48 +187,24 @@ def read_geometry(geometry_filename):
     # Returning actual coordinates (x,y) is better for other operations such as radial averages
     x = x
     y = -y
-    xy = (x.flatten(), y.flatten())
-
     img_shape = (M, N)
-    return xy, img_shape    
+
+    #class result_class(object):
+    #    x = xx.flatten()
+    #    y = yy.flatten()
+    #    geom = xy
+    #    shape = img_shape
+
+    result_dict = {
+        'x' : x.flatten(),
+        'y' : y.flatten(),
+        'r' : r.flatten(),
+        'coffset' : coffset,
+        'res' : res,
+        'shape' : img_shape
+    }
+
+    return result_dict
     #end read_geometry()
 
 
-def read_geometry_coffset_and_res(geometry_filename):
-    """
-        Determine camera offset from geometry file
-        Pixelmaps do not have these values so we have a temporary hack in place
-    """
-    # determine file format
-    if geometry_filename.endswith(".geom"):
-        format = 'CrystFEL'
-    elif geometry_filename.endswith(".h5"):
-        format = 'pixelmap'
-    else:
-        print("Unknown geometry file format: ", geometry_filename)
-        format = 'unknown'
-
-
-    # Read camera offset, etc, 
-    if format == 'pixelmap': 
-        coffset = 0.591754
-        res = 9090.91
-    elif format == 'CrystFEL':
-        f = open(geometry_filename, 'r')
-        f_lines = []
-        for line in f:
-            f_lines.append(line)
-        #endfor
-        coffset_lines = [ x for x in f_lines if 'coffset' in x]
-        coffset = float(coffset_lines[-1].split('=')[1])
-        res_lines = [ x for x in f_lines if 'res' in x]
-        res = float(res_lines[-1].split('=')[1])
-    else:
-        print('Unsupported geometry type')
-        coffset = numpy.inf
-        res = numpy.inf
-    #endif        
-
-
-    return coffset, res
-    #end read_geometry_coffset_and_res()

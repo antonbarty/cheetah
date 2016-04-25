@@ -6,6 +6,7 @@
 
 import h5py
 import glob
+import numpy as np
 
 def file_search(pattern, recursive=True, iterator=False):
     """
@@ -111,7 +112,7 @@ def write_h5(filename, field="data/data", compress=3):
 # end write_h5
 
 
-def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, camera_length=False, slab_size=False):
+def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_energy=False, camera_length=False, slab_size=False):
     """ 
     Read a frame from multi-event CXI file
     Also read mask and peak lists if requested
@@ -126,34 +127,48 @@ def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, 
     :return:
     """
 
+    # Open CXI file
     hdf5_fh = h5py.File(filename, 'r')
 
-    # Return peak list
+
+    # Peak list
     if peaks == True:
         n_peaks = hdf5_fh['/entry_1/result_1/nPeaks'][frameID]
-        peak_x_data = hdf5_fh['/entry_1/result_1/peakXPosRaw'][frameID]
-        peak_y_data = hdf5_fh['/entry_1/result_1/peakYPosRaw'][frameID]
-        peak_xy = (peak_x_data.flatten(), peak_y_data.flatten())
-        hdf5_fh.close()
-        return n_peaks, peak_xy
+        peakXPosRaw = hdf5_fh['/entry_1/result_1/peakXPosRaw'][frameID]
+        peakYPosRaw = hdf5_fh['/entry_1/result_1/peakYPosRaw'][frameID]
+        peak_xy = (peakXPosRaw.flatten(), peakYPosRaw.flatten())
+    else:
+        n_peaks = 0
+        peakXPosRaw = np.nan
+        peakYPosRaw = np.nan
 
-    # Return masks
+
+    # Masks
     if mask == True:
-        mask = hdf5_fh['/entry_1/data_1/mask'][frameID, :, :]
-        hdf5_fh.close()
-        return mask
+        mask_array = hdf5_fh['/entry_1/data_1/mask'][frameID, :, :]
+    else:
+        mask_array = np.nan
 
-    # Return photon energy    
+
+    # Photon energy
     if photon_energy == True:
-        photon_energy = hdf5_fh['/LCLS/photon_energy_eV'][frameID]
-        hdf5_fh.close()
-        return photon_energy
+        photon_energy_eV = hdf5_fh['/LCLS/photon_energy_eV'][frameID]
+        #return photon_energy_eV
+    else:
+        photon_energy_eV = np.nan
 
-    # Return camera length
+
+    # Camera length
     if camera_length == True:
-        camera_length = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
-        hdf5_fh.close()
-        return camera_length
+        EncoderValue = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
+    else:
+        EncoderValue = np.nan
+
+    # Array dimensions
+    if slab_size == True:
+        size = hdf5_fh['/entry_1/data_1/data'].shape
+    else:
+        size = [0,0,0]
 
     # Return the number of events and slab size
     # As the file is being written the slab size can be greater than the number of saved images (rest are blank)
@@ -167,18 +182,35 @@ def read_cxi(filename, frameID=0, mask=False, peaks=False, photon_energy=False, 
     #				if nframes gt ncheck then $
     #					nframes = ncheck
     #			endif
-    if slab_size == True:
-        size = hdf5_fh['/entry_1/data_1/data'].shape
-        hdf5_fh.close()
-        return size
 
-    # Default is to return image data
     # data = hdf5_fh['/entry_1/instrument_1/detector_1/detector_corrected/data'][frameID, :, :]
-    data = hdf5_fh['/entry_1/data_1/data'][frameID, :, :]
-    hdf5_fh.close()
-    return data
 
+    # Image data
+    if data == True:
+        data_array = hdf5_fh['/entry_1/data_1/data'][frameID, :, :]
+    else:
+        data_array = np.nan
+
+
+    # Close file
+    hdf5_fh.close()
+
+
+    # Build return structure
+    result = {
+        'data' : data_array,
+        'mask' : mask_array,
+        'size' : size,
+        'EncoderValue' : EncoderValue,
+        'photon_energy_eV' : photon_energy_eV,
+        'n_peaks' : n_peaks,
+        'peakXPosRaw' : peakXPosRaw,
+        'peakYPosRaw' : peakYPosRaw
+    }
+    return result
 # end read_cxi
+
+
 
 
 def list_events(pattern='./*.cxi', field='data/data'):
