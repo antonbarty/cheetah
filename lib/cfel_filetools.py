@@ -8,6 +8,33 @@ import h5py
 import glob
 import numpy as np
 
+
+# Needed for dialog_pickfile()
+import PyQt4
+import PyQt4.QtGui
+import sys
+qtApp = PyQt4.QtGui.QApplication(sys.argv)
+
+
+def dialog_pickfile(write=False, directory=False, multiple=False, filter='*.*'):
+    """
+    In [1]: import PyQt4
+    In [2]: from PyQt4 import QtGui
+    In [8]: import sys
+    The following line is already present in cxiview - may not always need it
+    In [9]: app = QtGui.QApplication(sys.argv)
+
+    In [14]: a = QtGui.QMainWindow()
+    In [15]: fname = QtGui.QFileDialog.getOpenFileName(a, 'Open file','/data')
+    In [16]: print(fname)
+    /Data/work/2016/lcls-scheduling-run_13_0-2.pdf
+    In [17]: fname = QtGui.QFileDialog.getSaveFileName(a, 'Open file','/data')
+    :return:
+    gui.QFileDialog.getExistingDirectory(a)
+
+    """
+
+
 def file_search(pattern, recursive=True, iterator=False):
     """
     IDL file_search() function replacement
