@@ -1,4 +1,5 @@
 #!/reg/g/cfel/anaconda/bin/python3
+#!/nfs/cfel/cxi/common/cfelsoft-rh7/anaconda-py3/bin/python3
 #
 #   CXIview
 #   A python/Qt viewer for .cxi files (and other files output by Cheetah)
@@ -341,15 +342,15 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             y_mouse = int(mouse_point.y()) 
             x_mouse_centered = x_mouse - self.img_shape[0]/2 + 1
             y_mouse_centered = y_mouse - self.img_shape[0]/2 + 1
-            radius = numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2) / self.geometry['res']
+            radius = self.geometry['dx'] * numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2)
             self.camera_z = (self.camera_length+self.geometry['coffset'])
             camera_z_mm = self.camera_z * 1e3
             camera_z_in = camera_z_mm / 25.4
             resolution = 10e9*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius/(self.camera_length+self.geometry['coffset']))))
 
             self.ui.statusBar.setText(
-                'Last clicked pixel:     x: %4i     y: %4i     z: %.2f in     value: %4i     resolution: %4.2f Å' % (
-                x_mouse_centered, y_mouse_centered, camera_z_in, self.img_to_draw[x_mouse, y_mouse], resolution))
+                'Last clicked pixel:     x: %4i     y: %4i     value: %4i     z: %.2f mm     resolution: %4.2f Å' % (
+                x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse], camera_z_mm, resolution))
 
     #end mouse_clicked()
     

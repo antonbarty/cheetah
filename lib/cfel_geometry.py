@@ -64,6 +64,7 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
     #endfor
 
 
+
     max_slab_fs = numpy.array([parsed_detector_dict[k]['max_fs'] for k in parsed_detector_dict.keys()]).max()
     max_slab_ss = numpy.array([parsed_detector_dict[k]['max_ss'] for k in parsed_detector_dict.keys()]).max()
 
@@ -97,6 +98,7 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
 def coffset_from_CrystFEL_geometry_file(fnam):
     """
     Read coffset from CrystFEL geometry file
+    res = The resolution (in pixels per metre) for this panel. This is one over the pixel size in metres.
     :param fnam:
     :return:
     """
@@ -110,8 +112,9 @@ def coffset_from_CrystFEL_geometry_file(fnam):
     coffset = float(coffset_lines[-1].split('=')[1])
     res_lines = [x for x in f_lines if 'res' in x]
     res = float(res_lines[-1].split('=')[1])
+    dx_m = 1.0/res
 
-    return coffset, res
+    return coffset, res, dx_m
 
 
 def read_pixelmap(filename):
@@ -129,14 +132,15 @@ def read_pixelmap(filename):
 
     # Correct for pixel size (meters --> pixels)
     # Currently hard coded for CSPAD
-    x /= 110e-6
-    y /= 110e-6
+    dx = 110e-6
+    x /= dx
+    y /= dx
     
 
     # Calculate radius
     r = numpy.sqrt(numpy.square(x) + numpy.square(y))
 
-    return x, y, r
+    return x, y, r, dx
     
 
 def read_geometry(geometry_filename):
@@ -144,7 +148,21 @@ def read_geometry(geometry_filename):
     Read geometry files and return pixel map
     Determines file type and calls the appropriate routine for reading the geometry
     Note transposition and change of axes so that images appear the same orientation in hdfsee, cheetah/IDL and pyQtGraph
+
+    Output is the following sttructure.
+    Return unit for geometry is pixels
+
+    result_dict = {
+        'x' : x.flatten(),      # In pixels
+        'y' : y.flatten(),      # In pixels
+        'r' : r.flatten(),      # In pixels
+        'dx' : dx_m,
+        'res' : res,
+        'coffset' : coffset,
+        'shape' : img_shape
+    }
     """
+
     # determine file format
     if geometry_filename.endswith(".geom"):
         format = 'CrystFEL'
@@ -157,10 +175,10 @@ def read_geometry(geometry_filename):
     # Read geometry, depending on format
     if format == 'CrystFEL':
         x, y, r = pixelmap_from_CrystFEL_geometry_file(geometry_filename)
-        coffset, res = coffset_from_CrystFEL_geometry_file(geometry_filename)
+        coffset, res, dx_m = coffset_from_CrystFEL_geometry_file(geometry_filename)
 
     elif format == 'pixelmap':
-        x, y, r = read_pixelmap(geometry_filename)
+        x, y, r, dx_m = read_pixelmap(geometry_filename)
         coffset = 0.591754
         res = 9090.91
 
@@ -174,9 +192,10 @@ def read_geometry(geometry_filename):
     M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
     N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
 
-    print('X range: ', x.min(), x.max())
-    print('Y range: ', y.min(), y.max())
-    print('R range: ', r.min(), r.max())
+    print('X range (pix): ', x.min(), x.max())
+    print('Y range (pix): ', y.min(), y.max())
+    print('R range (pix): ', r.min(), r.max())
+    print('Pixel size (m): %4.6f' % (dx_m))
 
     # convert x y values to i j values
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
@@ -199,6 +218,7 @@ def read_geometry(geometry_filename):
         'x' : x.flatten(),
         'y' : y.flatten(),
         'r' : r.flatten(),
+        'dx' : dx_m,
         'coffset' : coffset,
         'res' : res,
         'shape' : img_shape
