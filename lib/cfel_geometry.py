@@ -132,6 +132,7 @@ def read_pixelmap(filename):
 
     # Correct for pixel size (meters --> pixels)
     # Currently hard coded for CSPAD
+    # We can figure this out from the pixel map
     dx = 110e-6
     x /= dx
     y /= dx
@@ -143,21 +144,20 @@ def read_pixelmap(filename):
     return x, y, r, dx
     
 
-def read_geometry(geometry_filename):
+def read_geometry(geometry_filename, quiet=False):
     """
     Read geometry files and return pixel map
     Determines file type and calls the appropriate routine for reading the geometry
     Note transposition and change of axes so that images appear the same orientation in hdfsee, cheetah/IDL and pyQtGraph
 
     Output is the following sttructure.
-    Return unit for geometry is pixels
+    Return unit for geometry is pixels (CrystFEL unit 'res = 1/pix_size' is depreciated)
 
     result_dict = {
         'x' : x.flatten(),      # In pixels
         'y' : y.flatten(),      # In pixels
         'r' : r.flatten(),      # In pixels
         'dx' : dx_m,
-        'res' : res,
         'coffset' : coffset,
         'shape' : img_shape
     }
@@ -192,10 +192,13 @@ def read_geometry(geometry_filename):
     M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
     N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
 
-    print('X range (pix): ', x.min(), x.max())
-    print('Y range (pix): ', y.min(), y.max())
-    print('R range (pix): ', r.min(), r.max())
-    print('Pixel size (m): %4.6f' % (dx_m))
+    # Print a sanity check unless suppressed
+    if not quiet:
+        print('X range (pix): ', x.min(), x.max())
+        print('Y range (pix): ', y.min(), y.max())
+        print('R range (pix): ', r.min(), r.max())
+        print('Pixel size (m): %4.6f' % (dx_m))
+
 
     # convert x y values to i j values
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
@@ -220,7 +223,7 @@ def read_geometry(geometry_filename):
         'r' : r.flatten(),
         'dx' : dx_m,
         'coffset' : coffset,
-        'res' : res,
+        #'res' : res,
         'shape' : img_shape
     }
 

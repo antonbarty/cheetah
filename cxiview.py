@@ -440,14 +440,31 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
 
-        # Size of the first images to be read (assume all images have the same size)
+        # Size of the first image to be read (assume all images have the same size)
         self.filename = img_file_pattern
-        temp = read_cxi(self.filename, slab_size=True)
+        temp = read_cxi(self.filename, slab_size=True, num_frames=True)
         self.slab_size = temp['size']
-        self.num_lines = self.slab_size[0]
-        self.nframes = self.slab_size[0]
         self.slab_shape = (self.slab_size[1],self.slab_size[2])
+        #self.num_lines = temp['nframes']
+        #self.nframes = temp['nframes']
+
+
+        # Create list of all events in files
+        self.event_list = list_events_from_file(img_file_pattern, field=img_h5_field)
+
+        # Diagnostic stuff
+        #print(self.event_list['nevents']   )
+        #print(img_h5_field)
+        #print(self.event_list['field'])
+
+        self.nframes = self.event_list['nevents']
+        self.num_lines = self.nframes
         print('Number of frames', self.nframes)
+
+        # No events?  May as well exit now
+        if self.nframes == 0:
+            print('Exiting (no events found to display)')
+            exit(1)
 
 
         # Load geometry
