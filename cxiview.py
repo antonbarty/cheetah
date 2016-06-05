@@ -56,7 +56,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         # Set title 
         #title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
-        title = self.event_list['filename'][self.img_index] + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
+        #file_str = self.event_list['filename'][self.img_index]
+        file_str = os.path.basename(self.event_list['filename'][self.img_index])
+        title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
         self.ui.jumpToLineEdit.setText(str(self.img_index))
 
         # Extract image to display
@@ -514,7 +516,7 @@ if __name__ == '__main__':
     parser.add_argument("-g", default="none", help="Geometry file (.geom/.h5)")
     parser.add_argument("-i", default="none", help="Input file or directory (.cxi/.h5)")
     parser.add_argument("-d", default="none", help="Directory to scan")
-    parser.add_argument("-f", default="none", help="HDF5 field to read")
+    parser.add_argument("-e", default="none", help="HDF5 field to read")
     parser.add_argument("-p", default=False, help="Circle peaks by default")    
     #parser.add_argument("--rmin", type=float, help="minimum pixel resolution cutoff")
     #parser.add_argument("--nmax", default=np.inf, type=int, help="maximum number of peaks to read")
