@@ -14,6 +14,7 @@
 import argparse
 import os
 import sys
+import numpy
 
 import PyQt4.QtCore
 import PyQt4.QtGui
@@ -21,9 +22,9 @@ import pyqtgraph
 import scipy.constants
 
 import UI.cxiview_ui
-from lib.cfel_filetools import *
-from lib.cfel_geometry import *
-from lib.cfel_imgtools import *
+import lib.cfel_filetools as cfel_file
+import lib.cfel_geometry as cfel_geom
+import lib.cfel_imgtools as cfel_img
 
 
 #
@@ -38,8 +39,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
         # Retrieve CXI file data all at once
         # (Saves opening and closing file many times)
-        cxi = read_cxi(self.filename, self.img_index,  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
-        img = cxi['data']
+        #cxi = cfel_file.read_cxi(self.filename, self.img_index,  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
+        #cxi = cfel_file.read_cxi(self.event_list['filename'][self.img_index], self.event_list['event'][self.img_index],  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
+        cxi = cfel_file.read_event(self.event_list, self.img_index,  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
+
 
 
         # Retrieve resolution related stuff
@@ -52,30 +55,32 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.lambd = 1e-10
         
         # Set title 
-        title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
+        #title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
+        title = self.event_list['filename'][self.img_index] + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
         self.ui.jumpToLineEdit.setText(str(self.img_index))
 
-        # Set the image
+        # Extract image to display
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
-        self.img_to_draw = pixel_remap(img, self.geometry['x'], self.geometry['y'], dx=1.0)
+        img_data = cxi['data']
+        self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=True, autoRange=False)
 
         # Histogram equalisation (saturate top 0.1% of pixels)   
         if self.histogram_clip == True:
-            bottom, top  = histogram_clip_levels(img.ravel(),0.001)        
+            bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
             self.ui.imageView.setLevels(0,top) #, update=True)
         else:
-            top = numpy.amax(img.ravel())
+            top = numpy.amax(img_data.ravel())
             self.ui.imageView.setLevels(0,top) #, update=True)
         
-        # Set the histogram widget to not auto-scale so badly
+        # Set the histogram widget to auto-scale politely
         # http://www.pyqtgraph.org/documentation/graphicsItems/histogramlutitem.html#pyqtgraph.HistogramLUTItem
         if self.auto_levels == True:
             hist = self.ui.imageView.getHistogramWidget()
             hist.setHistogramRange(-100, 10000, padding=0.1)
         else:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(numpy.amin(img.ravel()), numpy.amax(img.ravel()), padding=0.1)
+            hist.setHistogramRange(numpy.amin(img_data.ravel()), numpy.amax(img_data.ravel()), padding=0.1)
             
 
 
@@ -127,7 +132,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             mask_from_file = cxi['mask']
             bitmask = 0xFFFF
 
-            mask_img = pixel_remap(mask_from_file, self.geometry['x'], self.geometry['y'], dx=1.0)
+            mask_img = cfel_img.pixel_remap(mask_from_file, self.geometry['x'], self.geometry['y'], dx=1.0)
             mask_img = numpy.int_(mask_img)
             w = (mask_img & bitmask) != 0
             mask_img[w] = 255
@@ -364,11 +369,45 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Import CFEL colour scales
         import lib.cfel_colours
 
+        #
+        # Initialisation stuff
+        #
         # Extract info from command line arguments
         geom_filename = args.g
         img_file_pattern = args.i
         img_h5_field = args.f
 
+        # Create event list of all events in all files matching pattern
+        # This is for multi-file flexibility - importing of file lists, enables multiple input files, format flexibility
+        self.event_list = cfel_file.list_events(img_file_pattern, field=img_h5_field)
+        self.nframes = self.event_list['nevents']
+        self.num_lines = self.nframes
+        print('Number of frames', self.nframes)
+
+        # No events?  May as well exit now
+        if self.nframes == 0:
+            print('Exiting (no events found to display)')
+            exit(1)
+
+        # Load geometry
+        self.geometry = cfel_geom.read_geometry(geom_filename)
+        self.img_shape = self.geometry['shape']
+        self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
+        self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
+
+        # Size of images (assume all images have the same size as frame 0)
+        #temp = cfel_file.read_cxi(self.event_list['filename'][0], slab_size=True)
+        #temp = cfel_file.read_event(self.event_list, 0, slab_size=True)
+        #self.slab_size = temp.shape
+        #self.slab_shape = (self.slab_size[0],self.slab_size[1])
+        temp = cfel_file.read_event(self.event_list, 0, data=True)
+        print("Data shape: ", temp['data'].shape)
+        self.slab_shape = temp['data'].shape
+
+
+        #
+        # Set up the UI
+        #
         super(cxiview, self).__init__()
         pyqtgraph.setConfigOption('background', 0.2)
         self.ui = UI.cxiview_ui.Ui_MainWindow()
@@ -379,7 +418,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Masks
         self.mask_view = pyqtgraph.ImageItem()
         self.ui.imageView.getView().addItem(self.mask_view)
-
 
         # Found peaks
         self.found_peak_canvas = pyqtgraph.ScatterPlotItem()
@@ -433,55 +471,14 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
 
-        # Use filename, directory, HDF5field from command line to figure out what we want to show
-        #self.nframes = read_cxi(self.filename, slab_size=True)
-        #self.filename, self.img_event, self.img_h5field = cxi_event_list(img_file_pattern, img_h5_field)
-        #self.nframes = self.img_fiename.shape()
 
 
-
-        # Size of the first image to be read (assume all images have the same size)
-        self.filename = img_file_pattern
-        temp = read_cxi(self.filename, slab_size=True, num_frames=True)
-        self.slab_size = temp['size']
-        self.slab_shape = (self.slab_size[1],self.slab_size[2])
-        #self.num_lines = temp['nframes']
-        #self.nframes = temp['nframes']
-
-
-        # Create list of all events in files
-        self.event_list = list_events_from_file(img_file_pattern, field=img_h5_field)
-
-        # Diagnostic stuff
-        #print(self.event_list['nevents']   )
-        #print(img_h5_field)
-        #print(self.event_list['field'])
-
-        self.nframes = self.event_list['nevents']
-        self.num_lines = self.nframes
-        print('Number of frames', self.nframes)
-
-        # No events?  May as well exit now
-        if self.nframes == 0:
-            print('Exiting (no events found to display)')
-            exit(1)
-
-
-        # Load geometry
-        self.geometry = read_geometry(geom_filename)
-        self.img_shape = self.geometry['shape']
-
-
-        self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
-        self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
-
+        # Start on the first frame
         self.img_index = 0
         self.ui.jumpToLineEdit.setText(str(self.img_index))
-
         
         
-        # Set the colour table to inverse-BW
-        # Modify the colour table directly (thanks Valerio)
+        # Set the colour table to inverse-BW (thanks Valerio)
         pos = numpy.array([0.0,0.5,1.0])
         color = numpy.array([[255,255,255,255], [128,128,128,255], [0,0,0,255]], dtype=numpy.ubyte)
         self.new_color_map = pyqtgraph.ColorMap(pos,color)

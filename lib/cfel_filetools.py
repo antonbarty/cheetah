@@ -13,6 +13,7 @@ import numpy as np
 import PyQt4
 import PyQt4.QtGui
 import sys
+import os
 qtApp = PyQt4.QtGui.QApplication(sys.argv)
 
 
@@ -127,6 +128,61 @@ def write_h5(filename, field="data/data", compress=3):
 
 # end write_h5
 
+def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_energy=False, camera_length=False, num_frames=False, slab_size=False):
+    """
+    Read an event from file
+    Calls file-reading function for different file formats as specified in the event list 'format' field
+    :param event_list:
+    :param eventID:
+    :param data:
+    :param mask:
+    :param peaks:
+    :param photon_energy:
+    :param camera_length:
+    :param num_frames:
+    :param slab_size:
+    :return:
+    """
+
+    if event_list['format'][eventID] == 'cxi':
+        event_data = read_cxi(event_list['filename'][eventID], event_list['event'][eventID], data=data, peaks=peaks, photon_energy=photon_energy, camera_length=camera_length, num_frames=num_frames, slab_size=slab_size)
+    #end cxi
+
+    elif event_list['format'][eventID] == 'cheetah_h5':
+        data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
+        event_data = {
+            'data': data_array,
+            'data_shape': data_array.shape,
+            'mask': [0],
+            'nframes': 1,
+            'EncoderValue': 0,
+            'photon_energy_eV': 0,
+            'n_peaks': 0,
+            'peakXPosRaw': [0],
+            'peakYPosRaw': [0]
+        }
+    #end cheetah_h5
+
+    elif event_list['format'][eventID] == 'generic_h5':
+        data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
+        event_data = {
+            'data': data_array,
+            'data_shape': data_array.shape,
+            'nframes': 1,
+            'EncoderValue': 0,
+            'photon_energy_eV': 0,
+        }
+    #end generic_h5
+
+    else:
+        print("Unsupported file format: ", event_list['format'][eventID])
+        exit(1)
+    #end error
+
+
+    return event_data
+
+
 
 def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_energy=False, camera_length=False, num_frames=False, slab_size=False):
     """ 
@@ -183,8 +239,10 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
     # Array dimensions
     if slab_size == True:
         size = hdf5_fh['/entry_1/data_1/data'].shape
+        data_shape = size[1:]
     else:
         size = [0,0,0]
+        data_shape = [0,0]
 
     # Number of frames
     if num_frames == True:
@@ -204,6 +262,7 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
     # Image data
     if data == True:
         data_array = hdf5_fh['/entry_1/data_1/data'][frameID, :, :]
+        data_shape = data_array.size
     else:
         data_array = np.nan
 
@@ -215,8 +274,9 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
     # Build return structure
     result = {
         'data' : data_array,
+        'data_shape' : data_shape,
+        'stack_shape' : size,
         'mask' : mask_array,
-        'size' : size,
         'nframes' : nframes,
         'EncoderValue' : EncoderValue,
         'photon_energy_eV' : photon_energy_eV,
@@ -230,7 +290,7 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
 
 
 
-def list_events_from_file(pattern='./*.cxi', field='data/data'):
+def list_events(pattern='./*.cxi', field='data/data'):
     """
     :param file_pattern: Single filename, or search string
     :param field: HDF5 field from which to draw data, can be different for each file, default='data/data'
@@ -267,6 +327,10 @@ def list_events_from_file(pattern='./*.cxi', field='data/data'):
     print('Found files:')
     for filename in glob.iglob(pattern, recursive=True):
 
+        basename = os.path.basename(filename)
+        dirname = os.path.dirname(filename)
+        #print(dirname, basename)
+
         # CXI file
         if filename.endswith(".cxi"):
             # Number of events in file
@@ -296,19 +360,28 @@ def list_events_from_file(pattern='./*.cxi', field='data/data'):
         # Assume .h5 file is a single frame data file (for now)
         # Be more clever about generalising this later on
         # (eg: if number of dimensions of field = 2, it's an image; if number of dimensions = 3 it's a slab)
-        if filename.endswith(".h5"):
+        if basename.endswith(".h5") and basename.startswith("LCLS"):
             nframes = 1
-            if nframes == 0:
-                break
+            filename_out.extend([filename])
+            eventid_out.extend([0])
+            fieldname_out.extend(['data/data'])
+            format_out.extend(['cheetah_h5'])
+            #endif
 
+        elif basename.endswith(".h5"):
+            nframes = 1
             filename_out.extend([filename])
             eventid_out.extend([0])
             fieldname_out.extend([field])
-            format_out.extend(['h5_single'])
+            format_out.extend(['generic_h5'])
             #endif
 
-        filename_short = filename.split('/')[-1]
+
+        #filename_short = filename.split('/')[-1]
+        filename_short = basename
         print(filename_short, '    ', nframes)
+
+
     #endfor
 
     nevents = len(filename_out)
@@ -320,7 +393,7 @@ def list_events_from_file(pattern='./*.cxi', field='data/data'):
         'nevents' : nevents,
         'filename': filename_out,
         'event': eventid_out,
-        'field': fieldname_out,
+        'h5field': fieldname_out,
         'format': format_out
     }
     return result

@@ -192,13 +192,6 @@ def read_geometry(geometry_filename, quiet=False):
     M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2
     N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
 
-    # Print a sanity check unless suppressed
-    if not quiet:
-        print('X range (pix): ', x.min(), x.max())
-        print('Y range (pix): ', y.min(), y.max())
-        print('R range (pix): ', r.min(), r.max())
-        print('Pixel size (m): %4.6f' % (dx_m))
-
 
     # convert x y values to i j values
     # Minus sign for y-axis because Python takes (0,0) in top left corner instead of bottom left corner
@@ -211,19 +204,25 @@ def read_geometry(geometry_filename, quiet=False):
     y = -y
     img_shape = (M, N)
 
-    #class result_class(object):
-    #    x = xx.flatten()
-    #    y = yy.flatten()
-    #    geom = xy
-    #    shape = img_shape
+    # Print a sanity check unless suppressed
+    if not quiet:
+        print('----------')
+        print('Geometry info:')
+        print('X range (pix): ', x.min(), x.max())
+        print('Y range (pix): ', y.min(), y.max())
+        print('R range (pix): ', r.min(), r.max())
+        print('Pixel size (m): %4.6f' % (dx_m))
+        print("Geometry shape: ", x.shape)
+        print("Geometry elements: ", x.flatten().shape)
+        print("Assembled image size: ", img_shape)
 
+    # Return dict
     result_dict = {
         'x' : x.flatten(),
         'y' : y.flatten(),
         'r' : r.flatten(),
         'dx' : dx_m,
         'coffset' : coffset,
-        #'res' : res,
         'shape' : img_shape
     }
 
