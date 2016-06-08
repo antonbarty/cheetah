@@ -17,6 +17,7 @@ import PyQt4.QtGui
 import UI.crawler_ui
 import lib.crawler_slac as location
 import lib.crawler_hdf5 as cheetah
+import lib.crawler_merge as merge
 
 
 #
@@ -28,6 +29,8 @@ class cheetah_crawler(PyQt4.QtGui.QMainWindow):
     #   Actions to be done each refresh cycle
     #
     def refresh(self):
+        # Button is busy
+        self.ui.refreshButton.setEnabled(False)
 
         # Crawler data (facility dependent)
         self.ui.statusBar.setText('Scanning data files')
@@ -49,23 +52,17 @@ class cheetah_crawler(PyQt4.QtGui.QMainWindow):
         # Crawler merge (facility independent)
         self.ui.statusBar.setText('Merging results')
         self.ui.progressBar.setValue(75)
-        self.crawler_merge()
+        merge.crawler_merge()
 
 
         # Automatic update interval of 1 minute
         self.ui.statusBar.setText('Ready')
         self.ui.progressBar.setValue(100)
+        self.ui.refreshButton.setEnabled(True)
         self.refresh_timer.start(60000)
     #end refresh()
 
 
-
-    #
-    #   Merge scan results
-    #   (facility independent)
-    #
-    def crawler_merge(self):
-        print("Crawler merge")
 
 
 

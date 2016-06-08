@@ -29,8 +29,8 @@ def scan_hdf5(hdf5_dir):
     files = glob.glob(pattern)
     files.sort()
 
-    #for filename in glob.iglob(pattern):        #, recursive=True):
-    for filename in files:        #, recursive=True):
+    #for filename in glob.iglob(pattern):
+    for filename in files:
 
         # Default values are blanks
         run = ''
@@ -48,7 +48,8 @@ def scan_hdf5(hdf5_dir):
         directory = dirname2
 
         # Extract the run number (Warning: LCLS-specific)
-        run = directory[1:5]
+        run = directory[:5]
+        #run = directory[1:5]
 
 
 
@@ -108,10 +109,18 @@ def scan_hdf5(hdf5_dir):
         'hitrate%': hitrate_out
     }
 
+    # Sorting solved by sorting the file list
+    # For future reference, to return indices of the sorted list
+    # you can use the python sorting functions' key parameter to sort the index array instead.
+    # >>> s = [2, 3, 1, 4, 5]
+    # >>> sorted(range(len(s)), key=lambda k: s[k])
+    # [2, 0, 1, 3, 4]
+    # http://stackoverflow.com/questions/7851077/how-to-return-index-of-a-sorted-list
+
 
     # Write dict to CSV file
     keys_to_save = ['run','status','directory','processed','hits','hitrate%']
-    cfel_file.dict_to_csv('test.csv', result, keys_to_save )
+    cfel_file.dict_to_csv('cheetah_status.csv', result, keys_to_save )
 
 
 

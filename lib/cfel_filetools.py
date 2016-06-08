@@ -167,21 +167,27 @@ def dict_to_csv(filename, dict, keys):
     nrows = len(dict[keys[0]])
 
     # Check all keys are in the dict
-    #for k in keys:
-        #Check whether k is in dict.keys()
+    for k in keys:
+        if not k in dict.keys():
+            print("Error in dict_to_csv")
+            print("Requested key is not in dict")
+            print("Requested key: ", k)
+            print("Available keys: ", dict.keys())
+            return
 
 
     # Check all lines are the same length
     for k in keys:
         if len(dict[k]) != nrows:
-            print("Error: Dict element ", k, 'does not have the same dimensions')
-            print("nlines: ", keys[0], ' = ', nrows)
+            print("Error in dict_to_csv")
+            print("Dict element ", k, "does not have the same dimensions")
             print("nlines: ", k, ' = ', len(dict[k]))
+            print("nlines: ", keys[0], ' = ', nrows)
             return
         #endif
     #endfor
 
-
+    # Write columns with header row
     with open(filename, 'w') as f:
         #w = csv.writer(sys.stderr)
         w = csv.writer(f)
@@ -201,6 +207,35 @@ def dict_to_csv(filename, dict, keys):
 
 
 
+#
+# Read CSV file into a dictionary using the header row as dict entry names
+#
+#   >>> import pandas as pd
+#   >>> csv = pd.read_csv('example.csv')
+#   >>> csv
+#
+def csv_to_dict(filename):
+
+    # Open CSV file
+    result = {}
+
+    with open(filename, 'r', newline='') as f:
+
+        reader = csv.DictReader(f)
+
+        for row in reader:
+           for column, value in row.items():
+                result.setdefault(column, []).append(value)
+
+        f.close()
+
+    return result
+#end csv_to_dict
+
+
+#
+#   Read event data using the appropriate reader for the format
+#
 def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_energy=False, camera_length=False, num_frames=False, slab_size=False):
     """
     Read an event from file
