@@ -67,10 +67,6 @@ def scan_data(data_dir):
 
     #for filename in glob.iglob(pattern):
 
-    #for filename in files:
-        # extract run number
-        # Set to 'Ready'
-        # If '.inprogress' then set to 'Copying'
 
     # Split a string
     #>>> '1,2,3'.split(',')

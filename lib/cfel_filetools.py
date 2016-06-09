@@ -208,7 +208,8 @@ def dict_to_csv(filename, dict, keys):
 
 
 #
-# Read CSV file into a dictionary using the header row as dict entry names
+#   Read CSV file into a dictionary using the header row as dict entry names
+#   Result will be a blank dict {} if file does not exist
 #
 #   >>> import pandas as pd
 #   >>> csv = pd.read_csv('example.csv')
