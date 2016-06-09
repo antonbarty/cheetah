@@ -15,11 +15,14 @@ def scan_data(data_dir):
     print("Crawler data: ", data_dir)
 
     pattern = data_dir + '/*.xtc'
+    debug = False
 
     # Create sorted file list (glob seems to return files in random order)
     files = glob.glob(pattern)
     files.sort()
 
+    if debug:
+        print(files)
 
     # Extract the run bit from XTC file name
     out = []
@@ -55,6 +58,8 @@ def scan_data(data_dir):
         'status' : status
     }
 
+    if debug:
+        print(result['run'])
 
     # Write dict to CSV file
     keys_to_save = ['run','status']

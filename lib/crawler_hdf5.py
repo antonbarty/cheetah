@@ -13,6 +13,7 @@ import lib.cfel_filetools as cfel_file
 def scan_hdf5(hdf5_dir):
     print("Crawler HDF5: ", hdf5_dir)
 
+    debug = False
     pattern = hdf5_dir + '/r*/status.txt'
 
     #printf, fout, '# Run, status, directory, processed, hits, hitrate%, mtime'
@@ -28,6 +29,8 @@ def scan_hdf5(hdf5_dir):
     # Create sorted file list or files come in seemingly random order
     files = glob.glob(pattern)
     files.sort()
+    if debug:
+        print(files)
 
     #for filename in glob.iglob(pattern):
     for filename in files:
@@ -78,7 +81,6 @@ def scan_hdf5(hdf5_dir):
             hitrate='---'
 
         # Diagnostic
-        debug = False
         if debug:
             print("---------------")
             print("Run: ", run)
@@ -108,6 +110,8 @@ def scan_hdf5(hdf5_dir):
         'hits' : hits_out,
         'hitrate%': hitrate_out
     }
+
+
 
     # Sorting solved by sorting the file list
     # For future reference, to return indices of the sorted list

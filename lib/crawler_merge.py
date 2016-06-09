@@ -12,6 +12,8 @@ import lib.cfel_filetools as cfel_file
 
 
 def crawler_merge():
+    print("Crawler merge")
+
 
     #
     #   Read .csv files
@@ -26,31 +28,31 @@ def crawler_merge():
     #Run, DatasetID, Directory
 
     # Check for missing data
-    if data=={} or cheetah=={} or datasets=={}:
-        return
-
+    #if data=={} or cheetah=={} or datasets=={}:
+    #    return
 
 
     #
     # Compatibility: convert r0002 (string) to 2 (integer) so that run is in the same format in each dict
     #   This may disappear later if datasets['run'] is in the same format
     #
-    for i, run in enumerate(data['run']):
-        run_num= int(run[1:])
-        data['run'][i] = run_num
+    if data != {}:
+        for i, run in enumerate(data['run']):
+            run_num= int(run[1:])
+            data['run'][i] = run_num
 
-    for i, run in enumerate(cheetah['run']):
-        run_num = int(run[1:])
-        cheetah['run'][i] = run_num
+    if cheetah != {}:
+        for i, run in enumerate(cheetah['run']):
+            run_num = int(run[1:])
+            cheetah['run'][i] = run_num
 
-    for i, run in enumerate(datasets['# Run']):
-        run_num = int(run[1:])
-        datasets['# Run'][i] = run_num
-
-    print(datasets.keys())
-
+    if datasets != {}:
+        for i, run in enumerate(datasets['# Run']):
+            run_num = int(run[1:])
+            datasets['# Run'][i] = run_num
     #print(data['run'])
     #print(datasets['# Run'])
+
 
     # Find unique run numbers
     # (some runs may be missing from some of the tables)
@@ -82,19 +84,21 @@ def crawler_merge():
         # Stuff contained in XTC info
         # run,status
         datastatus = '---'
-        if run in data['run']:
-            i = data['run'].index(run)
-            datastatus = data['status'][i]
+        if data != {}:
+            if run in data['run']:
+                i = data['run'].index(run)
+                datastatus = data['status'][i]
 
 
         # Stuff contained in datasets file
         # Run, DatasetID, Directory
         dataset = '---'
         h5dir = '---'
-        if run in datasets['# Run']:
-            i = datasets['# Run'].index(run)
-            dataset = datasets[' DatasetID'][i].strip()
-            h5dir = datasets[' Directory'][i].strip()
+        if datasets != {}:
+            if run in datasets['# Run']:
+                i = datasets['# Run'].index(run)
+                dataset = datasets[' DatasetID'][i].strip()
+                h5dir = datasets[' Directory'][i].strip()
 
 
         # Stuff contained in Cheetah status file
@@ -105,17 +109,18 @@ def crawler_merge():
         nprocessed = '---'
         nhits = '---'
         hitrate = '---'
-        if h5dir in cheetah['directory']:
-            i = cheetah['directory'].index(h5dir)
-            if cheetah['run'][i] == run:
-                cheetahstatus = cheetah['status'][i].strip()
-                nprocessed = cheetah['processed'][i].strip()
-                nhits = cheetah['hits'][i].strip()
-                hitrate = cheetah['hitrate%'][i].strip()
-                if hitrate.replace('.','',1).isnumeric():
-                    hitrate = '{:0.2f}'.format(float(hitrate))
-            else:
-                print(cheetah['run'][i], run)
+        if cheetah != {}:
+            if h5dir in cheetah['directory']:
+                i = cheetah['directory'].index(h5dir)
+                if cheetah['run'][i] == run:
+                    cheetahstatus = cheetah['status'][i].strip()
+                    nprocessed = cheetah['processed'][i].strip()
+                    nhits = cheetah['hits'][i].strip()
+                    hitrate = cheetah['hitrate%'][i].strip()
+                    if hitrate.replace('.','',1).isnumeric():
+                        hitrate = '{:0.2f}'.format(float(hitrate))
+                else:
+                    print(cheetah['run'][i], run)
 
 
         # CrystFEL stuff is not yet included
@@ -156,18 +161,5 @@ def crawler_merge():
 
     # Write dict to CSV file
     keys_to_save = ['Run', 'Dataset','XTC','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%']
-    cfel_file.dict_to_csv('crawler.csv', result, keys_to_save)
-
-
-
-
-#
-#   Help snippets
-#
-    #if 'your_element' in mylist:
-    #    print
-    #    mylist.index('your_element')
-    #else:
-    #    print
-    #    None
+    cfel_file.dict_to_csv('crawler.txt', result, keys_to_save)
 

@@ -193,7 +193,7 @@ def dict_to_csv(filename, dict, keys):
         w = csv.writer(f)
         w.writerow(keys)
 
-        for row in range(0, nrows-1):
+        for row in range(0, nrows):
             str_out = []
             for k in keys:
                 str_out.append(dict[k][row])
