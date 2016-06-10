@@ -110,6 +110,7 @@ def crawler_merge():
         nhits = '---'
         hitrate = '---'
         if cheetah != {}:
+            # Use any matches in the directory column (handles multiple directories per run)
             if h5dir in cheetah['directory']:
                 i = cheetah['directory'].index(h5dir)
                 if cheetah['run'][i] == run:
@@ -117,11 +118,17 @@ def crawler_merge():
                     nprocessed = cheetah['processed'][i].strip()
                     nhits = cheetah['hits'][i].strip()
                     hitrate = cheetah['hitrate%'][i].strip()
-                    if hitrate.replace('.','',1).isnumeric():
-                        hitrate = '{:0.2f}'.format(float(hitrate))
-                else:
-                    print(cheetah['run'][i], run)
 
+            # Else fall back to the first directory matching the run number
+            elif run in cheetah['run']:
+                i = cheetah['run'].index(run)
+                cheetahstatus = cheetah['status'][i].strip()
+                nprocessed = cheetah['processed'][i].strip()
+                nhits = cheetah['hits'][i].strip()
+                hitrate = cheetah['hitrate%'][i].strip()
+
+            if hitrate.replace('.', '', 1).isnumeric():
+                hitrate = '{:0.2f}'.format(float(hitrate))
 
         # CrystFEL stuff is not yet included
         crystfel_status = '---'

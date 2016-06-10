@@ -14,7 +14,7 @@ import lib.cfel_filetools as cfel_file
 def scan_data(data_dir):
     print("Crawler data: ", data_dir)
 
-    pattern = data_dir + '/*.xtc'
+    pattern = data_dir + '/*.xtc*'
     debug = False
 
     # Create sorted file list (glob seems to return files in random order)
