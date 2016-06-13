@@ -246,7 +246,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #   Pinched from Onda GUI - clean up code later
     #
     def update_resolution_rings(self):
-        items = ['3.0', '4.0', '6.0', '8.0', '10.0']
+        items = ['3.0', '4.0', '6.0', '8.0', '10.0','20.0']
         for ti in self.resolution_rings_textitems:
             self.ui.imageView.getView().removeItem(ti)
         if len(items) == 0:
@@ -260,7 +260,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
     def draw_resolution_rings(self):
         dx = self.geometry['dx']
-        resolution_rings_in_pix = [1.0]
+        resolution_rings_in_pix = [2.0]
         for resolution in self.resolution_rings_in_A:
             resolution = float(resolution)
             res_in_pix = (2.0 / dx) * self.camera_z_m * numpy.tan(2.0 * numpy.arcsin(self.lambd / (2.0 * resolution * 1e-10)))
@@ -647,9 +647,12 @@ if __name__ == '__main__':
     parser.add_argument("-g", default="none", help="Geometry file (.geom/.h5)")
     parser.add_argument("-i", default="none", help="Input file pattern (eg: *.cxi, LCLS*.h5)")
     parser.add_argument("-e", default="none", help="HDF5 field to read")
-    parser.add_argument("-p", default=False, help="Circle peaks by default")    
-    #parser.add_argument("--rmin", type=float, help="minimum pixel resolution cutoff")
-    #parser.add_argument("--nmax", default=np.inf, type=int, help="maximum number of peaks to read")
+    parser.add_argument("-p", default=False, help="Circle peaks by default")
+    parser.add_argument("-l", default='None', help="Read event list")
+    #parser.add_argument("-s", default='None', help="Read stream file")
+    #parser.add_argument("-z", default='50e-3', help="Detector distance (m)")
+    #parser.add_argument("-v", default='8000', help="Photon energy (eV)")
+    #parser.add_argument("-x", default='110e-6', help="Detector pixel size (m)")
     args = parser.parse_args()
     
     print("----------")    
