@@ -230,6 +230,8 @@ def csv_to_dict(filename):
 
         f.close()
 
+    result.update({'fieldnames' : list(reader.fieldnames)})
+
     return result
 #end csv_to_dict
 

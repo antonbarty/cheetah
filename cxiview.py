@@ -485,17 +485,17 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.action_update_files()
 
 
+        # Size of images (assume all images have the same size as frame 0)
+        temp = cfel_file.read_event(self.event_list, 0, data=True)
+        print("Data shape: ", temp['data'].shape)
+        self.slab_shape = temp['data'].shape
+
         # Load geometry
         self.geometry = cfel_geom.read_geometry(self.geom_filename)
         self.img_shape = self.geometry['shape']
         self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
         self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
-
-        # Size of images (assume all images have the same size as frame 0)
-        temp = cfel_file.read_event(self.event_list, 0, data=True)
-        print("Data shape: ", temp['data'].shape)
-        self.slab_shape = temp['data'].shape
 
         # Sanity check: Do geometry and data shape match?
         if (temp['data'].flatten().shape != self.geometry['x'].shape):
