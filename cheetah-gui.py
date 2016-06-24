@@ -6,6 +6,7 @@
 
 import os
 import sys
+import glob
 import argparse
 import subprocess
 import PyQt4.QtCore
@@ -13,6 +14,7 @@ import PyQt4.QtGui
 
 import UI.cheetahgui_ui
 import lib.cfel_filetools as cfel_file
+import lib.gui_dialogs as gui_dialogs
 
 
 # TODO: Dialog for selecting experiment
@@ -31,6 +33,19 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         command = str.join(' ', cmdarr)
         print(command)
         #subprocess.Popen(cmdarr)
+
+
+    #
+    # Quick wrapper for viewing images (this code got repeated over-and-over)
+    #
+    def show_selected_images(self, filepat, field='data/data'):
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return
+        file = runs['path'][0] + filepat
+        cmdarr = ['cxiview.py', '-g', self.config['geometry'], '-e', field, '-i', file]
+        self.spawn_subprocess(cmdarr)
+    #end show_selected_powder()
 
 
 
@@ -76,7 +91,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.table.show()
 
         # Button is no longer busy; set timer for next refresh
-        print("Refreshed")
         self.ui.button_refresh.setEnabled(True)
         self.refresh_timer.start(60000)
     #end refresh()
@@ -88,15 +102,18 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #   Use actual table entries to handle sorting
     #
     def selected_runs(self):
+        # Option 1
         # Rows where all columns are selected (entire row must be selected)
         #indexes = self.table.selectionModel().selectedRows()
         #for index in sorted(indexes):
         #    print('1: Row %d is selected' % index.row())
 
+        # Option 2
         # Rows where at least one cell is selected (any box in row is selected)
         rows = sorted(set(index.row() for index in self.table.selectedIndexes()))
         #for row in rows:
         #    print('2: Row %d is selected' % row)
+
 
         # Extract info from selected rows
         run_out = []
@@ -136,8 +153,8 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     def list_experiments(self):
 
-        #expfile = '~/.cheetah-crawler'
-        expfile = './cheetah-crawler'
+        expfile = '~/.cheetah-crawler'
+        #expfile = './cheetah-crawler'
 
         # Does it exist?
         if os.path.exists(expfile):
@@ -157,17 +174,73 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         return exptlist
     #end list_experiments
 
+    #
+    #   Select an experiment, or find a new one
+    #
+    def select_experiment(self):
 
+        # Dialog box with list of past experiments
+        past_expts = self.list_experiments()
+        gui = gui_dialogs.expt_select_gui.get_expt(past_expts)
 
+        if gui['action'] == 'goto':
+            dir = gui['selected_expt']
+            return dir
 
+        elif gui['action'] == 'find':
+            cfile = cfel_file.dialog_pickfile(filter='crawler.config')
+            if cfile == '':
+                print('Selection canceled')
+                self.exit_gui()
+
+            basename = os.path.basename(cfile)
+            dir = os.path.dirname(cfile)
+
+            # Update the past experiments list
+            # expfile = '~/.cheetah-crawler'
+            expfile = './cheetah-crawler'
+            past_expts.insert(0,dir)
+            with open(expfile, mode='w') as f:
+                f.write('\n'.join(past_expts))
+
+            return dir
+
+        elif gui['action'] == 'setup_new':
+            print('Set up new experiment not yet working :-(')
+            self.exit_gui()
+
+        else:
+            print("Catch you another time.")
+            self.exit_gui()
+
+        return result
 
 
     #
     #   Action button items
     #
     def run_cheetah(self):
-        print("Run cheetah selected")
-        self.selected_runs()
+        # Dialog box for dataset label and ini file
+        inifile_list = glob.glob('../process/*.ini')
+        inifile_list = ['test1.ini','test2.ini']
+        gui, ok = gui_dialogs.run_cheetah_gui.cheetah_dialog(inifile_list)
+        dataset = gui['dataset']
+        inifile = gui['inifile']
+
+        # Exit if cancel was pressed
+        if ok == False:
+            return
+
+        # Process all selected runs
+        runs = self.selected_runs()
+        for run in runs['run']:
+            cmdarr = [self.config['process'], run, inifile, dataset]
+            self.spawn_subprocess(cmdarr)
+
+        #TODO: Update dataset file and Cheetah status in table
+
+    #end run_cheetah()
+
 
     def run_crystfel(self):
         print("Run crystfel selected")
@@ -189,7 +262,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
 
     #
-    # Cheetah menu items
+    #   Cheetah menu items
     #
     def enableCommands(self):
         self.ui.button_runCheetah.setEnabled(True)
@@ -227,7 +300,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         print("Combine masks selected")
 
     #
-    # Analysis menu items
+    #   Analysis menu items
     #
     def show_hitrate(self):
         print("Show hitrate not yet implemented")
@@ -249,47 +322,37 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
 
     #
-    # Powder menu items
+    #   Powder menu items
     #
     def show_powder_hits(self):
         file = '*detector0-class1-sum.h5'
         field = 'data/non_assembled_detector_and_photon_corrected'
-        #field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
-    #end show_powder_hits()
 
     def show_powder_blanks(self):
         file = '*detector0-class0-sum.h5'
         field = 'data/non_assembled_detector_and_photon_corrected'
-        #field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
-    #end show_powder_blanks()
 
     def show_powder_hits_det(self):
         file = '*detector0-class1-sum.h5'
-        #field = 'data/non_assembled_detector_and_photon_corrected'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
-    #end show_powder_hits_det()
 
     def show_powder_blanks_det(self):
         file = '*detector0-class0-sum.h5'
-        #field = 'data/non_assembled_detector_and_photon_corrected'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
-    #end show_powder_blanks_det
 
     def show_powder_peaks_hits(self):
         file = '*detector0-class1-sum.h5'
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
-    #end show_powder_peaks_hits
 
     def show_powder_peaks_blanks(self):
         file = '*detector0-class0-sum.h5'
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
-    # end show_powder_peaks_blanks
 
 
     #
@@ -304,18 +367,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     def view_cheetah_status(self):
         print("View cheetah status selected")
 
-
-    #
-    # Quick wrapper for viewing images, stuff that got repeated over-and-over
-    #
-    def show_selected_images(self, filepat, field='data/data'):
-        runs = self.selected_runs()
-        if len(runs['run']) == 0:
-            return;
-        file = runs['path'][0] + filepat
-        cmdarr = ['cxiview.py', '-g', self.config['geometry'], '-e', field, '-i', file]
-        self.spawn_subprocess(cmdarr)
-    #end show_selected_powder()
 
 
     #
@@ -335,21 +386,35 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #end parse_config
 
 
+    #
+    #   Try to exit cleanly
+    #
+    def exit_gui(self):
+        print("Bye bye.")
+        app.exit()
+        os._exit(1)
+        sys.exit(1)
+
+
 
     #
     #	GUI Initialisation function
     #
     def __init__(self, args):
-        #
+
         # Extract info from command line arguments
-        #
-        #self.location = args.l
-        #self.data_dir = args.d
         #self.hdf5_dir = args.c
+
+
+        # Experiment selector
+        expdir = self.select_experiment()
+        print("Moving to working directory:", expdir)
+        os.chdir(expdir)
+
 
         # Parse configuration file
         self.config = self.parse_config()
-        #self.list_experiments()
+
 
         #
         # Set up the UI
