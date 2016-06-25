@@ -8,6 +8,7 @@ import os
 import sys
 import glob
 import argparse
+import datetime
 import subprocess
 import PyQt4.QtCore
 import PyQt4.QtGui
@@ -16,9 +17,15 @@ import UI.cheetahgui_ui
 import lib.cfel_filetools as cfel_file
 import lib.gui_dialogs as gui_dialogs
 
+#TODO: Cheetah GUI
+#TODO: Setup new experiment function
+#TODO: Relabel datasets (including directory renaming and database update)
 
-# TODO: Dialog for selecting experiment
-# TODO: Dialog for starting Cheetah processing
+#TODO: cxiview.py
+#TODO: Sensible behaviour when geometry not specified (display without geometry applied)
+#TODO: Do not display resolution rings if wavelength, z, or geometry not defined
+#TODO: Wavelength and z on command line (optional)
+#TODO: Take file list as an argument
 
 #
 #	Cheetah GUI code
@@ -32,7 +39,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     def spawn_subprocess(self, cmdarr):
         command = str.join(' ', cmdarr)
         print(command)
-        #subprocess.Popen(cmdarr)
+        subprocess.Popen(cmdarr)
 
 
     #
@@ -40,12 +47,17 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     def show_selected_images(self, filepat, field='data/data'):
         runs = self.selected_runs()
+
+        # No run selected
         if len(runs['run']) == 0:
             return
         file = runs['path'][0] + filepat
-        cmdarr = ['cxiview.py', '-g', self.config['geometry'], '-e', field, '-i', file]
-        self.spawn_subprocess(cmdarr)
-    #end show_selected_powder()
+
+        # Display if some file matches pattern (avoids error when no match)
+        if len(glob.glob(file)) != 0:
+            cmdarr = ['cxiview.py', '-g', self.config['geometry'], '-e', field, '-i', file]
+            self.spawn_subprocess(cmdarr)
+    #end show_selected_images()
 
 
 
@@ -53,6 +65,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #   Actions to be done each refresh cycle
     #
     def refresh_table(self):
+        print('Table refreshed at ', str(datetime.datetime.now()))
 
         # Button is busy
         self.ui.button_refresh.setEnabled(False)
@@ -60,6 +73,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Load the table data
         status = cfel_file.csv_to_dict('crawler.txt')
         ncols = len(list(status.keys()))-1
+        self.crawler_txt = status
 
         # Length of first list is number of rows - except when it is the fieldnames list
         #nrows = len(status[list(status.keys())[0]])
@@ -93,6 +107,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Button is no longer busy; set timer for next refresh
         self.ui.button_refresh.setEnabled(True)
         self.refresh_timer.start(60000)
+
     #end refresh()
 
 
@@ -139,6 +154,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         # Return value
         result = {
+            'row' : rows,
             'run' : run_out,
             'dataset' : dataset_out,
             'directory' : directory_out,
@@ -153,11 +169,12 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     def list_experiments(self):
 
-        expfile = '~/.cheetah-crawler'
+        expfile = os.path.expanduser('~/.cheetah-crawler')
+        #expfile = '~/.cheetah-crawler'
         #expfile = './cheetah-crawler'
 
         # Does it exist?
-        if os.path.exists(expfile):
+        if os.path.isfile(expfile):
             f = open(expfile)
             exptlist = f.readlines()
             f.close()
@@ -169,10 +186,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         for i in range(len(exptlist)):
             exptlist[i] = exptlist[i].strip()
 
-        #print("Past experiments:")
-        #print(exptlist)
         return exptlist
     #end list_experiments
+
 
     #
     #   Select an experiment, or find a new one
@@ -197,8 +213,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             dir = os.path.dirname(cfile)
 
             # Update the past experiments list
-            # expfile = '~/.cheetah-crawler'
-            expfile = './cheetah-crawler'
+            expfile = os.path.expanduser('~/.cheetah-crawler')
             past_expts.insert(0,dir)
             with open(expfile, mode='w') as f:
                 f.write('\n'.join(past_expts))
@@ -220,10 +235,24 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #   Action button items
     #
     def run_cheetah(self):
+
+        # Find .ini files for dropdown list
+        inifile_list = []
+        for file in glob.iglob('../process/*.ini'):
+            basename = os.path.basename(file)
+            inifile_list.append(basename)
+        #inifile_list = ['test1.ini','test2.ini']
+
+        # Info needed for the dialog box
+        dialog_info = {
+            'inifile_list' : inifile_list,
+            'lastini' : self.lastini,
+            'lasttag' : self.lasttag
+        }
         # Dialog box for dataset label and ini file
-        inifile_list = glob.glob('../process/*.ini')
-        inifile_list = ['test1.ini','test2.ini']
-        gui, ok = gui_dialogs.run_cheetah_gui.cheetah_dialog(inifile_list)
+        gui, ok = gui_dialogs.run_cheetah_gui.cheetah_dialog(dialog_info)
+
+        # Extract values from return dict
         dataset = gui['dataset']
         inifile = gui['inifile']
 
@@ -231,14 +260,48 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         if ok == False:
             return
 
+        dataset_txt = cfel_file.csv_to_dict('datasets.csv')
+
+        self.lasttag = dataset
+        self.lastini = inifile
+
         # Process all selected runs
         runs = self.selected_runs()
-        for run in runs['run']:
+        for i, run in enumerate(runs['run']):
+            print('------------ Start Cheetah process script ------------')
             cmdarr = [self.config['process'], run, inifile, dataset]
             self.spawn_subprocess(cmdarr)
+            print('------------ Finish Cheetah process script ------------')
 
-        #TODO: Update dataset file and Cheetah status in table
+            # Format directory string
+            dir = 'r{:04d}'.format(int(run))
+            dir += '-'+dataset
 
+
+            #Update Dataset and Cheetah status in table
+            table_row = runs['row'][i]
+            self.table.setItem(table_row, 1, PyQt4.QtGui.QTableWidgetItem(dataset))
+            self.table.setItem(table_row, 5, PyQt4.QtGui.QTableWidgetItem(dir))
+            self.table.setItem(table_row, 3, PyQt4.QtGui.QTableWidgetItem('Submitted'))
+
+            # Update dataset file
+            if run in dataset_txt['Run']:
+                ds_indx = dataset_txt['Run'].index(run)
+                dataset_txt['DatasetID'][ds_indx] = dataset
+                dataset_txt['Directory'][ds_indx] = dir
+                dataset_txt['iniFile'][ds_indx] = inifile
+            else:
+                dataset_txt['Run'].append(run)
+                dataset_txt['DatasetID'].append(dataset)
+                dataset_txt['Directory'].append(dir)
+                dataset_txt['iniFile'].append(inifile)
+
+
+        # Sort dataset file to keep it in order
+
+        # Save datasets file
+        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
+        cfel_file.dict_to_csv('datasets.csv', dataset_txt, keys_to_save)
     #end run_cheetah()
 
 
@@ -283,6 +346,15 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     def autorun(self):
         print("Autorun selected")
 
+    def set_new_geometry(self):
+        gfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='Geometry files (*.h5 *.geom);;All files (*.*)')
+        if gfile == '':
+            return
+        gfile = os.path.relpath(gfile)
+        print('Selected geometry file:')
+        print(gfile)
+        self.config['geometry'] = gfile
+
 
     #
     #   Mask menu items
@@ -298,6 +370,13 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
     def combine_masks(self):
         print("Combine masks selected")
+
+    def show_mask_file(self):
+        file = cfel_file.dialog_pickfile(path='../calib/mask', filter='*.h5')
+        field = 'data/data'
+        if file != '':
+            file = os.path.relpath(file)
+            self.show_selected_images(file, field)
 
     #
     #   Analysis menu items
@@ -354,6 +433,13 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
 
+    def show_darkcal(self):
+        file = '*detector0-darkcal.h5'
+        field = 'data/data'
+        #file = '*detector0-class0-sum.h5'
+        #field = 'data/non_assembled_raw'
+        self.show_selected_images(file, field)
+
 
     #
     # Log menu actions
@@ -406,14 +492,20 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         #self.hdf5_dir = args.c
 
 
-        # Experiment selector
-        expdir = self.select_experiment()
-        print("Moving to working directory:", expdir)
-        os.chdir(expdir)
+        # Experiment selector (if not already in a gui directory)
+        if not os.path.isfile('crawler.config'):
+            expdir = self.select_experiment()
+            print("Thank you.")
+            print("Moving to working directory:")
+            print(expdir)
+            os.chdir(expdir)
 
 
         # Parse configuration file
+        print("Loading configuration file: ./crawler.config")
         self.config = self.parse_config()
+        self.lastini = self.config['cheetahini']
+        self.lasttag = self.config['cheetahtag']
 
 
         #
@@ -439,6 +531,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # File menu actions
         self.ui.menu_file_startcrawler.triggered.connect(self.start_crawler)
         self.ui.menu_file_refreshtable.triggered.connect(self.refresh_table)
+        self.ui.menu_file_newgeometry.triggered.connect(self.set_new_geometry)
 
         # Cheetah menu actions
         self.ui.menu_cheetah_processselected.triggered.connect(self.run_cheetah)
@@ -450,6 +543,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_mask_badpixdark.triggered.connect(self.badpix_from_darkcal)
         self.ui.menu_mask_badpixbright.triggered.connect(self.badpix_from_bright)
         self.ui.menu_mask_combine.triggered.connect(self.combine_masks)
+        self.ui.menu_mask_view.triggered.connect(self.show_mask_file)
         self.ui.menu_mask_makecspadgain.setEnabled(False)
         self.ui.menu_mask_translatecspadgain.setEnabled(False)
 
@@ -466,6 +560,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_powder_blank_det.triggered.connect(self.show_powder_blanks_det)
         self.ui.menu_powder_peaks_hits.triggered.connect(self.show_powder_peaks_hits)
         self.ui.menu_powder_peaks_blank.triggered.connect(self.show_powder_peaks_blanks)
+        self.ui.menu_powder_darkcal.triggered.connect(self.show_darkcal)
 
         # Log menu actions
         self.ui.menu_log_batch.triggered.connect(self.view_batch_log)
@@ -478,7 +573,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Disable action commands until enabled
         #self.ui.button_runCheetah.setEnabled(False)
         self.ui.button_index.setEnabled(False)
-        self.ui.button_view.setEnabled(False)
         self.ui.menu_file_startcrawler.setEnabled(False)
         self.ui.menu_cheetah_processselected.setEnabled(False)
         self.ui.menu_cheetah_autorun.setEnabled(False)

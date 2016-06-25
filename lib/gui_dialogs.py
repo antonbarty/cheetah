@@ -99,8 +99,13 @@ class expt_select_gui(PyQt4.QtGui.QDialog):
 #   Dialog box to select experiment from drop-down list
 #
 class run_cheetah_gui(PyQt4.QtGui.QDialog):
-    def __init__(self, inifile_list, parent=None):
+    def __init__(self, dialog_info, parent=None):
         super(run_cheetah_gui, self).__init__(parent)
+
+        inifile_list = dialog_info['inifile_list']
+        lastini = dialog_info['lastini']
+        lasttag = dialog_info['lasttag']
+
 
         layout = PyQt4.QtGui.QVBoxLayout(self)
         self.setWindowTitle("Run Cheetah")
@@ -120,7 +125,7 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
         self.label2 = PyQt4.QtGui.QLabel()
         self.label2.setText("Dataset tag: ")
         self.le = PyQt4.QtGui.QLineEdit(self)
-        self.le.setText("Test")
+        self.le.setText(lasttag)
         layout2.addWidget(self.label2)
         layout2.addWidget(self.le)
         layout.addLayout(layout2)
@@ -132,6 +137,7 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
         self.label3 = PyQt4.QtGui.QLabel()
         self.label3.setText("cheetah.ini file: ")
         self.cb = PyQt4.QtGui.QComboBox()
+        self.cb.addItem(lastini)
         self.cb.addItems(inifile_list)
         layout3.addWidget(self.label3)
         layout3.addWidget(self.cb)
@@ -157,8 +163,8 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
 
     # static method to create the dialog and return
     @staticmethod
-    def cheetah_dialog(inifile_list, parent=None):
-        dialog = run_cheetah_gui(inifile_list, parent=parent)
+    def cheetah_dialog(dialog_info, parent=None):
+        dialog = run_cheetah_gui(dialog_info, parent=parent)
         result = dialog.exec_()
         selection = dialog.getCheetahIni()
         return (selection, result == PyQt4.QtGui.QDialog.Accepted)

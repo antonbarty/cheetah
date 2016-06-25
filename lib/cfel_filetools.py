@@ -226,7 +226,7 @@ def csv_to_dict(filename):
 
         for row in reader:
            for column, value in row.items():
-                result.setdefault(column, []).append(value)
+                result.setdefault(column.strip(), []).append(value.strip())
 
         f.close()
 

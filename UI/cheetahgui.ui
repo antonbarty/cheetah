@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>950</width>
+    <width>776</width>
     <height>855</height>
    </rect>
   </property>
@@ -42,30 +42,11 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>32</height>
+            <height>25</height>
            </size>
           </property>
           <property name="text">
            <string>Refresh</string>
-          </property>
-         </widget>
-        </item>
-        <item>
-         <widget class="QPushButton" name="button_view">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>100</width>
-            <height>16777215</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Dataset view</string>
           </property>
          </widget>
         </item>
@@ -80,7 +61,7 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>16777215</height>
+            <height>25</height>
            </size>
           </property>
           <property name="text">
@@ -102,7 +83,7 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>16777215</height>
+            <height>25</height>
            </size>
           </property>
           <property name="text">
@@ -121,7 +102,7 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>16777215</height>
+            <height>25</height>
            </size>
           </property>
           <property name="text">
@@ -143,11 +124,11 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>16777215</height>
+            <height>25</height>
            </size>
           </property>
           <property name="text">
-           <string> Powder</string>
+           <string>Powder</string>
           </property>
          </widget>
         </item>
@@ -165,7 +146,7 @@
           <property name="maximumSize">
            <size>
             <width>100</width>
-            <height>16777215</height>
+            <height>25</height>
            </size>
           </property>
           <property name="text">
@@ -288,7 +269,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>950</width>
+     <width>776</width>
      <height>22</height>
     </rect>
    </property>
@@ -300,6 +281,7 @@
     <addaction name="menu_file_startcrawler"/>
     <addaction name="menu_file_refreshtable"/>
     <addaction name="menu_file_autorefresh"/>
+    <addaction name="menu_file_newgeometry"/>
     <addaction name="separator"/>
     <addaction name="menu_file_quit"/>
    </widget>
@@ -330,6 +312,7 @@
     <addaction name="menu_mask_combine"/>
     <addaction name="menu_mask_makecspadgain"/>
     <addaction name="menu_mask_translatecspadgain"/>
+    <addaction name="menu_mask_view"/>
    </widget>
    <widget class="QMenu" name="menuPowder">
     <property name="title">
@@ -341,6 +324,7 @@
     <addaction name="menu_powder_blank_det"/>
     <addaction name="menu_powder_peaks_hits"/>
     <addaction name="menu_powder_peaks_blank"/>
+    <addaction name="menu_powder_darkcal"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -350,11 +334,19 @@
     <addaction name="menu_log_cheetah"/>
     <addaction name="menu_log_cheetahstatus"/>
    </widget>
+   <widget class="QMenu" name="menuUtilities">
+    <property name="title">
+     <string>Utilities</string>
+    </property>
+    <addaction name="menu_utilities_calibman"/>
+    <addaction name="menu_utilities_psocake"/>
+   </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCheetah"/>
+   <addaction name="menuPowder"/>
    <addaction name="menu_masks"/>
    <addaction name="menuAnalysis"/>
-   <addaction name="menuPowder"/>
+   <addaction name="menuUtilities"/>
    <addaction name="menuLogs"/>
   </widget>
   <action name="menu_file_autorefresh">
@@ -517,6 +509,31 @@
   <action name="menu_mask_maker">
    <property name="text">
     <string>Mask maker</string>
+   </property>
+  </action>
+  <action name="menu_utilities_psocake">
+   <property name="text">
+    <string>psocake (Chuck)</string>
+   </property>
+  </action>
+  <action name="menu_powder_darkcal">
+   <property name="text">
+    <string>View darkcal</string>
+   </property>
+  </action>
+  <action name="menu_mask_view">
+   <property name="text">
+    <string>View mask file</string>
+   </property>
+  </action>
+  <action name="menu_file_newgeometry">
+   <property name="text">
+    <string>Change geometry file</string>
+   </property>
+  </action>
+  <action name="menu_utilities_calibman">
+   <property name="text">
+    <string>calibman (pcds)</string>
    </property>
   </action>
  </widget>

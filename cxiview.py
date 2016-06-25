@@ -65,27 +65,28 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
         img_data = cxi['data']
         self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
-        self.ui.imageView.setImage(self.img_to_draw, autoLevels=True, autoRange=False)
+        self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
 
         # Histogram equalisation (saturate top 0.1% of pixels)   
-        if self.histogram_clip == True:
+        if self.ui.actionHistogram_clip.isChecked() == True:
             bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
-            self.ui.imageView.setLevels(0,top) #, update=True)
         else:
             top = numpy.amax(img_data.ravel())
-            self.ui.imageView.setLevels(0,top) #, update=True)
+
+        # Histogram autoscale?
+        if not self.ui.actionDisbale_autoscale.isChecked():
+            self.ui.imageView.setLevels(0,top)
         
-        # Set the histogram widget to auto-scale politely
+        # Set the histogram widget scale bar to behave politely and not jump around
         # http://www.pyqtgraph.org/documentation/graphicsItems/histogramlutitem.html#pyqtgraph.HistogramLUTItem
-        if self.auto_levels == True:
+        if self.ui.actionAuto_scale_levels.isChecked() == True:
             hist = self.ui.imageView.getHistogramWidget()
             hist.setHistogramRange(-100, 10000, padding=0.1)
         else:
             hist = self.ui.imageView.getHistogramWidget()
             hist.setHistogramRange(numpy.amin(img_data.ravel()), numpy.amax(img_data.ravel()), padding=0.1)
-            
 
-
+            self.ui.actionDisbale_autoscale
 
         # Static level
         #self.ui.imageView.setLevels(0,1000) #, update=True)
@@ -460,6 +461,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         if self.nframes == 0:
             print('Exiting (no events found to display)')
             exit(1)
+
+        file_str = os.path.basename(self.event_list['filename'][self.img_index])
+        title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
+        self.ui.jumpToLineEdit.setText(str(self.img_index))
+        self.setWindowTitle(title)
     #end action_update_files
 
 
@@ -480,9 +486,22 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.img_file_pattern = args.i
         self.img_h5_field = args.e
 
+        #
+        # Set up the UI
+        #
+        super(cxiview, self).__init__()
+        pyqtgraph.setConfigOption('background', 0.0)
+        pyqtgraph.setConfigOption('background', 'k')
+        pyqtgraph.setConfigOption('foreground', 'w')
+        self.ui = UI.cxiview_ui.Ui_MainWindow()
+        self.ui.setupUi(self)
+
+
         # Create event list of all events in all files matching pattern
         # This is for multi-file flexibility - importing of file lists, enables multiple input files, format flexibility
+        self.img_index = 0
         self.action_update_files()
+
 
 
         # Size of images (assume all images have the same size as frame 0)
@@ -505,15 +524,10 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             exit(1)
 
 
+
         #
-        # Set up the UI
+        #   UI configuration stuff
         #
-        super(cxiview, self).__init__()
-        pyqtgraph.setConfigOption('background', 0.0)
-        pyqtgraph.setConfigOption('background', 'k')
-        pyqtgraph.setConfigOption('foreground', 'w')
-        self.ui = UI.cxiview_ui.Ui_MainWindow()
-        self.ui.setupUi(self)
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
         
@@ -578,6 +592,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.actionAuto_scale_levels.setChecked(True)
         self.ui.actionAuto_scale_levels.triggered.connect(self.action_autolevels)
 
+        self.ui.actionDisbale_autoscale.setChecked(False)
+
         self.ui.actionSave_image.triggered.connect(self.action_save_png)
         self.ui.actionRefresh_file_list.triggered.connect(self.action_update_files)
 
@@ -599,7 +615,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
         # Start on the first frame
-        self.img_index = 0
         self.ui.jumpToLineEdit.setText(str(self.img_index))
         self.exportdir = ''
         

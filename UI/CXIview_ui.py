@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1773, 1300)
+        MainWindow.resize(1436, 855)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
@@ -159,7 +159,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.verticalLayout, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1773, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1436, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menuFile = QtGui.QMenu(self.menuBar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -198,6 +198,10 @@ class Ui_MainWindow(object):
         self.actionAuto_scale_levels.setCheckable(True)
         self.actionAuto_scale_levels.setChecked(True)
         self.actionAuto_scale_levels.setObjectName(_fromUtf8("actionAuto_scale_levels"))
+        self.actionDisbale_autoscale = QtGui.QAction(MainWindow)
+        self.actionDisbale_autoscale.setCheckable(True)
+        self.actionDisbale_autoscale.setChecked(False)
+        self.actionDisbale_autoscale.setObjectName(_fromUtf8("actionDisbale_autoscale"))
         self.menuFile.addAction(self.actionRefresh_file_list)
         self.menuFile.addAction(self.actionLoad_geometry)
         self.menuFile.addAction(self.actionSave_image)
@@ -208,6 +212,7 @@ class Ui_MainWindow(object):
         self.menuCrystals.addAction(self.actionDefault_crystal_display_settings)
         self.menuCrystals.addAction(self.actionCircle_Cheetah_peaks)
         self.menuView.addAction(self.actionHistogram_clip)
+        self.menuView.addAction(self.actionDisbale_autoscale)
         self.menuView.addAction(self.actionAuto_scale_levels)
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuColours.menuAction())
@@ -248,6 +253,7 @@ class Ui_MainWindow(object):
         self.actionCircle_Cheetah_peaks.setText(_translate("MainWindow", "Circle Cheetah peaks", None))
         self.actionDefault_particle_display_settings.setText(_translate("MainWindow", "Default particle display settings", None))
         self.actionHistogram_clip.setText(_translate("MainWindow", "Histogram clip", None))
-        self.actionAuto_scale_levels.setText(_translate("MainWindow", "Clamp histogram scale ", None))
+        self.actionAuto_scale_levels.setText(_translate("MainWindow", "Lock histogram scale", None))
+        self.actionDisbale_autoscale.setText(_translate("MainWindow", "Lock colour scale", None))
 
 from pyqtgraph import ImageView
