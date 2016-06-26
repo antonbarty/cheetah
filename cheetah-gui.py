@@ -36,9 +36,13 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     # Launch a subprocess (eg: viewer or analysis script) without blocking the GUI
     # Separate routine makes it easy change this globally if needed
     #
-    def spawn_subprocess(self, cmdarr, wait=False):
+    def spawn_subprocess(self, cmdarr, wait=False, test=False):
         command = str.join(' ', cmdarr)
         print(command)
+
+        if test:
+            return
+
         if wait:
             subprocess.run(cmdarr)
         else:
@@ -78,6 +82,18 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         # Load the table data
         status = cfel_file.csv_to_dict('crawler.txt')
+
+        # Fix some legacy issues with old crawler.txt file format (different key names in crawler.txt)
+        if not 'Run' in status.keys() and '#Run' in status.keys():
+            print(status.keys())
+            status.update({'Run': status['#Run']})
+            status.update({'H5Directory': status['H5 Directory']})
+            del status['#Run']
+            del status['H5 Directory']
+            status['fieldnames'] = list(status.keys())
+
+
+        # Remember table for later use in other functions
         ncols = len(list(status.keys()))-1
         self.crawler_txt = status
 
@@ -213,15 +229,15 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         #   Now for some LCLS-specific stuff
         ss = realdir.split('/')
         ss = ss[1:]
-        print(ss)
 
         ss[1] = 'd'
         ss[2] = 'psdm'
         instr = ss[3]
         expt = ss[4]
         xtcdir = '/' + str.join('/', ss[0:5]) + '/xtc'
-        userdir = '/' + str.join('/', ss) + '/'
+        userdir = '/' + str.join('/', ss) + '/cheetah'
 
+        print('Deduced experiment information:')
         print('    Relative path: ', dir)
         print('    Absolute path: ', realdir)
         print('    Instrument: ', instr)
@@ -229,12 +245,98 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         print('    XTC directory: ', xtcdir)
         print('    Output directory: ', userdir)
 
-    # Unpack template
-    #print, '>---------------------<'
-    #print, 'Extracting template...'
-    #cmd = 'tar -xf /reg/g/cfel/cheetah/template.tar'
-    #print, cmd
-    #spawn, cmd
+
+        #
+        # QMessageBox for confirmation before proceeding
+        #
+        msgBox = PyQt4.QtGui.QMessageBox()
+        str1 = []
+        str1.append('<b>Instrument:</b> ' + str(instr))
+        str1.append('<b>Experiment:</b> ' + str(expt))
+        str1.append('<b>XTC directory:</b> ' + str(xtcdir))
+        str1.append('<b>Output directory:</b> ' + str(userdir))
+        str1.append('<b>Relative path:</b> '+ str(dir))
+        str2 = str.join('<br>', str1)
+        msgBox.setText(str2)
+
+        msgBox.setInformativeText('<b>Proceed?</b>')
+        msgBox.addButton(PyQt4.QtGui.QMessageBox.Yes)
+        msgBox.addButton(PyQt4.QtGui.QMessageBox.Cancel)
+        msgBox.setDefaultButton(PyQt4.QtGui.QMessageBox.Yes)
+        ret = msgBox.exec_();
+
+        if ret == PyQt4.QtGui.QMessageBox.Cancel:
+            print("So long and thanks for all the fish.")
+            self.exit_gui()
+
+
+        # Unpack template
+        print('>---------------------<')
+        print('Extracting template...')
+        cmd = ['tar','-xf','/reg/g/cfel/cheetah/template.tar']
+        self.spawn_subprocess(cmd, wait=True)
+        print("Done")
+
+        # Fix permissions
+        print('>---------------------<')
+        print('Fixing permissions...')
+        cmd = ['chgrp',  '-R', expt, 'cheetah/']
+        self.spawn_subprocess(cmd, wait=True)
+        cmd = ['chmod',  '-R', 'g+w', 'cheetah/']
+        self.spawn_subprocess(cmd, wait=True)
+        print("Done")
+
+        # Place configuration into /res
+        #print, 'Placing configuration files into /res...'
+        #cmd = ['/reg/g/cfel/cheetah/cheetah-stable/bin/make-labrynth']
+        #self.spawn_subprocess(cmd, wait=True)
+        #print("Done")
+
+
+        # Modify gui/crawler.config
+        print('>---------------------<')
+        file = 'cheetah/gui/crawler.config'
+        print('Modifying ', file)
+
+        # Replace XTC directory with the correct location using sed
+        xtcsedstr = str.replace(xtcdir, '/', '\\/')
+        cmd = ["sed", "-i", "-r", "s/(xtcdir=).*/\\1" + xtcsedstr + "/", file]
+        self.spawn_subprocess(cmd, wait=True)
+
+        print('>-------------------------<')
+        cmd = ['cat', file]
+        self.spawn_subprocess(cmd, wait=True)
+        print('>-------------------------<')
+
+
+        # Modify process/process
+        file = 'cheetah/process/process'
+        print('Modifying ', file)
+
+        cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1\"" + expt + "\"/", file]
+        self.spawn_subprocess(cmd, wait=True)
+
+        xtcsedstr = str.replace(xtcdir, '/', '\\/')
+        cmd = ["sed", "-i", "-r", "s/(XTCDIR=).*/\\1\"" + xtcsedstr + "\"/", file]
+        self.spawn_subprocess(cmd, wait=True)
+
+        h5sedstr = str.replace(userdir, '/', '\\/') + '\/hdf5'
+        cmd = ["sed", "-i", "-r", "s/(H5DIR=).*/\\1\"" + h5sedstr + "\"/", file]
+        self.spawn_subprocess(cmd, wait=True)
+
+        confsedstr= str.replace(userdir, '/', '\\/') + '\/process'
+        cmd = ["sed", "-i", "-r", "s/(CONFIGDIR=).*/\\1\"" + confsedstr + "\"/", file]
+        self.spawn_subprocess(cmd, wait=True)
+
+        print('>-------------------------<')
+        cmd = ['head', file]
+        self.spawn_subprocess(cmd, wait=True)
+        print('>-------------------------<')
+
+        print("Working directory: ")
+        print(os.getcwd() + '/cheetah')
+    #end setup_new_experiment
+
 
     #
     #   Select an experiment, or find a new one
@@ -268,8 +370,8 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         elif gui['action'] == 'setup_new':
             self.setup_new_experiment()
-            print('Set up new experiment not yet working :-(')
-            self.exit_gui()
+            cwd = os.getcwd()
+            return cwd + '/cheetah/gui'
 
         else:
             print("Catch you another time.")
@@ -592,6 +694,17 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Extract info from command line arguments
         #self.hdf5_dir = args.c
 
+        #
+        # Set up the UI
+        #
+        super(cheetah_gui, self).__init__()
+        self.ui = UI.cheetahgui_ui.Ui_MainWindow()
+        self.ui.setupUi(self)
+        self.ui.menuBar.setNativeMenuBar(False)
+        self.table = self.ui.table_status
+        self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
+        self.table.setSortingEnabled(True)
+
 
         # Experiment selector (if not already in a gui directory)
         if not os.path.isfile('crawler.config'):
@@ -608,17 +721,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.lastini = self.config['cheetahini']
         self.lasttag = self.config['cheetahtag']
 
-
-        #
-        # Set up the UI
-        #
-        super(cheetah_gui, self).__init__()
-        self.ui = UI.cheetahgui_ui.Ui_MainWindow()
-        self.ui.setupUi(self)
-        self.ui.menuBar.setNativeMenuBar(False)
-        self.table = self.ui.table_status
-        self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
-        self.table.setSortingEnabled(True)
 
 
         # Connect front panel buttons to actions
