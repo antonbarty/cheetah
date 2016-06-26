@@ -279,8 +279,6 @@
     </property>
     <addaction name="menu_file_command"/>
     <addaction name="menu_file_startcrawler"/>
-    <addaction name="menu_file_refreshtable"/>
-    <addaction name="menu_file_autorefresh"/>
     <addaction name="menu_file_newgeometry"/>
     <addaction name="separator"/>
     <addaction name="menu_file_quit"/>
@@ -324,7 +322,9 @@
     <addaction name="menu_powder_blank_det"/>
     <addaction name="menu_powder_peaks_hits"/>
     <addaction name="menu_powder_peaks_blank"/>
+    <addaction name="separator"/>
     <addaction name="menu_powder_darkcal"/>
+    <addaction name="menu_powder_copydarkcal"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -418,7 +418,7 @@
   </action>
   <action name="menu_cheetah_relabel">
    <property name="text">
-    <string>Label or relable dataset</string>
+    <string>Label or relabel dataset</string>
    </property>
   </action>
   <action name="menu_cheetah_autorun">
@@ -534,6 +534,11 @@
   <action name="menu_utilities_calibman">
    <property name="text">
     <string>calibman (pcds)</string>
+   </property>
+  </action>
+  <action name="menu_powder_copydarkcal">
+   <property name="text">
+    <string>Copy darkcal.h5 to calib/darkcal</string>
    </property>
   </action>
  </widget>

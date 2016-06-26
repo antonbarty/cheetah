@@ -36,10 +36,13 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     # Launch a subprocess (eg: viewer or analysis script) without blocking the GUI
     # Separate routine makes it easy change this globally if needed
     #
-    def spawn_subprocess(self, cmdarr):
+    def spawn_subprocess(self, cmdarr, wait=False):
         command = str.join(' ', cmdarr)
         print(command)
-        subprocess.Popen(cmdarr)
+        if wait:
+            subprocess.run(cmdarr)
+        else:
+            subprocess.Popen(cmdarr)
 
 
     #
@@ -57,6 +60,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         if len(glob.glob(file)) != 0:
             cmdarr = ['cxiview.py', '-g', self.config['geometry'], '-e', field, '-i', file]
             self.spawn_subprocess(cmdarr)
+        else:
+            print("File does not seem to exist:")
+            print(file)
     #end show_selected_images()
 
 
@@ -189,6 +195,46 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         return exptlist
     #end list_experiments
 
+    #
+    #   Set up a new experiment based on template and selected directory
+    #   Uses LCLS schema; will need modification to run anywhere else; do this later
+    #
+    def setup_new_experiment(self):
+        dir = cfel_file.dialog_pickfile(directory=True)
+        if dir == '':
+            self.exit_gui()
+        print('Selected directory: ')
+        os.chdir(dir)
+
+        #   Deduce experiment number, etc using de-referenced paths
+		#   Assumes the file path follows the pattern:   /reg/d/psdm/cxi/cxij4915/scratch/...
+        realdir = os.getcwd()
+
+        #   Now for some LCLS-specific stuff
+        ss = realdir.split('/')
+        ss = ss[1:]
+        print(ss)
+
+        ss[1] = 'd'
+        ss[2] = 'psdm'
+        instr = ss[3]
+        expt = ss[4]
+        xtcdir = '/' + str.join('/', ss[0:5]) + '/xtc'
+        userdir = '/' + str.join('/', ss) + '/'
+
+        print('    Relative path: ', dir)
+        print('    Absolute path: ', realdir)
+        print('    Instrument: ', instr)
+        print('    Experiment: ', expt)
+        print('    XTC directory: ', xtcdir)
+        print('    Output directory: ', userdir)
+
+    # Unpack template
+    #print, '>---------------------<'
+    #print, 'Extracting template...'
+    #cmd = 'tar -xf /reg/g/cfel/cheetah/template.tar'
+    #print, cmd
+    #spawn, cmd
 
     #
     #   Select an experiment, or find a new one
@@ -221,6 +267,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             return dir
 
         elif gui['action'] == 'setup_new':
+            self.setup_new_experiment()
             print('Set up new experiment not yet working :-(')
             self.exit_gui()
 
@@ -271,7 +318,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             print('------------ Start Cheetah process script ------------')
             cmdarr = [self.config['process'], run, inifile, dataset]
             self.spawn_subprocess(cmdarr)
-            print('------------ Finish Cheetah process script ------------')
 
             # Format directory string
             dir = 'r{:04d}'.format(int(run))
@@ -295,13 +341,16 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
                 dataset_txt['DatasetID'].append(dataset)
                 dataset_txt['Directory'].append(dir)
                 dataset_txt['iniFile'].append(inifile)
-
+            print('------------ Finish Cheetah process script ------------')
 
         # Sort dataset file to keep it in order
+
 
         # Save datasets file
         keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
         cfel_file.dict_to_csv('datasets.csv', dataset_txt, keys_to_save)
+
+
     #end run_cheetah()
 
 
@@ -341,7 +390,50 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
 
     def relabel_dataset(self):
-        print("Relabel dataset selected")
+
+        # Simple dialog box: http: // www.tutorialspoint.com / pyqt / pyqt_qinputdialog_widget.htm
+        text, ok = PyQt4.QtGui.QInputDialog.getText(self, 'Change dataset label', 'New label:')
+        if ok == False:
+            return
+        newlabel = str(text)
+        print('New label is: ', newlabel)
+
+        dataset_txt = cfel_file.csv_to_dict('datasets.csv')
+
+        # Label all selected runs
+        runs = self.selected_runs()
+        for i, run in enumerate(runs['run']):
+
+            # Format directory string
+            olddir = runs['directory'][i]
+            newdir = 'r{:04d}'.format(int(run))
+            newdir += '-' + newlabel
+
+            # Update Dataset and Cheetah status in table
+            table_row = runs['row'][i]
+            self.table.setItem(table_row, 1, PyQt4.QtGui.QTableWidgetItem(newlabel))
+            self.table.setItem(table_row, 5, PyQt4.QtGui.QTableWidgetItem(newdir))
+
+            # Update dataset file
+            if run in dataset_txt['Run']:
+                ds_indx = dataset_txt['Run'].index(run)
+                dataset_txt['DatasetID'][ds_indx] = newlabel
+                dataset_txt['Directory'][ds_indx] = newdir
+            else:
+                dataset_txt['Run'].append(run)
+                dataset_txt['DatasetID'].append(newlabel)
+                dataset_txt['Directory'].append(newdir)
+
+            # Rename the directory
+            cmdarr = ['mv', self.config['hdf5dir']+'/'+olddir, self.config['hdf5dir']+'/'+newdir]
+            self.spawn_subprocess(cmdarr)
+
+        # Sort dataset file to keep it in order
+        # Save datasets file
+        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
+        cfel_file.dict_to_csv('datasets.csv', dataset_txt, keys_to_save)
+
+
 
     def autorun(self):
         print("Autorun selected")
@@ -361,6 +453,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     def maskmaker(self):
         print("Mask maker selected")
+        print("Talk to Andrew Morgan to add his mask maker")
 
     def badpix_from_darkcal(self):
         print("Badpix from darkcal selected")
@@ -436,9 +529,17 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     def show_darkcal(self):
         file = '*detector0-darkcal.h5'
         field = 'data/data'
-        #file = '*detector0-class0-sum.h5'
-        #field = 'data/non_assembled_raw'
         self.show_selected_images(file, field)
+
+    def copy_darkcal(self):
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+        path = runs['path'][0] + '*detector0-darkcal.h5'
+        for dkcal in glob.iglob(path):
+            cmdarr = ['cp', dkcal, '../calib/darkcal/.']
+            self.spawn_subprocess(cmdarr)
+
 
 
     #
@@ -561,6 +662,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_powder_peaks_hits.triggered.connect(self.show_powder_peaks_hits)
         self.ui.menu_powder_peaks_blank.triggered.connect(self.show_powder_peaks_blanks)
         self.ui.menu_powder_darkcal.triggered.connect(self.show_darkcal)
+        self.ui.menu_powder_copydarkcal.triggered.connect(self.copy_darkcal)
 
         # Log menu actions
         self.ui.menu_log_batch.triggered.connect(self.view_batch_log)
@@ -602,10 +704,10 @@ if __name__ == '__main__':
     #
     #   Use parser to process command line arguments
     #    
-    parser = argparse.ArgumentParser(description='CFEL cheetah crawler')
-    parser.add_argument("-l", default="none", help="Location (LCLS, P11)")
-    parser.add_argument("-d", default="none", help="Data directory (XTC, CBF, etc)")
-    parser.add_argument("-c", default="none", help="Cheetah HDF5 directory")
+    parser = argparse.ArgumentParser(description='CFEL cheetah GUI')
+    #parser.add_argument("-l", default="none", help="Location (LCLS, P11)")
+    #parser.add_argument("-d", default="none", help="Data directory (XTC, CBF, etc)")
+    #parser.add_argument("-c", default="none", help="Cheetah HDF5 directory")
     args = parser.parse_args()
     
     print("----------")    
@@ -613,12 +715,6 @@ if __name__ == '__main__':
     print(args)
     print("----------")    
     
-    # This bit may be irrelevent if we can make parser.parse_args() require this field    
-    #if args.l == "none" or args.d == "none" or args.c == "none":
-    #    print('Usage: cheetah-gui.py')
-    #    sys.exit()
-    #endif        
-
 
     #
     #   Spawn the viewer

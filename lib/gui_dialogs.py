@@ -37,7 +37,6 @@ class expt_select_gui(PyQt4.QtGui.QDialog):
         self.button1.clicked.connect(self.button1_function)
         self.button2 = PyQt4.QtGui.QPushButton("Set up new experiment",self)
         self.button2.clicked.connect(self.button2_function)
-        self.button2.setEnabled(False)
         self.button3 = PyQt4.QtGui.QPushButton("Find a different experiment",self)
         self.button3.clicked.connect(self.button3_function)
         self.button4 = PyQt4.QtGui.QPushButton("Cancel",self)
@@ -103,6 +102,7 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
         super(run_cheetah_gui, self).__init__(parent)
 
         inifile_list = dialog_info['inifile_list']
+        inifile_list = sorted(inifile_list)
         lastini = dialog_info['lastini']
         lasttag = dialog_info['lasttag']
 

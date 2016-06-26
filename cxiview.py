@@ -55,8 +55,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.lambd = 1e-10
         
         # Set title 
-        #title = str(self.img_index)+'/'+ str(self.num_lines) + ' - ' + self.filename
-        #file_str = self.event_list['filename'][self.img_index]
         file_str = os.path.basename(self.event_list['filename'][self.img_index])
         title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
         self.ui.jumpToLineEdit.setText(str(self.img_index))
@@ -67,29 +65,29 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
 
-        # Histogram equalisation (saturate top 0.1% of pixels)   
-        if self.ui.actionHistogram_clip.isChecked() == True:
-            bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
-        else:
-            top = numpy.amax(img_data.ravel())
+        # Auto-scale the image
+        if self.ui.actionAutoscale.isChecked():
+            if self.ui.actionHistogram_clip.isChecked() == True:
+                # Histogram equalisation (saturate top 0.1% of pixels)
+                bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
+            else:
+                # Scale from 0 to maximum intensity value
+                top = numpy.amax(img_data.ravel())
 
-        # Histogram autoscale?
-        if not self.ui.actionDisbale_autoscale.isChecked():
             self.ui.imageView.setLevels(0,top)
-        
+        #end autoscale
+
         # Set the histogram widget scale bar to behave politely and not jump around
         # http://www.pyqtgraph.org/documentation/graphicsItems/histogramlutitem.html#pyqtgraph.HistogramLUTItem
         if self.ui.actionAuto_scale_levels.isChecked() == True:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(-100, 10000, padding=0.1)
+            hist.setHistogramRange(-100, 32768, padding=0.05)
         else:
             hist = self.ui.imageView.getHistogramWidget()
             hist.setHistogramRange(numpy.amin(img_data.ravel()), numpy.amax(img_data.ravel()), padding=0.1)
+        #end histogramscale
 
-            self.ui.actionDisbale_autoscale
 
-        # Static level
-        #self.ui.imageView.setLevels(0,1000) #, update=True)
 
 
         # Edit the colour table (unduly complicated - edit the editor rather than load a table of values)
@@ -385,17 +383,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
 
-    def action_histclip(self, state):
-        self.histogram_clip = state        
-        self.draw_things()
-    #end action_histclip()
-        
-    def action_autolevels(self, state):
-        self.auto_levels = state
-        self.draw_things()
-    #end action_autolevels()
-
-
 
     #
     # Mouse clicked somewhere in the window
@@ -581,18 +568,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.show_resolution_rings = False
         self.ui.resolutionCheckBox.setChecked(False)
         self.ui.resolutionCheckBox.stateChanged.connect(self.showhideresrings)
-        #self.update_resolution_rings()
 
 
-        self.histogram_clip = True
+        self.ui.actionAutoscale.setChecked(True)
         self.ui.actionHistogram_clip.setChecked(True)
-        self.ui.actionHistogram_clip.triggered.connect(self.action_histclip)
-
-        self.auto_levels = True
         self.ui.actionAuto_scale_levels.setChecked(True)
-        self.ui.actionAuto_scale_levels.triggered.connect(self.action_autolevels)
-
-        self.ui.actionDisbale_autoscale.setChecked(False)
+        self.ui.actionHistogram_clip.triggered.connect(self.draw_things)
+        self.ui.actionAuto_scale_levels.triggered.connect(self.draw_things)
 
         self.ui.actionSave_image.triggered.connect(self.action_save_png)
         self.ui.actionRefresh_file_list.triggered.connect(self.action_update_files)
@@ -627,13 +609,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
 
-        # Scale QtGraph histogram to not auto-range
-        #qt_Histogram = self.ui.imageView.ui.HistogramLUTItem()
-        #qt_Histogram.autoHistogramRange()
-        #qt_Histogram.setHistogramRange(-100, 10000, padding=0.1)
-        #self.ui.imageView.ui.HistogramLUTItem().setHistogramRange(-100, 10000, padding=0.1)
-        self.ui.imageView.ui.histogram.setHistogramRange(-100, 10000, padding=0.1)
-                
         self.draw_things()
         #self.ui.imageView.imageItem.setZoom(1)
         self.ui.imageView.imageItem.setAutoDownsample(False)     # True/False
