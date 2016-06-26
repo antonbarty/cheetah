@@ -361,8 +361,8 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             dir = os.path.dirname(cfile)
 
             # Update the past experiments list
-            expfile = os.path.expanduser('~/.cheetah-crawler')
             past_expts.insert(0,dir)
+            expfile = os.path.expanduser('~/.cheetah-crawler')
             with open(expfile, mode='w') as f:
                 f.write('\n'.join(past_expts))
 
@@ -371,7 +371,13 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         elif gui['action'] == 'setup_new':
             self.setup_new_experiment()
             cwd = os.getcwd()
-            return cwd + '/cheetah/gui'
+            dir = cwd + '/cheetah/gui'
+
+            past_expts.insert(0,dir)
+            expfile = os.path.expanduser('~/.cheetah-crawler')
+            with open(expfile, mode='w') as f:
+                f.write('\n'.join(past_expts))
+            return dir
 
         else:
             print("Catch you another time.")
