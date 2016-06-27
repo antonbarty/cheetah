@@ -85,13 +85,12 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         # Fix some legacy issues with old crawler.txt file format (different key names in crawler.txt)
         if not 'Run' in status.keys() and '#Run' in status.keys():
-            print(status.keys())
             status.update({'Run': status['#Run']})
             status.update({'H5Directory': status['H5 Directory']})
             del status['#Run']
             del status['H5 Directory']
-            status['fieldnames'] = list(status.keys())
-
+            status['fieldnames'][status['fieldnames'].index('#Run')] = 'Run'
+            status['fieldnames'][status['fieldnames'].index('H5 Directory')] = 'H5Directory'
 
         # Remember table for later use in other functions
         ncols = len(list(status.keys()))-1
@@ -109,7 +108,8 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         for col, key in enumerate(status['fieldnames']):
             for row, item in enumerate(status[key]):
 
-                if col in numbercols:
+                #if col in numbercols:
+                if item.isnumeric():
                     newitem = PyQt4.QtGui.QTableWidgetItem()
                     newitem.setData(PyQt4.QtCore.Qt.DisplayRole, float(item))
                 else:
@@ -643,10 +643,11 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         runs = self.selected_runs()
         if len(runs['run']) == 0:
             return;
-        path = runs['path'][0] + '*detector0-darkcal.h5'
-        for dkcal in glob.iglob(path):
-            cmdarr = ['cp', dkcal, '../calib/darkcal/.']
-            self.spawn_subprocess(cmdarr)
+        for path in runs['path']:
+            path += '*detector0-darkcal.h5'
+            for dkcal in glob.iglob(path):
+                cmdarr = ['cp', dkcal, '../calib/darkcal/.']
+                self.spawn_subprocess(cmdarr)
 
 
 

@@ -230,7 +230,13 @@ def csv_to_dict(filename):
 
         f.close()
 
-    result.update({'fieldnames' : list(reader.fieldnames)})
+    # Strip blanks from field names
+    fieldnames = list(reader.fieldnames)
+    for item, field in enumerate(fieldnames):
+        fieldnames[item] = field.strip()
+
+    # Add field names to dict
+    result.update({'fieldnames' : fieldnames})
 
     return result
 #end csv_to_dict
