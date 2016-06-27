@@ -8,7 +8,7 @@ import os
 import sys
 import csv
 import h5py
-import fnmatch
+import glob
 import numpy as np
 
 
@@ -16,19 +16,6 @@ import numpy as np
 import PyQt4
 import PyQt4.QtGui
 qtApp = PyQt4.QtGui.QApplication(sys.argv)
-
-
-def recursive_glob(pattern):
-
-    pattern_part1 = os.path.dirname(pattern)
-    pattern_part2 = os.path.basename(pattern)
-
-    matches = []
-    for root, dirnames, filenames in os.walk(pattern_part1):
-        for filename in fnmatch.filter(filenames, pattern_part2):
-            matches.append(os.path.join(root, filename))
-
-    return matches
 
 
 def dialog_pickfile(write=False, directory=False, multiple=False, path=False, filter='*.*'):
@@ -233,7 +220,7 @@ def csv_to_dict(filename):
     # Open CSV file
     result = {}
 
-    with open(filename, 'r') as f:
+    with open(filename, 'r', newline='') as f:
 
         reader = csv.DictReader(f)
 
@@ -431,7 +418,7 @@ def list_events(pattern='./*.cxi', field='data/data'):
         field = 'data/data'
 
     # Find all files matching pattern
-    files = recursive_glob(pattern)
+    files = glob.glob(pattern, recursive=True)
     if len(files) == 0:
         print('No files found matching pattern: ', pattern)
 
@@ -448,7 +435,7 @@ def list_events(pattern='./*.cxi', field='data/data'):
 
 
     #print('Found files:')
-    for filename in recursive_glob(pattern):
+    for filename in glob.iglob(pattern, recursive=True):
 
         basename = os.path.basename(filename)
         dirname = os.path.dirname(filename)

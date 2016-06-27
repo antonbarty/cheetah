@@ -129,7 +129,7 @@ def crawler_merge():
                 nhits = cheetah['hits'][i].strip()
                 hitrate = cheetah['hitrate%'][i].strip()
 
-            if unicode(hitrate.replace('.', '', 1)).isnumeric():
+            if hitrate.replace('.', '', 1).isnumeric():
                 hitrate = '{:0.2f}'.format(float(hitrate))
 
         # CrystFEL stuff is not yet included

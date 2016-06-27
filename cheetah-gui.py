@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #   cheetah-gui
 #   A python/Qt replacement for the IDL cheetah GUI
@@ -44,7 +44,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             return
 
         if wait:
-            subprocess.call(cmdarr)
+            subprocess.run(cmdarr)
         else:
             subprocess.Popen(cmdarr)
 
@@ -58,8 +58,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # No run selected
         if len(runs['run']) == 0:
             return
-
-        print type(runs['path'][0])  
         file = runs['path'][0] + filepat
 
         # Display if some file matches pattern (avoids error when no match)
@@ -160,9 +158,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         directory_out = []
         for row in rows:
             #print("Row: ", row)
-            run = str(self.table.item(row,0).text())
-            dataset = str(self.table.item(row,1).text())
-            directory = str(self.table.item(row,5).text())
+            run = self.table.item(row,0).text()
+            dataset = self.table.item(row,1).text()
+            directory = self.table.item(row,5).text()
             #print("Run is: ", run)
             #print("Dataset is: ", dataset)
             #print("Directory is: ", directory)
@@ -359,8 +357,8 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
                 print('Selection canceled')
                 self.exit_gui()
 
-            basename = os.path.basename(str(cfile))
-            dir = os.path.dirname(str(cfile))
+            basename = os.path.basename(cfile)
+            dir = os.path.dirname(cfile)
 
             # Update the past experiments list
             past_expts.insert(0,dir)
@@ -841,7 +839,7 @@ if __name__ == '__main__':
     #
     app.exit()
     
-    # This function does the following in an attempt to "safely" terminate the process:
+    # This function does the following in an attempt to ‘safely’ terminate the process:
     #   Invoke atexit callbacks
     #   Close all open file handles
     os._exit(ret)

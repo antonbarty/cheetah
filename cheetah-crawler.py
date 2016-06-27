@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 #   cxiview
 #   A python/Qt replacement for the IDL cheetah crawler
@@ -137,7 +137,7 @@ if __name__ == '__main__':
     #
     app.exit()
     
-    # This function does the following in an attempt to "safely" terminate the process:
+    # This function does the following in an attempt to ‘safely’ terminate the process:
     #   Invoke atexit callbacks
     #   Close all open file handles
     os._exit(ret)
