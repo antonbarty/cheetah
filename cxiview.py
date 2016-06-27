@@ -1,4 +1,4 @@
-#!/usr/bin/env python3
+#!/usr/bin/env python
 #
 #   CXIview
 #   A python/Qt viewer for .cxi files (and other files output by Cheetah)
@@ -401,7 +401,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             resolution = 1e10*self.lambd/(2.0*numpy.sin(0.5*numpy.arctan(radius_in_m/self.camera_z_m)))
 
             self.ui.statusBar.setText(
-                'Last clicked pixel:     x: %4i     y: %4i     value: %4i     z: %.2f mm     resolution: %4.2f Å' % (
+                'Last clicked pixel:     x: %4i     y: %4i     value: %4i     z: %.2f mm     resolution: %4.2f A' % (
                 x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse], self.camera_z_mm, resolution))
 
     #end mouse_clicked()
@@ -670,7 +670,7 @@ if __name__ == '__main__':
     #
     app.exit()
     
-    # This function does the following in an attempt to ‘safely’ terminate the process:
+    # This function does the following in an attempt to "safely" terminate the process:
     #   Invoke atexit callbacks
     #   Close all open file handles
     os._exit(ret)
