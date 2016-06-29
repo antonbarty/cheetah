@@ -123,6 +123,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.table.setHorizontalHeaderLabels(status['fieldnames'])
         self.table.verticalHeader().setVisible(False)
         #self.table.resizeColumnsToContents()
+        #self.table.horizontalHeader().setSectionResizeMode(PyQt4.QtGui.QHeaderView.Interactive)
         self.table.resizeRowsToContents()
         self.table.show()
 
@@ -415,7 +416,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         if ok == False:
             return
 
-        dataset_txt = cfel_file.csv_to_dict('datasets.csv')
+        dataset_csv = cfel_file.csv_to_dict('datasets.csv')
 
         self.lasttag = dataset
         self.lastini = inifile
@@ -439,16 +440,16 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             self.table.setItem(table_row, 3, PyQt4.QtGui.QTableWidgetItem('Submitted'))
 
             # Update dataset file
-            if run in dataset_txt['Run']:
-                ds_indx = dataset_txt['Run'].index(run)
-                dataset_txt['DatasetID'][ds_indx] = dataset
-                dataset_txt['Directory'][ds_indx] = dir
-                dataset_txt['iniFile'][ds_indx] = inifile
+            if run in dataset_csv['Run']:
+                ds_indx = dataset_csv['Run'].index(run)
+                dataset_csv['DatasetID'][ds_indx] = dataset
+                dataset_csv['Directory'][ds_indx] = dir
+                dataset_csv['iniFile'][ds_indx] = inifile
             else:
-                dataset_txt['Run'].append(run)
-                dataset_txt['DatasetID'].append(dataset)
-                dataset_txt['Directory'].append(dir)
-                dataset_txt['iniFile'].append(inifile)
+                dataset_csv['Run'].append(run)
+                dataset_csv['DatasetID'].append(dataset)
+                dataset_csv['Directory'].append(dir)
+                dataset_csv['iniFile'].append(inifile)
             print('------------ Finish Cheetah process script ------------')
 
         # Sort dataset file to keep it in order
@@ -456,9 +457,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         # Save datasets file
         keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
-        cfel_file.dict_to_csv('datasets.csv', dataset_txt, keys_to_save)
-
-
+        cfel_file.dict_to_csv('datasets.csv', dataset_csv, keys_to_save)
     #end run_cheetah()
 
 
@@ -506,7 +505,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         newlabel = str(text)
         print('New label is: ', newlabel)
 
-        dataset_txt = cfel_file.csv_to_dict('datasets.csv')
+        dataset_csv = cfel_file.csv_to_dict('datasets.csv')
 
         # Label all selected runs
         runs = self.selected_runs()
@@ -514,32 +513,38 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
             # Format directory string
             olddir = runs['directory'][i]
-            newdir = 'r{:04d}'.format(int(run))
-            newdir += '-' + newlabel
+            newdir = '---'
 
-            # Update Dataset and Cheetah status in table
+            if olddir != '---':
+                newdir = 'r{:04d}'.format(int(run))
+                newdir += '-' + newlabel
+
+            # Update Dataset in table
             table_row = runs['row'][i]
             self.table.setItem(table_row, 1, PyQt4.QtGui.QTableWidgetItem(newlabel))
             self.table.setItem(table_row, 5, PyQt4.QtGui.QTableWidgetItem(newdir))
 
             # Update dataset file
-            if run in dataset_txt['Run']:
-                ds_indx = dataset_txt['Run'].index(run)
-                dataset_txt['DatasetID'][ds_indx] = newlabel
-                dataset_txt['Directory'][ds_indx] = newdir
+            if run in dataset_csv['Run']:
+                ds_indx = dataset_csv['Run'].index(run)
+                dataset_csv['DatasetID'][ds_indx] = newlabel
+                dataset_csv['Directory'][ds_indx] = newdir
             else:
-                dataset_txt['Run'].append(run)
-                dataset_txt['DatasetID'].append(newlabel)
-                dataset_txt['Directory'].append(newdir)
+                dataset_csv['Run'].append(run)
+                dataset_csv['DatasetID'].append(newlabel)
+                dataset_csv['Directory'].append(newdir)
+                dataset_csv['iniFile'].append('---')
 
             # Rename the directory
-            cmdarr = ['mv', self.config['hdf5dir']+'/'+olddir, self.config['hdf5dir']+'/'+newdir]
-            self.spawn_subprocess(cmdarr)
+            if olddir != '---':
+                cmdarr = ['mv', self.config['hdf5dir']+'/'+olddir, self.config['hdf5dir']+'/'+newdir]
+                self.spawn_subprocess(cmdarr)
+
 
         # Sort dataset file to keep it in order
         # Save datasets file
         keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
-        cfel_file.dict_to_csv('datasets.csv', dataset_txt, keys_to_save)
+        cfel_file.dict_to_csv('datasets.csv', dataset_csv, keys_to_save)
 
 
 
@@ -709,7 +714,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.menuBar.setNativeMenuBar(False)
         self.table = self.ui.table_status
-        self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
+        #self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
+        self.table.horizontalHeader().setDefaultSectionSize(75)
+        self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Interactive)
         self.table.setSortingEnabled(True)
 
 

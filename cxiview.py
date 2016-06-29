@@ -34,27 +34,32 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     def draw_things(self):
         
-        # Retrieve CXI file data all at once
-        # (Saves opening and closing file many times)
-        #cxi = cfel_file.read_cxi(self.filename, self.img_index,  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
-        #cxi = cfel_file.read_cxi(self.event_list['filename'][self.img_index], self.event_list['event'][self.img_index],  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
+        # Retrieve CXI file data all at once (saves opening and closing file many times)
         cxi = cfel_file.read_event(self.event_list, self.img_index,  data=True, photon_energy=True, camera_length=True, mask=self.show_masks, peaks=self.show_found_peaks)
 
 
+        # Use command line eV if provided
+        if self.default_eV != 'None':
+            self.photon_energy = self.default_eV
+        else:
+            self.photon_energy = cxi['photon_energy_eV']
 
-        # Retrieve resolution related stuff
-        self.photon_energy = cxi['photon_energy_eV']
-        self.camera_length = cxi['EncoderValue']
-        self.camera_length *= 1e-3
-        self.camera_z_m = (self.camera_length + self.geometry['coffset'])
+        # Use command line camera distance if provided
+        if self.default_z != 'None':
+            self.camera_z_m = self.default_z
+        else:
+            self.camera_length = cxi['EncoderValue']
+            self.camera_length *= 1e-3
+            self.camera_z_m = (self.camera_length + self.geometry['coffset'])
         self.camera_z_mm = self.camera_z_m * 1e3
 
-        if (self.photon_energy > 0):
+
+        if (self.photon_energy > 0 and self.photon_energy != numpy.nan):
             self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * self.photon_energy)
         else:
-            self.lambd = 1e-10
+            self.lambd = numpy.nan
         
-        # Set title 
+        # Set window title
         file_str = os.path.basename(self.event_list['filename'][self.img_index])
         title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
         self.ui.jumpToLineEdit.setText(str(self.img_index))
@@ -64,6 +69,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         img_data = cxi['data']
         self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
+
 
         # Auto-scale the image
         if self.ui.actionAutoscale.isChecked():
@@ -472,6 +478,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.geom_filename = args.g
         self.img_file_pattern = args.i
         self.img_h5_field = args.e
+        self.default_z = args.z
+        self.default_eV = args.v
 
         #
         # Set up the UI
@@ -637,8 +645,8 @@ if __name__ == '__main__':
     parser.add_argument("-p", default=False, help="Circle peaks by default")
     parser.add_argument("-l", default='None', help="Read event list")
     #parser.add_argument("-s", default='None', help="Read stream file")
-    #parser.add_argument("-z", default='50e-3', help="Detector distance (m)")
-    #parser.add_argument("-v", default='8000', help="Photon energy (eV)")
+    parser.add_argument("-z", default='None', help="Detector distance (m)")
+    parser.add_argument("-v", default='None', help="Photon energy (eV)")
     #parser.add_argument("-x", default='110e-6', help="Detector pixel size (m)")
     args = parser.parse_args()
     

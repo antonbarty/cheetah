@@ -16,6 +16,21 @@ def crawler_merge():
 
 
     #
+    #   Fix legacy issue with old datasets.txt format the first time we encounter it
+    #
+    if os.path.exists('datasets.txt') and not os.path.exists('datasets.csv'):
+        print('Updating old datasets.txt format to new datasets.csv format')
+        oldstyle = cfel_file.csv_to_dict('datasets.txt')
+
+        oldstyle.update({'Run' : oldstyle['# Run']})
+        oldstyle.update({'iniFile' : ['---']*len(oldstyle['Run'])})
+        del oldstyle['# Run']
+
+        keys_to_save = ['Run', 'DatasetID','Directory','iniFile']
+        cfel_file.dict_to_csv('datasets.csv', oldstyle, keys_to_save)
+
+
+    #
     #   Read .csv files
     #
     data = cfel_file.csv_to_dict('data_status.csv')
