@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1436</width>
-    <height>855</height>
+    <width>1400</width>
+    <height>1200</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -318,7 +318,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1436</width>
+     <width>1400</width>
      <height>22</height>
     </rect>
    </property>
@@ -363,6 +363,7 @@
     <addaction name="actionAutoscale"/>
     <addaction name="actionHistogram_clip"/>
     <addaction name="actionAuto_scale_levels"/>
+    <addaction name="menu_view_photonconversion"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuColours"/>
@@ -442,6 +443,11 @@
    </property>
    <property name="text">
     <string>Auto-scale image</string>
+   </property>
+  </action>
+  <action name="menu_view_photonconversion">
+   <property name="text">
+    <string>Photon count conversion</string>
    </property>
   </action>
  </widget>

@@ -769,7 +769,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
                 os.chdir(expdir)
             except:
                 print("Uh oh - it looks like that directory does not exist any more.")
-                print("Maybe it has been deleted or moved.  Plesae check it still exists.")
+                print("It may have been moved or deleted.  Plesae check it still exists.")
                 self.exit_gui()
 
 

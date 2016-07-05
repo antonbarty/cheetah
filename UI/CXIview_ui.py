@@ -25,7 +25,7 @@ except AttributeError:
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName(_fromUtf8("MainWindow"))
-        MainWindow.resize(1436, 855)
+        MainWindow.resize(1400, 1200)
         self.centralwidget = QtGui.QWidget(MainWindow)
         self.centralwidget.setObjectName(_fromUtf8("centralwidget"))
         self.gridLayout = QtGui.QGridLayout(self.centralwidget)
@@ -159,7 +159,7 @@ class Ui_MainWindow(object):
         self.gridLayout.addLayout(self.verticalLayout, 1, 0, 1, 1)
         MainWindow.setCentralWidget(self.centralwidget)
         self.menuBar = QtGui.QMenuBar(MainWindow)
-        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1436, 22))
+        self.menuBar.setGeometry(QtCore.QRect(0, 0, 1400, 22))
         self.menuBar.setObjectName(_fromUtf8("menuBar"))
         self.menuFile = QtGui.QMenu(self.menuBar)
         self.menuFile.setObjectName(_fromUtf8("menuFile"))
@@ -202,6 +202,8 @@ class Ui_MainWindow(object):
         self.actionAutoscale.setCheckable(True)
         self.actionAutoscale.setChecked(True)
         self.actionAutoscale.setObjectName(_fromUtf8("actionAutoscale"))
+        self.menu_view_photonconversion = QtGui.QAction(MainWindow)
+        self.menu_view_photonconversion.setObjectName(_fromUtf8("menu_view_photonconversion"))
         self.menuFile.addAction(self.actionRefresh_file_list)
         self.menuFile.addAction(self.actionLoad_geometry)
         self.menuFile.addAction(self.actionSave_image)
@@ -214,6 +216,7 @@ class Ui_MainWindow(object):
         self.menuView.addAction(self.actionAutoscale)
         self.menuView.addAction(self.actionHistogram_clip)
         self.menuView.addAction(self.actionAuto_scale_levels)
+        self.menuView.addAction(self.menu_view_photonconversion)
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuColours.menuAction())
         self.menuBar.addAction(self.menuCrystals.menuAction())
@@ -255,5 +258,6 @@ class Ui_MainWindow(object):
         self.actionHistogram_clip.setText(_translate("MainWindow", "Histogram clip", None))
         self.actionAuto_scale_levels.setText(_translate("MainWindow", "Lock histogram scale", None))
         self.actionAutoscale.setText(_translate("MainWindow", "Auto-scale image", None))
+        self.menu_view_photonconversion.setText(_translate("MainWindow", "Photon count conversion", None))
 
 from pyqtgraph import ImageView
