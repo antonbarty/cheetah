@@ -62,7 +62,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Set window title
         file_str = os.path.basename(self.event_list['filename'][self.img_index])
         title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
+        self.setWindowTitle(title)
         self.ui.jumpToLineEdit.setText(str(self.img_index))
+
 
         # Extract image to display
         # http://www.pyqtgraph.org/documentation/graphicsItems/imageitem.html
@@ -208,9 +210,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.draw_resolution_rings()
 
 
-        # Set title
-        self.setWindowTitle(title)
-  
+
     #end draw_things()
     
 

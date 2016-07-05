@@ -256,7 +256,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         str1.append('<b>Experiment:</b> ' + str(expt))
         str1.append('<b>XTC directory:</b> ' + str(xtcdir))
         str1.append('<b>Output directory:</b> ' + str(userdir))
-        str1.append('<b>Relative path:</b> '+ str(dir))
+        #str1.append('<b>Relative path:</b> '+ str(dir))
         str2 = str.join('<br>', str1)
         msgBox.setText(str2)
 
@@ -352,6 +352,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             dir = gui['selected_expt']
             return dir
 
+
         elif gui['action'] == 'find':
             cfile = cfel_file.dialog_pickfile(filter='crawler.config')
             if cfile == '':
@@ -366,14 +367,15 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             expfile = os.path.expanduser('~/.cheetah-crawler')
             with open(expfile, mode='w') as f:
                 f.write('\n'.join(past_expts))
-
             return dir
+
 
         elif gui['action'] == 'setup_new':
             self.setup_new_experiment()
             cwd = os.getcwd()
             dir = cwd + '/cheetah/gui'
 
+            # Update the past experiments list
             past_expts.insert(0,dir)
             expfile = os.path.expanduser('~/.cheetah-crawler')
             with open(expfile, mode='w') as f:
@@ -383,8 +385,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         else:
             print("Catch you another time.")
             self.exit_gui()
+            return ''
 
-        return result
+
 
 
     #
@@ -675,26 +678,60 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     def parse_config(self):
         configfile = 'crawler.config'
+
+        # Double-check again that the file exists
+        if not os.path.isfile(configfile):
+            print("Uh oh - there does not seem to be a crawler.config file in this directory.")
+            print("Please check")
+            self.exit_gui()
+
         config= {}
         with open(configfile) as f:
             for line in f:
                 name, var = line.partition("=")[::2]
                 config[name.strip()] = var.strip()
 
-        #print("Cheetah configuration:")
-        #print(config)
+
+        # Trap some legacy case with fewer keys in file
+        if not 'cheetahini' in config.keys():
+            config.update({'cheetahini': 'darkcal.ini'})
+        if not 'cheetahtag' in config.keys():
+            config.update({'cheetahtag': 'darkcal'})
+
+
         return config
     #end parse_config
 
 
+
     #
-    #   Try to exit cleanly
+    #   Try to avoid the worst of the ugly Linux GUI layouts
+    #
+    def change_skins(self):
+
+        styles = PyQt4.QtGui.QStyleFactory.keys()
+        #print("Available Qt4 styles: ", styles)
+
+        style = styles[-1]
+        #print("Setting Qt4 style: ", style)
+
+        try:
+            PyQt4.QtGui.QApplication.setStyle(PyQt4.QtGui.QStyleFactory.create(style))
+        except:
+            print("Style not available:", style)
+    #end change_skins
+
+
+    #
+    #   Exit cleanly
     #
     def exit_gui(self):
         print("Bye bye.")
         app.exit()
         os._exit(1)
         sys.exit(1)
+    #end exit_gui
+
 
 
 
@@ -714,10 +751,12 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.setupUi(self)
         self.ui.menuBar.setNativeMenuBar(False)
         self.table = self.ui.table_status
-        #self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
         self.table.horizontalHeader().setDefaultSectionSize(75)
         self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Interactive)
+        #self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
         self.table.setSortingEnabled(True)
+        self.change_skins()
+
 
 
         # Experiment selector (if not already in a gui directory)
@@ -726,7 +765,12 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             print("Thank you.")
             print("Moving to working directory:")
             print(expdir)
-            os.chdir(expdir)
+            try:
+                os.chdir(expdir)
+            except:
+                print("Uh oh - it looks like that directory does not exist any more.")
+                print("Maybe it has been deleted or moved.  Plesae check it still exists.")
+                self.exit_gui()
 
 
         # Parse configuration file
@@ -735,6 +779,10 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.lastini = self.config['cheetahini']
         self.lasttag = self.config['cheetahtag']
 
+        # Update window title
+        dir = os.getcwd()
+        title = 'Cheetah GUI: ' + dir
+        self.setWindowTitle(title)
 
 
         # Connect front panel buttons to actions
@@ -834,8 +882,8 @@ if __name__ == '__main__':
 
     #
     #   Spawn the viewer
-    #        
-    app = PyQt4.QtGui.QApplication(sys.argv)    
+    #
+    app = PyQt4.QtGui.QApplication(sys.argv)
         
     ex = cheetah_gui(args)
     ex.show()
