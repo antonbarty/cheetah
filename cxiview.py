@@ -48,7 +48,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Photon energy - use command line eV if provided
         self.photon_energy_ok = False
         if self.default_eV != 'None':
-            self.photon_energy = self.default_eV
+            self.photon_energy = float(self.default_eV)
             self.photon_energy_ok = True
         else:
             self.photon_energy = cxi['photon_energy_eV']
@@ -66,7 +66,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Detector distance - use command line detector distance if provided
         self.detector_distance_ok = False
         if self.default_z != 'None':
-            self.detector_z_m = self.default_z
+            self.detector_z_m = float(self.default_z)
             self.detector_distance_ok = True
         else:
             detector_distance = cxi['EncoderValue']
@@ -120,7 +120,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Set the histogram widget scale bar to behave politely and not jump around
         if self.ui.actionAuto_scale_levels.isChecked() == True:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(-100, 16653, padding=0.05)
+            hist.setHistogramRange(-100, 16384, padding=0.05)
         else:
             hist = self.ui.imageView.getHistogramWidget()
             hist.setHistogramRange(numpy.amin(img_data.ravel()), numpy.amax(img_data.ravel()), padding=0.1)
@@ -514,22 +514,38 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Size of images (assume all images have the same size as frame 0)
         temp = cfel_file.read_event(self.event_list, 0, data=True)
-        print("Data shape: ", temp['data'].shape)
         self.slab_shape = temp['data'].shape
+        print("Data shape: ", self.slab_shape )
 
 
         # Load geometry
-        # read_geometry currently exits program on failure; add ability to work without geometry file.
-        self.geometry = cfel_geom.read_geometry(self.geom_filename)
-        self.geometry_ok = True
-        self.img_shape = self.geometry['shape']
-        self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
-        self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
-        self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
+        # read_geometry currently exits program on failure
+        if self.geom_filename != "":
+            self.geometry = cfel_geom.read_geometry(self.geom_filename)
+            self.geometry_ok = True
+            self.img_shape = self.geometry['shape']
+            self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
+            self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
+            self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
+        else:
+            self.geometry_ok = False
+            self.img_shape = self.slab_shape
+            self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
+            self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
+            self.mask_to_draw = numpy.zeros(self.img_shape + (3,), dtype=numpy.uint8)
+            # faking self.geometry is a hack to stop crashes down the line.  Fix more elegantly later
+            self.geometry = {
+                'x': numpy.zeros(self.img_shape).flatten(),
+                'y': numpy.zeros(self.img_shape).flatten(),
+                'r': numpy.zeros(self.img_shape).flatten(),
+                'dx': 1.0,
+                'coffset': 'nan',
+                'shape': self.slab_shape
+            }
 
 
         # Sanity check: Do geometry and data shape match?
-        if (temp['data'].flatten().shape != self.geometry['x'].shape):
+        if self.geometry_ok and (temp['data'].flatten().shape != self.geometry['x'].shape):
             print("Error: Shape of geometry and image data do not match")
             print('Data size: ', temp.data.flatten().shape)
             print('Geometry size: ', self.geometry['x'].shape)
@@ -637,11 +653,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         #self.ui.imageView.imageItem.clipToView(False)     # True/False
         #self.ui.imageView.imageItem.antialias(True)     # True/False
         self.ui.statusBar.setText('Ready')
-        
-        
-        
+
     #end __init()__
 #end cxiview
+
+
 
         
 #
@@ -653,25 +669,26 @@ if __name__ == '__main__':
     #   Use parser to process command line arguments
     #    
     parser = argparse.ArgumentParser(description='CFEL CXI file viewer')
-    parser.add_argument("-g", default="None", help="Geometry file (.geom/.h5)")
-    parser.add_argument("-i", default="None", help="Input file pattern (eg: *.cxi, LCLS*.h5)")
-    parser.add_argument("-e", default="None", help="HDF5 field to read")
-    parser.add_argument("-p", default=False, help="Circle peaks by default")
-    parser.add_argument("-l", default='None', help="Read event list")
-    #parser.add_argument("-s", default='None', help="Read stream file")
+    parser.add_argument("-g", default="", help="Geometry file (.geom/.h5)")
+    parser.add_argument("-i", default="", help="Input file pattern (eg: *.cxi, LCLS*.h5)")
+    parser.add_argument("-e", default="data/data", help="HDF5 field to read")
     parser.add_argument("-z", default='None', help="Detector distance (m)")
     parser.add_argument("-v", default='None', help="Photon energy (eV)")
+    parser.add_argument("-l", default='None', help="Read event list")
+    parser.add_argument("-p", default=False, help="Circle peaks by default")
+    #parser.add_argument("-s", default='None', help="Read stream file")
     #parser.add_argument("-x", default='110e-6', help="Detector pixel size (m)")
     args = parser.parse_args()
-    
+
+
     print("----------")    
     print("Parsed command line arguments")
     print(args)
     print("----------")    
     
     # This bit may be irrelevent if we can make parser.parse_args() require this field    
-    if args.i == "None" and args.g == "None":
-        print('Usage: CXIview.py -i data_file_pattern -g geom_file [-e HDF5 field]')
+    if args.i == "":
+        print('Usage: cxiview.py -i data_file_pattern [-g geom_file .geom/.h5] [-e HDF5 field] [-z Detector distance m] [-v photon energy eV]')
         sys.exit()
     #endif        
 
