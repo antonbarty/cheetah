@@ -322,10 +322,15 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
 
     # Peak list
     if peaks == True:
-        n_peaks = hdf5_fh['/entry_1/result_1/nPeaks'][frameID]
-        peakXPosRaw = hdf5_fh['/entry_1/result_1/peakXPosRaw'][frameID]
-        peakYPosRaw = hdf5_fh['/entry_1/result_1/peakYPosRaw'][frameID]
-        peak_xy = (peakXPosRaw.flatten(), peakYPosRaw.flatten())
+        try:
+            n_peaks = hdf5_fh['/entry_1/result_1/nPeaks'][frameID]
+            peakXPosRaw = hdf5_fh['/entry_1/result_1/peakXPosRaw'][frameID]
+            peakYPosRaw = hdf5_fh['/entry_1/result_1/peakYPosRaw'][frameID]
+            peak_xy = (peakXPosRaw.flatten(), peakYPosRaw.flatten())
+        except:
+            n_peaks = 0
+            peakXPosRaw = np.nan
+            peakYPosRaw = np.nan
     else:
         n_peaks = 0
         peakXPosRaw = np.nan
@@ -334,22 +339,30 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
 
     # Masks
     if mask == True:
-        mask_array = hdf5_fh['/entry_1/data_1/mask'][frameID, :, :]
+        try:
+            mask_array = hdf5_fh['/entry_1/data_1/mask'][frameID, :, :]
+        except:
+            mask_array = np.nan
     else:
         mask_array = np.nan
 
 
     # Photon energy
     if photon_energy == True:
-        photon_energy_eV = hdf5_fh['/LCLS/photon_energy_eV'][frameID]
-        #return photon_energy_eV
+        try:
+            photon_energy_eV = hdf5_fh['/LCLS/photon_energy_eV'][frameID]
+        except:
+            photon_energy_eV = 'nan'
     else:
         photon_energy_eV = 'nan'
 
 
     # Camera length
     if camera_length == True:
-        EncoderValue = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
+        try:
+            EncoderValue = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
+        except:
+            EncoderValue = 'nan'
     else:
         EncoderValue = 'nan'
 
