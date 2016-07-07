@@ -98,7 +98,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         if self.geometry_ok:
             self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
         else:
-            self.img_to_draw = img_data
+            self.img_to_draw = numpy.transpose(img_data)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
 
 
