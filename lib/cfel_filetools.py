@@ -86,14 +86,15 @@ def read_h5(filename='', field="/data/data"):
             return
 
 
-    # Open HDF5 file
-    fp = h5py.File(filename, 'r')
+    # Open HDF5 file, read specified field, clean up and exit
+    try:
+        with h5py.File(filename, 'r') as fp:
+            data = fp[field][:]
+            fp.close()
+    except:
+        print('Error reading field ', field, ' from ', filename)
+        data = []
 
-    # Read the specified field
-    data = fp[field][:]
-
-    # Close and clean up
-    fp.close()
 
     # return
     return data
@@ -267,13 +268,15 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
 
     elif event_list['format'][eventID] == 'cheetah_h5':
         data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
+        # Need to add reading of peaks, photon energy, detector distance
+        # Lower priority since this is an old file format
         event_data = {
             'data': data_array,
             'data_shape': data_array.shape,
             'mask': [0],
             'nframes': 1,
-            'EncoderValue': 0,
-            'photon_energy_eV': 0,
+            'EncoderValue': np.nan,
+            'photon_energy_eV': np.nan,
             'n_peaks': 0,
             'peakXPosRaw': [0],
             'peakYPosRaw': [0]
@@ -286,8 +289,8 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
             'data': data_array,
             'data_shape': data_array.shape,
             'nframes': 1,
-            'EncoderValue': 0,
-            'photon_energy_eV': 0,
+            'EncoderValue': np.nan,
+            'photon_energy_eV': np.nan,
         }
     #end generic_h5
 

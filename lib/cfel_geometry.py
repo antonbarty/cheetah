@@ -125,10 +125,10 @@ def read_pixelmap(filename):
 
     # Open HDF5 pixelmap file
     try:
-        fp = h5py.File(filename, 'r')
-        x = fp['x'][:]
-        y = fp['y'][:]
-        fp.close()
+        with h5py.File(filename, 'r') as fp:
+            x = fp['x'][:]
+            y = fp['y'][:]
+            fp.close()
     except:
         print('Error reading pixelmap:')
         print(filename)
@@ -190,7 +190,7 @@ def read_geometry(geometry_filename, quiet=False):
     elif format == 'pixelmap':
         try:
             x, y, r, dx_m = read_pixelmap(geometry_filename)
-            coffset = 'nan'
+            coffset = numpy.nan
         except:
             fail = True
 

@@ -52,9 +52,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.photon_energy_ok = True
         else:
             self.photon_energy = cxi['photon_energy_eV']
-            if self.photon_energy != 'nan':
+            if not numpy.isnan(self.photon_energy):
                 self.photon_energy_ok = True
-        if self.photon_energy < 0 or self.photon_energy == numpy.nan:
+        if self.photon_energy < 0 or numpy.isnan(self.photon_energy):
             self.photon_energy_ok = False
 
         # Photon energy to wavelength
@@ -70,7 +70,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.detector_distance_ok = True
         else:
             detector_distance = cxi['EncoderValue']
-            if detector_distance != numpy.nan and self.geometry['coffset'] != 'nan':
+            if not numpy.isnan(detector_distance) and not numpy.isnan(self.geometry['coffset']):
                 self.detector_distance_ok = True
                 self.detector_z_m = (1e-3*detector_distance + self.geometry['coffset'])
             else:
