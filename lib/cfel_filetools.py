@@ -15,8 +15,11 @@ import numpy as np
 # Needed for dialog_pickfile()
 import PyQt4
 import PyQt4.QtGui
-qtApp = PyQt4.QtGui.QApplication(sys.argv)
 
+""" Comment added by Dominik. With that line the GUI isn't rendered. The function of
+    the line is not clear to me.
+qtApp = PyQt4.QtGui.QApplication(sys.argv)
+"""
 
 def dialog_pickfile(write=False, directory=False, multiple=False, path=False, filter='*.*'):
     """

@@ -22,6 +22,7 @@ import UI.cxiview_ui
 import lib.cfel_filetools as cfel_file
 import lib.cfel_geometry as cfel_geom
 import lib.cfel_imgtools as cfel_img
+from lib.cfel_streamfile import *
 
 
 #
@@ -493,7 +494,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.img_h5_field = args.e
         self.default_z = args.z
         self.default_eV = args.v
-
+        self.stream_filepath = args.s
 
         #
         # Set up the UI
@@ -507,7 +508,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
         # Create event list of all events in all files matching pattern
-        # This is for multi-file flexibility - importing of file lists, enables multiple input files, format flexibility
+        # This is for multi-file flexibility - importing of file lists, enables
+        # multiple input files, format flexibility
         self.img_index = 0
         self.action_update_files()
 
@@ -520,20 +522,26 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Load geometry
         # read_geometry currently exits program on failure
-        if self.geom_filename != "":
+        if self.stream_filepath != "":
+            # TODO: work going on here
+            streamfile_parser = StreamfileParser(self.stream_filepath)
+            self.geometry = streamfile_parser.get_geometry()
+            self.geometry_ok = True
+            self.img_shape = self.geometry['shape']
+        elif self.geom_filename != "":
             self.geometry = cfel_geom.read_geometry(self.geom_filename)
             self.geometry_ok = True
             self.img_shape = self.geometry['shape']
-            self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
-            self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
-            self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
         else:
             self.geometry_ok = False
             self.img_shape = self.slab_shape
-            self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
-            self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
-            self.mask_to_draw = numpy.zeros(self.img_shape + (3,), dtype=numpy.uint8)
-            # faking self.geometry is a hack to stop crashes down the line.  Fix more elegantly later
+            # the commented code has been moved downwards to avoid redundancy 
+            #self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
+            #self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
+            #self.mask_to_draw = numpy.zeros(self.img_shape + (3,), dtype=numpy.uint8)
+
+            # faking self.geometry is a hack to stop crashes down the line.
+            # Fix more elegantly later
             self.geometry = {
                 'x': numpy.zeros(self.img_shape).flatten(),
                 'y': numpy.zeros(self.img_shape).flatten(),
@@ -542,6 +550,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 'coffset': 'nan',
                 'shape': self.slab_shape
             }
+        self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
+        self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
+        self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
 
 
         # Sanity check: Do geometry and data shape match?
@@ -670,13 +681,17 @@ if __name__ == '__main__':
     #    
     parser = argparse.ArgumentParser(description='CFEL CXI file viewer')
     parser.add_argument("-g", default="", help="Geometry file (.geom/.h5)")
-    parser.add_argument("-i", default="", help="Input file pattern (eg: *.cxi, LCLS*.h5)")
+    parser.add_argument("-i", 
+        default="", help="Input file pattern (eg: *.cxi, LCLS*.h5)")
     parser.add_argument("-e", default="data/data", help="HDF5 field to read")
     parser.add_argument("-z", default='None', help="Detector distance (m)")
     parser.add_argument("-v", default='None', help="Photon energy (eV)")
     parser.add_argument("-l", default='None', help="Read event list")
     parser.add_argument("-p", default=False, help="Circle peaks by default")
-    #parser.add_argument("-s", default='None', help="Read stream file")
+    #
+    # Add the functionality to read a stream file
+    #
+    parser.add_argument("-s", default='None', help="Stream file")
     #parser.add_argument("-x", default='110e-6', help="Detector pixel size (m)")
     args = parser.parse_args()
 
@@ -686,9 +701,11 @@ if __name__ == '__main__':
     print(args)
     print("----------")    
     
-    # This bit may be irrelevent if we can make parser.parse_args() require this field    
+    # This bit may be irrelevent if we can make parser.parse_args() require this
+    # field    
     if args.i == "":
-        print('Usage: cxiview.py -i data_file_pattern [-g geom_file .geom/.h5] [-e HDF5 field] [-z Detector distance m] [-v photon energy eV]')
+        print("""Usage: cxiview.py -i data_file_pattern [-g geom_file .geom/.h5]
+            [-e HDF5 field] [-z Detector distance m] [-v photon energy eV]""")
         sys.exit()
     #endif        
 
@@ -709,7 +726,8 @@ if __name__ == '__main__':
     #
     app.exit()
     
-    # This function does the following in an attempt to ‘safely’ terminate the process:
+    # This function does the following in an attempt to ‘safely’ terminate the 
+    # process:
     #   Invoke atexit callbacks
     #   Close all open file handles
     os._exit(ret)

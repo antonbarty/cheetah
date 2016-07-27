@@ -15,9 +15,12 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
     
     Input: geometry filename
     
-    Output: x: slab-like pixel map with x coordinate of each slab pixel in the reference system of the detector
-            y: slab-like pixel map with y coordinate of each slab pixel in the reference system of the detector
-            z: slab-like pixel map with distance of each pixel from the center of the reference system.
+    Output: x: slab-like pixel map with x coordinate of each slab pixel in 
+                the reference system of the detector
+            y: slab-like pixel map with y coordinate of each slab pixel in 
+                the reference system of the detector
+            z: slab-like pixel map with distance of each pixel from the center
+                of the reference system.  
     """
 
     f = open(fnam, 'r')
@@ -97,11 +100,11 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
 
 def coffset_from_CrystFEL_geometry_file(fnam):
     """
-    Read coffset from CrystFEL geometry file
-    res = The resolution (in pixels per metre) for this panel. This is one over the pixel size in metres.
-    :param fnam:
-    :return:
+    Read coffset from CrystFEL geometry file res = The resolution (in pixels
+    per metre) for this panel. This is one over the pixel size in metres.
+    :param fnam: :return: 
     """
+
     f = open(fnam, 'r')
     f_lines = []
     for line in f:
@@ -151,12 +154,13 @@ def read_pixelmap(filename):
 
 def read_geometry(geometry_filename, quiet=False):
     """
-    Read geometry files and return pixel map
-    Determines file type and calls the appropriate routine for reading the geometry
-    Note transposition and change of axes so that images appear the same orientation in hdfsee, cheetah/IDL and pyQtGraph
+    Read geometry files and return pixel map Determines file type and calls the
+    appropriate routine for reading the geometry Note transposition and change
+    of axes so that images appear the same orientation in hdfsee, cheetah/IDL
+    and pyQtGraph
 
-    Output is the following sttructure.
-    Return unit for geometry is pixels (CrystFEL unit 'res = 1/pix_size' is depreciated)
+    Output is the following sttructure.  Return unit for geometry is pixels
+    (CrystFEL unit 'res = 1/pix_size' is depreciated)
 
     result_dict = {
         'x' : x.flatten(),      # In pixels
