@@ -45,7 +45,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             print('Error encountered reading data from file (image data, peaks, energy or masks).  Skipping frame.')
             return
 
-
         # Photon energy - use command line eV if provided
         self.photon_energy_ok = False
         if self.default_eV != 'None':
@@ -193,11 +192,16 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             peak_y = []
 
             # Read peaks in raw coordinates
-            n_peaks = cxi['n_peaks']
-            peak_x_data = cxi['peakXPosRaw']
-            peak_y_data = cxi['peakYPosRaw']
+            if self.streamfile is not None:
+                # read the peaks from the streamfile
+                peak_x_data, peak_y_data = self.streamfile.get_peak_data(self.img_index)
+                n_peaks = len(peak_x_data)
+            else:
+                n_peaks = cxi['n_peaks']
+                peak_x_data = cxi['peakXPosRaw']
+                peak_y_data = cxi['peakYPosRaw']
             
-            for ind in range(0,n_peaks):                
+            for ind in xrange(0,n_peaks):                
                 peak_fs = peak_x_data[ind]                
                 peak_ss = peak_y_data[ind]         
                 
@@ -213,27 +217,32 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.found_peak_canvas.setData([])
 
         # Draw predicted peaks
-        """
-        if self.show_predicted_peaks == True:
+        if self.ui.predictedPeaksCheckBox.isChecked():
 
             peak_x = []
             peak_y = []
             
+            peak_x_data, peak_y_data = self.streamfile.get_predicted_peak_data(
+                self.img_index)
+            n_peaks = len(peak_x_data)
+
             for ind in range(0,n_peaks):                
                 peak_fs = peak_x_data[ind]                
                 peak_ss = peak_y_data[ind]         
                 
                 # Peak coordinate to pixel in image
                 peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(round(peak_fs))
-                peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
-                peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
+                peak_x.append(self.geometry['x'][peak_in_slab] + self.img_shape[0] / 2)
+                peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
+                #peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
+                #peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
 
             ring_pen = pyqtgraph.mkPen('b', width=2)
             self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.predicted_peak_canvas.setData([])
-        """
+        
 
 
         # Draw resolution rings
@@ -459,7 +468,14 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
     def action_update_files(self):
-        self.event_list = cfel_file.list_events(self.img_file_pattern, field=self.img_h5_field)
+        # read files from streamfile if streamfile is there
+        if self.streamfile is not None:
+            print(self.streamfile.get_cxi_filenames())
+            self.event_list = cfel_file.list_events(field = self.img_h5_field,
+                list_of_files = self.streamfile.get_cxi_filenames())
+        else:
+            self.event_list = cfel_file.list_events(self.img_file_pattern, 
+                field=self.img_h5_field)
         self.nframes = self.event_list['nevents']
         self.num_lines = self.nframes
         print('Number of frames', self.nframes)
@@ -495,39 +511,17 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.default_z = args.z
         self.default_eV = args.v
         self.stream_filepath = args.s
-
-        #
-        # Set up the UI
-        #
-        super(cxiview, self).__init__()
-        pyqtgraph.setConfigOption('background', 0.0)
-        pyqtgraph.setConfigOption('background', 'k')
-        pyqtgraph.setConfigOption('foreground', 'w')
-        self.ui = UI.cxiview_ui.Ui_MainWindow()
-        self.ui.setupUi(self)
-
-
-        # Create event list of all events in all files matching pattern
-        # This is for multi-file flexibility - importing of file lists, enables
-        # multiple input files, format flexibility
-        self.img_index = 0
-        self.action_update_files()
-
-
-        # Size of images (assume all images have the same size as frame 0)
-        temp = cfel_file.read_event(self.event_list, 0, data=True)
-        self.slab_shape = temp['data'].shape
-        print("Data shape: ", self.slab_shape )
-
+        self.streamfile = None
 
         # Load geometry
         # read_geometry currently exits program on failure
         if self.stream_filepath != "":
             # TODO: work going on here
-            streamfile_parser = StreamfileParser(self.stream_filepath)
-            self.geometry = streamfile_parser.get_geometry()
+            self.streamfile = Streamfile(self.stream_filepath)
+            self.geometry = self.streamfile.get_geometry()
             self.geometry_ok = True
             self.img_shape = self.geometry['shape']
+            # activate predicted peaks checkbox
         elif self.geom_filename != "":
             self.geometry = cfel_geom.read_geometry(self.geom_filename)
             self.geometry_ok = True
@@ -554,6 +548,29 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
         self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
 
+        #
+        # Set up the UI
+        #
+        super(cxiview, self).__init__()
+        pyqtgraph.setConfigOption('background', 0.0)
+        pyqtgraph.setConfigOption('background', 'k')
+        pyqtgraph.setConfigOption('foreground', 'w')
+        self.ui = UI.cxiview_ui.Ui_MainWindow()
+        self.ui.setupUi(self)
+
+        if self.streamfile is not None:
+            self.ui.predictedPeaksCheckBox.setEnabled(True)
+
+        # Create event list of all events in all files matching pattern
+        # This is for multi-file flexibility - importing of file lists, enables
+        # multiple input files, format flexibility
+        self.img_index = 0
+        self.action_update_files()
+
+        # Size of images (assume all images have the same size as frame 0)
+        temp = cfel_file.read_event(self.event_list, 0, data=True)
+        self.slab_shape = temp['data'].shape
+        print("Data shape: ", self.slab_shape )
 
         # Sanity check: Do geometry and data shape match?
         if self.geometry_ok and (temp['data'].flatten().shape != self.geometry['x'].shape):
@@ -561,6 +578,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             print('Data size: ', temp.data.flatten().shape)
             print('Geometry size: ', self.geometry['x'].shape)
             exit(1)
+
 
 
         #
@@ -630,8 +648,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.imageView.getView().addItem(self.found_peak_canvas)
 
         # Predicted peaks
-        #self.predicted_peak_canvas = pyqtgraph.ScatterPlotItem()
-        #self.ui.imageView.getView().addItem(self.predicted_peak_canvas)
+        self.predicted_peak_canvas = pyqtgraph.ScatterPlotItem()
+        self.ui.imageView.getView().addItem(self.predicted_peak_canvas)
 
         # Resolution rings
         self.resolution_ok = False
@@ -703,10 +721,10 @@ if __name__ == '__main__':
     
     # This bit may be irrelevent if we can make parser.parse_args() require this
     # field    
-    if args.i == "":
-        print("""Usage: cxiview.py -i data_file_pattern [-g geom_file .geom/.h5]
-            [-e HDF5 field] [-z Detector distance m] [-v photon energy eV]""")
-        sys.exit()
+    #if args.i == "":
+    #    print("""Usage: cxiview.py -i data_file_pattern [-g geom_file .geom/.h5]
+    #        [-e HDF5 field] [-z Detector distance m] [-v photon energy eV]""")
+    #    sys.exit()
     #endif        
 
 
