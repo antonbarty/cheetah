@@ -2,6 +2,8 @@ import numpy
 import tempfile
 import lib.cfel_geometry as cfel_geom
 import re
+import time
+import sys
 
 """
 This class is a data structure to store the information of a unit cell. The unit
@@ -31,6 +33,7 @@ class UnitCell:
         print("beta: ", self.beta)
         print("gamma: ", self.gamma)
 
+
 """
 This class is providing flags used in the parsing process of the streamfile.
 """
@@ -42,13 +45,61 @@ class StreamfileParserFlags:
     predicted_peak = 4
     flag_changed = 5
 
+
+"""
+This class provides the ability to handle large text files relatively quickly.
+The funcionality to jump between different lines is implemented.
+"""
+class LargeFile:
+    def __init__(self, name, mode="r"):
+        self.name = name
+        self.file = open(name, mode)
+        print("Start counting line numbers.")
+        self.length = sum(1 for line in self.file)
+        print("End counting line numbers.")
+        self.file.seek(0)
+        self._line_offset = numpy.zeros(self.length)
+        self._read_file()
+
+    def __exit__(self):
+        self.file.close()
+
+    def __iter__(self):
+        return self.file
+
+    def __next__(self):
+        return self.file.next()
+
+    def _read_file(self):
+        offset = 0
+        print("Start searching newlines.")
+        for index, line in enumerate(self.file):
+            #self._line_offset.append(offset)
+            #numpy.append(self._line_offset, offset)
+            self._line_offset[index] = offset
+            offset += len(line)
+        self.file.seek(0)
+        print("End searching newlines.")
+
+    def close(self):
+        self.file.close()
+
+    def seek_line(self, line_number):
+        self.file.seek(self._line_offset[line_number])
+
+    def read_line(self, line_number):
+        self.file.seek(self._line_offset[line_number])
+        return self.file.readline()
+        
+        
 """
 This class is providing the information of a specific chunk in the streamfile
 """
 class Chunk:
-    def __init__(self, stream_filename):
+    def __init__(self, stream_filename, stream_file):
         # general properties of the chunk
         self.stream_filename = stream_filename
+        self.stream_file = stream_file
         self.cxi_filename = None
         self.contained_in_cxi = False
         self.event = None
@@ -123,17 +174,29 @@ class Chunk:
             # with the in the streamfile. we use just the plain
             # "photon_energy_ev" entry
             if "hdf5" not in line:
-                self.photon_energy = float(re.findall(
-                    self._float_matching_regex, line)[0])
+                if self._float_matching_regex.match(line):
+                    self.photon_energy = float(re.findall(
+                        self._float_matching_regex, line)[0])
+                else:
+                    self.photon_energy = float('nan')
         elif "beam_divergence = " in line:
-            self.beam_divergence = float(re.findall(
-                self._float_matching_regex, line)[0])
+            if self._float_matching_regex.match(line):
+                self.beam_divergence = float(re.findall(
+                    self._float_matching_regex, line)[0])
+            else:
+                self.beam_divergence = float('nan')
         elif "beam_bandwidth = " in line:
-            self.beam_bandwidth = float(re.findall(
-                self._float_matching_regex, line)[0])
+            if self._float_matching_regex.match(line):
+                self.beam_bandwidth = float(re.findall(
+                    self._float_matching_regex, line)[0])
+            else:
+                self.beam_bandwidth = float('nan')
         elif "average_camera_length = " in line:
-            self.average_camera_length = float(re.findall(
-                self._float_matching_regex, line)[0])
+            if self._float_matching_regex.match(line):
+                self.average_camera_length = float(re.findall(
+                    self._float_matching_regex, line)[0])
+            else:
+                self.average_camera_length = float('nan')
         elif "num_peaks = " in line:
             self.num_peaks = int(line.replace("num_peaks = ", ""))
         elif "num_saturated_peaks = " in line:
@@ -178,33 +241,34 @@ class Chunk:
             self.unit_cell.to_angstroem()
         elif "diffraction_resolution_limit" in line:
             # we use the second resolution index in angstroem
-            self.resolution_limit = float(re.findall(
-                self._float_matching_regex, line)[2])
+            if self._float_matching_regex.match(line):
+                self.resolution_limit = float(re.findall(
+                    self._float_matching_regex, line)[2])
+            else:
+                self.resolution_limit = float('nan')
 
     def _get_coordinates_from_streamfile(self, first_line, last_line, 
         x_column, y_column):
         try:
-            print("first line: ", first_line)
-            print("last line: ", last_line)
-            f = open(self.stream_filename, "r")
+            #print("first line: ", first_line)
+            #print("last line: ", last_line)
+            #f = open(self.stream_filename, "r")
             line_number = 1
             peak_x_data = []
             peak_y_data = []
-            for line in f:
-                if (first_line <= line_number 
-                    and line_number <= last_line):
-                    matches = re.findall(self._float_matching_regex, line)
-                    # TODO: look up if fs is always x in the cheetah 
-                    # implementation
-                    peak_x_data.append(float(matches[x_column]))
-                    peak_y_data.append(float(matches[y_column]))
-                line_number += 1
-            f.close()
+
+            for line_number in xrange(first_line, last_line):
+                line = self.stream_file.read_line(line_number)
+                matches = re.findall(self._float_matching_regex, line)
+                # TODO: look up if fs is always x in the cheetah 
+                # implementation
+                peak_x_data.append(float(matches[x_column]))
+                peak_y_data.append(float(matches[y_column]))
+
             return (peak_x_data, peak_y_data)
         except IOError:
             print("Cannot read from streamfile: ", self.filename, ". Quitting")
             exit()
-
 
     def get_peak_data(self):
         return self._get_coordinates_from_streamfile(self.first_peaks_line,
@@ -223,13 +287,26 @@ state machine.
 class Streamfile:
     def __init__(self, filename):
         self.filename = filename
-        self._geom_dict = None
-        self._gen_temporary_geometry_file()
+
+        try: 
+            self.file = LargeFile(filename) 
+        except IOError:
+            print("Cannot read from streamfile: ", self.filename, ". Quitting")
+            exit()
+
         self.chunks = []
+        # we need a variable to check if the geometry has already been
+        # processed because the geometry flag migth appear multiple times
+        # in a stream file due to stream concatenation
+        self._geometry_processed = False
+        self._geom_dict = None
+        self._temporary_geometry_file = None
+        self._gen_temporary_geometry_file()
         self.parse_streamfile()
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self._temporary_geometry_file.close()
+        if not self._temporary_geometry_file.closed:
+            self._temporary_geometry_file.close()
 
     def get_geometry(self):
         return self._geom_dict
@@ -237,8 +314,14 @@ class Streamfile:
     def get_peak_data(self, index):
         return self.chunks[index].get_peak_data()
 
+    def has_crystal(self, index):
+        return self.chunks[index].crystal
+
     def get_predicted_peak_data(self, index):
-        return self.chunks[index].get_predicted_peak_data()
+        if(self.chunks[index].crystal == True):
+            return self.chunks[index].get_predicted_peak_data()
+        else:
+            return []
 
     def get_cxi_filenames(self):
         list_of_filenames = set([]) 
@@ -248,12 +331,14 @@ class Streamfile:
 
     def _gen_temporary_geometry_file(self):
         self._temporary_geometry_file = tempfile.NamedTemporaryFile(mode="w",
-            suffix=".geom", delete = True)
+            suffix=".geom", delete = False)
 
     def _write_temporary_geometry_file(self, geometry_lines):
         try:
             for line in geometry_lines: 
                 self._temporary_geometry_file.write("%s\n" % line)
+            self._temporary_geometry_file.flush()
+            self._geometry_processed = True
         except IOError:
             print("""Writing the temporary geometry file failed.
                 Maybe the program does not have the right to write on
@@ -275,28 +360,33 @@ class Streamfile:
         #    StreamfileParserFlags.chunk: _process_chunk
         #}
 
+        flag = StreamfileParserFlags.none
+        flag_changed = False
+        # line numbering starts at 1
+        line_number = 1
+        new_chunk = None
+
+
         try:
-            f = open(self.filename, 'r')
-            flag = StreamfileParserFlags.none
-            flag_changed = False
-            # line numbering starts at 1
-            line_number = 1
-            new_chunk = None
-            for line in f:
+            for line in self.file:
+                if (line_number % (self.file.length//25) == 0):
+                    print("{0:0.2f}".format(line_number/self.file.length*100),"% of the streamfile parsed.")
                 # scan the line for keywords and perform end or begin flag 
                 # operations
                 if "Begin geometry file" in line:
-                    flag = StreamfileParserFlags.geometry
-                    flag_changed = True
+                    if not self._geometry_processed:
+                        flag = StreamfileParserFlags.geometry
+                        flag_changed = True
                 elif "End geometry file" in line:
-                    flag = StreamfileParserFlags.none
-                    self._write_temporary_geometry_file(geometry_lines)
-                    self._geom_dict = cfel_geom.read_geometry(
-                        self._temporary_geometry_file.name)
-                    flag_changed = True
+                    if not self._geometry_processed:
+                        flag = StreamfileParserFlags.none
+                        self._write_temporary_geometry_file(geometry_lines)
+                        self._geom_dict = cfel_geom.read_geometry(
+                            self._temporary_geometry_file.name)
+                        flag_changed = True
                 elif "Begin chunk" in line:
                     flag = StreamfileParserFlags.chunk
-                    new_chunk = Chunk(self.filename)
+                    new_chunk = Chunk(self.filename, self.file)
                     new_chunk.first_line = line_number + 1
                     flag_changed = True
                 elif "End chunk" in line:
@@ -316,18 +406,14 @@ class Streamfile:
                 # more to do
                 if not flag_changed:
                     if flag == StreamfileParserFlags.geometry:
-                        geometry_lines.append(line)
+                        geometry_lines.append(line.strip())
                     elif flag == StreamfileParserFlags.chunk:
                         new_chunk.parse_line(line, line_number)
                 else:
                     flag_changed = False
                     
                 line_number += 1
-            f.close()
+            print("Number of chunks found: ", len(self.chunks))
         except IOError:
-            print("Cannot read from streamfile: ", self.filename, ". Quitting")
+            print("Cannot read from streamfile: ", self.filename, ". Quitting.")
             exit()
-        
-        # test chunk information
-        # for i in xrange(3):
-        # self.chunks[i].dump()

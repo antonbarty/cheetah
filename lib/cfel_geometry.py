@@ -8,7 +8,6 @@
 import h5py
 import numpy
 
-
 def pixelmap_from_CrystFEL_geometry_file(fnam):
     """
     Return pixel and radius maps from CrystFEL format geometry file
@@ -112,10 +111,20 @@ def coffset_from_CrystFEL_geometry_file(fnam):
     # endfor
 
     coffset_lines = [x for x in f_lines if 'coffset' in x]
-    coffset = float(coffset_lines[-1].split('=')[1])
+    
+    # There might be no coffset in the geometry file. We have to check for that.
+    if coffset_lines:
+        coffset = float(coffset_lines[-1].split('=')[1])
+    else:
+        coffset = numpy.nan
     res_lines = [x for x in f_lines if 'res' in x]
-    res = float(res_lines[-1].split('=')[1])
-    dx_m = 1.0/res
+    # There might be no res in the geometry file. We have to check for that.
+    if res_lines:
+        res = float(res_lines[-1].split('=')[1])
+        dx_m = 1.0/res
+    else:
+        res = numpy.nan
+        dx_m = numpy.nan
 
     return coffset, res, dx_m
 

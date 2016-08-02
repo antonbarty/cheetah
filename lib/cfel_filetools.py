@@ -273,6 +273,7 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
         data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
         # Need to add reading of peaks, photon energy, detector distance
         # Lower priority since this is an old file format
+
         event_data = {
             'data': data_array,
             'data_shape': data_array.shape,
@@ -284,7 +285,6 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
             'peakXPosRaw': [0],
             'peakYPosRaw': [0]
         }
-    #end cheetah_h5
 
     elif event_list['format'][eventID] == 'generic_h5':
         data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
@@ -425,7 +425,6 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
 
 
 
-# TODO: implement the list_of_files function
 def list_events(pattern='./*.cxi', field='data/data', list_of_files = None):
     """
     :param file_pattern: Single filename, or search string
@@ -477,10 +476,13 @@ def list_events(pattern='./*.cxi', field='data/data', list_of_files = None):
             nframes = read_cxi(filename, num_frames=True)['nframes']
             if nframes == 0:
                 filename_short = basename
-                print(filename_short, '    ', nframes)
+                # The following line has been commented by Dominik to avoid 
+                # verbose console output
+                #print(filename_short, '    ', nframes)
                 continue
 
             # Default location for data in .cxi files is not data/data
+
             # But leave option for passing a different hdf5 data path on the command line
             cxi_field = field
             if cxi_field == 'data/data':
@@ -521,7 +523,9 @@ def list_events(pattern='./*.cxi', field='data/data', list_of_files = None):
 
         #filename_short = filename.split('/')[-1]
         filename_short = basename
-        print(filename_short, '    ', nframes)
+        # The following line has been commented by Dominik to avoid 
+        # verbose console output
+        #print(filename_short, '    ', nframes)
 
 
     #endfor

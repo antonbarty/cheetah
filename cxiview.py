@@ -218,28 +218,31 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Draw predicted peaks
         if self.ui.predictedPeaksCheckBox.isChecked():
-
-            peak_x = []
-            peak_y = []
-            
-            peak_x_data, peak_y_data = self.streamfile.get_predicted_peak_data(
-                self.img_index)
-            n_peaks = len(peak_x_data)
-
-            for ind in range(0,n_peaks):                
-                peak_fs = peak_x_data[ind]                
-                peak_ss = peak_y_data[ind]         
+            if(self.streamfile.has_crystal(self.img_index)):
+                peak_x = []
+                peak_y = []
                 
-                # Peak coordinate to pixel in image
-                peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(round(peak_fs))
-                peak_x.append(self.geometry['x'][peak_in_slab] + self.img_shape[0] / 2)
-                peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
-                #peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
-                #peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
+                peak_x_data, peak_y_data = self.streamfile.get_predicted_peak_data(
+                    self.img_index)
+                n_peaks = len(peak_x_data)
+
+                for ind in range(0,n_peaks):                
+                    peak_fs = peak_x_data[ind]                
+                    peak_ss = peak_y_data[ind]         
+                    
+                    # Peak coordinate to pixel in image
+                    peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(round(peak_fs))
+                    peak_x.append(self.geometry['x'][peak_in_slab] + self.img_shape[0] / 2)
+                    peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
+                    #peak_x.append(self.pixel_map[0][peak_in_slab] + self.img_shape[0]/2)
+                    #peak_y.append(self.pixel_map[1][peak_in_slab] + self.img_shape[1]/2)
+            else:
+                # no crystal and thus no peaks
+                peak_x = []
+                peak_y = []
 
             ring_pen = pyqtgraph.mkPen('b', width=2)
             self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
-
         else:
             self.predicted_peak_canvas.setData([])
         
@@ -470,7 +473,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     def action_update_files(self):
         # read files from streamfile if streamfile is there
         if self.streamfile is not None:
-            print(self.streamfile.get_cxi_filenames())
+            print(self.img_h5_field)
             self.event_list = cfel_file.list_events(field = self.img_h5_field,
                 list_of_files = self.streamfile.get_cxi_filenames())
         else:
@@ -516,7 +519,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Load geometry
         # read_geometry currently exits program on failure
         if self.stream_filepath != "":
-            # TODO: work going on here
             self.streamfile = Streamfile(self.stream_filepath)
             self.geometry = self.streamfile.get_geometry()
             self.geometry_ok = True
