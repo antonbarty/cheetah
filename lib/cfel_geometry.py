@@ -7,6 +7,8 @@
 
 import h5py
 import numpy
+import sys
+import traceback
 
 def pixelmap_from_CrystFEL_geometry_file(fnam):
     """
@@ -25,7 +27,9 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
     f = open(fnam, 'r')
     f_lines = []
     for line in f:
-        f_lines.append(line)
+        line_parsed_comments = line.split(";", 1)[0] 
+        if(line_parsed_comments is not ""):
+            f_lines.append(line_parsed_comments)
 
     keyword_list = ['min_fs', 'min_ss', 'max_fs', 'max_ss', 'fs', 'ss', 'corner_x', 'corner_y']
 
@@ -107,17 +111,21 @@ def coffset_from_CrystFEL_geometry_file(fnam):
     f = open(fnam, 'r')
     f_lines = []
     for line in f:
-        f_lines.append(line)
+        # handle comments
+        line_parsed_comments = line.split(";", 1)[0] 
+        if(line_parsed_comments is not ""):
+            f_lines.append(line_parsed_comments)
     # endfor
 
-    coffset_lines = [x for x in f_lines if 'coffset' in x]
+    coffset_lines = [x for x in f_lines if "coffset" in x]
     
     # There might be no coffset in the geometry file. We have to check for that.
     if coffset_lines:
         coffset = float(coffset_lines[-1].split('=')[1])
     else:
         coffset = numpy.nan
-    res_lines = [x for x in f_lines if 'res' in x]
+
+    res_lines = [x for x in f_lines if "res" in x]
     # There might be no res in the geometry file. We have to check for that.
     if res_lines:
         res = float(res_lines[-1].split('=')[1])
@@ -199,6 +207,7 @@ def read_geometry(geometry_filename, quiet=False):
             coffset, res, dx_m = coffset_from_CrystFEL_geometry_file(geometry_filename)
         except:
             fail = True
+            traceback.print_exc()
 
     elif format == 'pixelmap':
         try:

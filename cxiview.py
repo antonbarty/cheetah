@@ -733,6 +733,9 @@ if __name__ == '__main__':
         if not os.path.isfile(args.i):
             print("Error! Input file does not exist")
             exit()
+        if (args.g == ""):
+            print("Error! A geometry file is required")
+            exit()
     if args.s != "":
         if not os.path.isfile(args.s):
             print("Error! Stream file does not exist")
