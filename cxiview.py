@@ -473,7 +473,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     def action_update_files(self):
         # read files from streamfile if streamfile is there
         if self.streamfile is not None:
-            print(self.img_h5_field)
             self.event_list = cfel_file.list_events(field = self.img_h5_field,
                 list_of_files = self.streamfile.get_cxi_filenames())
         else:
@@ -481,7 +480,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 field=self.img_h5_field)
         self.nframes = self.event_list['nevents']
         self.num_lines = self.nframes
-        print('Number of frames', self.nframes)
 
         # No events?  May as well exit now
         if self.nframes == 0:
@@ -518,13 +516,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Load geometry
         # read_geometry currently exits program on failure
-        if self.stream_filepath != "":
+        if self.stream_filepath is not "":
             self.streamfile = Streamfile(self.stream_filepath)
             self.geometry = self.streamfile.get_geometry()
             self.geometry_ok = True
             self.img_shape = self.geometry['shape']
-            # activate predicted peaks checkbox
-        elif self.geom_filename != "":
+        elif self.geom_filename is not "":
             self.geometry = cfel_geom.read_geometry(self.geom_filename)
             self.geometry_ok = True
             self.img_shape = self.geometry['shape']
@@ -699,6 +696,7 @@ if __name__ == '__main__':
     #
     #   Use parser to process command line arguments
     #    
+    # TODO: option -p does not work
     parser = argparse.ArgumentParser(description='CFEL CXI file viewer')
     parser.add_argument("-g", default="", help="Geometry file (.geom/.h5)")
     parser.add_argument("-i", 
@@ -708,26 +706,45 @@ if __name__ == '__main__':
     parser.add_argument("-v", default='None', help="Photon energy (eV)")
     parser.add_argument("-l", default='None', help="Read event list")
     parser.add_argument("-p", default=False, help="Circle peaks by default")
-    #
     # Add the functionality to read a stream file
-    #
-    parser.add_argument("-s", default='None', help="Stream file")
+    parser.add_argument("-s", default="", help="""CrystFEL stream file. If 
+    the stream file is passed to the program all other options except -e are 
+    ignored. The relevant information is generated automatically from the 
+    stream file.""")
     #parser.add_argument("-x", default='110e-6', help="Detector pixel size (m)")
     args = parser.parse_args()
 
 
+    """
     print("----------")    
     print("Parsed command line arguments")
     print(args)
     print("----------")    
+    """
     
+    # Perform consistency checking on the command line arguments.
+    if (args.i == "" and args.s == ""):
+        print("No input or stream file given")
+        exit()
+    if (args.i is not "" and args.s is not ""):
+        print("Error! Provide either a stream file or an input file")
+        exit()
+    if args.i != "":
+        if not os.path.isfile(args.i):
+            print("Error! Input file does not exist")
+            exit()
+    if args.s != "":
+        if not os.path.isfile(args.s):
+            print("Error! Stream file does not exist")
+            exit()
+
     # This bit may be irrelevent if we can make parser.parse_args() require this
     # field    
-    #if args.i == "":
+    # if args.i == "":
     #    print("""Usage: cxiview.py -i data_file_pattern [-g geom_file .geom/.h5]
     #        [-e HDF5 field] [-z Detector distance m] [-v photon energy eV]""")
     #    sys.exit()
-    #endif        
+    # endif        
 
 
     #

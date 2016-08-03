@@ -48,7 +48,8 @@ class StreamfileParserFlags:
 
 """
 This class provides the ability to handle large text files relatively quickly.
-The funcionality to jump between different lines is implemented.
+The funcionality to jump between different lines is implemented. The offset
+table is currently deactivated to save memory.
 """
 class LargeFile:
     def __init__(self, name, mode="r"):
@@ -146,9 +147,6 @@ class Chunk:
 
         self._flag = StreamfileParserFlags.none
 
-    # TODO: maybe put this function into the Streamfile class. Then all the
-    # parsing activity is going on there. This may again result into a
-    # cleaner style
     def dump(self):
         print("""-----------------------------------------------------------""")
         print("Dumping all the chunk information.")
@@ -169,11 +167,13 @@ class Chunk:
         if(self.crystal is not None):
             print("First predicted peaks line: ", 
                 self.begin_predicted_peaks_pointer)
-            print("Last predicted peaks line: ", self.end_predicted_peaks_pointer)
+            print("Last predicted peaks line: ", 
+                self.end_predicted_peaks_pointer)
             self.unit_cell.dump()
             print("Resolution limit: ", self.resolution_limit)
 
-    def parse_line(self, line, previous_line_pointer, current_line_pointer, next_line_pointer):
+    def parse_line(self, line, previous_line_pointer, current_line_pointer, 
+        next_line_pointer):
         if self._flag == StreamfileParserFlags.peak:
             if "fs/px" in line:
                 self.begin_peaks_pointer = next_line_pointer
@@ -276,8 +276,9 @@ class Chunk:
 
             return (peak_x_data, peak_y_data)
         except IOError:
-            print("Cannot read from streamfile: ", self.filename, ". Quitting")
-            exit()
+            print("Cannot read the peak information from streamfile: ", 
+                self.filename)
+            return ([], [])
 
     def get_peak_data(self):
         return self._get_coordinates_from_streamfile(self.begin_peaks_pointer,
@@ -285,8 +286,8 @@ class Chunk:
 
     def get_predicted_peak_data(self):
         return self._get_coordinates_from_streamfile(
-            self.begin_predicted_peaks_pointer, self.end_predicted_peaks_pointer, 
-            7, 8)
+            self.begin_predicted_peaks_pointer, 
+            self.end_predicted_peaks_pointer, 7, 8)
         
 
 """
@@ -300,7 +301,7 @@ class Streamfile:
         try: 
             self.file = LargeFile(filename) 
         except IOError:
-            print("Cannot read from streamfile: ", self.filename, ". Quitting")
+            print("Cannot read from streamfile: ", self.filename)
             exit()
 
         self.chunks = []
@@ -333,14 +334,22 @@ class Streamfile:
             return []
 
     def get_cxi_filenames(self):
-        list_of_filenames = set([]) 
+        list_of_filenames = [] 
         for chunk in self.chunks:
-            list_of_filenames.add(chunk.cxi_filename)
-        return list(list_of_filenames)
+            # TODO: better use a ordered set class here
+            if chunk.cxi_filename not in list_of_filenames:
+                list_of_filenames.append(chunk.cxi_filename)
+        return list_of_filenames
 
     def _gen_temporary_geometry_file(self):
-        self._temporary_geometry_file = tempfile.NamedTemporaryFile(mode="w",
-            suffix=".geom", delete = False)
+        try:
+            self._temporary_geometry_file = tempfile.NamedTemporaryFile(
+                mode="w", suffix=".geom", delete = False)
+        except IOError:
+            print("""Generating the temporary geometry file failed.
+                Probably the program does not have the right to write on
+                disk.""")
+            exit()
 
     def _write_temporary_geometry_file(self, geometry_lines):
         try:
@@ -350,8 +359,9 @@ class Streamfile:
             self._geometry_processed = True
         except IOError:
             print("""Writing the temporary geometry file failed.
-                Maybe the program does not have the right to write on
+                Probably the program does not have the right to write on
                 disk.""")
+            exit()
 
     def parse_streamfile(self):
         """
@@ -376,11 +386,7 @@ class Streamfile:
         next_line_pointer = 0
         try:
             for line in self.file:
-                if (line_number % 1000000 == 0):
-                    print(line_number)
                 next_line_pointer = current_line_pointer + len(line)
-                #if (line_number % (self.file.length//25) == 0):
-                    #print("{0:0.2f}".format(line_number/self.file.length*100),"% of the streamfile parsed.")
 
                 # scan the line for keywords and perform end or begin flag 
                 # operations
@@ -407,7 +413,7 @@ class Streamfile:
                     flag_changed = True
 
 
-                # process active flags, python dictionary switch-case
+                # Process active flags, python dictionary switch-case
                 # alternative doesn't work here because we may need to
                 # execute complex tasks depending on the flag which
                 # may require many different arguments. Python sucks from
@@ -419,7 +425,8 @@ class Streamfile:
                     if flag == StreamfileParserFlags.geometry:
                         geometry_lines.append(line.strip())
                     elif flag == StreamfileParserFlags.chunk:
-                        new_chunk.parse_line(line, previous_line_pointer, current_line_pointer, next_line_pointer)
+                        new_chunk.parse_line(line, previous_line_pointer, 
+                            current_line_pointer, next_line_pointer)
                 else:
                     flag_changed = False
                     
@@ -428,5 +435,5 @@ class Streamfile:
                 current_line_pointer = next_line_pointer
             print("Number of chunks found: ", len(self.chunks))
         except IOError:
-            print("Cannot read from streamfile: ", self.filename, ". Quitting.")
+            print("Cannot read from streamfile: ", self.filename)
             exit()
