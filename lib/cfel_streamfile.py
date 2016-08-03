@@ -2,8 +2,8 @@ import numpy
 import tempfile
 import lib.cfel_geometry as cfel_geom
 import re
-import time
 import sys
+import os
 
 """
 This class is a data structure to store the information of a unit cell. The unit
@@ -54,12 +54,13 @@ class LargeFile:
     def __init__(self, name, mode="r"):
         self.name = name
         self.file = open(name, mode)
-        print("Start counting line numbers.")
+        self.length = 0
+        """
         self.length = sum(1 for line in self.file)
-        print("End counting line numbers.")
         self.file.seek(0)
         self._line_offset = numpy.zeros(self.length)
         self._read_file()
+        """
 
     def __exit__(self):
         self.file.close()
@@ -72,24 +73,30 @@ class LargeFile:
 
     def _read_file(self):
         offset = 0
-        print("Start searching newlines.")
         for index, line in enumerate(self.file):
-            #self._line_offset.append(offset)
-            #numpy.append(self._line_offset, offset)
             self._line_offset[index] = offset
             offset += len(line)
         self.file.seek(0)
-        print("End searching newlines.")
 
     def close(self):
         self.file.close()
 
-    def seek_line(self, line_number):
-        self.file.seek(self._line_offset[line_number])
+    def tell(self):
+        return self.file.tell()
 
-    def read_line(self, line_number):
+    def seek(self, pos):
+        self.file.seek(pos)
+
+    def readline(self):
+        return self.file.readline()
+
+    def fileno(self):
+        return self.file.fileno()
+    """
+    def read_line_by_number(self, line_number):
         self.file.seek(self._line_offset[line_number])
         return self.file.readline()
+    """
         
         
 """
@@ -112,13 +119,13 @@ class Chunk:
         self.num_saturated_peaks = None 
         self.first_line = None
         self.last_line = None 
-        self.first_peaks_line = None 
-        self.last_peaks_line = None 
+        self.begin_peaks_pointer = None 
+        self.end_peaks_pointer = None 
 
         # properties if a crystal has been found
         self.crystal = None
-        self.first_predicted_peaks_line = None 
-        self.last_predicted_peaks_line = None
+        self.begin_predicted_peaks_pointer = None 
+        self.end_predicted_peaks_pointer = None
         self.unit_cell = None
         self.resolution_limit = None
 
@@ -137,6 +144,8 @@ class Chunk:
         self._float_matching_regex = re.compile(
             self._float_matching_pattern, re.VERBOSE)
 
+        self._flag = StreamfileParserFlags.none
+
     # TODO: maybe put this function into the Streamfile class. Then all the
     # parsing activity is going on there. This may again result into a
     # cleaner style
@@ -154,18 +163,24 @@ class Chunk:
         print("First line: ", self.first_line)
         print("Last line: ", self.last_line)
         print("Crystal found: ", self.crystal)
-        print("First peaks line: ", self.first_peaks_line)
-        print("Last peaks line: ", self.last_peaks_line)
+        print("First peaks line: ", self.begin_peaks_pointer)
+        print("Last peaks line: ", self.end_peaks_pointer)
 
         if(self.crystal is not None):
             print("First predicted peaks line: ", 
-                self.first_predicted_peaks_line)
-            print("Last predicted peaks line: ", self.last_predicted_peaks_line)
+                self.begin_predicted_peaks_pointer)
+            print("Last predicted peaks line: ", self.end_predicted_peaks_pointer)
             self.unit_cell.dump()
             print("Resolution limit: ", self.resolution_limit)
 
-    def parse_line(self, line, line_number):
-        flag = StreamfileParserFlags.none
+    def parse_line(self, line, previous_line_pointer, current_line_pointer, next_line_pointer):
+        if self._flag == StreamfileParserFlags.peak:
+            if "fs/px" in line:
+                self.begin_peaks_pointer = next_line_pointer
+
+        if self._flag == StreamfileParserFlags.predicted_peak:
+            if "fs/px" in line:
+                self.begin_predicted_peaks_pointer = next_line_pointer
 
         if "Image filename: " in line:
             self.cxi_filename = line.replace("Image filename: ", "").rstrip()
@@ -211,24 +226,20 @@ class Chunk:
         # Streamfile class such that the class Chunk has no information about 
         # the current line number. Maybe implement this later.
         elif "Peaks from peak search" in line:
-            flag = StreamfileParserFlags.peak
-            self.first_peaks_line = line_number + 2
+            self._flag = StreamfileParserFlags.peak
             return
         elif "End of peak list" in line:
-            flag = StreamfileParserFlags.none
-            self.last_peaks_line = line_number - 1
+            self._flag = StreamfileParserFlags.none
+            self.end_peaks_pointer = current_line_pointer 
             return
         elif "Begin crystal" in line:
             self.crystal = True
         elif "Reflections measured after indexing" in line:
-            flag = StreamfileParserFlags.predicted_peak
-            # +2 here because there is a table header before the predicted peaks
-            # we have to account for
-            self.first_predicted_peaks_line = line_number + 2
+            self._flag = StreamfileParserFlags.predicted_peak
             return
         elif "End of reflections" in line:
-            flag = StreamfileParserFlags.none
-            self.last_predicted_peaks_line = line_number - 1
+            self._flag = StreamfileParserFlags.none
+            self.end_predicted_peaks_pointer = current_line_pointer
             return
         elif "Cell parameters" in line:
             self.unit_cell = UnitCell(
@@ -247,18 +258,16 @@ class Chunk:
             else:
                 self.resolution_limit = float('nan')
 
-    def _get_coordinates_from_streamfile(self, first_line, last_line, 
+    def _get_coordinates_from_streamfile(self, begin_pointer, end_pointer, 
         x_column, y_column):
         try:
-            #print("first line: ", first_line)
-            #print("last line: ", last_line)
-            #f = open(self.stream_filename, "r")
             line_number = 1
             peak_x_data = []
             peak_y_data = []
 
-            for line_number in xrange(first_line, last_line):
-                line = self.stream_file.read_line(line_number)
+            self.stream_file.seek(begin_pointer)
+            while(self.stream_file.tell() != end_pointer):
+                line = self.stream_file.readline()
                 matches = re.findall(self._float_matching_regex, line)
                 # TODO: look up if fs is always x in the cheetah 
                 # implementation
@@ -271,12 +280,12 @@ class Chunk:
             exit()
 
     def get_peak_data(self):
-        return self._get_coordinates_from_streamfile(self.first_peaks_line,
-            self.last_peaks_line, 0, 1)
+        return self._get_coordinates_from_streamfile(self.begin_peaks_pointer,
+            self.end_peaks_pointer, 0, 1)
 
     def get_predicted_peak_data(self):
         return self._get_coordinates_from_streamfile(
-            self.first_predicted_peaks_line, self.last_predicted_peaks_line, 
+            self.begin_predicted_peaks_pointer, self.end_predicted_peaks_pointer, 
             7, 8)
         
 
@@ -354,12 +363,6 @@ class Streamfile:
         geometry_lines = []
         filenames = []
 
-        #options = {
-        #    StreamfileParserFlags.none: lambda x: None,
-        #    StreamfileParserFlags.geometry: lambda x: geometry_lines.append(x),
-        #    StreamfileParserFlags.chunk: _process_chunk
-        #}
-
         flag = StreamfileParserFlags.none
         flag_changed = False
         # line numbering starts at 1
@@ -367,10 +370,18 @@ class Streamfile:
         new_chunk = None
 
 
+        filesize = os.fstat(self.file.fileno()).st_size
+        current_line_pointer = 0
+        previous_line_pointer = 0
+        next_line_pointer = 0
         try:
             for line in self.file:
-                if (line_number % (self.file.length//25) == 0):
-                    print("{0:0.2f}".format(line_number/self.file.length*100),"% of the streamfile parsed.")
+                if (line_number % 1000000 == 0):
+                    print(line_number)
+                next_line_pointer = current_line_pointer + len(line)
+                #if (line_number % (self.file.length//25) == 0):
+                    #print("{0:0.2f}".format(line_number/self.file.length*100),"% of the streamfile parsed.")
+
                 # scan the line for keywords and perform end or begin flag 
                 # operations
                 if "Begin geometry file" in line:
@@ -387,11 +398,11 @@ class Streamfile:
                 elif "Begin chunk" in line:
                     flag = StreamfileParserFlags.chunk
                     new_chunk = Chunk(self.filename, self.file)
-                    new_chunk.first_line = line_number + 1
+                    new_chunk.begin_pointer = next_line_pointer
                     flag_changed = True
                 elif "End chunk" in line:
                     flag = StreamfileParserFlags.none
-                    new_chunk.last_line = line_number - 1
+                    new_chunk.end_pointer = current_line_pointer
                     self.chunks.append(new_chunk)
                     flag_changed = True
 
@@ -408,11 +419,13 @@ class Streamfile:
                     if flag == StreamfileParserFlags.geometry:
                         geometry_lines.append(line.strip())
                     elif flag == StreamfileParserFlags.chunk:
-                        new_chunk.parse_line(line, line_number)
+                        new_chunk.parse_line(line, previous_line_pointer, current_line_pointer, next_line_pointer)
                 else:
                     flag_changed = False
                     
                 line_number += 1
+                previous_line_pointer = current_line_pointer
+                current_line_pointer = next_line_pointer
             print("Number of chunks found: ", len(self.chunks))
         except IOError:
             print("Cannot read from streamfile: ", self.filename, ". Quitting.")
