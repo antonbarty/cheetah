@@ -18,6 +18,7 @@ class UnitCell:
         self.alpha = alpha
         self.beta = beta
         self.gamma = gamma
+        self.centering = None
 
     def to_angstroem(self):
         self.a /= 10.0
@@ -32,6 +33,7 @@ class UnitCell:
         print("alpha: ", self.alpha)
         print("beta: ", self.beta)
         print("gamma: ", self.gamma)
+        print("centering: ", self.centering)
 
 
 """
@@ -250,6 +252,8 @@ class Chunk:
                 float(re.findall(self._float_matching_regex, line)[4]),
                 float(re.findall(self._float_matching_regex, line)[5]))
             self.unit_cell.to_angstroem()
+        elif "centering = " in line:
+            self.unit_cell.centering = line.replace("centering = ", "").strip() 
         elif "diffraction_resolution_limit" in line:
             # we use the second resolution index in angstroem
             if self._float_matching_regex.match(line):
@@ -326,6 +330,9 @@ class Streamfile:
 
     def has_crystal(self, index):
         return self.chunks[index].crystal
+        
+    def get_unit_cell(self, index):
+        return self.chunks[index].unit_cell
 
     def get_predicted_peak_data(self, index):
         if(self.chunks[index].crystal == True):

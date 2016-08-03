@@ -25,6 +25,14 @@ import lib.cfel_imgtools as cfel_img
 from lib.cfel_streamfile import *
 
 
+"""
+Class implementing an exception for the case that no crystal is found in the 
+streamfile.
+"""
+class NoCrystalException(Exception):
+    pass
+
+
 #
 #	CXI viewer code
 #
@@ -256,6 +264,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             for index, item in enumerate(self.resolution_rings_textitems):
                 item.setText('')
 
+        self.show_unit_cell_info()
 
     #end draw_things()
     
@@ -442,6 +451,33 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #
     #   Saving and other file functions
     #
+    def show_unit_cell_info(self):
+        try:
+            if self.streamfile is None:
+                raise NoCrystalException
+            if not self.streamfile.has_crystal(self.img_index):
+                raise NoCrystalException
+            unit_cell = self.streamfile.get_unit_cell(self.img_index)
+
+            if unit_cell is None:
+                # If something went wrong just don't display the crystal 
+                # information
+                raise NoCrystalException
+
+            text = "Unit cell: "
+            text += unit_cell.centering + ", "
+            text += "a = " + "{:.2f}".format(unit_cell.a) + " \u212B, "
+            text += "b = " + "{:.2f}".format(unit_cell.b) + " \u212B,"
+            text += "c = " + "{:.2f}".format(unit_cell.c) + " \u212B, "
+            text += "\u03B1 = " + "{:.1f}".format(unit_cell.alpha) + "\u00B0, "
+            text += "\u03B2 = " + "{:.1f}".format(unit_cell.beta) + "\u00B0, "
+            text += "\u03B3 = " + "{:.1f}".format(unit_cell.gamma) + "\u00B0"
+            #qtext = PyQt4.QtCore.QString(text)
+            self.ui.statusBar.setText(text) 
+        except NoCrystalException:
+            self.ui.statusBar.setText("Ready") 
+            
+
     def action_save_png(self):
         file_hint = os.path.basename(self.event_list['filename'][self.img_index])
         file_hint = os.path.splitext(file_hint)[0]
@@ -493,6 +529,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #end action_update_files
 
 
+    def keyPressEvent(self, e):
+        if e.key() == PyQt4.QtCore.Qt.Key_Escape:
+            self.show_unit_cell_info()
 
     #
     #	Initialisation function
@@ -680,7 +719,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         #self.ui.imageView.imageItem.setZoom(1)
         #self.ui.imageView.imageItem.clipToView(False)     # True/False
         #self.ui.imageView.imageItem.antialias(True)     # True/False
-        self.ui.statusBar.setText('Ready')
+        #self.ui.statusBar.setText('Ready')
+        #self.show_unit_cell_info()
 
     #end __init()__
 #end cxiview
