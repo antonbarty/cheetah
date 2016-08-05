@@ -250,7 +250,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 peak_y = []
 
             ring_pen = pyqtgraph.mkPen('b', width=2)
-            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
+            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', 
+                size = 2*self.predicted_peak_circle_radius, pen = ring_pen, 
+                brush = (0,0,0,0), pxMode = False)
         else:
             self.predicted_peak_canvas.setData([])
         
@@ -411,19 +413,54 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #end jump_to_pattern()
         
 
+    def mouse_in_predicted_peak(self, mouse_x, mouse_y):
+        if self.streamfile is None:
+            return
+        
+        if not self.streamfile.has_crystal(self.img_index):
+            return
 
+        peak_x_data, peak_y_data = self.streamfile.get_predicted_peak_data(
+            self.img_index)
+        n_peaks = len(peak_x_data)
+
+        for ind in range(0,n_peaks):                
+            peak_fs = peak_x_data[ind]                
+            peak_ss = peak_y_data[ind]         
+            
+            # Peak coordinate to pixel in image
+            peak_in_slab = int(round(peak_ss))*self.slab_shape[1]+int(
+                round(peak_fs))
+            peak_x = (self.geometry['x'][peak_in_slab] + 
+                self.img_shape[0] / 2)
+            peak_y = (self.geometry['y'][peak_in_slab] + 
+                self.img_shape[1] / 2)
+                
+            if(numpy.sqrt((peak_x - mouse_x)**2 + (peak_y - mouse_y)**2) <
+                self.predicted_peak_circle_radius):
+                hkl = self.streamfile.get_hkl_indices(self.img_index,
+                    peak_fs, peak_ss)
+                text = "The hkl indices of the predicted peak are: "
+                text += str(hkl[0]) + ", "
+                text += str(hkl[1]) + ", "
+                text += str(hkl[2])
+                self.ui.statusBar.setText(text)
 
     #
     # Mouse clicked somewhere in the window
     #
     def mouse_clicked(self, event):
-        pos = event[0].pos()
+        #pos = event[0].pos()
+        pos = event.scenePos()
+        #print(pos)
         if self.ui.imageView.getView().sceneBoundingRect().contains(pos):
             mouse_point = self.ui.imageView.getView().mapSceneToView(pos)
             x_mouse = int(mouse_point.x())
             y_mouse = int(mouse_point.y()) 
+            #print("x: ", x_mouse, "y: ", y_mouse)
             x_mouse_centered = x_mouse - self.img_shape[0]/2 + 1
             y_mouse_centered = y_mouse - self.img_shape[0]/2 + 1
+
             radius_in_m = self.geometry['dx'] * numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2)
 
             text = 'Last clicked pixel:     x: %4i     y: %4i     value: %4i' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse])
@@ -441,6 +478,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
             self.ui.statusBar.setText(text)
+            self.mouse_in_predicted_peak(x_mouse, y_mouse)
             # self.ui.statusBar.setText(
             #    'Last clicked pixel:     x: %4i     y: %4i     value: %4i     z: %.2f mm     resolution: %4.2f Å' % (
             #    x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse], self.camera_z_mm, resolution))
@@ -528,6 +566,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.setWindowTitle(title)
     #end action_update_files
 
+    """
+    def mousePressEvent(self, event):
+        p = PyQt4.QtGui.QCursor.pos()
+        print("pressed here: " + str(p.x()) + ", " + str(p.y()))
+    """
 
     def keyPressEvent(self, e):
         if e.key() == PyQt4.QtCore.Qt.Key_Escape:
@@ -585,6 +628,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.image_center = (self.img_shape[0] / 2, self.img_shape[1] / 2)
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
         self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
+        self.predicted_peak_circle_radius = 5
 
         #
         # Set up the UI
@@ -674,7 +718,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Put menu inside the window on Macintosh and elsewhere
         self.ui.menuBar.setNativeMenuBar(False)
-        self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
+        self.ui.imageView.getView().scene().sigMouseClicked.connect(self.mouse_clicked)
+        #self.proxy = pyqtgraph.SignalProxy(self.ui.imageView.getView().scene().sigMouseClicked, rateLimit=60, slot=self.mouse_clicked)
 
 
         # Masks

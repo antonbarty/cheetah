@@ -4,14 +4,29 @@ import lib.cfel_geometry as cfel_geom
 import re
 import sys
 import os
+import math
 
-"""
-This class is a data structure to store the information of a unit cell. The unit
-of the length of the axis is supposed to be in nm and the unit of the angles
-supposed to be degree.
-"""
 class UnitCell:
+    """
+    This class is a data structure to store the information of a unit cell. The
+    unit of the length of the axis is supposed to be in nm and the unit of the
+    angles supposed to be degree.  
+    """
+
     def __init__(self, a, b, c, alpha, beta, gamma):
+        """
+        Note:
+            The centering parameter of the unit cell is not required in the
+            constructer but can be set later.
+
+        Args:
+            a: The length of the a-axis of the unit cell in nm
+            b: The length of the b-axis of the unit cell in nm
+            c: The length of the c-axis of the unit cell in nm
+            alpha: The length of the alpha angle of the unit cell
+            beta: The length of the beta angle of the unit cell
+            gamma: The length of the gamma angle of the unit cell
+        """
         self.a = a
         self.b = b
         self.c = c
@@ -21,11 +36,20 @@ class UnitCell:
         self.centering = None
 
     def to_angstroem(self):
+        """
+        This method converts the length of the unit cell axis from nm to 
+        Angstroem.
+        """
+
         self.a /= 10.0
         self.b /= 10.0
         self.c /= 10.0
     
     def dump(self):
+        """
+        This method prints the unit cell parameters.
+        """
+
         print("Unit Cell:")
         print("a: ", self.a)
         print("b: ", self.b)
@@ -36,10 +60,15 @@ class UnitCell:
         print("centering: ", self.centering)
 
 
-"""
-This class is providing flags used in the parsing process of the streamfile.
-"""
 class StreamfileParserFlags:
+    """
+    This class provides flags used in the parsing process of the streamfile.
+
+    Note:
+        All the class variables are static and therefore the class should not be
+        instantiated.  
+    """
+
     none = 0
     geometry = 1
     chunk = 2
@@ -48,13 +77,28 @@ class StreamfileParserFlags:
     flag_changed = 5
 
 
-"""
-This class provides the ability to handle large text files relatively quickly.
-The funcionality to jump between different lines is implemented. The offset
-table is currently deactivated to save memory.
-"""
 class LargeFile:
+    """
+    This class provides the ability to handle large text files relatively
+    quickly. This is achieved by storing a table containing the newline
+    positions in the file. Hence it is able to quickly jump to a given line
+    number without scanning the whole file again. 
+    
+    Note: 
+        The table storing the newline positions is currently deactivated to save
+        memory.  
+
+        Most of the methods reimplement the methods of a python file and will
+        therefore not be further described.
+    """
+
     def __init__(self, name, mode="r"):
+        """
+        Args:
+            name: Filepath to the file on the harddrive
+            mode: Mode in which the file should be opened, e.g. "r","w","rw"
+        """
+
         self.name = name
         self.file = open(name, mode)
         self.length = 0
@@ -66,6 +110,11 @@ class LargeFile:
         """
 
     def __exit__(self):
+        """
+        This method implements the desctructor of the class. The Desctructer
+        closes the file when the object is destroyed.
+        """
+
         self.file.close()
 
     def __iter__(self):
@@ -75,6 +124,11 @@ class LargeFile:
         return self.file.next()
 
     def _read_file(self):
+        """
+        This method reads the whole file once and creates the table _line_offset
+        which stores the position of the newlines in the file.  
+        """
+
         offset = 0
         for index, line in enumerate(self.file):
             self._line_offset[index] = offset
@@ -95,6 +149,7 @@ class LargeFile:
 
     def fileno(self):
         return self.file.fileno()
+
     """
     def read_line_by_number(self, line_number):
         self.file.seek(self._line_offset[line_number])
@@ -102,11 +157,19 @@ class LargeFile:
     """
         
         
-"""
-This class is providing the information of a specific chunk in the streamfile
-"""
 class Chunk:
+    """
+    This class is a datastructure to store the information of a Chunk in the
+    streamfile.
+    """
+
     def __init__(self, stream_filename, stream_file):
+        """
+        Args:
+            stream_filename: Filepath to the stream file on the harddrive
+            stream_file: File/LargeFile object of the stream file
+        """
+
         # general properties of the chunk
         self.stream_filename = stream_filename
         self.stream_file = stream_file
@@ -126,7 +189,7 @@ class Chunk:
         self.end_peaks_pointer = None 
 
         # properties if a crystal has been found
-        self.crystal = None
+        self.crystal = False
         self.begin_predicted_peaks_pointer = None 
         self.end_predicted_peaks_pointer = None
         self.unit_cell = None
@@ -150,6 +213,10 @@ class Chunk:
         self._flag = StreamfileParserFlags.none
 
     def dump(self):
+        """
+        This method prints all the Chunk information.
+        """
+
         print("""-----------------------------------------------------------""")
         print("Dumping all the chunk information.")
         print("Filename: ", self.cxi_filename)
@@ -166,7 +233,7 @@ class Chunk:
         print("First peaks line: ", self.begin_peaks_pointer)
         print("Last peaks line: ", self.end_peaks_pointer)
 
-        if(self.crystal is not None):
+        if(self.crystal == True):
             print("First predicted peaks line: ", 
                 self.begin_predicted_peaks_pointer)
             print("Last predicted peaks line: ", 
@@ -176,6 +243,30 @@ class Chunk:
 
     def parse_line(self, line, previous_line_pointer, current_line_pointer, 
         next_line_pointer):
+        """
+        This methods parses one line of the stream file. The information in the
+        line is stored in the corresponding Chunk variables. 
+
+        Args:
+            line: String containing the the line of the streamfile which shall
+                be parsed.
+            previous_line_pointer: Integer storing the beginning position of
+                the previous line in the stream file.
+            current_line_pointer: Integer storing the beginning position of
+                the current line in the stream file.
+            next_line_pointer: Integer storing the beginning position of the 
+                next line in the stream file.
+
+
+        Note:
+            The information of the beginning positions of the previous, current
+            and next line is needed to read information from the stream file
+            after the parsing process. With the method seek of a python file it
+            is possible to set the file pointer to the desired position and
+            read from there. This is really fast and used to read crystal and
+            predicted peak information when needed from the streamfile.
+        """
+
         if self._flag == StreamfileParserFlags.peak:
             if "fs/px" in line:
                 self.begin_peaks_pointer = next_line_pointer
@@ -284,22 +375,78 @@ class Chunk:
                 self.filename)
             return ([], [])
 
+    def get_hkl_indices_from_streamfile(self, peak_x, peak_y):
+        """
+        This method returns the hkl indices of the predicted bragg peak at the
+        position (peak_x, peak_y)
+
+        Args:
+            peak_x (float): The x coordinate of the peak position
+            peak_y (float): The y coordinate of the peak position
+
+        Returns:
+            list: The hkl indices
+        """
+
+        try:
+            self.stream_file.seek(self.begin_predicted_peaks_pointer)
+            while(self.stream_file.tell() != self.end_predicted_peaks_pointer):
+                line = self.stream_file.readline()
+                matches = re.findall(self._float_matching_regex, line)
+               
+                if(math.isclose(peak_x, float(matches[7]))
+                    and math.isclose(peak_y, float(matches[8]))):
+                    return [int(matches[0]), int(matches[1]), int(matches[2])]
+        except IOError:
+            print("Cannot read the peak information from streamfile: ", 
+                self.filename)
+        return []
+
     def get_peak_data(self):
+        """
+        This method returns a list of all the peaks in the chunk of the 
+        streamfile.
+
+        Returns:
+            list: The list with the positions of the peaks. The peaks are
+            stored in the format (x_position, y_position).
+        """
+
         return self._get_coordinates_from_streamfile(self.begin_peaks_pointer,
             self.end_peaks_pointer, 0, 1)
 
     def get_predicted_peak_data(self):
-        return self._get_coordinates_from_streamfile(
-            self.begin_predicted_peaks_pointer, 
-            self.end_predicted_peaks_pointer, 7, 8)
+        """
+        This method returns a list of all the predicted peaks in the chunk of 
+        the streamfile.
+
+        Note:
+            If the chunk contains no crystal an empty list is returned.
+
+        Returns:
+            list: The list with the positions of the predicted peaks. The peaks 
+                are stored in the format (x_position, y_position).
+        """
+
+        if self.crystal == True:
+            return self._get_coordinates_from_streamfile(
+                self.begin_predicted_peaks_pointer, 
+                self.end_predicted_peaks_pointer, 7, 8)
+        else:
+            return []
         
 
-"""
-This class implements the parser of the crystfel streamfile with the help of a
-state machine.
-"""
 class Streamfile:
+    """
+    This class is a datastructure to store the information in the stream file.
+    """
+
     def __init__(self, filename):
+        """
+        Args:
+            filename: Filepath to the stream file on the harddrive
+        """
+
         self.filename = filename
 
         try: 
@@ -323,22 +470,83 @@ class Streamfile:
             self._temporary_geometry_file.close()
 
     def get_geometry(self):
+        """
+        This method returns the geometry information in the format requiered
+        for the cxiviewer
+
+        Return:
+            dict: The geometry information.
+        """
+
         return self._geom_dict
 
     def get_peak_data(self, index):
+        """
+        This methods return a list of all the peaks in the streamfile
+        corresponding to a specific chunk.
+
+        Args:
+            index (int): The number of the chunk from which the peak information
+                is returned.
+
+        Returns:
+            list: The list with the positions of the peaks. The peaks are
+                stored in the format (x_position, y_position).
+        """
         return self.chunks[index].get_peak_data()
 
     def has_crystal(self, index):
+        """
+        This method returns True or False depending on whether a crystal was
+        found in a specific chunk.
+
+        Args:
+            index (int): The number of the chunk from which the information
+                is returned.
+
+        Returns:
+            bool: True if a crystal was found. False if no crystal was found.
+        """
+
         return self.chunks[index].crystal
         
     def get_unit_cell(self, index):
+        """
+        This method returns the UnitCell object of a specific chunk if a
+        crystal was found. If no crystal was found None is returned.
+
+        Args:
+            index (int): The number of the chunk from which the unit cell
+                is returned.
+
+        Returns:
+            unit cell (UnitCell): The unit cell of the chunk
+        """
+
         return self.chunks[index].unit_cell
 
-    def get_predicted_peak_data(self, index):
-        if(self.chunks[index].crystal == True):
-            return self.chunks[index].get_predicted_peak_data()
+    def get_predicted_peak_data(self, chunk_index):
+        """
+        This methods return a list of all the predicted peaks in the streamfile
+        corresponding to a specific chunk.
+
+        Args:
+            index (int): The number of the chunk from which the peak information
+                should be returned.
+
+        Returns:
+            list: The list with the positions of the predicted peaks. The peaks 
+                are stored in the format (x_position, y_position).
+        """
+
+        if(self.chunks[chunk_index].crystal == True):
+            return self.chunks[chunk_index].get_predicted_peak_data()
         else:
             return []
+
+    def get_hkl_indices(self, chunk_index, peak_x, peak_y):
+        return self.chunks[chunk_index].get_hkl_indices_from_streamfile(
+            peak_x, peak_y)
 
     def get_cxi_filenames(self):
         list_of_filenames = [] 
@@ -372,8 +580,10 @@ class Streamfile:
 
     def parse_streamfile(self):
         """
-        Read the streamfile and process its content.
+        This methods parses the stream file. The information in the stream file
+        is stored corresponding Streamfile variables.
         """
+
         # start to parse the streamfile
         # we write the geometry file into a temporary directory to process it
         # with the cheetah function read_geometry in lib/cfel_geometry
@@ -440,7 +650,6 @@ class Streamfile:
                 line_number += 1
                 previous_line_pointer = current_line_pointer
                 current_line_pointer = next_line_pointer
-            print("Number of chunks found: ", len(self.chunks))
         except IOError:
             print("Cannot read from streamfile: ", self.filename)
             exit()
