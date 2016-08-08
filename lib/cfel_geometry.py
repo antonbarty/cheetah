@@ -9,6 +9,7 @@ import h5py
 import numpy
 import sys
 import traceback
+import re
 
 def pixelmap_from_CrystFEL_geometry_file(fnam):
     """
@@ -116,6 +117,7 @@ def coffset_from_CrystFEL_geometry_file(fnam):
         if(line_parsed_comments is not ""):
             f_lines.append(line_parsed_comments)
     # endfor
+    f.close()
 
     coffset_lines = [x for x in f_lines if "coffset" in x]
     
@@ -136,6 +138,57 @@ def coffset_from_CrystFEL_geometry_file(fnam):
 
     return coffset, res, dx_m
 
+
+def clen_from_CrystFEL_geometry_file(fnam):
+    """
+    This fuction returns the clen from the geometry file.
+
+    Returns:
+        string: codeword under which the clen can be found in the streamfile
+        float: clen value
+        None: clen not found in the geometry file
+    
+    Note:
+        This functions opens the geometry file all alone and scans the whole
+        file for the clen flag. This might take long and is so far from being
+        optimal. This implementation has been choosen such that the original
+        geometry parser from cheetah remains unchanged.
+    """
+
+    try:
+        with open(fnam, 'r') as f:
+            clen = None
+            for line in f:
+                line_parsed_comments = line.split(";", 1)[0] 
+                if "clen = " in line_parsed_comments:
+                    clen = line.replace("clen = ", "").rstrip()
+                    break
+
+            if clen is None:
+                return clen
+            if isinstance(clen, str):
+                return clen
+
+            float_matching_pattern = r"""
+                [-+]? # optional sign
+                (?:
+                (?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
+                |
+                (?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
+                )
+                # followed by optional exponent part if desired
+                (?: [Ee] [+-]? \d+ ) ?
+            """
+            float_matching_regex = re.compile(
+                float_matching_pattern, re.VERBOSE)
+
+            match = re.findall(float_matching_regex, clen)
+            if match:
+                return float(match[0])
+            else:
+                return clen
+    except IOError:
+        return None
 
 def read_pixelmap(filename):
     """

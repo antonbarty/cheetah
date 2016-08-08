@@ -59,11 +59,17 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.photon_energy = float(self.default_eV)
             self.photon_energy_ok = True
         else:
-            self.photon_energy = cxi['photon_energy_eV']
-            if not numpy.isnan(self.photon_energy):
+            # get photon energy from streamfile
+            self.photon_energy = self.streamfile.chunks[self.img_index].photon_energy
+            if self.photon_energy > 0:
                 self.photon_energy_ok = True
-        if self.photon_energy < 0 or numpy.isnan(self.photon_energy):
-            self.photon_energy_ok = False
+            else:    
+                # reading photon energy from streamfile failed, try cxi
+                self.photon_energy = cxi['photon_energy_eV']
+                if not numpy.isnan(self.photon_energy):
+                    self.photon_energy_ok = True
+            if self.photon_energy < 0 or numpy.isnan(self.photon_energy):
+                self.photon_energy_ok = False
 
         # Photon energy to wavelength
         if self.photon_energy_ok:
@@ -77,7 +83,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.detector_z_m = float(self.default_z)
             self.detector_distance_ok = True
         else:
-            detector_distance = cxi['EncoderValue']
+            # get detector distance from streamfile
+            detector_distance = self.streamfile.chunks[self.img_index].clen
+            if detector_distance is None:
+                detector_distance = cxi['EncoderValue']
+
             if not numpy.isnan(detector_distance) and not numpy.isnan(self.geometry['coffset']):
                 self.detector_distance_ok = True
                 self.detector_z_m = (1e-3*detector_distance + self.geometry['coffset'])
@@ -230,6 +240,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 peak_x = []
                 peak_y = []
                 
+                print("Number of peaks found: ", 
+                    self.streamfile.get_number_of_crystals(self.img_index))
+                print("At the moment just displaying the first one.")
                 peak_x_data, peak_y_data = self.streamfile.get_predicted_peak_data(
                     self.img_index)
                 n_peaks = len(peak_x_data)
@@ -414,6 +427,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         
 
     def mouse_in_predicted_peak(self, mouse_x, mouse_y):
+        """
+        This method displays the predicted peak hkl indices in the lower
+        left corner of the gui window if the mouse pointer has been clicked
+        on the corresponding predicted peak.
+        """
+
         if self.streamfile is None:
             return
         
@@ -438,8 +457,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 
             if(numpy.sqrt((peak_x - mouse_x)**2 + (peak_y - mouse_y)**2) <
                 self.predicted_peak_circle_radius):
-                hkl = self.streamfile.get_hkl_indices(self.img_index,
-                    peak_fs, peak_ss)
+                hkl = self.streamfile.get_hkl_indices(peak_fs, peak_ss, 
+                    self.img_index)
                 text = "The hkl indices of the predicted peak are: "
                 text += str(hkl[0]) + ", "
                 text += str(hkl[1]) + ", "
@@ -486,10 +505,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #end mouse_clicked()
 
 
-    #
-    #   Saving and other file functions
-    #
     def show_unit_cell_info(self):
+        """
+        This method displays the unit cell information in the lower left corner
+        of the gui windows if a crystal has been found.
+        """
+
         try:
             if self.streamfile is None:
                 raise NoCrystalException
@@ -516,6 +537,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.ui.statusBar.setText("Ready") 
             
 
+    #
+    #   Saving and other file functions
+    #
     def action_save_png(self):
         file_hint = os.path.basename(self.event_list['filename'][self.img_index])
         file_hint = os.path.splitext(file_hint)[0]

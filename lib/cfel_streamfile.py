@@ -60,6 +60,32 @@ class UnitCell:
         print("centering: ", self.centering)
 
 
+class Crystal:
+    """
+    This class is a data structure to store the information about a crystal in
+    the crystfel stream file.
+    """
+    
+    def __init__(self):
+        self.begin_predicted_peaks_pointer = None 
+        self.end_predicted_peaks_pointer = None
+        self.unit_cell = None
+        self.resolution_limit = None
+
+    def dump(self):
+        """
+        This method prints the parameters of the crystal
+        """
+
+        print("Crystal:")
+        print("Begin predicted peaks pointer: ", 
+            self.begin_predicted_peaks_pointer)
+        print("End predicted peaks pointer: ", 
+            self.end_predicted_peaks_pointer)
+        self.unit_cell.dump()
+        print("Resolution limit: ", self.resolution_limit)
+
+
 class StreamfileParserFlags:
     """
     This class provides flags used in the parsing process of the streamfile.
@@ -163,11 +189,13 @@ class Chunk:
     streamfile.
     """
 
-    def __init__(self, stream_filename, stream_file):
+    def __init__(self, stream_filename, stream_file, clen, clen_codeword):
         """
         Args:
             stream_filename: Filepath to the stream file on the harddrive
             stream_file: File/LargeFile object of the stream file
+            clen: value of the clen in the geometry file
+            clen_codeword: string under which the clen is stored in the chunk
         """
 
         # general properties of the chunk
@@ -180,20 +208,16 @@ class Chunk:
         self.photon_energy = -1.0
         self.beam_divergence = -1.0
         self.beam_bandwidth = -1.0
-        self.average_camera_length = -1.0
+        self.clen_codeword = clen_codeword
+        self.clen = clen
         self.num_peaks = None 
         self.num_saturated_peaks = None 
         self.first_line = None
         self.last_line = None 
         self.begin_peaks_pointer = None 
         self.end_peaks_pointer = None 
-
-        # properties if a crystal has been found
-        self.crystal = False
-        self.begin_predicted_peaks_pointer = None 
-        self.end_predicted_peaks_pointer = None
-        self.unit_cell = None
-        self.resolution_limit = None
+        self.crystals = []
+        self.num_crystals = 0
 
         # implementation specific class variables. Regular expressions
         # are needed for parsing the streamfile
@@ -229,17 +253,10 @@ class Chunk:
         print("Num saturated peaks: ", self.num_saturated_peaks)
         print("First line: ", self.first_line)
         print("Last line: ", self.last_line)
-        print("Crystal found: ", self.crystal)
+        print("Crystal found: ", self.has_crystal())
+        print("Number of crystals found: ", len(self.crystals))
         print("First peaks line: ", self.begin_peaks_pointer)
         print("Last peaks line: ", self.end_peaks_pointer)
-
-        if(self.crystal == True):
-            print("First predicted peaks line: ", 
-                self.begin_predicted_peaks_pointer)
-            print("Last predicted peaks line: ", 
-                self.end_predicted_peaks_pointer)
-            self.unit_cell.dump()
-            print("Resolution limit: ", self.resolution_limit)
 
     def parse_line(self, line, previous_line_pointer, current_line_pointer, 
         next_line_pointer):
@@ -273,7 +290,19 @@ class Chunk:
 
         if self._flag == StreamfileParserFlags.predicted_peak:
             if "fs/px" in line:
-                self.begin_predicted_peaks_pointer = next_line_pointer
+                self.crystals[self.num_crystals - 1]. \
+                    begin_predicted_peaks_pointer = next_line_pointer
+        if self.clen_codeword is not None:
+            if self.clen_codeword in line:
+                # we split the line first because the clen_codeword may contain
+                # some float number
+                search_string = line.split("=")[1]
+                matches = re.findall(
+                    self._float_matching_regex, search_string)
+                if matches:
+                    self.clen = float(matches[0])
+                else:
+                    self.clen = float('nan')
 
         if "Image filename: " in line:
             self.cxi_filename = line.replace("Image filename: ", "").rstrip()
@@ -282,29 +311,26 @@ class Chunk:
             # with the in the streamfile. we use just the plain
             # "photon_energy_ev" entry
             if "hdf5" not in line:
-                if self._float_matching_regex.match(line):
-                    self.photon_energy = float(re.findall(
-                        self._float_matching_regex, line)[0])
+                matches = re.findall(
+                        self._float_matching_regex, line)
+                if matches:
+                    self.photon_energy = float(matches[0])
                 else:
                     self.photon_energy = float('nan')
         elif "beam_divergence = " in line:
-            if self._float_matching_regex.match(line):
-                self.beam_divergence = float(re.findall(
-                    self._float_matching_regex, line)[0])
+            matches = re.findall(
+                    self._float_matching_regex, line)
+            if matches:
+                self.beam_divergence = float(matches[0])
             else:
                 self.beam_divergence = float('nan')
         elif "beam_bandwidth = " in line:
-            if self._float_matching_regex.match(line):
-                self.beam_bandwidth = float(re.findall(
-                    self._float_matching_regex, line)[0])
+            matches = re.findall(
+                    self._float_matching_regex, line)
+            if matches:
+                self.beam_bandwidth = float(matches[0])
             else:
                 self.beam_bandwidth = float('nan')
-        elif "average_camera_length = " in line:
-            if self._float_matching_regex.match(line):
-                self.average_camera_length = float(re.findall(
-                    self._float_matching_regex, line)[0])
-            else:
-                self.average_camera_length = float('nan')
         elif "num_peaks = " in line:
             self.num_peaks = int(line.replace("num_peaks = ", ""))
         elif "num_saturated_peaks = " in line:
@@ -326,30 +352,34 @@ class Chunk:
             self.end_peaks_pointer = current_line_pointer 
             return
         elif "Begin crystal" in line:
-            self.crystal = True
+            self.num_crystals += 1
+            self.crystals.append(Crystal())
+            #self.crystal = True
         elif "Reflections measured after indexing" in line:
             self._flag = StreamfileParserFlags.predicted_peak
             return
         elif "End of reflections" in line:
             self._flag = StreamfileParserFlags.none
-            self.end_predicted_peaks_pointer = current_line_pointer
+            self.crystals[self.num_crystals - 1].end_predicted_peaks_pointer = \
+                current_line_pointer
             return
         elif "Cell parameters" in line:
-            self.unit_cell = UnitCell(
+            self.crystals[self.num_crystals-1].unit_cell = UnitCell(
                 float(re.findall(self._float_matching_regex, line)[0]),
                 float(re.findall(self._float_matching_regex, line)[1]),
                 float(re.findall(self._float_matching_regex, line)[2]),
                 float(re.findall(self._float_matching_regex, line)[3]),
                 float(re.findall(self._float_matching_regex, line)[4]),
                 float(re.findall(self._float_matching_regex, line)[5]))
-            self.unit_cell.to_angstroem()
+            self.crystals[self.num_crystals - 1].unit_cell.to_angstroem()
         elif "centering = " in line:
-            self.unit_cell.centering = line.replace("centering = ", "").strip() 
+            self.crystals[self.num_crystals - 1].unit_cell.centering = \
+                line.replace("centering = ", "").strip() 
         elif "diffraction_resolution_limit" in line:
             # we use the second resolution index in angstroem
             if self._float_matching_regex.match(line):
-                self.resolution_limit = float(re.findall(
-                    self._float_matching_regex, line)[2])
+                self.crystals[self.num_crystals - 1].resolution_limit = \
+                    float(re.findall(self._float_matching_regex, line)[2])
             else:
                 self.resolution_limit = float('nan')
 
@@ -375,12 +405,14 @@ class Chunk:
                 self.filename)
             return ([], [])
 
-    def get_hkl_indices_from_streamfile(self, peak_x, peak_y):
+    def get_hkl_indices_from_streamfile(self, crystal_index, peak_x, peak_y):
         """
-        This method returns the hkl indices of the predicted bragg peak at the
-        position (peak_x, peak_y)
+        This method returns the hkl indices of the predicted bragg peaks of
+        the crystal with the given index at the position (peak_x, peak_y)
 
         Args:
+            crystal_index (int): Index of the crystal from which the unit cell
+                is returned.
             peak_x (float): The x coordinate of the peak position
             peak_y (float): The y coordinate of the peak position
 
@@ -389,8 +421,10 @@ class Chunk:
         """
 
         try:
-            self.stream_file.seek(self.begin_predicted_peaks_pointer)
-            while(self.stream_file.tell() != self.end_predicted_peaks_pointer):
+            crystal = self.crystals[crystal_index]
+            self.stream_file.seek(crystal.begin_predicted_peaks_pointer)
+            while(self.stream_file.tell() != 
+                crystal.end_predicted_peaks_pointer):
                 line = self.stream_file.readline()
                 matches = re.findall(self._float_matching_regex, line)
                
@@ -415,25 +449,65 @@ class Chunk:
         return self._get_coordinates_from_streamfile(self.begin_peaks_pointer,
             self.end_peaks_pointer, 0, 1)
 
-    def get_predicted_peak_data(self):
+    def has_crystal(self):
         """
-        This method returns a list of all the predicted peaks in the chunk of 
-        the streamfile.
+        This method returns True if the Chunk has at least one crystal and
+        False if no crystal is present.
+
+        Returns:
+            Bool
+        """
+
+        if (len(self.crystals) != 0):
+            return True
+        else:
+            return False
+
+    def get_number_of_crystals(self):
+        """
+        This method returns the number of crystals in the chunk.
+
+        Returns:
+            number_of_crystals (int): The number of crystals in the chunk
+        """
+        
+        return (len(self.crystals))
+
+    def get_unit_cell(self, crystal_index):
+        """
+        This method returns the unit cell of the crystal with the given index.
+
+        Args:
+            crystal_index (int): Index of the crystal from which the unit cell
+                is returned.
+
+        Returns:
+            UnitCell: Unit cell of the crystal
+        """
+
+        return self.crystals[crystal_index].unit_cell
+
+    def get_predicted_peak_data(self, crystal_index):
+        """
+        This method returns a list of all the predicted peaks from the crystal
+        with the given index.
 
         Note:
             If the chunk contains no crystal an empty list is returned.
 
+        Args:
+            crystal_index (int): Index of the crystal from which the unit cell
+                is returned.
+                
         Returns:
             list: The list with the positions of the predicted peaks. The peaks 
                 are stored in the format (x_position, y_position).
         """
+        crystal = self.crystals[crystal_index] 
+        return self._get_coordinates_from_streamfile(
+                crystal.begin_predicted_peaks_pointer, 
+                crystal.end_predicted_peaks_pointer, 7, 8)
 
-        if self.crystal == True:
-            return self._get_coordinates_from_streamfile(
-                self.begin_predicted_peaks_pointer, 
-                self.end_predicted_peaks_pointer, 7, 8)
-        else:
-            return []
         
 
 class Streamfile:
@@ -464,6 +538,9 @@ class Streamfile:
         self._temporary_geometry_file = None
         self._gen_temporary_geometry_file()
         self.parse_streamfile()
+        
+        self.clen = None
+        self.clen_codeword = None
 
     def __exit__(self, exc_type, exc_value, traceback):
         if not self._temporary_geometry_file.closed:
@@ -507,10 +584,10 @@ class Streamfile:
         Returns:
             bool: True if a crystal was found. False if no crystal was found.
         """
-
-        return self.chunks[index].crystal
         
-    def get_unit_cell(self, index):
+        return self.chunks[index].has_crystal()
+        
+    def get_unit_cell(self, index, crystal_index = 0):
         """
         This method returns the UnitCell object of a specific chunk if a
         crystal was found. If no crystal was found None is returned.
@@ -519,13 +596,16 @@ class Streamfile:
             index (int): The number of the chunk from which the unit cell
                 is returned.
 
+            crystal_index (int): Index of the crystal from which the unit cell
+                is returned.
+
         Returns:
             unit cell (UnitCell): The unit cell of the chunk
         """
 
-        return self.chunks[index].unit_cell
+        return self.chunks[index].get_unit_cell(crystal_index)
 
-    def get_predicted_peak_data(self, chunk_index):
+    def get_predicted_peak_data(self, chunk_index, crystal_index = 0):
         """
         This methods return a list of all the predicted peaks in the streamfile
         corresponding to a specific chunk.
@@ -534,19 +614,33 @@ class Streamfile:
             index (int): The number of the chunk from which the peak information
                 should be returned.
 
+            crystal_index (int): Index of the crystal from which the unit cell
+                is returned.
+
         Returns:
             list: The list with the positions of the predicted peaks. The peaks 
                 are stored in the format (x_position, y_position).
         """
 
-        if(self.chunks[chunk_index].crystal == True):
-            return self.chunks[chunk_index].get_predicted_peak_data()
-        else:
-            return []
+        return self.chunks[chunk_index].get_predicted_peak_data(crystal_index)
 
-    def get_hkl_indices(self, chunk_index, peak_x, peak_y):
+    def get_number_of_crystals(self, chunk_index):
+        """
+        This method returns the number of crystals in a specific chunk.
+        
+        Args:
+            index (int): The number of the chunk from which the number of 
+                crystals should be returned.
+
+        Returns:
+            number_of_crystals (int): The number of crystals in the chunk
+        """
+        
+        return self.chunks[chunk_index].get_number_of_crystals()
+
+    def get_hkl_indices(self, peak_x, peak_y, chunk_index, crystal_index = 0):
         return self.chunks[chunk_index].get_hkl_indices_from_streamfile(
-            peak_x, peak_y)
+            crystal_index, peak_x, peak_y)
 
     def get_cxi_filenames(self):
         list_of_filenames = [] 
@@ -595,7 +689,8 @@ class Streamfile:
         # line numbering starts at 1
         line_number = 1
         new_chunk = None
-
+        clen = None
+        clen_codeword = None
 
         filesize = os.fstat(self.file.fileno()).st_size
         current_line_pointer = 0
@@ -617,10 +712,23 @@ class Streamfile:
                         self._write_temporary_geometry_file(geometry_lines)
                         self._geom_dict = cfel_geom.read_geometry(
                             self._temporary_geometry_file.name)
+
+                        # handle the clen property which can be given either as
+                        # a float directly or as a codeword in the chunk
+                        clen = cfel_geom.clen_from_CrystFEL_geometry_file(
+                            self._temporary_geometry_file.name)
+                        if isinstance(clen, str):
+                            clen_codeword = clen
+                            clen = None
+                           
                         flag_changed = True
                 elif "Begin chunk" in line:
                     flag = StreamfileParserFlags.chunk
-                    new_chunk = Chunk(self.filename, self.file)
+                    # the clen and clen_codeword parameters has to be passed
+                    # from the geometry file to the chunk. the chunk cannot
+                    # determine that information by itself
+                    new_chunk = Chunk(self.filename, self.file, clen, 
+                        clen_codeword)
                     new_chunk.begin_pointer = next_line_pointer
                     flag_changed = True
                 elif "End chunk" in line:
