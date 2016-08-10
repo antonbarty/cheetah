@@ -41,9 +41,9 @@ class UnitCell:
         Angstroem.
         """
 
-        self.a /= 10.0
-        self.b /= 10.0
-        self.c /= 10.0
+        self.a *= 10.0
+        self.b *= 10.0
+        self.c *= 10.0
     
     def dump(self):
         """
@@ -377,9 +377,11 @@ class Chunk:
                 line.replace("centering = ", "").strip() 
         elif "diffraction_resolution_limit" in line:
             # we use the second resolution index in angstroem
-            if self._float_matching_regex.match(line):
+            matches = re.findall(
+               self._float_matching_regex, line)
+            if matches:
                 self.crystals[self.num_crystals - 1].resolution_limit = \
-                    float(re.findall(self._float_matching_regex, line)[2])
+                    float(matches[2])
             else:
                 self.resolution_limit = float('nan')
 
@@ -633,10 +635,19 @@ class Streamfile:
                 crystals should be returned.
 
         Returns:
-            number_of_crystals (int): The number of crystals in the chunk
+            int: The number of crystals in the chunk
         """
         
         return self.chunks[chunk_index].get_number_of_crystals()
+
+    def get_number_of_chunks(self):
+        """
+        This methods returns the number of chunks in the streamfile.
+
+        Returns:
+            int: The number of chunks
+        """
+        return len(self.chunks)
 
     def get_hkl_indices(self, peak_x, peak_y, chunk_index, crystal_index = 0):
         return self.chunks[chunk_index].get_hkl_indices_from_streamfile(

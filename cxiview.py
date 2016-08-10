@@ -106,7 +106,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Set window title
         file_str = os.path.basename(self.event_list['filename'][self.img_index])
-        title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
+        title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines-1) + ')'
         self.setWindowTitle(title)
         self.ui.jumpToLineEdit.setText(str(self.img_index))
 
@@ -229,13 +229,20 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
 
             ring_pen = pyqtgraph.mkPen('r', width=2)
-            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
+            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.found_peak_canvas.setData([])
 
         # Draw predicted peaks
         if self.ui.predictedPeaksCheckBox.isChecked():
+            # Draw resolution limit ring
+            self.draw_resolution_limit_ring()
+
+            for index, item in enumerate(self.resolution_rings_textitems):
+                item.setText('')
+
+
             if(self.streamfile.has_crystal(self.img_index)):
                 peak_x = []
                 peak_y = []
@@ -268,6 +275,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 brush = (0,0,0,0), pxMode = False)
         else:
             self.predicted_peak_canvas.setData([])
+            self.resolution_limit_ring_canvas.setData([])
         
 
 
@@ -279,6 +287,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             for index, item in enumerate(self.resolution_rings_textitems):
                 item.setText('')
 
+        
         self.show_unit_cell_info()
 
     #end draw_things()
@@ -334,6 +343,34 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.draw_resolution_rings()
 
 
+    def draw_resolution_limit_ring(self):
+        """
+        This method draws the resolution limit ring corresponding to the
+        resolution limit given in the crystal of the current displayed
+        chunk. If no crystal is present no ring is drawn.
+        """
+
+        if(self.streamfile.has_crystal(self.img_index)):
+            number_of_crystals = self.streamfile.get_number_of_crystals(
+                self.img_index)
+            crystal = self.streamfile.chunks[self.img_index].crystals[0]
+            resolution_limit = crystal.resolution_limit
+
+            dx = self.geometry['dx']
+            resolution_limit_pix = (2.0 / dx) * self.detector_z_m * numpy.tan(
+                2.0 * numpy.arcsin(self.lambd / (
+                2.0 * resolution_limit * 1e-10)))
+
+            self.resolution_limit_ring_canvas.setData(
+                [self.img_shape[0] / 2], [self.img_shape[1] / 2],
+                    symbol='o',
+                    size=[resolution_limit_pix],
+                    pen=self.resolution_limit_ring_pen,
+                    brush=(0, 0, 0, 0), pxMode=False)
+        else:
+            self.resolution_limit_ring_canvas.setData([],[])
+
+
     def draw_resolution_rings(self):
         dx = self.geometry['dx']
         resolution_rings_in_pix = [2.0]
@@ -359,8 +396,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 item.setText('')
 
 
-
-
     #
     # Go to random pattern
     #
@@ -368,7 +403,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         pattern_to_jump = self.num_lines*numpy.random.random(1)[0]
         pattern_to_jump = pattern_to_jump.astype(numpy.int64)
         
-        if 0<pattern_to_jump<self.num_lines:
+        if 0<=pattern_to_jump<self.num_lines:
             self.img_index = pattern_to_jump
             self.draw_things()
         else:
@@ -418,7 +453,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     def jump_to_pattern(self):
         pattern_to_jump = int(self.ui.jumpToLineEdit.text())
         
-        if 0<pattern_to_jump<self.num_lines:
+        if 0<=pattern_to_jump<self.num_lines:
             self.img_index = pattern_to_jump
             self.draw_things()
         else:
@@ -426,7 +461,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     #end jump_to_pattern()
         
 
-    def mouse_in_predicted_peak(self, mouse_x, mouse_y):
+    def mouse_in_predicted_peak(self, mouse_x, mouse_y, text):
         """
         This method displays the predicted peak hkl indices in the lower
         left corner of the gui window if the mouse pointer has been clicked
@@ -459,9 +494,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 self.predicted_peak_circle_radius):
                 hkl = self.streamfile.get_hkl_indices(peak_fs, peak_ss, 
                     self.img_index)
-                text = "The hkl indices of the predicted peak are: "
-                text += str(hkl[0]) + ", "
-                text += str(hkl[1]) + ", "
+                text += "     hkl: "
+                text += str(hkl[0]) + "  "
+                text += str(hkl[1]) + "  "
                 text += str(hkl[2])
                 self.ui.statusBar.setText(text)
 
@@ -482,7 +517,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
             radius_in_m = self.geometry['dx'] * numpy.sqrt(x_mouse_centered**2 + y_mouse_centered**2)
 
-            text = 'Last clicked pixel:     x: %4i     y: %4i     value: %4i' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse])
+            try:
+                text = 'Last clicked pixel:     x: %4i     y: %4i     value: %4i' % (x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse])
+            except IndexError:
+                # click is not in image anymore
+                return
 
             # Refuse to report an incorrect detector distance
             if self.detector_distance_ok:
@@ -497,7 +536,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
 
             self.ui.statusBar.setText(text)
-            self.mouse_in_predicted_peak(x_mouse, y_mouse)
+            self.mouse_in_predicted_peak(x_mouse, y_mouse, text)
             # self.ui.statusBar.setText(
             #    'Last clicked pixel:     x: %4i     y: %4i     value: %4i     z: %.2f mm     resolution: %4.2f Å' % (
             #    x_mouse_centered, y_mouse_centered, self.img_to_draw[x_mouse, y_mouse], self.camera_z_mm, resolution))
@@ -573,6 +612,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         if self.streamfile is not None:
             self.event_list = cfel_file.list_events(field = self.img_h5_field,
                 list_of_files = self.streamfile.get_cxi_filenames())
+            # we override the number of events because there may be fewer
+            # chunks in the streamfile than in the cxi
+            self.event_list['nevents'] = self.streamfile.get_number_of_chunks()
         else:
             self.event_list = cfel_file.list_events(self.img_file_pattern, 
                 field=self.img_h5_field)
@@ -585,7 +627,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             exit(1)
 
         file_str = os.path.basename(self.event_list['filename'][self.img_index])
-        title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines) + ')'
+        title = file_str + ' #' + str(self.event_list['event'][self.img_index]) + ' - (' + str(self.img_index)+'/'+ str(self.num_lines-1) + ')'
         self.ui.jumpToLineEdit.setText(str(self.img_index))
         self.setWindowTitle(title)
     #end action_update_files
@@ -764,6 +806,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.resolution_rings_canvas = pyqtgraph.ScatterPlotItem()
         self.ui.imageView.getView().addItem(self.resolution_rings_canvas)
         self.resolution_rings_pen = pyqtgraph.mkPen('b', width=1)     # float=greyscale(0-1) or (r,g,b) or "r, g, b, c, m, y, k, w"
+
+        # Resolution limit ring
+        self.resolution_limit_ring_canvas = pyqtgraph.ScatterPlotItem()
+        self.ui.imageView.getView().addItem(self.resolution_limit_ring_canvas)
+        self.resolution_limit_ring_pen = pyqtgraph.mkPen(color=(0, 200, 0), width=2, style = PyQt4.QtCore.Qt.DashLine)    
+
+
         self.resolution_rings_in_A = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0]
         self.resolution_rings_textitems = [pyqtgraph.TextItem('', anchor=(0.5, 0.8)) for x in self.resolution_rings_in_A]
         for ti in self.resolution_rings_textitems:
