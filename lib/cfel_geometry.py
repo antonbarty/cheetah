@@ -54,7 +54,6 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
 
     for p in detector_dict.keys():
 
-        print(detector_dict[p]['fs'])
         parsed_detector_dict[p] = {}
 
         parsed_detector_dict[p]['min_fs'] = int( detector_dict[p]['min_fs'] )
@@ -62,11 +61,11 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
         parsed_detector_dict[p]['min_ss'] = int( detector_dict[p]['min_ss'] )
         parsed_detector_dict[p]['max_ss'] = int( detector_dict[p]['max_ss'] )
         parsed_detector_dict[p]['fs'] = []
-        parsed_detector_dict[p]['fs'].append( float( detector_dict[p]['fs'].split('x')[0] ) )
-        parsed_detector_dict[p]['fs'].append( float( detector_dict[p]['fs'].split('x')[1].split('y')[0] ) )
+        parsed_detector_dict[p]['fs'].append( float( detector_dict[p]['fs'].split('x')[0].replace(" ", "") ) )
+        parsed_detector_dict[p]['fs'].append( float( detector_dict[p]['fs'].split('x')[1].split('y')[0].replace(" ", "") ) )
         parsed_detector_dict[p]['ss'] = []
-        parsed_detector_dict[p]['ss'].append( float( detector_dict[p]['ss'].split('x')[0] ) )
-        parsed_detector_dict[p]['ss'].append( float( detector_dict[p]['ss'].split('x')[1].split('y')[0] ) )
+        parsed_detector_dict[p]['ss'].append( float( detector_dict[p]['ss'].split('x')[0].replace(" ", "") ) )
+        parsed_detector_dict[p]['ss'].append( float( detector_dict[p]['ss'].split('x')[1].split('y')[0].replace(" ", "") ) )
         parsed_detector_dict[p]['corner_x'] = float( detector_dict[p]['corner_x'] )
         parsed_detector_dict[p]['corner_y'] = float( detector_dict[p]['corner_y'] )
     #endfor
@@ -164,30 +163,32 @@ def clen_from_CrystFEL_geometry_file(fnam):
                 if "clen = " in line_parsed_comments:
                     clen = line.replace("clen = ", "").rstrip()
                     break
-
             if clen is None:
                 return clen
-            if isinstance(clen, str):
+            try:
+                clen_float = float(clen)
+                return clen_float
+            except ValueError:
                 return clen
 
-            float_matching_pattern = r"""
-                [-+]? # optional sign
-                (?:
-                (?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
-                |
-                (?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
-                )
-                # followed by optional exponent part if desired
-                (?: [Ee] [+-]? \d+ ) ?
-            """
-            float_matching_regex = re.compile(
-                float_matching_pattern, re.VERBOSE)
+            #float_matching_pattern = r"""
+            #    [-+]? # optional sign
+            #    (?:
+            #    (?: \d* \. \d+ ) # .1 .12 .123 etc 9.1 etc 98.1 etc
+            #    |
+            #    (?: \d+ \.? ) # 1. 12. 123. etc 1 12 123 etc
+            #    )
+            #    # followed by optional exponent part if desired
+            #    (?: [Ee] [+-]? \d+ ) ?
+            #"""
+            #float_matching_regex = re.compile(
+            #    float_matching_pattern, re.VERBOSE)
 
-            match = re.findall(float_matching_regex, clen)
-            if match:
-                return float(match[0])
-            else:
-                return clen
+            #match = re.findall(float_matching_regex, clen)
+            #if match:
+            #    return float(match[0])
+            #else:
+            #    return clen
     except IOError:
         return None
 

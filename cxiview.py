@@ -32,6 +32,8 @@ streamfile.
 class NoCrystalException(Exception):
     pass
 
+class InsufficientInformationException(Exception):
+    pass
 
 #
 #	CXI viewer code
@@ -286,7 +288,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             for index, item in enumerate(self.resolution_rings_textitems):
                 item.setText('')
 
-        
         self.show_unit_cell_info()
 
     #end draw_things()
@@ -349,12 +350,23 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         chunk. If no crystal is present no ring is drawn.
         """
 
-        if(self.streamfile.has_crystal(self.img_index)):
+        try:
+            if not self.streamfile.has_crystal(self.img_index):
+                raise NoCrystalException
             number_of_crystals = self.streamfile.get_number_of_crystals(
                 self.img_index)
             crystal = self.streamfile.chunks[self.img_index].crystals[0]
             resolution_limit = crystal.resolution_limit
+            
+            if resolution_limit is None: 
+                raise InsufficientInformationException
+                
+            if numpy.isnan(self.detector_z_m):
+                raise InsufficientInformationException
 
+            if numpy.isnan(self.lambd):
+                raise InsufficientInformationException
+                
             dx = self.geometry['dx']
             resolution_limit_pix = (2.0 / dx) * self.detector_z_m * numpy.tan(
                 2.0 * numpy.arcsin(self.lambd / (
@@ -366,7 +378,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                     size=[resolution_limit_pix],
                     pen=self.resolution_limit_ring_pen,
                     brush=(0, 0, 0, 0), pxMode=False)
-        else:
+        except (NoCrystalException, InsufficientInformationException):
+            print("Insufficient information to draw the resolution limit ring")
             self.resolution_limit_ring_canvas.setData([],[])
 
 

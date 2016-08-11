@@ -382,8 +382,6 @@ class Chunk:
             if matches:
                 self.crystals[self.num_crystals - 1].resolution_limit = \
                     float(matches[2])
-            else:
-                self.resolution_limit = float('nan')
 
     def _get_coordinates_from_streamfile(self, begin_pointer, end_pointer, 
         x_column, y_column):
