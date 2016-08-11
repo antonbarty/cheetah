@@ -54,6 +54,7 @@ def pixelmap_from_CrystFEL_geometry_file(fnam):
 
     for p in detector_dict.keys():
 
+        print(detector_dict[p]['fs'])
         parsed_detector_dict[p] = {}
 
         parsed_detector_dict[p]['min_fs'] = int( detector_dict[p]['min_fs'] )

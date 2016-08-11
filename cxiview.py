@@ -120,7 +120,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
 
 
-
         # Auto-scale the image
         if self.ui.actionAutoscale.isChecked():
             if self.ui.actionHistogram_clip.isChecked() == True:
@@ -494,10 +493,19 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 self.predicted_peak_circle_radius):
                 hkl = self.streamfile.get_hkl_indices(peak_fs, peak_ss, 
                     self.img_index)
+                overline = "\u0305"
                 text += "     hkl: "
-                text += str(hkl[0]) + "  "
-                text += str(hkl[1]) + "  "
+                text += str(hkl[0])
+                if hkl[0] < 0:
+                    text += "\u0305 "
+                else: text += " "
+                text += str(hkl[1]) 
+                if hkl[1] < 0:
+                    text += "\u0305 "
+                else: text += " "
                 text += str(hkl[2])
+                if hkl[2] < 0:
+                    text += "\u0305"
                 self.ui.statusBar.setText(text)
 
     #
