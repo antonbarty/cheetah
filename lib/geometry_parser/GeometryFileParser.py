@@ -6,6 +6,7 @@
 import sys
 import re
 import pprint
+import textwrap
 
 from BeamCharacteristicFlags import *
 from PanelFlags import *
@@ -16,22 +17,22 @@ class GeometryFileParser:
     This class provides the functionality to parse the CrystFEL geometry file.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename = ""):
         """
         Args:
             filename (string): Filename of the geometry file.
         """
 
-        self.lines = []
-        self._read_geometry_file(filename)
+        self._lines = []
+        self.filename = filename
         self.dictionary = {}
         self.dictionary['panels'] = {}
         self.dictionary['beam_characteristics'] = {}
         self.dictionary['bad_regions'] = {}
         self.dictionary['rigid_groups'] = {}
         self.dictionary['rigid_group_collections'] = {}
-        self._parse()
-        self.dump()
+
+        self.error_list = []
 
 
     def dump(self):
@@ -49,7 +50,7 @@ class GeometryFileParser:
 
     def _read_geometry_file(self, filename):
         """
-        This methods reads the geometry file line by line into the self.lines
+        This methods reads the geometry file line by line into the self._lines
         list. Comments and empty lines are removed.
 
         Args:
@@ -61,7 +62,7 @@ class GeometryFileParser:
                 for line in f:
                     line_parsed_comments = line.split(";", 1)[0].strip()
                     if line_parsed_comments:
-                        self.lines.append(line_parsed_comments)
+                        self._lines.append(line_parsed_comments)
         except IOError:
             print("Error reading the geometry file: ", self.filename)
             exit()
@@ -467,9 +468,8 @@ class GeometryFileParser:
             
             regex = re.compile(check_pattern, re.VERBOSE)
             if not regex.match(stripped):
-                print("Geometry file corrupted.")
-                print("Unable to parse the", key, "property: ", value)
-                exit()
+                raise ParserError("Unable to parse the key " + key  + 
+                    " with value: " + value)
 
             group_pattern = """
             ^([-+] (?= .*x))?   # Positive lookaheads in this and the next line
@@ -535,10 +535,73 @@ class GeometryFileParser:
                     return value
 
 
-    def _parse(self):
+    def check_geometry(self, filename = ""):
+        """
+        This methods check if the given geometry file or the geometry file of
+        stored in the object fulfills the definition standards of a valid
+        CrystFEL geometry file.
+
+        Args:
+            filename (string): Path to the geometry file
+
+        Returns:
+            bool: True if the geometry file fulfills the standards, False
+                otherwise
+        """
+
+        self._parse(filename, exit_on_error = False)
+
+        num_errors = len(self.error_list)
+        if num_errors > 0:
+            if num_errors == 1:
+                num_errors_string = "error"
+            else:
+                num_errors_string = "errors"
+            print(textwrap.fill("The geometry file does not fulfill the " +
+                "CrystFEL geometry standards. " + str(num_errors) + " " + 
+                num_errors_string + " occured.", 80))
+            for error in self.error_list:
+                print("")
+                print(textwrap.fill("Line: " + error[0], 80))
+                print(textwrap.fill("Error: " + error[1], 80))
+            self.error_list = []
+            return False
+        else:
+            print("The geometry file fulfills the CrystFEL geometry standards.")
+            return True
+
+    
+    def parse(self, filename = ""):
         """
         This methods parses the geometry file.
+
+        Args:
+            filename (string): Path to the geometry file
         """
+
+        self._parse(filename, True)
+            
+
+    def _parse(self, filename = "", exit_on_error = True):
+        """
+        This methods parses the geometry file.
+
+        Args:
+            filename (string): Path to the geometry file
+            exit_on_error (bool): If True the program exits when an error in
+                the parsing process occurs. If False the program stores the
+                errors and linenumber and can give a complete error report.
+
+        """
+
+        if exit_on_error:
+            # reset the error list
+            self.error_list = []
+
+        if filename is not "":
+            self.filename = filename
+
+        self._read_geometry_file(self.filename)
 
         beam_flags = BeamCharacteristicFlags.list
         panel_flags = PanelFlags.list
@@ -548,7 +611,7 @@ class GeometryFileParser:
         panels = set()
         bad_regions = set()
 
-        for line in self.lines:
+        for line in self._lines:
             # match all the known patterns in the line
             line_matches = {}
             line_matches['beam_characteristics_information'] = \
@@ -568,10 +631,10 @@ class GeometryFileParser:
                 # every line has to contain a flag, get the flag first
                 flag = self.get_flag(line, line_matches)
                 if flag == "":
-                    print("Geometry file is corrupted in line: ", line)
-                    print("There is no valid CrystFEL geometry flag in the" + 
-                        "line.")
-                    exit()
+                    raise ParserError(
+                        "A valid CrystFEL geometry flag could not be found. " +
+                        "Either the line has an invalid form or no CrystFEL " +
+                        "geometry flag is present. ")
 
                 # rigid groups
                 if(line_matches['rigid_group_information']):
@@ -632,10 +695,13 @@ class GeometryFileParser:
                     self.dictionary['bad_regions'][bad_region_name][flag] = \
                         self.convert_type(flag, information)
                 else:
-                    print("Geometry file is corrupted in line: ", line)
-                    exit()
+                    raise ParserError("The given line has an invalid form.")
                    
             except ParserError as e:
-                print("Geometry file is corrupted in line: ", line)
-                print(e.args)
-                exit()
+                if exit_on_error:
+                    print(textwrap.fill("Geometry file is corrupted in line: " +
+                    line, 80))
+                    print(textwrap.fill(e.args[0], 80))
+                    exit()
+                else:
+                    self.error_list.append((line, e.args[0]))
