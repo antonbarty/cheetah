@@ -15,6 +15,7 @@ class PanelFlags:
         "dim0",
         "dim1",
         "dim2",
+        "dim3",
         "min_fs",
         "min_ss",
         "max_fs",
@@ -30,5 +31,10 @@ class PanelFlags:
         "corner_y",
         "max_adu",
         "no_index",
-        "max"
+        "mask",
+        "mask_file",
+        "saturation_map",
+        "saturation_map_file",
+        "mask_good",
+        "mask_bad"
     ]

@@ -9,6 +9,7 @@ import pprint
 
 from BeamCharacteristicFlags import *
 from PanelFlags import *
+from ParserError import *
 
 class GeometryFileParser:
     """
@@ -30,9 +31,20 @@ class GeometryFileParser:
         self.dictionary['rigid_groups'] = {}
         self.dictionary['rigid_group_collections'] = {}
         self._parse()
+        self.dump()
+
+
+    def dump(self):
+        """
+        This methods dumps the contents of the geometry dictionary after parsing
+        the geometry file.
+        """
+
         pprint.pprint(self.dictionary['panels'])
         pprint.pprint(self.dictionary['beam_characteristics'])
         pprint.pprint(self.dictionary['bad_regions'])
+        pprint.pprint(self.dictionary['rigid_groups'])
+        pprint.pprint(self.dictionary['rigid_group_collections'])
 
 
     def _read_geometry_file(self, filename):
@@ -55,26 +67,20 @@ class GeometryFileParser:
             exit()
 
 
-    def _has_check(self, line, pattern):
+    def _match_pattern(self, line, pattern):
         regex = re.compile(pattern, re.VERBOSE)
 
-        if regex.match(line):
-            return True
-        else:
-            return False
+        return regex.match(line)
 
 
-    def _get_information(self, line, pattern):
-        regex = re.compile(pattern, re.VERBOSE)
-
-        information, number_of_subs = re.subn(regex, "", line)
-        if number_of_subs == 0:
+    def _get_property_from_match(self, match, index):
+        try:
+            return match.group(index).strip()
+        except IndexError:
             return ""
-        else:
-            return information
+        
 
-
-    def has_rigid_group_information(self, line):
+    def match_rigid_group_information(self, line):
         """
         This methods checks whether the current line has information about rigid
         groups in the detector
@@ -83,25 +89,25 @@ class GeometryFileParser:
             line (string): Line containing the rigid group information
 
         Returns:
-            bool: True if it has information about rigid groups, False 
-                otherwise
+            re.MatchObject: The match object of the line
+
         """
 
         rigid_group_information_pattern = """
-            (^[\s]*)          
-            (rigid_group)
+            ^[\s]*          
+            ((rigid_group)
             (?!_collection)
-            ([A-Za-z0-9_]+)     
-            ([\s]*)          
+            [A-Za-z0-9_]+)     
+            [\s]*          
             =
-            ([\s]*)             
-            ([A-Za-z0-9_]+)[\s]*  (,[\s]*[A-Za-z0-9_]+[\s]*)*$
+            [\s]*             
+            (([A-Za-z0-9_]+)[\s]*  (,[\s]*[A-Za-z0-9_]+[\s]*)*)$
         """
 
-        return self._has_check(line, rigid_group_information_pattern)
+        return self._match_pattern(line, rigid_group_information_pattern)
 
 
-    def has_rigid_group_collection_information(self, line):
+    def match_rigid_group_collection_information(self, line):
         """
         This methods checks whether the current line has information about rigid
         groups in the detector
@@ -110,66 +116,67 @@ class GeometryFileParser:
             line (string): Line containing the rigid group information
 
         Returns:
-            bool: True if it has information about rigid groups, False 
-                otherwise
+            re.MatchObject: The match object of the line
+
         """
 
         rigid_group_information_pattern = """
-            (^[\s]*)           
-            (rigid_group_collection)
-            ([A-Za-z0-9_]+)    
-            ([\s]*)             
+            ^[\s]*           
+            (rigid_group_collection
+            [A-Za-z0-9_]+)    
+            [\s]*             
             =
-            ([\s]*)             
-            ([A-Za-z0-9_]+)[\s]*  (,[\s]*[A-Za-z0-9_]+[\s]*)*$
+            [\s]*             
+            (([A-Za-z0-9_]+)[\s]*  (,[\s]*[A-Za-z0-9_]+[\s]*)*)$
         """
 
-        return self._has_check(line, rigid_group_information_pattern)
+        return self._match_pattern(line, rigid_group_information_pattern)
 
 
-    def get_rigid_group_information(self, line):
+    def get_rigid_group_information(self, match):
         """
-        This method returns the rigid group information from the given line.
+        This method returns the rigid group information from the given match.
 
         Args:
-            line (string): Line containing the rigid group information
+            match (re.MatchObject): Match object containing the rigid group 
+                information
 
         Returns:
             list: list of all the rigid groups
 
         """
 
-        rigid_group_information_pattern = """
-            (^[\s]*)          
-            ([A-Za-z0-9_]+)     
-            ([\s]*)          
-            =
-            ([\s]*)             
-        """
+        try:
+            information = match.group(3)
+            stripped_information = "".join(information.split())
+            return stripped_information.split(",")
+        except IndexError:
+            return []
 
-        information = self._get_information(line, 
-            rigid_group_information_pattern)
-        stripped_information = "".join(information.split())
-        return stripped_information.split(",")
 
-    def get_rigid_group_collection_information(self, line):
+    def get_rigid_group_collection_information(self, match):
         """
         This method returns the rigid group collection information from the 
         given line.
 
         Args:
-            line (string): Line containing the rigid group collection 
-            information
+            match (re.MatchObject): MatchObject containing the rigid group 
+            collection information
 
         Returns:
             list: list of all the rigid groups collections
 
         """
 
-        return self.get_rigid_group_information(line)
+        try:
+            information = match.group(2)
+            stripped_information = "".join(information.split())
+            return stripped_information.split(",")
+        except IndexError:
+            return []
 
 
-    def has_bad_region_information(self, line):
+    def match_bad_region_information(self, line):
         """
         This methods checks whether the current line has information about bad
         regions in the detector.
@@ -178,54 +185,43 @@ class GeometryFileParser:
             line (string): Line containing the local panel information
 
         Returns:
-            bool: True if it has information about bad sections, False 
-                otherwise
+            re.MatchObject: The match object of the line
+
         """
 
         bad_region_pattern = """
-            (^[\s]*)            # whitespaces at the beginning
+            ^[\s]*            # whitespaces at the beginning
             (?=bad)             
             ([A-Za-z0-9_]+)     # panel name
             \/
             ([A-Za-z0-9_]+)     # property name 
-            ([\s]*)          
+            [\s]*          
             =
             (.*$)               # property value
         """
 
-        return self._has_check(line, bad_region_pattern)
+        return self._match_pattern(line, bad_region_pattern)
     
 
-    def get_bad_region_information(self, line):
+    def get_bad_region_information(self, match):
         """
-        This method returns the bad region information from the given line.
+        This method returns the bad region information from the given match.
 
         Args:
-            line (string): Line containing the bad region information
+            match (string): MatchObject containing the bad region information
 
         Returns:
             string: Bad region information
 
-        Note:
-            If the line does not match a CrystFEL geometry bad region
-            information line an empty string is returned.
         """
 
-        local_panel_information_pattern = """
-            (^[\s]*)            # whitespaces at the beginning
-            (?=bad)             
-            ([A-Za-z0-9_]+)     # panel name
-            \/
-            ([A-Za-z0-9_]+)     # property name 
-            ([\s]*)          
-            =
-            ([\s]*)             # whitespaces after equality sign
-        """
-
-        return self._get_information(line, local_panel_information_pattern)
+        try:
+            return match.group(3).strip()
+        except IndexError:
+            return "" 
 
 
-    def has_local_panel_information(self, line):
+    def match_local_panel_information(self, line):
         """
         This methods checks if the current line is matching a specific panel
         flag contains information for a specific panel or for all following
@@ -235,183 +231,161 @@ class GeometryFileParser:
             line (string): Line containing the local panel information
 
         Returns:
-            bool: True is it only has information for one panel, False 
-                otherwise
+            re.MatchObject: The match object of the line
+
         """
 
         local_panel_information_pattern = """
-            (^[\s]*)            # whitespaces at the beginning
+            ^[\s]*            # whitespaces at the beginning
             (?!bad)             # the panel information must not begin with bad
             ([A-Za-z0-9_]+)     # panel name
             \/
             ([A-Za-z0-9_]+)     # property name 
-            ([\s]*)          
+            [\s]*          
             =
             (.*$)               # property value
         """
 
-        return self._has_check(line, local_panel_information_pattern) 
+        return self._match_pattern(line, local_panel_information_pattern) 
 
 
-    def get_panel_name(self, line):
+    def get_panel_name(self, match):
         """
-        This method returns the panel name from a given line.
+        This method returns the panel name from a given match.
 
         Args:
-            line (string): Line containing the panel name
+            match (re.MatchObject): Match object containing the panel name
 
         Returns:
             string: Panel name
         """
 
-        panel_name_pattern = """
-            \/
-            ([A-Za-z0-9_]+)     # property name 
-            ([\s]*)          
-            =
-            (.*$)               # property value
+        try:
+            return match.group(1).strip()
+        except IndexError:
+            return ""
+
+
+    def get_bad_region_name(self, match):
         """
-
-        return self._get_information(line, panel_name_pattern)
-
-
-    def get_bad_region_name(self, line):
-        """
-        This method returns the name of the bad region from a given line.
+        This method returns the name of the bad region from a given match.
 
         Args:
-            line (string): Line containing the bad region name
+            match (re.MatchObject): Match object containing the bad region name
 
         Returns:
             string: Bad region name
 
-        Note:
-            This function is exactly the same as get_panel_name
         """
 
-        return self.get_panel_name(line)
+        try:
+            return match.group(1).strip()
+        except IndexError:
+            return ""
 
 
-    def get_local_panel_information(self, line):
+    def get_local_panel_information(self, match):
         """
-        This method returns the local panel information from the given line.
+        This method returns the local panel information from the given match.
 
         Args:
-            line (string): Line containing the local panel information
+            match (re.MatchObject): Match obejct containing the local panel 
+            information
 
         Returns:
             string: Local panel information
 
-        Note:
-            If the line does not match a CrystFEL geometry local panel
-            information line an empty string is returned.
         """
 
-        local_panel_information_pattern = """
-            (^[\s]*)            # whitespaces at the beginning
-            ([A-Za-z0-9_]+)     # panel name
-            \/
-            ([A-Za-z0-9_]+)     # property name 
-            ([\s]*)          
-            =
-            ([\s]*)             # whitespaces after equality sign
-        """
-
-        return self._get_information(line, local_panel_information_pattern)
+        try:
+            return match.group(3).strip()
+        except IndexError:
+            return ""
 
 
-    def has_global_panel_information(self, line):
+    def match_global_panel_information(self, line):
         """
         This method checks whether the current line has global panel
         information.
 
         Returns:
-            bool: True if the information is global, False otherwise
+            match (re.MatchObject): Match object containing the global panel
+                information
         """
 
         global_panel_information_pattern = """
-            (^[\s]*)            # whitespaces at the beginning
+            ^[\s]*            
             (?!rigid_group)             # may not be a rigid group
-            (?!rigid_group_collection)             # may not be a rigid group
-            ([A-Za-z0-9_]+)     # property name 
-            ([\s]*)          
+            (?!rigid_group_collection)  # may not be a rigid group
+            ([A-Za-z0-9_]+)             # property name 
+            [\s]*          
             =
-            (.*$)               # property value
+            (.*$)                       # property value
         """
         
-        return self._has_check(line, global_panel_information_pattern)
+        return self._match_pattern(line, global_panel_information_pattern)
 
 
-    def get_global_panel_information(self, line):
+    def get_global_panel_information(self, match):
         """
-        This method returns the global panel information from the given line.
+        This method returns the global panel information from the given match.
 
         Args:
-            line (string): Line containing the global panel information
+            match (re.MatchObject): Match object containing the global panel 
+            information
 
         Returns:
             string: Global panel information
 
-        Note:
-            If the line does not match a CrystFEL geometry global panel
-            information line an empty string is returned.
         """
 
-        global_panel_information_pattern = """
-            (^[\s]*)                    # whitespaces at the beginning
-            (?!rigid_group)             # may not be a rigid group
-            (?!rigid_group_collection)  # may not be a rigid group
-            ([A-Za-z0-9_]+)             # property name 
-            ([\s]*)                     # whitespaces after property name
-            =
-            ([\s]*)                     # whitespaces after equality sign
-        """
-
-        return self._get_information(line, global_panel_information_pattern)
+        try:
+            return match.group(2).strip()
+        except IndexError:
+            return ""
 
         
-    def has_beam_characteristics_information(self, line):
+    def match_beam_characteristics_information(self, line):
         """
         This method checks whether the current line has beam characteristics
         information.
 
         Returns:
-            Bool: True if the information is global, False otherwise
+            match (re.MatchObject): Match object containing the beam
+                characteristics information
 
         Note:
             The layout of the beam characteristic information is exactly the
             same as the layout of the global panel information. Therefore this
-            method just wraps the has_global_panel_information method.
+            method just wraps the match_global_panel_information method.
         """
 
-        return self.has_global_panel_information(line)
+        return self.match_global_panel_information(line)
 
 
-    def get_beam_characteristics_information(self, line):
+    def get_beam_characteristics_information(self, match):
         """
         This method returns the beam characteristics information from the given 
-        line.
+        match.
 
         Args:
-            line (string): Line containing the beam characteristics information
+            match (re.MatchObject): Match object containing the beam
+            characteristics information
 
         Returns:
             string: Global panel information
 
         Note:
-            If the line does not match a CrystFEL geometry beam characteristics
-            information line an empty string is returned.
-
             The layout of the beam characteristic information is exactly the
             same as the layout of the global panel information. Therefore this
-            method just wraps the has_global_panel_information method.
+            method just wraps the get_global_panel_information method.
 
         """
         
-        return self.get_global_panel_information(line)
+        return self.get_global_panel_information(match)
 
 
-    def get_flag(self, line):
+    def get_flag(self, line, line_matches):
         """
         This method returns the CrystFEL geometry flag (eg. ss, fs,
         photon_energy_eV, ...) from a given line. If no flag is found an empty
@@ -427,17 +401,10 @@ class GeometryFileParser:
 
         flag = ""
 
-        is_characteristic = self.has_beam_characteristics_information(line)
-        is_panel = self.has_local_panel_information(line)
-        is_global = self.has_global_panel_information(line)
-        is_rigid_group = self.has_rigid_group_information(line)
-        is_rigid_group_collection = self.has_rigid_group_collection_information(
-            line)
-        is_bad_region = self.has_bad_region_information(line)
-        if (is_characteristic
-            or is_global
-            or is_rigid_group
-            or is_rigid_group_collection):
+        if (line_matches['beam_characteristics_information']
+            or line_matches['global_panel_information']
+            or line_matches['rigid_group_information']
+            or line_matches['rigid_group_collection_information']):
 
             flag_pattern = """
                 ([\s]*)
@@ -447,7 +414,8 @@ class GeometryFileParser:
 
             regex = re.compile(flag_pattern, re.VERBOSE)
             flag = re.sub(regex, "", line)
-        elif (is_panel or is_bad_region):
+        elif (line_matches['local_panel_information']
+            or line_matches['bad_region_information']):
             flag_pattern1 = """
                 (^[\s]*)
                 [A-Za-z0-9_]+
@@ -464,7 +432,8 @@ class GeometryFileParser:
             regex2 = re.compile(flag_pattern2, re.VERBOSE)
             sub_line = re.sub(regex1, "", line)
             flag = re.sub(regex2, "", sub_line)
-        if (is_panel or is_characteristic):
+        if (line_matches['local_panel_information'] 
+            or line_matches['beam_characteristics_information']):
             # check if found flags are valid
             for key in BeamCharacteristicFlags.list + PanelFlags.list:
                 if key == flag:
@@ -477,39 +446,85 @@ class GeometryFileParser:
     def convert_type(self, key, value):
         if (key == "ss" or key == "fs"):
             stripped = "".join(value.split())
-            vector_pattern = """
-            ^\s*
-            ([-+]?  \s* (?: (?: \d* \. \d+) | (?: \d+ \.? )))?
+            check_pattern = """
+            (^[-+]? 
+            \s*
+            (?: (?: \d* \. \d+) | (?: \d+ \.? ))?
             \s*
             x
+            [-+]? 
             \s*
-            [-+]?  (\s* (?: (?: \d* \. \d+) | (?: \d+ \.? )))?
-            y
-            \s*$
+            (?: (?: \d* \. \d+) | (?: \d+ \.? ))?
+            \s*
+            y$)
+            |
+            (^[-+]?
+            \s*
+            (?: (?: \d* \. \d+) | (?: \d+ \.? ))?
+            \s*
+            [xy]{1})$
+            """
+            
+            regex = re.compile(check_pattern, re.VERBOSE)
+            if not regex.match(stripped):
+                print("Geometry file corrupted.")
+                print("Unable to parse the", key, "property: ", value)
+                exit()
+
+            group_pattern = """
+            ^([-+] (?= .*x))?   # Positive lookaheads in this and the next line
+                                # are needed to check if [-+] is really 
+                                # belonging to the x and not to the y variable. 
+                                # This is relevant for the case when no x but a
+                                # y variabe is present.
+            ((?: (?: \d* \. \d+) | (?: \d+ \.? )) (?=\s*x))?
+            \s*
+            (x)?
+            \s*
+            ([-+])?  
+            ((?: (?: \d* \. \d+) | (?: \d+ \.? )))?
+            \s*
+            (y)?$
             """
 
-            regex = re.compile(vector_pattern, re.VERBOSE)
-            if regex.match(stripped):
-                float_pattern = """
-                    ([-+]?  \s* (?: (?: \d* \. \d+) | (?: \d+ \.? )))
-                """
-                regex = re.compile(float_pattern, re.VERBOSE)
-                matches = re.findall(regex, stripped)
-                if len(matches) == 2:
-                    return {'x' : float(matches[0]), 'y' : float(matches[1])}
-                elif len(matches) == 0:
-                    return {'x' : 1.0, 'y' : 1.0}
+            regex = re.compile(group_pattern, re.VERBOSE)
+            match = regex.match(stripped)
+            if match:
+                x_sign = match.group(1)
+                x_value = match.group(2)
+                x_key = match.group(3)
+                y_sign = match.group(4)
+                y_value = match.group(5)
+                y_key = match.group(6)
+                # debug prints maybe also be handy later
+                # print("x_sign: ", x_sign)
+                # print("x_key: ", x_key)
+                # print("x_value: ", x_value)
+                # print("y_sign: ", y_sign)
+                # print("y_key: ", y_key)
+                # print("y_value: ", y_value)
+                if x_sign is None:
+                    x_sign = "+"
+                if y_sign is None:
+                    y_sign = "+"
+                if (x_key is not None and y_key is not None):
+                    if x_value is None:
+                        x_value = "1.0"
+                    if y_value is None:
+                        y_value = "1.0"
+                    return {'x' : float(x_sign + x_value), 
+                        'y' : float(y_sign + y_value)}
+                elif (x_key is None and y_key is not None):
+                    if y_value is None:
+                        y_value = "1.0"
+                    return {'x' : 0.0, 'y' : float(y_sign + y_value)}
+                elif (x_key is not None and y_key is None):
+                    if x_value is None:
+                        x_value = "1.0"
+                    return {'x' : float(x_sign + x_value), 'y' : 0.0}
                 else:
-                    x_pattern = "^x.*$"
-                    regex = re.compile(x_pattern, re.VERBOSE)
-                    if regex.match(stripped):
-                        return {'x' : 1.0, 'y' : float(matches[0])}
-                    else:
-                        return {'x' : float(matches[0]), 'y' : 1.0}
-            else:
-                #TODO: improve error handling here
-                print("Geometry file corrupted.")
-                print("Unable to parse the", key, "property :", value)
+                    raise ParserError("Unable to parse the key " + key \
+                        + " with value: " + value)
         else:
             try:
                 return int(value)
@@ -534,63 +549,93 @@ class GeometryFileParser:
         bad_regions = set()
 
         for line in self.lines:
-            # every line has to contain a flag, get the flag first
-            flag = self.get_flag(line)
-            if flag == "":
-                print("Geometry file is corrupted in line: ", line)
-                print("The flag \"", flag, "\" is not a valid CrystFEL" \
-                    "geometry flag.")
-                exit()
+            # match all the known patterns in the line
+            line_matches = {}
+            line_matches['beam_characteristics_information'] = \
+                self.match_beam_characteristics_information(line)
+            line_matches['local_panel_information'] = \
+                self.match_local_panel_information(line)
+            line_matches['global_panel_information'] = \
+                self.match_global_panel_information(line)
+            line_matches['rigid_group_information'] = \
+                self.match_rigid_group_information(line)
+            line_matches['rigid_group_collection_information'] = \
+                self.match_rigid_group_collection_information( line)
+            line_matches['bad_region_information'] = \
+                self.match_bad_region_information(line)
 
-            # rigid groups
-            if(self.has_rigid_group_information(line)):
-                information = self.get_rigid_group_information(line)
-                self.dictionary['rigid_groups'][flag] = \
-                    self.convert_type(flag, information)
-            # rigid group collections
-            elif(self.has_rigid_group_collection_information(line)):
-                information = self.get_rigid_group_collection_information(line)
-                self.dictionary['rigid_group_collections'][flag] = \
-                    self.convert_type(flag, information)
-            # search for panel characteristics
-            # check first if the flag is for one panel only or global
-            # information valid for many panels
-            elif self.has_local_panel_information(line):
-                panel_name = self.get_panel_name(line)
-                # check whether the panel has already appeared in the geometry
-                if panel_name not in panels:
-                    panels.add(panel_name)
-                    self.dictionary['panels'][panel_name] = {}
-                    # set the current global information about panels  in the 
-                    # dictionary
-                    for key in global_panel_properties:
-                       self.dictionary['panels'][panel_name][key] = \
-                        global_panel_properties[key] 
-                # set the local line information in the dictionary
-                information = self.get_local_panel_information(line)
-                self.dictionary['panels'][panel_name][flag] = \
-                    self.convert_type(flag, information)
-            # global panel information has the same shape as beam characteristic
-            # information, we can just separate them by the flag
-            elif self.has_global_panel_information(line):
-                if flag in BeamCharacteristicFlags.list:
-                    information = self.get_beam_characteristics_information(
-                        line)
-                    self.dictionary['beam_characteristics'][flag] = \
+            try:
+                # every line has to contain a flag, get the flag first
+                flag = self.get_flag(line, line_matches)
+                if flag == "":
+                    print("Geometry file is corrupted in line: ", line)
+                    print("There is no valid CrystFEL geometry flag in the" + 
+                        "line.")
+                    exit()
+
+                # rigid groups
+                if(line_matches['rigid_group_information']):
+                    information = self.get_rigid_group_information(
+                        line_matches['rigid_group_information'])
+                    self.dictionary['rigid_groups'][flag] = \
                         self.convert_type(flag, information)
-                else: 
-                    information = self.get_global_panel_information(line)
-                    global_panel_properties[flag] = \
+                # rigid group collections
+                elif(line_matches['rigid_group_collection_information']):
+                    information = self.get_rigid_group_collection_information(
+                        line_matches['rigid_group_collection_information'])
+                    self.dictionary['rigid_group_collections'][flag] = \
                         self.convert_type(flag, information)
-            # bad regions
-            elif self.has_bad_region_information(line):
-                bad_region_name = self.get_bad_region_name(line)
-                if bad_region_name not in bad_regions:
-                    bad_regions.add(bad_region_name)    
-                    self.dictionary['bad_regions'][bad_region_name] = {}
-                information = self.get_bad_region_information(line)
-                self.dictionary['bad_regions'][bad_region_name][flag] = \
-                    self.convert_type(flag, information)
-            else:
+                # search for panel characteristics
+                # check first if the flag is for one panel only or global
+                # information valid for many panels
+                elif line_matches['local_panel_information']:
+                    panel_name = self.get_panel_name(
+                        line_matches['local_panel_information'])
+                    # check whether the panel has already appeared in the 
+                    # geometry
+                    if panel_name not in panels:
+                        panels.add(panel_name)
+                        self.dictionary['panels'][panel_name] = {}
+                        # set the current global information about panels in the
+                        # dictionary
+                        for key in global_panel_properties:
+                           self.dictionary['panels'][panel_name][key] = \
+                            global_panel_properties[key] 
+                    # set the local line information in the dictionary
+                    information = self.get_local_panel_information(
+                        line_matches['local_panel_information'])
+                    self.dictionary['panels'][panel_name][flag] = \
+                        self.convert_type(flag, information)
+                # global panel information has the same shape as beam 
+                # characteristic information, we can just separate them by the
+                # flag
+                elif line_matches['global_panel_information']:
+                    if flag in BeamCharacteristicFlags.list:
+                        information = self.get_beam_characteristics_information(
+                            line_matches['global_panel_information'])
+                        self.dictionary['beam_characteristics'][flag] = \
+                            self.convert_type(flag, information)
+                    else: 
+                        information = self.get_global_panel_information(
+                            line_matches['global_panel_information'])
+                        global_panel_properties[flag] = \
+                            self.convert_type(flag, information)
+                # bad regions
+                elif line_matches['bad_region_information']:
+                    bad_region_name = self.get_bad_region_name(
+                        line_matches['bad_region_information'])
+                    if bad_region_name not in bad_regions:
+                        bad_regions.add(bad_region_name)    
+                        self.dictionary['bad_regions'][bad_region_name] = {}
+                    information = self.get_bad_region_information(
+                        line_matches['bad_region_information'])
+                    self.dictionary['bad_regions'][bad_region_name][flag] = \
+                        self.convert_type(flag, information)
+                else:
+                    print("Geometry file is corrupted in line: ", line)
+                    exit()
+                   
+            except ParserError as e:
                 print("Geometry file is corrupted in line: ", line)
+                print(e.args)
                 exit()
