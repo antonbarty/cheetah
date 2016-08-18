@@ -61,14 +61,15 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.photon_energy = float(self.default_eV)
             self.photon_energy_ok = True
         else:
-            # get photon energy from streamfile
-            self.photon_energy = self.streamfile.chunks[self.img_index].photon_energy
-            if self.photon_energy > 0:
+            # reading photon energy from streamfile failed, try cxi
+            self.photon_energy = cxi['photon_energy_eV']
+            if not numpy.isnan(self.photon_energy):
                 self.photon_energy_ok = True
-            else:    
-                # reading photon energy from streamfile failed, try cxi
-                self.photon_energy = cxi['photon_energy_eV']
-                if not numpy.isnan(self.photon_energy):
+
+            # get photon energy from streamfile
+            if self.stream_filepath != "":
+                self.photon_energy = self.streamfile.chunks[self.img_index].photon_energy
+                if self.photon_energy > 0:
                     self.photon_energy_ok = True
             if self.photon_energy < 0 or numpy.isnan(self.photon_energy):
                 self.photon_energy_ok = False
@@ -85,8 +86,11 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.detector_z_m = float(self.default_z)
             self.detector_distance_ok = True
         else:
+            detector_distance = cxi['EncoderValue']
+
             # get detector distance from streamfile
-            detector_distance = self.streamfile.chunks[self.img_index].clen
+            if self.stream_filepath != "":
+                detector_distance = self.streamfile.chunks[self.img_index].clen
             if detector_distance is None:
                 detector_distance = cxi['EncoderValue']
 
@@ -909,9 +913,9 @@ if __name__ == '__main__':
         print("Error! Provide either a stream file or an input file")
         exit()
     if args.i != "":
-        if not os.path.isfile(args.i):
-            print("Error! Input file does not exist")
-            exit()
+        #if not os.path.isfile(args.i):
+        #    print("Error! Input file does not exist")
+        #    exit()
         if (args.g == ""):
             print("Error! A geometry file is required")
             exit()
