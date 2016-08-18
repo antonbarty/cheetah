@@ -1,10 +1,12 @@
 import numpy
 import tempfile
-import lib.cfel_geometry as cfel_geom
+import lib.geometry_parser.GeometryFileParser as geom
 import re
 import sys
 import os
 import math
+
+from lib.geometry_parser import *
 
 class UnitCell:
     """
@@ -719,13 +721,15 @@ class Streamfile:
                     if not self._geometry_processed:
                         flag = StreamfileParserFlags.none
                         self._write_temporary_geometry_file(geometry_lines)
-                        self._geom_dict = cfel_geom.read_geometry(
+                        #self._geom_dict = cfel_geom.read_geometry(
+                            #self._temporary_geometry_file.name)
+                        geom_parser = geom.GeometryFileParser(
                             self._temporary_geometry_file.name)
+                        self._geom_dict = geom_parser.pixel_map_for_cxiview()
 
                         # handle the clen property which can be given either as
                         # a float directly or as a codeword in the chunk
-                        clen = cfel_geom.clen_from_CrystFEL_geometry_file(
-                            self._temporary_geometry_file.name)
+                        clen = self._geom_dict['clen']
                         if isinstance(clen, str):
                             clen_codeword = clen
                             clen = None

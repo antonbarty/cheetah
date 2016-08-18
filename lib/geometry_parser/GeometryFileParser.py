@@ -7,10 +7,11 @@ import sys
 import re
 import pprint
 import textwrap
+import numpy
 
-from BeamCharacteristicFlags import *
-from PanelFlags import *
-from ParserError import *
+from .BeamCharacteristicFlags import *
+from .PanelFlags import *
+from .ParserError import *
 
 class GeometryFileParser:
     """
@@ -581,6 +582,125 @@ class GeometryFileParser:
 
         self._parse(filename, True)
             
+
+    def pixel_map(self):
+        """
+        This method returns the pixelmap needed for the cxiviewer.py
+
+        Returns:
+            x: slab-like pixel map with x coordinate of each slab pixel in 
+                the reference system of the detector
+            y: slab-like pixel map with y coordinate of each slab pixel in 
+                the reference system of the detector
+            z: slab-like pixel map with distance of each pixel from the center
+                of the reference system.  
+
+        """
+
+        if not self.dictionary['panels']:
+            self.parse()
+
+        # TODO: do proper error handling in the case the geometry file does
+        # not supply all needed keys
+        try:
+            max_slab_fs = numpy.array([self.dictionary['panels'][k]['max_fs']  
+                for k in self.dictionary['panels'].keys()]).max()
+            max_slab_ss = numpy.array([self.dictionary['panels'][k]['max_ss'] 
+                for k in self.dictionary['panels'].keys()]).max()
+
+
+            x = numpy.zeros((max_slab_ss+1, max_slab_fs+1), dtype=numpy.float32)
+            y = numpy.zeros((max_slab_ss+1, max_slab_fs+1), dtype=numpy.float32)
+
+
+            for p in self.dictionary['panels'].keys():
+                # get the pixel coords for this asic
+                i, j = numpy.meshgrid(numpy.arange(
+                    self.dictionary['panels'][p]['max_ss']
+                    - self.dictionary['panels'][p]['min_ss'] + 1),
+                    numpy.arange(self.dictionary['panels'][p]['max_fs'] 
+                    - self.dictionary['panels'][p]['min_fs'] + 1), indexing='ij')
+
+                # make the y-x ( ss, fs ) vectors, using complex notation
+                dx  = self.dictionary['panels'][p]['fs']['y'] + 1J * \
+                    self.dictionary['panels'][p]['fs']['x']
+                dy  = self.dictionary['panels'][p]['ss']['y'] + 1J * \
+                    self.dictionary['panels'][p]['ss']['x']
+                #print("here")
+                r_0 = self.dictionary['panels'][p]['corner_y'] + 1J * \
+                    self.dictionary['panels'][p]['corner_x']
+
+                r   = i * dy + j * dx + r_0
+
+                y[self.dictionary['panels'][p]['min_ss']: \
+                    self.dictionary['panels'][p]['max_ss'] + 1, \
+                    self.dictionary['panels'][p]['min_fs']: \
+                    self.dictionary['panels'][p]['max_fs'] + 1] = r.real
+                x[self.dictionary['panels'][p]['min_ss']: \
+                    self.dictionary['panels'][p]['max_ss'] + 1, \
+                    self.dictionary['panels'][p]['min_fs']: \
+                    self.dictionary['panels'][p]['max_fs'] + 1] = r.imag
+        except KeyError:
+            print("The geometry file does not provide sufficient information " +
+                "to construct the pixelmap.")
+            exit()
+
+        r = numpy.sqrt(numpy.square(x) + numpy.square(y))
+        return x,y,r
+
+
+    def pixel_map_for_cxiview(self):
+        """
+        This method returns the information needed for the cxiviewer.py
+
+        """
+
+        x, y, r = self.pixel_map()
+
+        M = 2 * int(max(abs(x.max()), abs(x.min()))) + 2       
+        N = 2 * int(max(abs(y.max()), abs(y.min()))) + 2
+
+        y = -y
+        img_shape = (M, N)
+
+        # numpy.nan is a bad choice because it relies on numpy. But
+        # this part of the program has to be compatible with cxiview.py
+        coffset = numpy.nan
+        clen = numpy.nan
+        res = numpy.nan
+        dx_m = numpy.nan
+
+        try:
+            panel_dict = next(iter(self.dictionary['panels'].values()))
+        except KeyError:
+            print("The geometry file does not contain panel information.")
+            exit()
+        try:
+            coffset = panel_dict['coffset']
+        except KeyError:
+            pass
+        try:
+            res = panel_dict['res']
+            dx_m = 1.0/res
+        except KeyError:
+            pass
+        try:
+            clen = panel_dict['clen']
+        except KeyError:
+            pass
+
+        result_dict = {
+            'x' : x.flatten(),
+            'y' : y.flatten(),
+            'r' : r.flatten(),
+            'dx' : dx_m,
+            'coffset' : coffset,
+            'shape' : img_shape,
+            'clen' : clen
+        }
+
+        return result_dict
+
 
     def _parse(self, filename = "", exit_on_error = True):
         """
