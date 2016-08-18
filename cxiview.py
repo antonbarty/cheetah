@@ -608,7 +608,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         file_hint += '.png'
         file_hint = os.path.join(self.exportdir, file_hint)
 
-        filename = cfel_file.dialog_pickfile(write=True, path=file_hint)
+        filename = cfel_file.dialog_pickfile(write=True, path=file_hint, qtmainwin=self)
         if filename=='':
             return
         if filename.endswith('.png') == False:

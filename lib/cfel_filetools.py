@@ -21,7 +21,7 @@ import PyQt4.QtGui
 qtApp = PyQt4.QtGui.QApplication(sys.argv)
 """
 
-def dialog_pickfile(write=False, directory=False, multiple=False, path=False, filter='*.*'):
+def dialog_pickfile(write=False, directory=False, multiple=False, path=False, filter='*.*', qtmainwin=None):
     """
     :param write:
     :param directory:
@@ -31,30 +31,32 @@ def dialog_pickfile(write=False, directory=False, multiple=False, path=False, fi
     :return:
     See: http://doc.qt.io/qt-4.8/qfiledialog.html
     """
-    QtWin= PyQt4.QtGui.QMainWindow()
+    if qtmainwin == None:
+        qtApp = PyQt4.QtGui.QApplication(sys.argv)
 
     if path==False:
         path= ''
 
     if write==True:
         caption = 'Select destination file'
-        file = PyQt4.QtGui.QFileDialog.getSaveFileName(QtWin, caption, path, filter)
+        file = PyQt4.QtGui.QFileDialog.getSaveFileName(qtmainwin, caption, path, filter)
         return file
 
     elif directory==True:
         caption = 'Select directory'
-        dirname= PyQt4.QtGui.QFileDialog.getExistingDirectory(QtWin, caption, path)
+        dirname= PyQt4.QtGui.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
         return dirname
 
     elif multiple==True:
         caption = 'Select Files'
-        files = PyQt4.QtGui.QFileDialog.getOpenFileNames(QtWin, caption, path, filter)
+        files = PyQt4.QtGui.QFileDialog.getOpenFileNames(qtmainwin, caption, path, filter)
         return files
 
     else:
         caption = 'Select File'
-        file = PyQt4.QtGui.QFileDialog.getOpenFileName(QtWin, caption, path, filter)
+        file = PyQt4.QtGui.QFileDialog.getOpenFileName(qtmainwin, caption, path, filter)
         return file
+
 #end dialog_pickfile()
 
 
