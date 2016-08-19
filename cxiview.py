@@ -635,8 +635,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
     def action_update_files(self):
         # read files from streamfile if streamfile is there
         if self.streamfile is not None:
-            self.event_list = cfel_file.list_events(field = self.img_h5_field,
-                list_of_files = self.streamfile.get_cxi_filenames())
+            self.event_list = self.streamfile.get_cxiview_event_list()
             # we override the number of events because there may be fewer
             # chunks in the streamfile than in the cxi
             self.event_list['nevents'] = self.streamfile.get_number_of_chunks()

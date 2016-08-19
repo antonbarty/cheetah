@@ -37,6 +37,7 @@ class UnitCell:
         self.gamma = gamma
         self.centering = None
 
+
     def to_angstroem(self):
         """
         This method converts the length of the unit cell axis from nm to 
@@ -47,6 +48,7 @@ class UnitCell:
         self.b *= 10.0
         self.c *= 10.0
     
+
     def dump(self):
         """
         This method prints the unit cell parameters.
@@ -73,6 +75,7 @@ class Crystal:
         self.end_predicted_peaks_pointer = None
         self.unit_cell = None
         self.resolution_limit = None
+
 
     def dump(self):
         """
@@ -120,6 +123,7 @@ class LargeFile:
         therefore not be further described.
     """
 
+
     def __init__(self, name, mode="r"):
         """
         Args:
@@ -137,6 +141,7 @@ class LargeFile:
         self._read_file()
         """
 
+
     def __exit__(self):
         """
         This method implements the desctructor of the class. The Desctructer
@@ -145,11 +150,14 @@ class LargeFile:
 
         self.file.close()
 
+
     def __iter__(self):
         return self.file
 
+
     def __next__(self):
         return self.file.next()
+
 
     def _read_file(self):
         """
@@ -163,17 +171,22 @@ class LargeFile:
             offset += len(line)
         self.file.seek(0)
 
+
     def close(self):
         self.file.close()
+
 
     def tell(self):
         return self.file.tell()
 
+
     def seek(self, pos):
         self.file.seek(pos)
 
+
     def readline(self):
         return self.file.readline()
+
 
     def fileno(self):
         return self.file.fileno()
@@ -233,10 +246,18 @@ class Chunk:
             # followed by optional exponent part if desired
             (?: [Ee] [+-]? \d+ ) ?
         """
+        self._integer_matching_pattern = r"""
+            (?<![-.])\b[0-9]{1,}\b(?!\.[0-9])
+        """
+
         self._float_matching_regex = re.compile(
             self._float_matching_pattern, re.VERBOSE)
 
+        self._integer_matching_regex = re.compile(
+            self._integer_matching_pattern, re.VERBOSE)
+
         self._flag = StreamfileParserFlags.none
+
 
     def dump(self):
         """
@@ -259,6 +280,7 @@ class Chunk:
         print("Number of crystals found: ", len(self.crystals))
         print("First peaks line: ", self.begin_peaks_pointer)
         print("Last peaks line: ", self.end_peaks_pointer)
+
 
     def parse_line(self, line, previous_line_pointer, current_line_pointer, 
         next_line_pointer):
@@ -342,7 +364,7 @@ class Chunk:
             if not "indexed_by = none" in line:
                 self.indexed = True
         elif "Event: " in line:
-            self.event = line.replace("Event: ", "").rstrip()
+            self.event = int(re.findall(self._integer_matching_regex, line)[0])
         # It would maybe be a better style to set the line numbers from the
         # Streamfile class such that the class Chunk has no information about 
         # the current line number. Maybe implement this later.
@@ -385,6 +407,7 @@ class Chunk:
                 self.crystals[self.num_crystals - 1].resolution_limit = \
                     float(matches[2])
 
+
     def _get_coordinates_from_streamfile(self, begin_pointer, end_pointer, 
         x_column, y_column):
         try:
@@ -406,6 +429,7 @@ class Chunk:
             print("Cannot read the peak information from streamfile: ", 
                 self.filename)
             return ([], [])
+
 
     def get_hkl_indices_from_streamfile(self, crystal_index, peak_x, peak_y):
         """
@@ -438,6 +462,7 @@ class Chunk:
                 self.filename)
         return []
 
+
     def get_peak_data(self):
         """
         This method returns a list of all the peaks in the chunk of the 
@@ -450,6 +475,7 @@ class Chunk:
 
         return self._get_coordinates_from_streamfile(self.begin_peaks_pointer,
             self.end_peaks_pointer, 0, 1)
+
 
     def has_crystal(self):
         """
@@ -465,6 +491,7 @@ class Chunk:
         else:
             return False
 
+
     def get_number_of_crystals(self):
         """
         This method returns the number of crystals in the chunk.
@@ -474,6 +501,7 @@ class Chunk:
         """
         
         return (len(self.crystals))
+
 
     def get_unit_cell(self, crystal_index):
         """
@@ -488,6 +516,7 @@ class Chunk:
         """
 
         return self.crystals[crystal_index].unit_cell
+
 
     def get_predicted_peak_data(self, crystal_index):
         """
@@ -509,7 +538,6 @@ class Chunk:
         return self._get_coordinates_from_streamfile(
                 crystal.begin_predicted_peaks_pointer, 
                 crystal.end_predicted_peaks_pointer, 7, 8)
-
         
 
 class Streamfile:
@@ -537,6 +565,7 @@ class Streamfile:
         # in a stream file due to stream concatenation
         self._geometry_processed = False
         self._geom_dict = None
+        self.geometry = None
         self._temporary_geometry_file = None
         self._gen_temporary_geometry_file()
         self.parse_streamfile()
@@ -544,9 +573,11 @@ class Streamfile:
         self.clen = None
         self.clen_codeword = None
 
+
     def __exit__(self, exc_type, exc_value, traceback):
         if not self._temporary_geometry_file.closed:
             self._temporary_geometry_file.close()
+
 
     def get_geometry(self):
         """
@@ -558,6 +589,7 @@ class Streamfile:
         """
 
         return self._geom_dict
+
 
     def get_peak_data(self, index):
         """
@@ -574,6 +606,7 @@ class Streamfile:
         """
         return self.chunks[index].get_peak_data()
 
+
     def has_crystal(self, index):
         """
         This method returns True or False depending on whether a crystal was
@@ -588,6 +621,7 @@ class Streamfile:
         """
         
         return self.chunks[index].has_crystal()
+
         
     def get_unit_cell(self, index, crystal_index = 0):
         """
@@ -606,6 +640,7 @@ class Streamfile:
         """
 
         return self.chunks[index].get_unit_cell(crystal_index)
+
 
     def get_predicted_peak_data(self, chunk_index, crystal_index = 0):
         """
@@ -626,6 +661,7 @@ class Streamfile:
 
         return self.chunks[chunk_index].get_predicted_peak_data(crystal_index)
 
+
     def get_number_of_crystals(self, chunk_index):
         """
         This method returns the number of crystals in a specific chunk.
@@ -640,6 +676,7 @@ class Streamfile:
         
         return self.chunks[chunk_index].get_number_of_crystals()
 
+
     def get_number_of_chunks(self):
         """
         This methods returns the number of chunks in the streamfile.
@@ -647,11 +684,29 @@ class Streamfile:
         Returns:
             int: The number of chunks
         """
+
         return len(self.chunks)
+
+
+    def get_event_id(self, chunk_index):
+        """
+        This method returns the event id of the chunk.
+
+        Args:
+            index (int): The number of the chunk from which the number of 
+                crystals should be returned.
+
+        Returns:
+            int: The event id of the chunk
+        """
+
+        return self.chunks[chunk_index].event
+
 
     def get_hkl_indices(self, peak_x, peak_y, chunk_index, crystal_index = 0):
         return self.chunks[chunk_index].get_hkl_indices_from_streamfile(
             crystal_index, peak_x, peak_y)
+
 
     def get_cxi_filenames(self):
         list_of_filenames = [] 
@@ -660,6 +715,54 @@ class Streamfile:
             if chunk.cxi_filename not in list_of_filenames:
                 list_of_filenames.append(chunk.cxi_filename)
         return list_of_filenames
+
+
+    def get_cxiview_event_list(self):
+        """
+        This method returns a dictionary with the event information the
+        cxiviewer needs to display the events correctly.
+
+        Returns:
+            dict: Dictionary containing the event information
+
+        """
+
+        nevents = len(self.chunks)
+        filenames = []
+        eventids = []
+        h5fields = []
+        formats = []
+
+        try:
+            # TODO: We assume here that the data is stored at the same position
+            # for every panel. That may not be true. But currently the cxiviewer
+            # does not support different storage positions for different panels
+            field = next(iter(self.geometry['panels'].values()))['data']
+        except KeyError:
+            field = "data/data"
+
+        for chunk in self.chunks:
+            filenames.append(chunk.cxi_filename) 
+            eventids.append(chunk.event)
+            h5fields.append(field)
+
+            basename = os.path.basename(chunk.cxi_filename)
+            if basename.endswith(".h5") and basename.startswith("LCLS"):
+                formats.append("cheetah_h5")
+            elif basename.endswith(".h5"):
+                formats.append("generic_h5")
+            else:
+                formats.append("cxi")
+
+        result = {
+            'nevents' : nevents,
+            'filename': filenames,
+            'event': eventids,
+            'h5field': h5fields,
+            'format': formats
+        }
+        return result
+
 
     def _gen_temporary_geometry_file(self):
         try:
@@ -670,6 +773,7 @@ class Streamfile:
                 Probably the program does not have the right to write on
                 disk.""")
             exit()
+
 
     def _write_temporary_geometry_file(self, geometry_lines):
         try:
@@ -682,6 +786,7 @@ class Streamfile:
                 Probably the program does not have the right to write on
                 disk.""")
             exit()
+
 
     def parse_streamfile(self):
         """
@@ -725,6 +830,8 @@ class Streamfile:
                             #self._temporary_geometry_file.name)
                         geom_parser = geom.GeometryFileParser(
                             self._temporary_geometry_file.name)
+                        geom_parser.parse()
+                        self.geometry = geom_parser.dictionary
                         self._geom_dict = geom_parser.pixel_map_for_cxiview()
 
                         # handle the clen property which can be given either as

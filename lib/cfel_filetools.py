@@ -427,11 +427,10 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
 
 
 
-def list_events(pattern='./*.cxi', field='data/data', list_of_files = None):
+def list_events(pattern='./*.cxi', field='data/data'):
     """
     :param file_pattern: Single filename, or search string
     :param field: HDF5 field from which to draw data, can be different for each file, default='data/data'
-    :param list_of_files: List of .cxi or .h5 filenames
     :return: List of filenames, eventID and HDF5 field
 
     reload:
@@ -445,11 +444,10 @@ def list_events(pattern='./*.cxi', field='data/data', list_of_files = None):
         field = 'data/data'
 
     # Find all files matching pattern
-    if list_of_files is None:
-        files = glob.glob(pattern, recursive=True)
-        if len(files) == 0:
-            print('No files found matching pattern: ', pattern)
-        list_of_files = glob.iglob(pattern, recursive=True)
+    files = glob.glob(pattern, recursive=True)
+    if len(files) == 0:
+        print('No files found matching pattern: ', pattern)
+    list_of_files = glob.iglob(pattern, recursive=True)
         
 
     # List the found files (sanity check)
