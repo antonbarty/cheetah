@@ -411,18 +411,19 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Dialog box for dataset label and ini file
         gui, ok = gui_dialogs.run_cheetah_gui.cheetah_dialog(dialog_info)
 
-        # Extract values from return dict
-        dataset = gui['dataset']
-        inifile = gui['inifile']
-
         # Exit if cancel was pressed
         if ok == False:
             return
 
-        dataset_csv = cfel_file.csv_to_dict('datasets.csv')
-
+        # Extract values from return dict
+        dataset = gui['dataset']
+        inifile = gui['inifile']
         self.lasttag = dataset
         self.lastini = inifile
+
+
+        dataset_csv = cfel_file.csv_to_dict('datasets.csv')
+
 
         # Process all selected runs
         runs = self.selected_runs()
