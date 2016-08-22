@@ -22,17 +22,24 @@ import UI.CXIview_ui
 import lib.cfel_filetools as cfel_file
 import lib.cfel_geometry as cfel_geom
 import lib.cfel_imgtools as cfel_img
-from lib.cfel_streamfile import *
+
+from lib.streamfile_parser.Streamfile import *
 
 
-"""
-Class implementing an exception for the case that no crystal is found in the 
-streamfile.
-"""
 class NoCrystalException(Exception):
+    """
+    Class implementing an exception for the case that no crystal is found in the
+    streamfile.
+    """
+
     pass
 
 class InsufficientInformationException(Exception):
+    """
+    Class implementing an exception for the case that required information is
+    missing to perform some task.
+    """
+
     pass
 
 #
