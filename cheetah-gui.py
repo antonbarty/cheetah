@@ -16,6 +16,7 @@ import PyQt4.QtGui
 import UI.cheetahgui_ui
 import lib.cfel_filetools as cfel_file
 import lib.cfel_locations as cfel_locations
+import lib.cfel_detcorr as cfel_detcorr
 import lib.gui_dialogs as gui_dialogs
 
 #TODO: Cheetah GUI
@@ -579,7 +580,16 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         print("Talk to Andrew Morgan to add his mask maker")
 
     def badpix_from_darkcal(self):
-        print("Badpix from darkcal selected")
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+
+        path = runs['path'][0]
+        path += '*detector?-class0-sum.h5'
+        for dkcal in glob.iglob(path):
+            cfel_detcorr.badpix_from_darkcal(dkcal, self)
+
+
 
     def badpix_from_bright(self):
         print("Badpix from bright selected")

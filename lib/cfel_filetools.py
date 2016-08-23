@@ -108,55 +108,26 @@ def read_h5(filename='', field="/data/data"):
 
 
 
-def write_h5(filename, field="data/data", compress=3):
-    """ 
+def write_h5(data_in, filename='', field="data/data"):
+    """
     Write a simple HDF5 file
+    """
 
-    IDL code
-    	if n_elements(filename) eq 0 then begin
-		print,'write_simple_hdf5: No filename specified...'
-		return
-	endif
-	
-	if n_elements(data) eq 0 then begin
-		print,'write_simple_hdf5: No data specified...'
-		return
-	endif
-	dim = size(data,/dimensions)
-	
-	
-	if not keyword_set(compress) then begin
-		compress=3
-	endif
-	
+    # Open a file selection dialog if no filename is provided
+    if filename == '':
+        filename = dialog_pickfile(write=True)
+        if filename == '':
+            return
 
-	;; HDF5 compression chunks
-	chunksize = dim
-	if n_elements(dim) ge 3 then $
-	;;	chunksize[0] = dim[0]/8;
-	;;	chunksize[0:n_elements(chunksize)-3] = 1
 
-	
-	fid = H5F_CREATE(filename) 
-	group_id = H5G_CREATE(fid, 'data')
-	datatype_id = H5T_IDL_CREATE(data) 
-	dataspace_id = H5S_CREATE_SIMPLE(dim) 
+    # Simple HDF5 writing with no data conversion
+    try:
+        with h5py.File(filename, 'w') as fp:
+            dset = fp.create_dataset(field, data=data_in)
+            fp.close()
+    except:
+        print('Error writing field ', field, ' to ', filename)
 
-	if (compress eq 0) then begin
-		dataset_id = H5D_CREATE(fid,'data/data',datatype_id,dataspace_id) 
-	endif else begin
-		;; GZIP keyword is ignored if CHUNK_DIMENSIONS is not specified.
-		dataset_id = H5D_CREATE(fid,'data/data',datatype_id,dataspace_id, gzip=compression,  chunk_dimensions=chunksize) 
-		;dataset_id = H5D_CREATE(fid,'data/data',datatype_id,dataspace_id, chunk_dimensions=chunksize, gzip=compression, /shuffle) 
-	endelse
-
-	H5D_WRITE,dataset_id,data 
-	H5D_CLOSE,dataset_id   
-	H5S_CLOSE,dataspace_id 
-	H5T_CLOSE,datatype_id 
-	H5G_CLOSE,group_id
-	H5F_CLOSE,fid 
-     """
 # end write_h5
 
 

@@ -18,7 +18,7 @@ def determine_location():
 
     #
     #   Only determine where we are
-    #   Enables location configuration to be overridden separately from what is determined here
+    #   Enables location configuration to be overridden separately from what is determined here, eg: from command line
     #
     if hostname.endswith("slac.stanford.edu"):
         print("Looks like we are at SLAC.")
