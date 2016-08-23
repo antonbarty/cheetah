@@ -5,11 +5,13 @@
 
 import tempfile
 import os
+import textwrap
 
 from  ..geometry_parser import GeometryFileParser as geom
 from .Chunk import *
 from .StreamfileParserFlags import *
 from .LargeFile import *
+from .ParserError import *
 
 
 class Streamfile:
@@ -76,6 +78,7 @@ class Streamfile:
             list: The list with the positions of the peaks. The peaks are
                 stored in the format (x_position, y_position).
         """
+            
         return self.chunks[index].get_peak_data()
 
 
@@ -165,7 +168,7 @@ class Streamfile:
         This method returns the event id of the chunk.
 
         Args:
-            index (int): The number of the chunk from which the number of 
+            chunk_index (int): The number of the chunk from which the number of 
                 crystals should be returned.
 
         Returns:
@@ -176,11 +179,39 @@ class Streamfile:
 
 
     def get_hkl_indices(self, peak_x, peak_y, chunk_index, crystal_index = 0):
+        """
+        This methods returns the hkl index of peak corresponding to the
+        given coordinates, the given crystal in the given chunk.
+
+        Args:
+            peak_x (float): x coordinate of the peak
+            peak_y (float): y coordinate of the peak
+            chunk_index (int): The number of the chunk in which the crystal is
+                located
+            crystal_index (int): The number of the crystal which the peak 
+                belongs to
+
+        Returns:
+            list: hkl indices
+        """
+
         return self.chunks[chunk_index].get_hkl_indices_from_streamfile(
             crystal_index, peak_x, peak_y)
 
 
     def get_cxi_filenames(self):
+        """
+        This method returns the cxi/h5 filenames in the streamfile.
+
+        Returns:
+            list: List of filenames
+
+        Note: 
+            This method is deprecated and has been replaced by the method
+            get_cxiview_event_list which gives more detailed information
+            about the events including filenames and event number.
+        """
+
         list_of_filenames = [] 
         for chunk in self.chunks:
             # TODO: better use a ordered set class here
@@ -274,6 +305,7 @@ class Streamfile:
 
         flag = StreamfileParserFlags.none
         flag_changed = False
+        skip_chunk = False
         # line numbering starts at 1
         line_number = 1
         new_chunk = None
@@ -321,12 +353,18 @@ class Streamfile:
                     # determine that information by itself
                     new_chunk = Chunk(self.filename, self.file, clen, 
                         clen_codeword)
+                    
                     new_chunk.begin_pointer = next_line_pointer
                     flag_changed = True
                 elif "End chunk" in line:
                     flag = StreamfileParserFlags.none
                     new_chunk.end_pointer = current_line_pointer
-                    self.chunks.append(new_chunk)
+                    if not skip_chunk:
+                        # check if begin chunk marker was present
+                        if new_chunk is not None:
+                            self.chunks.append(new_chunk)
+                    new_chunk = None
+                    skip_chunk = False
                     flag_changed = True
 
 
@@ -342,8 +380,17 @@ class Streamfile:
                     if flag == StreamfileParserFlags.geometry:
                         geometry_lines.append(line.strip())
                     elif flag == StreamfileParserFlags.chunk:
-                        new_chunk.parse_line(line, previous_line_pointer, 
-                            current_line_pointer, next_line_pointer)
+                        try:
+                            if not skip_chunk:
+                                new_chunk.parse_line(line, 
+                                    previous_line_pointer, current_line_pointer,
+                                    next_line_pointer)
+                        except ParserError as e:
+                            print(textwrap.fill("Error: " + e.args[0], 80))
+                            print(textwrap.fill("Line: " + line, 80))
+                            print("Action: Skipping current chunk")
+                            print("")
+                            skip_chunk = True
                 else:
                     flag_changed = False
                     

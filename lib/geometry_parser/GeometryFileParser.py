@@ -563,8 +563,8 @@ class GeometryFileParser:
                 num_errors_string + " occured.", 80))
             for error in self.error_list:
                 print("")
-                print(textwrap.fill("Line: " + error[0], 80))
                 print(textwrap.fill("Error: " + error[1], 80))
+                print(textwrap.fill("Line: " + error[0], 80))
             self.error_list = []
             return False
         else:
@@ -641,8 +641,8 @@ class GeometryFileParser:
                     self.dictionary['panels'][p]['min_fs']: \
                     self.dictionary['panels'][p]['max_fs'] + 1] = r.imag
         except KeyError:
-            print("The geometry file does not provide sufficient information " +
-                "to construct the pixelmap.")
+            print(textwrap.fill("Error: The geometry file does not provide " +
+                "sufficient information to construct the pixelmap.", 80))
             exit()
 
         r = numpy.sqrt(numpy.square(x) + numpy.square(y))
@@ -673,7 +673,7 @@ class GeometryFileParser:
         try:
             panel_dict = next(iter(self.dictionary['panels'].values()))
         except KeyError:
-            print("The geometry file does not contain panel information.")
+            print("Error: The geometry file does not contain panel information.")
             exit()
         try:
             coffset = panel_dict['coffset']
@@ -819,9 +819,9 @@ class GeometryFileParser:
                    
             except ParserError as e:
                 if exit_on_error:
-                    print(textwrap.fill("Geometry file is corrupted in line: " +
-                    line, 80))
-                    print(textwrap.fill(e.args[0], 80))
+                    print(textwrap.fill("Error: " + e.args[0], 80))
+                    print(textwrap.fill("Line: " + line, 80))
+                    print("")
                     exit()
                 else:
                     self.error_list.append((line, e.args[0]))

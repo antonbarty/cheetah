@@ -4,10 +4,13 @@
 #
 
 import re
+import textwrap
+import math
 
 from .LargeFile import *
 from .Crystal import *
 from .StreamfileParserFlags import *
+from .ParserError import *
 
 class Chunk:
     """
@@ -36,8 +39,6 @@ class Chunk:
         self.beam_bandwidth = -1.0
         self.clen_codeword = clen_codeword
         self.clen = clen
-        self.num_peaks = None 
-        self.num_saturated_peaks = None 
         self.first_line = None
         self.last_line = None 
         self.begin_peaks_pointer = None 
@@ -57,6 +58,7 @@ class Chunk:
             # followed by optional exponent part if desired
             (?: [Ee] [+-]? \d+ ) ?
         """
+
         self._integer_matching_pattern = r"""
             (?<![-.])\b[0-9]{1,}\b(?!\.[0-9])
         """
@@ -83,14 +85,21 @@ class Chunk:
         print("Photon Energy [eV]: ", self.photon_energy)
         print("Beam divergence [rad]: ", self.beam_divergence)
         print("Average camera length [m]: ", self.average_camera_length)
-        print("Num peaks: ", self.num_peaks)
-        print("Num saturated peaks: ", self.num_saturated_peaks)
         print("First line: ", self.first_line)
         print("Last line: ", self.last_line)
         print("Crystal found: ", self.has_crystal())
         print("Number of crystals found: ", len(self.crystals))
         print("First peaks line: ", self.begin_peaks_pointer)
         print("Last peaks line: ", self.end_peaks_pointer)
+
+
+    def _print_non_crit_error_message(self, property, line):
+        print(textwrap.fill("Warning: The property \"" + property + "\" could" +
+            " not be parsed", 80))
+        print(textwrap.fill("Line: " + line, 80))
+        print(textwrap.fill("Action: Set " + property + " to nan by default", 
+            80))
+        print("")
 
 
     def parse_line(self, line, previous_line_pointer, current_line_pointer, 
@@ -129,53 +138,55 @@ class Chunk:
                     begin_predicted_peaks_pointer = next_line_pointer
         if self.clen_codeword is not None:
             if self.clen_codeword in line:
-                # we split the line first because the clen_codeword may contain
-                # some float number
+                # we split the line first because the clen_codeword may 
+                # contain some float number
                 search_string = line.split("=")[1]
                 matches = re.findall(
                     self._float_matching_regex, search_string)
-                if matches:
+                if len(matches) == 1:
                     self.clen = float(matches[0])
                 else:
                     self.clen = float('nan')
-
+                    self._print_non_crit_error_message("clen", line)
+                    
         if "Image filename: " in line:
             self.cxi_filename = line.replace("Image filename: ", "").rstrip()
         elif "photon_energy_eV = " in line:
             # there may also be a different "hdf5/.../photon_energy_eV" tag
-            # with the in the streamfile. we use just the plain
-            # "photon_energy_ev" entry
+            # in the streamfile. We use just the plain "photon_energy_ev" entry
             if "hdf5" not in line:
                 matches = re.findall(
                         self._float_matching_regex, line)
-                if matches:
+                if len(matches) == 1:
                     self.photon_energy = float(matches[0])
                 else:
                     self.photon_energy = float('nan')
+                    self._print_non_crit_error_message("photon energy", line)
         elif "beam_divergence = " in line:
             matches = re.findall(
                     self._float_matching_regex, line)
-            if matches:
+            if len(matches) == 1:
                 self.beam_divergence = float(matches[0])
             else:
                 self.beam_divergence = float('nan')
+                self._print_non_crit_error_message("beam divergence", line)
         elif "beam_bandwidth = " in line:
             matches = re.findall(
                     self._float_matching_regex, line)
-            if matches:
+            if len(matches) == 1:
                 self.beam_bandwidth = float(matches[0])
             else:
                 self.beam_bandwidth = float('nan')
-        elif "num_peaks = " in line:
-            self.num_peaks = int(line.replace("num_peaks = ", ""))
-        elif "num_saturated_peaks = " in line:
-            self.num_saturated_peaks = int(
-                line.replace("num_saturated_peaks = ", ""))
+                self._print_non_crit_error_message("beam bandwidth", line)
         elif "indexed_by" in line:
             if not "indexed_by = none" in line:
                 self.indexed = True
         elif "Event: " in line:
-            self.event = int(re.findall(self._integer_matching_regex, line)[0])
+            matches = re.findall(self._integer_matching_regex, line)
+            if len(matches) == 1:
+                self.event = int(matches[0])
+            else:
+                raise ParserError("The event number could not be read.")
         # It would maybe be a better style to set the line numbers from the
         # Streamfile class such that the class Chunk has no information about 
         # the current line number. Maybe implement this later.
@@ -199,14 +210,14 @@ class Chunk:
                 current_line_pointer
             return
         elif "Cell parameters" in line:
-            self.crystals[self.num_crystals-1].unit_cell = UnitCell(
-                float(re.findall(self._float_matching_regex, line)[0]),
-                float(re.findall(self._float_matching_regex, line)[1]),
-                float(re.findall(self._float_matching_regex, line)[2]),
-                float(re.findall(self._float_matching_regex, line)[3]),
-                float(re.findall(self._float_matching_regex, line)[4]),
-                float(re.findall(self._float_matching_regex, line)[5]))
-            self.crystals[self.num_crystals - 1].unit_cell.to_angstroem()
+            matches = re.findall(self._float_matching_regex, line)
+            if len(matches) == 6:
+                self.crystals[self.num_crystals-1].unit_cell = UnitCell(
+                    float(matches[0]), float(matches[1]), float(matches[2]),
+                    float(matches[3]), float(matches[4]), float(matches[5]))
+                self.crystals[self.num_crystals - 1].unit_cell.to_angstroem()
+            else:
+                raise ParserError("The cell parameters could not be read.")
         elif "centering = " in line:
             self.crystals[self.num_crystals - 1].unit_cell.centering = \
                 line.replace("centering = ", "").strip() 
@@ -214,9 +225,14 @@ class Chunk:
             # we use the second resolution index in angstroem
             matches = re.findall(
                self._float_matching_regex, line)
-            if matches:
+            if len(matches) == 3:
                 self.crystals[self.num_crystals - 1].resolution_limit = \
                     float(matches[2])
+            else:
+                self.crystals[self.num_crystals - 1].resolution_limit = \
+                    float('nan')
+                self._print_non_crit_error_message("diffraction resolution" + 
+                    "limit", line)
 
 
     def _get_coordinates_from_streamfile(self, begin_pointer, end_pointer, 
@@ -225,20 +241,29 @@ class Chunk:
             line_number = 1
             peak_x_data = []
             peak_y_data = []
+            # check pointer validity
+            if ((begin_pointer is None)
+                or (end_pointer is None)):
+                print("Error: Cannot find the peak information in the chunk")
+                print("")
+                return ([], [])
 
             self.stream_file.seek(begin_pointer)
             while(self.stream_file.tell() != end_pointer):
                 line = self.stream_file.readline()
                 matches = re.findall(self._float_matching_regex, line)
-                # TODO: look up if fs is always x in the cheetah 
-                # implementation
-                peak_x_data.append(float(matches[x_column]))
-                peak_y_data.append(float(matches[y_column]))
-
+                try:
+                    peak_x_data.append(float(matches[x_column]))
+                    peak_y_data.append(float(matches[y_column]))
+                except (IndexError, ValueError):
+                    print("Error: Cannot parse the peak information")
+                    print(textwrap.fill("Line: " + line, 80))
+                    print("")
+                    return ([],[])
             return (peak_x_data, peak_y_data)
         except IOError:
-            print("Cannot read the peak information from streamfile: ", 
-                self.filename)
+            print(textwrap.fill("Error: Cannot read the peak information from "+
+                "streamfile: " + self.filename, 80))
             return ([], [])
 
 
@@ -260,17 +285,32 @@ class Chunk:
         try:
             crystal = self.crystals[crystal_index]
             self.stream_file.seek(crystal.begin_predicted_peaks_pointer)
+            # check pointer validity
+            if ((self.begin_predicted_peaks_pointer is None)
+                or (self.end_predicted_peaks_pointer is None)):
+                print("Error: Cannot find the hkl information in the chunk")
+                print("")
+                return []
+
             while(self.stream_file.tell() != 
                 crystal.end_predicted_peaks_pointer):
                 line = self.stream_file.readline()
                 matches = re.findall(self._float_matching_regex, line)
                
-                if(math.isclose(peak_x, float(matches[7]))
-                    and math.isclose(peak_y, float(matches[8]))):
-                    return [int(matches[0]), int(matches[1]), int(matches[2])]
+                try:
+                    if(math.isclose(peak_x, float(matches[7]))
+                        and math.isclose(peak_y, float(matches[8]))):
+                        return [int(matches[0]), int(matches[1]), 
+                            int(matches[2])]
+                except (IndexError, ValueError):
+                    print("Error: Cannot parse the hkl information")
+                    print(textwrap.fill("Line: " + line, 80))
+                    print("")
+                    return []
         except IOError:
-            print("Cannot read the peak information from streamfile: ", 
-                self.filename)
+            print(textwrap.fill("Error: Cannot read the hkl information from " +
+                "streamfile: " + self.filename, 80))
+            print("")
         return []
 
 
