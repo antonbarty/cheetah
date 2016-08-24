@@ -85,7 +85,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         if self.photon_energy_ok:
             self.lambd = scipy.constants.h * scipy.constants.c /(scipy.constants.e * self.photon_energy)
         else:
-            self.lambd = numpy.nan
+            self.lambd = float('nan')
 
         # Detector distance - use command line detector distance if provided
         self.detector_distance_ok = False
@@ -105,7 +105,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 self.detector_distance_ok = True
                 self.detector_z_m = (1e-3*detector_distance + self.geometry['coffset'])
             else:
-                self.detector_z_m = numpy.nan
+                self.detector_z_m = float('nan')
         self.detector_z_mm = self.detector_z_m * 1e3
 
 
@@ -749,7 +749,6 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Size of images (assume all images have the same size as frame 0)
         temp = cfel_file.read_event(self.event_list, 0, data=True)
         self.slab_shape = temp['data'].shape
-        print("Data shape: ", self.slab_shape )
 
         # Sanity check: Do geometry and data shape match?
         if self.geometry_ok and (temp['data'].flatten().shape != self.geometry['x'].shape):

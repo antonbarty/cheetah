@@ -600,8 +600,6 @@ class GeometryFileParser:
         if not self.dictionary['panels']:
             self.parse()
 
-        # TODO: do proper error handling in the case the geometry file does
-        # not supply all needed keys
         try:
             max_slab_fs = numpy.array([self.dictionary['panels'][k]['max_fs']  
                 for k in self.dictionary['panels'].keys()]).max()
@@ -663,12 +661,10 @@ class GeometryFileParser:
         y = -y
         img_shape = (M, N)
 
-        # numpy.nan is a bad choice because it relies on numpy. But
-        # this part of the program has to be compatible with cxiview.py
-        coffset = numpy.nan
-        clen = numpy.nan
-        res = numpy.nan
-        dx_m = numpy.nan
+        coffset = float('nan')
+        clen = float('nan')
+        res = float('nan')
+        dx_m = float('nan')
 
         try:
             panel_dict = next(iter(self.dictionary['panels'].values()))
