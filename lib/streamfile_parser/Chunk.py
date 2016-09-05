@@ -286,8 +286,8 @@ class Chunk:
             crystal = self.crystals[crystal_index]
             self.stream_file.seek(crystal.begin_predicted_peaks_pointer)
             # check pointer validity
-            if ((self.begin_predicted_peaks_pointer is None)
-                or (self.end_predicted_peaks_pointer is None)):
+            if ((crystal.begin_predicted_peaks_pointer is None)
+                or (crystal.end_predicted_peaks_pointer is None)):
                 print("Error: Cannot find the hkl information in the chunk")
                 print("")
                 return []

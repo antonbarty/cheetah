@@ -259,9 +259,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                 peak_x = []
                 peak_y = []
                 
-                print("Number of peaks found: ", 
-                    self.streamfile.get_number_of_crystals(self.img_index))
-                print("At the moment just displaying the first one.")
+                #print("Number of peaks found: ", 
+                #self.streamfile.get_number_of_crystals(self.img_index))
+                #print("At the moment just displaying the first one.")
                 peak_x_data, peak_y_data = self.streamfile.get_predicted_peak_data(
                     self.img_index)
                 n_peaks = len(peak_x_data)
@@ -338,7 +338,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
         # Refuse to draw deceptive resolution rings
         if self.resolution_ok == False:
-            print("Insufficient information to calculate resolution")
+            #print("Insufficient information to calculate resolution")
             return
 
 
@@ -483,6 +483,13 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             self.ui.jumpToLineEdit.setText(str(self.img_index))
     #end jump_to_pattern()
         
+    def _overline_string(self, string):
+        out = ""
+        for c in string:
+            out += c
+            out += u"\u0305"
+            
+        return out
 
     def mouse_in_predicted_peak(self, mouse_x, mouse_y, text):
         """
@@ -519,17 +526,20 @@ class cxiview(PyQt4.QtGui.QMainWindow):
                     self.img_index)
                 overline = "\u0305"
                 text += "     hkl: "
-                text += str(hkl[0])
                 if hkl[0] < 0:
-                    text += "\u0305 "
-                else: text += " "
-                text += str(hkl[1]) 
+                    text += self._overline_string(str(abs(hkl[0])))
+                else:
+                    text += str(hkl[0])
+                text += "  "
                 if hkl[1] < 0:
-                    text += "\u0305 "
-                else: text += " "
-                text += str(hkl[2])
+                    text += self._overline_string(str(abs(hkl[1])))
+                else:
+                    text += str(hkl[1]) 
+                text += "  "
                 if hkl[2] < 0:
-                    text += "\u0305"
+                    text += self._overline_string(str(abs(hkl[2])))
+                else:
+                    text += str(hkl[2])
                 self.ui.statusBar.setText(text)
 
     #

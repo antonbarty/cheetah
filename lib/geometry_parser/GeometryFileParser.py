@@ -46,11 +46,12 @@ class GeometryFileParser:
         This methods dumps the contents of the geometry dictionary.
         """
 
-        pprint.pprint(self.dictionary['panels'])
-        pprint.pprint(self.dictionary['beam_characteristics'])
-        pprint.pprint(self.dictionary['bad_regions'])
-        pprint.pprint(self.dictionary['rigid_groups'])
-        pprint.pprint(self.dictionary['rigid_group_collections'])
+        #pprint.pprint(self.dictionary['panels'])
+        #pprint.pprint(self.dictionary['beam_characteristics'])
+        #pprint.pprint(self.dictionary['bad_regions'])
+        #pprint.pprint(self.dictionary['rigid_groups'])
+        #pprint.pprint(self.dictionary['rigid_group_collections'])
+        pprint.pprint(self.dictionary)
 
 
     def _read_geometry_file(self, filename):
@@ -574,6 +575,7 @@ class GeometryFileParser:
                 print(textwrap.fill("Error: " + error[1], 80))
                 print(textwrap.fill("Line: " + error[0], 80))
             self.error_list = []
+            self.dictionary = {}
             return False
         else:
             print("The geometry file fulfills the CrystFEL geometry standards.")
