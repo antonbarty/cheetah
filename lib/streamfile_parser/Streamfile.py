@@ -21,6 +21,8 @@ class Streamfile:
 
     def __init__(self, filename):
         """
+        Constructor of the class
+
         Args:
             filename: Filepath to the stream file on the harddrive
         """
@@ -56,7 +58,7 @@ class Streamfile:
     def get_geometry(self):
         """
         This method returns the geometry information in the format requiered
-        for the cxiviewer
+        for the cxiview.py program.
 
         Return:
             dict: The geometry information.
@@ -227,7 +229,6 @@ class Streamfile:
 
         Returns:
             dict: Dictionary containing the event information
-
         """
 
         nevents = len(self.chunks)
@@ -294,7 +295,7 @@ class Streamfile:
     def parse_streamfile(self):
         """
         This methods parses the stream file. The information in the stream file
-        is stored corresponding Streamfile variables.
+        is stored corresponding Streamfile class variables.
         """
 
         # start to parse the streamfile

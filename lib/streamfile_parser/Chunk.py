@@ -20,6 +20,8 @@ class Chunk:
 
     def __init__(self, stream_filename, stream_file, clen, clen_codeword):
         """
+        Constructor of the class
+
         Args:
             stream_filename: Filepath to the stream file on the harddrive
             stream_file: File/LargeFile object of the stream file

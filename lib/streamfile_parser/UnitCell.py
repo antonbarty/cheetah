@@ -24,6 +24,7 @@ class UnitCell:
             beta: The length of the beta angle of the unit cell
             gamma: The length of the gamma angle of the unit cell
         """
+
         self.a = a
         self.b = b
         self.c = c

@@ -117,7 +117,7 @@ class GeometryFileParser:
     def _match_rigid_group_collection_information(self, line):
         """
         This methods checks whether the current line has information about rigid
-        groups in the detector
+        group collections in the detector
 
         Args:
             line (string): Line containing the rigid group information
@@ -230,9 +230,8 @@ class GeometryFileParser:
 
     def _match_local_panel_information(self, line):
         """
-        This methods checks if the current line is matching a specific panel
-        flag contains information for a specific panel or for all following
-        panels.
+        This methods checks if the current line contains local panel 
+        information.
 
         Args:
             line (string): Line containing the local panel information
@@ -543,7 +542,7 @@ class GeometryFileParser:
 
     def check_geometry(self, filename = ""):
         """
-        This methods check if the given geometry file or the geometry file of
+        This methods checks if the given geometry file or the geometry file
         stored in the object fulfills the definition standards of a valid
         CrystFEL geometry file.
 
@@ -663,7 +662,7 @@ class GeometryFileParser:
 
     def pixel_map_for_cxiview(self):
         """
-        This method returns the information needed for the cxiviewer.py
+        This method returns the information needed for the program cxiview.py
 
         Returns:
             dict: Dictionary the cxiviewer.py needs to display the information
@@ -723,7 +722,7 @@ class GeometryFileParser:
             filename (string): Path to the geometry file
             exit_on_error (bool): If True the program exits when an error in
                 the parsing process occurs. If False the program stores the
-                errors and linenumber and can give a complete error report.
+                errors and line content and can give a complete error report.
 
         """
 

@@ -21,6 +21,8 @@ class LargeFile:
 
     def __init__(self, name, mode="r"):
         """
+        Constructor of the class
+
         Args:
             name: Filepath to the file on the harddrive
             mode: Mode in which the file should be opened, e.g. "r","w","rw"
