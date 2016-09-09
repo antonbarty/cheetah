@@ -322,9 +322,6 @@
     <addaction name="menu_powder_blank_det"/>
     <addaction name="menu_powder_peaks_hits"/>
     <addaction name="menu_powder_peaks_blank"/>
-    <addaction name="separator"/>
-    <addaction name="menu_powder_darkcal"/>
-    <addaction name="menu_powder_copydarkcal"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -345,14 +342,18 @@
     <property name="title">
      <string>CrystFEL</string>
     </property>
-    <addaction name="actionView_indexing_results"/>
-    <addaction name="actionIndex_mosflm_nolatt"/>
-    <addaction name="actionCell_explorer"/>
+    <addaction name="menu_crystfel_listevents"/>
+    <addaction name="menu_crystfel_mosflmnolatt"/>
+    <addaction name="menu_crystfel_viewindexingresults"/>
+    <addaction name="menu_crystfel_cellexplorer"/>
+    <addaction name="menu_crystfel_mergestreams"/>
    </widget>
    <widget class="QMenu" name="menuCalibration">
     <property name="title">
      <string>Calibration</string>
     </property>
+    <addaction name="menu_calib_darkcal"/>
+    <addaction name="menu_calib_copydarkcal"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCheetah"/>
@@ -559,19 +560,39 @@
     <string>Copy darkcal.h5 to calib/darkcal</string>
    </property>
   </action>
-  <action name="actionCell_explorer">
+  <action name="menu_crystfel_cellexplorer">
    <property name="text">
     <string>Cell explorer</string>
    </property>
   </action>
-  <action name="actionView_indexing_results">
+  <action name="menu_crystfel_viewindexingresults">
    <property name="text">
     <string>View indexing results</string>
    </property>
   </action>
-  <action name="actionIndex_mosflm_nolatt">
+  <action name="menu_crystfel_mosflmnolatt">
    <property name="text">
     <string>Index mosflm-nolatt</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_mergestreams">
+   <property name="text">
+    <string>Merge stream files</string>
+   </property>
+  </action>
+  <action name="menu_calib_darkcal">
+   <property name="text">
+    <string>View darkcal</string>
+   </property>
+  </action>
+  <action name="menu_calib_copydarkcal">
+   <property name="text">
+    <string>Copy darkcal.h5 to calib/darkcal</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_listevents">
+   <property name="text">
+    <string>List events</string>
    </property>
   </action>
  </widget>

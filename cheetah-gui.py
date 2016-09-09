@@ -9,7 +9,6 @@ import sys
 import glob
 import argparse
 import datetime
-import subprocess
 import PyQt4.QtCore
 import PyQt4.QtGui
 
@@ -36,22 +35,6 @@ import lib.gui_dialogs as gui_dialogs
 #
 class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
-    #
-    # Launch a subprocess (eg: viewer or analysis script) without blocking the GUI
-    # Separate routine makes it easy change this globally if needed
-    #
-    def spawn_subprocess(self, cmdarr, wait=False, test=False):
-        command = str.join(' ', cmdarr)
-        print(command)
-
-        if test:
-            return
-
-        if wait:
-            subprocess.run(cmdarr)
-        else:
-            subprocess.Popen(cmdarr)
-
 
     #
     # Quick wrapper for viewing images (this code got repeated over-and-over)
@@ -67,7 +50,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Display if some file matches pattern (avoids error when no match)
         if len(glob.glob(file)) != 0:
             cmdarr = ['cxiview.py', '-g', self.config['geometry'], '-e', field, '-i', file]
-            self.spawn_subprocess(cmdarr)
+            cfel_file.spawn_subprocess(cmdarr)
         else:
             print("File does not seem to exist:")
             print(file)
@@ -282,22 +265,22 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         print('>---------------------<')
         print('Extracting template...')
         cmd = ['tar','-xf','/reg/g/cfel/cheetah/template.tar']
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
         print("Done")
 
         # Fix permissions
         print('>---------------------<')
         print('Fixing permissions...')
         cmd = ['chgrp',  '-R', expt, 'cheetah/']
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
         cmd = ['chmod',  '-R', 'g+w', 'cheetah/']
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
         print("Done")
 
         # Place configuration into /res
         #print, 'Placing configuration files into /res...'
         #cmd = ['/reg/g/cfel/cheetah/cheetah-stable/bin/make-labrynth']
-        #self.spawn_subprocess(cmd, wait=True)
+        #cfel_file.spawn_subprocess(cmd, wait=True)
         #print("Done")
 
 
@@ -309,11 +292,11 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Replace XTC directory with the correct location using sed
         xtcsedstr = str.replace(xtcdir, '/', '\\/')
         cmd = ["sed", "-i", "-r", "s/(xtcdir=).*/\\1" + xtcsedstr + "/", file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
 
         print('>-------------------------<')
         cmd = ['cat', file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
         print('>-------------------------<')
 
 
@@ -322,23 +305,23 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         print('Modifying ', file)
 
         cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1\"" + expt + "\"/", file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
 
         xtcsedstr = str.replace(xtcdir, '/', '\\/')
         cmd = ["sed", "-i", "-r", "s/(XTCDIR=).*/\\1\"" + xtcsedstr + "\"/", file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
 
         h5sedstr = str.replace(userdir, '/', '\\/') + '\/hdf5'
         cmd = ["sed", "-i", "-r", "s/(H5DIR=).*/\\1\"" + h5sedstr + "\"/", file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
 
         confsedstr= str.replace(userdir, '/', '\\/') + '\/process'
         cmd = ["sed", "-i", "-r", "s/(CONFIGDIR=).*/\\1\"" + confsedstr + "\"/", file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
 
         print('>-------------------------<')
         cmd = ['head', file]
-        self.spawn_subprocess(cmd, wait=True)
+        cfel_file.spawn_subprocess(cmd, wait=True)
         print('>-------------------------<')
 
         print("Working directory: ")
@@ -437,7 +420,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         for i, run in enumerate(runs['run']):
             print('------------ Start Cheetah process script ------------')
             cmdarr = [self.config['process'], run, inifile, dataset]
-            self.spawn_subprocess(cmdarr)
+            cfel_file.spawn_subprocess(cmdarr)
 
             # Format directory string
             dir = 'r{:04d}'.format(int(run))
@@ -504,7 +487,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
     def start_crawler(self):
         cmdarr = ['cheetah-crawler.py', '-l', 'LCLS', '-d', self.config['xtcdir'], '-c', self.config['hdf5dir']]
-        self.spawn_subprocess(cmdarr)
+        cfel_file.spawn_subprocess(cmdarr)
 
 
     def relabel_dataset(self):
@@ -549,7 +532,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             # Rename the directory
             if olddir != '---':
                 cmdarr = ['mv', self.config['hdf5dir']+'/'+olddir, self.config['hdf5dir']+'/'+newdir]
-                self.spawn_subprocess(cmdarr)
+                cfel_file.spawn_subprocess(cmdarr)
 
 
         # Sort dataset file to keep it in order
@@ -616,7 +599,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             return;
         pkfile = runs['path'][0] + 'peaks.txt'
         cmdarr = ['peakogram.py', '-i', pkfile]
-        self.spawn_subprocess(cmdarr)
+        cfel_file.spawn_subprocess(cmdarr)
     #end show_peakogram
 
     def show_resolution(self):
@@ -672,7 +655,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             path += '*detector0-darkcal.h5'
             for dkcal in glob.iglob(path):
                 cmdarr = ['cp', dkcal, '../calib/darkcal/.']
-                self.spawn_subprocess(cmdarr)
+                cfel_file.spawn_subprocess(cmdarr)
 
 
 
@@ -823,6 +806,10 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_cheetah_relabel.triggered.connect(self.relabel_dataset)
         self.ui.menu_cheetah_autorun.triggered.connect(self.autorun)
 
+        # Calibrations
+        self.ui.menu_calib_darkcal.triggered.connect(self.show_darkcal)
+        self.ui.menu_calib_copydarkcal.triggered.connect(self.copy_darkcal)
+
         # Mask menu actions
         self.ui.menu_mask_maker.triggered.connect(self.maskmaker)
         self.ui.menu_mask_badpixdark.triggered.connect(self.badpix_from_darkcal)
@@ -845,8 +832,6 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_powder_blank_det.triggered.connect(self.show_powder_blanks_det)
         self.ui.menu_powder_peaks_hits.triggered.connect(self.show_powder_peaks_hits)
         self.ui.menu_powder_peaks_blank.triggered.connect(self.show_powder_peaks_blanks)
-        self.ui.menu_powder_darkcal.triggered.connect(self.show_darkcal)
-        self.ui.menu_powder_copydarkcal.triggered.connect(self.copy_darkcal)
 
         # Log menu actions
         self.ui.menu_log_batch.triggered.connect(self.view_batch_log)
