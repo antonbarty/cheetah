@@ -49,7 +49,7 @@ def badpix_from_darkcal(filename="", qtmainwin=None):
 
     # Save mask
     outfile = cfel_file.dialog_pickfile(write=True, path='../calib/mask', filter='*.h5', qtmainwin=qtmainwin)
-    if outile is not '':
+    if outfile is not '':
         print("Saving mask: ", outfile)
         cfel_file.write_h5(mask, outfile, field='data/data')
 
