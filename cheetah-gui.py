@@ -17,17 +17,15 @@ import lib.cfel_filetools as cfel_file
 import lib.cfel_locations as cfel_locations
 import lib.cfel_detcorr as cfel_detcorr
 import lib.gui_dialogs as gui_dialogs
+import lib.gui_crystfel_bridge as gui_crystfel
+
 
 #TODO: Cheetah GUI
 #TODO: Calibration table (darkcal, mask, .ini for each run)
 
 #TODO: cxiview.py
-#TODO: Sensible behaviour when geometry not specified (display without geometry applied)
-#TODO: Do not display resolution rings if wavelength, z, or geometry not defined
-#TODO: Wavelength and z on command line
 #TODO: Take file list as an argument
 
-#app = PyQt4.QtGui.QApplication(sys.argv)
 
 
 #
@@ -414,6 +412,12 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         dataset_csv = cfel_file.csv_to_dict('datasets.csv')
 
+        # Failing to read the dataset file looses all information (bad)
+        if len(dataset_csv['DatasetID']) is 0:
+            print("Error reading datasets.csv (blank file)")
+            print("Try again...")
+            return
+
 
         # Process all selected runs
         runs = self.selected_runs()
@@ -479,6 +483,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     def enableCommands(self):
         self.ui.button_runCheetah.setEnabled(True)
+        self.ui.button_index.setEnabled(True)
         self.ui.menu_file_startcrawler.setEnabled(True)
         self.ui.menu_cheetah_processselected.setEnabled(True)
         self.ui.menu_cheetah_autorun.setEnabled(True)
@@ -642,6 +647,24 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
 
+
+
+    #
+    # Log menu actions
+    #
+    def view_batch_log(self):
+        print("View batch log selected")
+
+    def view_cheetah_log(self):
+        print("View cheetah log selected")
+
+    def view_cheetah_status(self):
+        print("View cheetah status selected")
+
+
+    #
+    #   Calibration menu items
+    #
     def show_darkcal(self):
         file = '*detector0-darkcal.h5'
         field = 'data/data'
@@ -657,19 +680,100 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
                 cmdarr = ['cp', dkcal, '../calib/darkcal/.']
                 cfel_file.spawn_subprocess(cmdarr)
 
+    def set_current_darkcal(self):
+        file = cfel_file.dialog_pickfile(path='../calib/darkcal', filter='*.h5', qtmainwin=self)
+        if file != '':
+            file = os.path.relpath(file)
+            basename = os.path.basename(file)
+            dirname = os.path.dirname(file)
+            cmdarr = ['ln', '-fs', basename, '../calib/darkcal/current-darkcal.h5']
+            cfel_file.spawn_subprocess(cmdarr)
 
+    def set_current_badpix(self):
+        file = cfel_file.dialog_pickfile(path='../calib/mask', filter='*.h5', qtmainwin=self)
+        if file != '':
+            file = os.path.relpath(file)
+            basename = os.path.basename(file)
+            dirname = os.path.dirname(file)
+            cmdarr = ['ln', '-fs', basename, '../calib/mask/current-badpix.h5']
+            cfel_file.spawn_subprocess(cmdarr)
+
+    def set_current_peakmask(self):
+        file = cfel_file.dialog_pickfile(path='../calib/mask', filter='*.h5', qtmainwin=self)
+        if file != '':
+            file = os.path.relpath(file)
+            basename = os.path.basename(file)
+            dirname = os.path.dirname(file)
+            cmdarr = ['ln', '-fs', basename, '../calib/mask/current-peakmask.h5']
+            cfel_file.spawn_subprocess(cmdarr)
+
+    def set_current_geometry(self):
+        file = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.h5', qtmainwin=self)
+        if file != '':
+            file = os.path.relpath(file)
+            basename = os.path.basename(file)
+            dirname = os.path.dirname(file)
+            cmdarr = ['ln', '-fs', basename, '../calib/geometry/current-geometry.h5']
+            cfel_file.spawn_subprocess(cmdarr)
 
     #
-    # Log menu actions
+    #   CrystFEL menu items
     #
-    def view_batch_log(self):
-        print("View batch log selected")
+    def crystfel_mosflmnolatt(self):
+        # Selected runs
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return
 
-    def view_cheetah_log(self):
-        print("View cheetah log selected")
+        # Select geometry file (force this action to make people think)
+        geomfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=self)
+        if geomfile is '':
+            return
 
-    def view_cheetah_status(self):
-        print("View cheetah status selected")
+        # Process each selected directory
+        for dir in runs['directory']:
+            gui_crystfel.index_nolatt(dir, geomfile)
+
+    def crystfel_indexpdb(self):
+        print("Test")
+
+
+    def crystfel_viewindex(self):
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+
+        dir = '../indexing/'+runs['directory'][0]
+        stream = glob.glob(dir+'/*.stream')
+        if len(stream) is 0:
+            return
+
+        cmdarr = ['cxiview', '-s', stream[0]]
+        cfel_file.spawn_subprocess(cmdarr)
+
+
+    def crystfel_cellexplore(self):
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+
+        dir = '../indexing/'+runs['directory'][0]
+        stream = glob.glob(dir+'/*.stream')
+        if len(stream) is 0:
+            return
+
+        cmdarr = ['cell_explorer', stream[0]]
+        cfel_file.spawn_subprocess(cmdarr)
+
+
+    def crystfel_mergestreams(self):
+        print("Test")
+
+    def crystfel_listevents(self):
+        print("Test")
+
+
+
 
 
 
@@ -791,7 +895,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Connect front panel buttons to actions
         self.ui.button_refresh.clicked.connect(self.refresh_table)
         self.ui.button_runCheetah.clicked.connect(self.run_cheetah)
-        self.ui.button_index.clicked.connect(self.run_crystfel)
+        self.ui.button_index.clicked.connect(self.crystfel_indexpdb)
         self.ui.button_viewhits.clicked.connect(self.view_hits)
         self.ui.button_virtualpowder.clicked.connect(self.view_powder)
         self.ui.button_peakogram.clicked.connect(self.view_peakogram)
@@ -809,6 +913,19 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         # Calibrations
         self.ui.menu_calib_darkcal.triggered.connect(self.show_darkcal)
         self.ui.menu_calib_copydarkcal.triggered.connect(self.copy_darkcal)
+        self.ui.menu_calib_currentdarkcal.triggered.connect(self.set_current_darkcal)
+        self.ui.menu_calib_currentbadpix.triggered.connect(self.set_current_badpix)
+        self.ui.menu_calib_currentpeakmask.triggered.connect(self.set_current_peakmask)
+        self.ui.menu_calib_currentgeom.triggered.connect(self.set_current_geometry)
+
+        # CrystFEL actions
+        self.ui.menu_crystfel_mosflmnolatt.triggered.connect(self.crystfel_mosflmnolatt)
+        self.ui.menu_crystfel_indexpdb.triggered.connect(self.crystfel_indexpdb)
+        self.ui.menu_crystfel_viewindexingresults.triggered.connect(self.crystfel_viewindex)
+        self.ui.menu_crystfel_cellexplorer.triggered.connect(self.crystfel_cellexplore)
+        self.ui.menu_crystfel_mergestreams.triggered.connect(self.crystfel_mergestreams)
+        self.ui.menu_crystfel_listevents.triggered.connect(self.crystfel_listevents)
+
 
         # Mask menu actions
         self.ui.menu_mask_maker.triggered.connect(self.maskmaker)

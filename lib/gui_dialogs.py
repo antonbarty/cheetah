@@ -120,7 +120,6 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
 
 
         # Text box for dataset entry
-        #TODO: Automatically add last dataset tag
         layout2 = PyQt4.QtGui.QHBoxLayout()
         self.label2 = PyQt4.QtGui.QLabel()
         self.label2.setText("Dataset tag: ")
@@ -132,7 +131,6 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
 
 
         # Combo box for list of .ini files
-        #TODO: Automatically select the last ini file
         layout3 = PyQt4.QtGui.QHBoxLayout()
         self.label3 = PyQt4.QtGui.QLabel()
         self.label3.setText("cheetah.ini file: ")

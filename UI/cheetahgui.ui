@@ -87,7 +87,7 @@
            </size>
           </property>
           <property name="text">
-           <string>Turbo index</string>
+           <string>Index hits</string>
           </property>
          </widget>
         </item>
@@ -342,11 +342,12 @@
     <property name="title">
      <string>CrystFEL</string>
     </property>
-    <addaction name="menu_crystfel_listevents"/>
     <addaction name="menu_crystfel_mosflmnolatt"/>
+    <addaction name="menu_crystfel_indexpdb"/>
     <addaction name="menu_crystfel_viewindexingresults"/>
     <addaction name="menu_crystfel_cellexplorer"/>
     <addaction name="menu_crystfel_mergestreams"/>
+    <addaction name="menu_crystfel_listevents"/>
    </widget>
    <widget class="QMenu" name="menuCalibration">
     <property name="title">
@@ -354,6 +355,11 @@
     </property>
     <addaction name="menu_calib_darkcal"/>
     <addaction name="menu_calib_copydarkcal"/>
+    <addaction name="separator"/>
+    <addaction name="menu_calib_currentdarkcal"/>
+    <addaction name="menu_calib_currentbadpix"/>
+    <addaction name="menu_calib_currentpeakmask"/>
+    <addaction name="menu_calib_currentgeom"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCheetah"/>
@@ -572,7 +578,7 @@
   </action>
   <action name="menu_crystfel_mosflmnolatt">
    <property name="text">
-    <string>Index mosflm-nolatt</string>
+    <string>Index mosflm-raw-nolatt-nocell</string>
    </property>
   </action>
   <action name="menu_crystfel_mergestreams">
@@ -593,6 +599,31 @@
   <action name="menu_crystfel_listevents">
    <property name="text">
     <string>List events</string>
+   </property>
+  </action>
+  <action name="menu_calib_currentdarkcal">
+   <property name="text">
+    <string>Set current darkcal</string>
+   </property>
+  </action>
+  <action name="menu_calib_currentbadpix">
+   <property name="text">
+    <string>Set current bad pixel mask</string>
+   </property>
+  </action>
+  <action name="menu_calib_currentpeakmask">
+   <property name="text">
+    <string>Set current analysis region mask</string>
+   </property>
+  </action>
+  <action name="menu_calib_currentgeom">
+   <property name="text">
+    <string>Set current geometry pixelmap</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_indexpdb">
+   <property name="text">
+    <string>Index to PDB reference</string>
    </property>
   </action>
  </widget>
