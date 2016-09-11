@@ -343,6 +343,7 @@
      <string>CrystFEL</string>
     </property>
     <addaction name="menu_crystfel_mosflmnolatt"/>
+    <addaction name="menu_crystfel_indexgeopt"/>
     <addaction name="menu_crystfel_indexpdb"/>
     <addaction name="separator"/>
     <addaction name="menu_crystfel_viewindexingresults"/>
@@ -351,6 +352,7 @@
     <addaction name="menu_crystfel_cellexplorer_pick"/>
     <addaction name="separator"/>
     <addaction name="menu_crystfel_mergestreams"/>
+    <addaction name="menu_crystfel_listfiles"/>
     <addaction name="menu_crystfel_listevents"/>
    </widget>
    <widget class="QMenu" name="menuCalibration">
@@ -638,6 +640,16 @@
   <action name="menu_crystfel_viewindexing_pick">
    <property name="text">
     <string>View indexing (pick stream file)</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_indexgeopt">
+   <property name="text">
+    <string>Index for geoptimiser</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_listfiles">
+   <property name="text">
+    <string>List files</string>
    </property>
   </action>
  </widget>

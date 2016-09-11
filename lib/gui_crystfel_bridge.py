@@ -45,7 +45,7 @@ def index_nolatt(dirbase = 'temp', geomfile = None):
     qlabel = 'indx-'+dirbase[1:5]
     logfile = 'bsub.log'
     abspath = os.path.abspath(indexdir)
-    bsub_cmd = ['bsub', '-q', 'psanaq', '-x', '-J', qlabel, '-o', logfile, '-cwd', abspath, 'source', './index_nocell.sh', dirbase, os.path.basename(geomfile)]
+    bsub_cmd = ['bsub', '-q', 'psanaq', '-x', '-J', qlabel, '-o', logfile, '-cwd', abspath, 'source', './index_nocell.sh', dirbase, 'none.pdb', os.path.basename(geomfile)]
 
 
     # Submit it
@@ -64,14 +64,14 @@ def index_pdb(dirs = None, geomfile = None):
 
     # Launch dialog box for CrystFEL options
     dialog_in = {
-        'pdb_files' : glob.glob('../calib/pdb/*.pdb'),
+        'pdb_files' : glob.glob('../calib/pdb/*.pdb')+glob.glob('../calib/pdb/*.cell'),
         'geom_files' : glob.glob('../calib/geometry/*.geom'),
         'recipe_files' : glob.glob('../process/index*.sh'),
         'default_geom' : geomfile
     }
     dialog_out, ok = gui_dialogs.run_crystfel_dialog.dialog_box(dialog_in)
 
-    print(dialog_out)
+    #print(dialog_out)
     pdbfile = dialog_out['pdbfile']
     geomfile = dialog_out['geomfile']
     recipefile = dialog_out['recipefile']

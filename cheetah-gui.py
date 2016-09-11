@@ -536,8 +536,20 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
             # Rename the directory
             if olddir != '---':
-                cmdarr = ['mv', self.config['hdf5dir']+'/'+olddir, self.config['hdf5dir']+'/'+newdir]
-                cfel_file.spawn_subprocess(cmdarr)
+                if os.path.exists(self.config['hdf5dir'] + '/' + olddir):
+                    try:
+                        cmdarr = ['mv', self.config['hdf5dir']+'/'+olddir, self.config['hdf5dir']+'/'+newdir]
+                        cfel_file.spawn_subprocess(cmdarr)
+                    except:
+                        pass
+
+                if os.path.exists('../indexing/' + olddir):
+                    try:
+                        cmdarr = ['mv', '../indexing/'+olddir, '../indexing/'+newdir]
+                        cfel_file.spawn_subprocess(cmdarr)
+                    except:
+                        pass
+
 
 
         # Sort dataset file to keep it in order

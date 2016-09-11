@@ -190,6 +190,7 @@ class run_crystfel_dialog(PyQt4.QtGui.QDialog):
 
         # List of CrystFEL recipes
         layout1 = PyQt4.QtGui.QHBoxLayout()
+        #layout1.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
         self.label1 = PyQt4.QtGui.QLabel()
         self.label1.setText("Indexing recipe: ")
         self.cb1 = PyQt4.QtGui.QComboBox()
@@ -202,8 +203,9 @@ class run_crystfel_dialog(PyQt4.QtGui.QDialog):
 
         # List of PDB files
         layout2 = PyQt4.QtGui.QHBoxLayout()
+        #layout2.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
         self.label2 = PyQt4.QtGui.QLabel()
-        self.label2.setText("PDB crystals: ")
+        self.label2.setText("Unit cell (PDB file): ")
         self.cb2 = PyQt4.QtGui.QComboBox()
         #self.cb2.addItem("index_pdb.sh")
         self.cb2.addItems(pdb_files)
@@ -214,8 +216,9 @@ class run_crystfel_dialog(PyQt4.QtGui.QDialog):
 
         # Geometry files
         layout3 = PyQt4.QtGui.QHBoxLayout()
+        #layout3.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
         self.label3 = PyQt4.QtGui.QLabel()
-        self.label3.setText("Geometry files: ")
+        self.label3.setText("Geometry file: ")
         self.cb3 = PyQt4.QtGui.QComboBox()
         self.cb3.addItem(os.path.relpath(default_geom))
         self.cb3.addItems(geom_files)
