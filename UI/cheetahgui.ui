@@ -344,8 +344,12 @@
     </property>
     <addaction name="menu_crystfel_mosflmnolatt"/>
     <addaction name="menu_crystfel_indexpdb"/>
+    <addaction name="separator"/>
     <addaction name="menu_crystfel_viewindexingresults"/>
     <addaction name="menu_crystfel_cellexplorer"/>
+    <addaction name="menu_crystfel_viewindexing_pick"/>
+    <addaction name="menu_crystfel_cellexplorer_pick"/>
+    <addaction name="separator"/>
     <addaction name="menu_crystfel_mergestreams"/>
     <addaction name="menu_crystfel_listevents"/>
    </widget>
@@ -568,12 +572,12 @@
   </action>
   <action name="menu_crystfel_cellexplorer">
    <property name="text">
-    <string>Cell explorer</string>
+    <string>Cell explorer (selected run)</string>
    </property>
   </action>
   <action name="menu_crystfel_viewindexingresults">
    <property name="text">
-    <string>View indexing results</string>
+    <string>View indexing (selected run)</string>
    </property>
   </action>
   <action name="menu_crystfel_mosflmnolatt">
@@ -623,7 +627,17 @@
   </action>
   <action name="menu_crystfel_indexpdb">
    <property name="text">
-    <string>Index to PDB reference</string>
+    <string>Index to pdb unit cell</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_cellexplorer_pick">
+   <property name="text">
+    <string>Cell explorer (pick stream file)</string>
+   </property>
+  </action>
+  <action name="menu_crystfel_viewindexing_pick">
+   <property name="text">
+    <string>View indexing (pick stream file)</string>
    </property>
   </action>
  </widget>

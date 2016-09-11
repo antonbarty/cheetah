@@ -491,7 +491,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #end enableCommands()
 
     def start_crawler(self):
-        cmdarr = ['cheetah-crawler.py', '-l', 'LCLS', '-d', self.config['xtcdir'], '-c', self.config['hdf5dir']]
+        cmdarr = ['cheetah-crawler.py', '-l', 'LCLS', '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
         cfel_file.spawn_subprocess(cmdarr)
 
 
@@ -734,20 +734,30 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         for dir in runs['directory']:
             gui_crystfel.index_nolatt(dir, geomfile)
 
+
     def crystfel_indexpdb(self):
-        print("Test")
+        # Selected runs
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return
+
+        # Select geometry file (force this action to make people think)
+        geomfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=self)
+        if geomfile is '':
+            return
+
+        dirs = runs['directory']
+        gui_crystfel.index_pdb(dirs, geomfile)
 
 
     def crystfel_viewindex(self):
         runs = self.selected_runs()
         if len(runs['run']) == 0:
             return;
-
         dir = '../indexing/'+runs['directory'][0]
         stream = glob.glob(dir+'/*.stream')
         if len(stream) is 0:
             return
-
         cmdarr = ['cxiview', '-s', stream[0]]
         cfel_file.spawn_subprocess(cmdarr)
 
@@ -756,18 +766,32 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         runs = self.selected_runs()
         if len(runs['run']) == 0:
             return;
-
         dir = '../indexing/'+runs['directory'][0]
         stream = glob.glob(dir+'/*.stream')
         if len(stream) is 0:
             return
-
         cmdarr = ['cell_explorer', stream[0]]
         cfel_file.spawn_subprocess(cmdarr)
 
 
+    def crystfel_viewindex_pick(self):
+        file = cfel_file.dialog_pickfile(path='../indexing/streams', filter='*.stream', qtmainwin=self)
+        if file != '':
+            cmdarr = ['cxiview', '-s', file]
+            cfel_file.spawn_subprocess(cmdarr)
+
+
+    def crystfel_cellexplore_pick(self):
+        file = cfel_file.dialog_pickfile(path='../indexing/streams', filter='*.stream', qtmainwin=self)
+        if file != '':
+            cmdarr = ['cell_explorer', file]
+            cfel_file.spawn_subprocess(cmdarr)
+
+
+
     def crystfel_mergestreams(self):
-        print("Test")
+        gui_crystfel.merge_streams(qtmainwin=self)
+
 
     def crystfel_listevents(self):
         print("Test")
@@ -922,7 +946,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_crystfel_mosflmnolatt.triggered.connect(self.crystfel_mosflmnolatt)
         self.ui.menu_crystfel_indexpdb.triggered.connect(self.crystfel_indexpdb)
         self.ui.menu_crystfel_viewindexingresults.triggered.connect(self.crystfel_viewindex)
+        self.ui.menu_crystfel_viewindexing_pick.triggered.connect(self.crystfel_viewindex_pick)
         self.ui.menu_crystfel_cellexplorer.triggered.connect(self.crystfel_cellexplore)
+        self.ui.menu_crystfel_cellexplorer_pick.triggered.connect(self.crystfel_cellexplore_pick)
         self.ui.menu_crystfel_mergestreams.triggered.connect(self.crystfel_mergestreams)
         self.ui.menu_crystfel_listevents.triggered.connect(self.crystfel_listevents)
 

@@ -1,4 +1,5 @@
 
+import os
 import sys
 import PyQt4
 import PyQt4.QtGui
@@ -95,7 +96,7 @@ class expt_select_gui(PyQt4.QtGui.QDialog):
 
 
 #
-#   Dialog box to select experiment from drop-down list
+#   Dialog box for launching Cheetah options
 #
 class run_cheetah_gui(PyQt4.QtGui.QDialog):
     def __init__(self, dialog_info, parent=None):
@@ -166,4 +167,87 @@ class run_cheetah_gui(PyQt4.QtGui.QDialog):
         result = dialog.exec_()
         selection = dialog.getCheetahIni()
         return (selection, result == PyQt4.QtGui.QDialog.Accepted)
+
+
+
+#
+#   Dialog box for launching CrystFEL
+#
+class run_crystfel_dialog(PyQt4.QtGui.QDialog):
+    def __init__(self, dialog_in, parent=None):
+        super(run_crystfel_dialog, self).__init__(parent)
+
+        # Get input values
+        pdb_files = dialog_in['pdb_files']
+        geom_files = dialog_in['geom_files']
+        recipe_files = dialog_in['recipe_files']
+        default_geom = dialog_in['default_geom']
+
+        # Empty dialog box
+        layout = PyQt4.QtGui.QVBoxLayout(self)
+        self.setWindowTitle("Run CrystFEL indexing")
+
+
+        # List of CrystFEL recipes
+        layout1 = PyQt4.QtGui.QHBoxLayout()
+        self.label1 = PyQt4.QtGui.QLabel()
+        self.label1.setText("Indexing recipe: ")
+        self.cb1 = PyQt4.QtGui.QComboBox()
+        self.cb1.addItem("../process/index_pdb.sh")
+        self.cb1.addItems(recipe_files)
+        layout1.addWidget(self.label1)
+        layout1.addWidget(self.cb1)
+        layout.addLayout(layout1)
+
+
+        # List of PDB files
+        layout2 = PyQt4.QtGui.QHBoxLayout()
+        self.label2 = PyQt4.QtGui.QLabel()
+        self.label2.setText("PDB crystals: ")
+        self.cb2 = PyQt4.QtGui.QComboBox()
+        #self.cb2.addItem("index_pdb.sh")
+        self.cb2.addItems(pdb_files)
+        layout2.addWidget(self.label2)
+        layout2.addWidget(self.cb2)
+        layout.addLayout(layout2)
+
+
+        # Geometry files
+        layout3 = PyQt4.QtGui.QHBoxLayout()
+        self.label3 = PyQt4.QtGui.QLabel()
+        self.label3.setText("Geometry files: ")
+        self.cb3 = PyQt4.QtGui.QComboBox()
+        self.cb3.addItem(os.path.relpath(default_geom))
+        self.cb3.addItems(geom_files)
+        layout3.addWidget(self.label3)
+        layout3.addWidget(self.cb3)
+        layout.addLayout(layout3)
+
+
+        # Default OK and Cancel buttons
+        self.buttonBox = PyQt4.QtGui.QDialogButtonBox(self)
+        self.buttonBox.setOrientation(PyQt4.QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(PyQt4.QtGui.QDialogButtonBox.Ok | PyQt4.QtGui.QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addWidget(self.buttonBox)
+
+
+    # get selected text
+    def getCrystfelParams(self):
+        dialog_out = {
+            'recipefile' : self.cb1.currentText(),
+            'pdbfile' : self.cb2.currentText(),
+            'geomfile': self.cb3.currentText()
+        }
+        return dialog_out
+
+    # static method to create the dialog and return
+    @staticmethod
+    def dialog_box(dialog_info, parent=None):
+        dialog = run_crystfel_dialog(dialog_info, parent=parent)
+        result = dialog.exec_()
+        dialog_out = dialog.getCrystfelParams()
+        return (dialog_out , result == PyQt4.QtGui.QDialog.Accepted)
+
 
