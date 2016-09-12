@@ -1,3 +1,8 @@
+import os
+import glob
+import shutil
+import lib.cfel_filetools as cfel_file
+import lib.gui_dialogs as gui_dialogs
 
 #
 #   Launch indexing
@@ -91,12 +96,14 @@ def index_runs(guiself, dirs=None, nocell=False, geopt=False):
         # Send indexing command to batch farm
         qlabel = 'indx-'+dirbase[1:5]
         logfile = 'bsub.log'
-        abspath = os.path.abspath(indexdir)
-        bsub_cmd = ['bsub', '-q', 'psanaq', '-x', '-J', qlabel, '-o', logfile, '-cwd', abspath, 'source', os.path.basename(recipefile), dirbase, os.path.basename(pdbfile), os.path.basename(geomfile)]
+        abspath = os.path.abspath(indexdir)+'/'
+        bsub_cmd = ['bsub', '-q', 'psanaq', '-x', '-J', qlabel, '-o', logfile, '-cwd', abspath, 'source', './'+os.path.basename(recipefile), dirbase, os.path.basename(pdbfile), os.path.basename(geomfile)]
 
         # Submit it
         cfel_file.spawn_subprocess(bsub_cmd)
-        return
+
+    print(">------------------------------<")
+    return
 
 
 #

@@ -806,8 +806,11 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
 
     def crystfel_listevents(self):
-        print("Test")
+        print("Not yet implemented")
 
+
+    def crystfel_listfiles(self):
+        print("Not yet implemented")
 
 
 
@@ -967,6 +970,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menu_crystfel_cellexplorer_pick.triggered.connect(self.crystfel_cellexplore_pick)
         self.ui.menu_crystfel_mergestreams.triggered.connect(self.crystfel_mergestreams)
         self.ui.menu_crystfel_listevents.triggered.connect(self.crystfel_listevents)
+        self.ui.menu_crystfel_listfiles.triggered.connect(self.crystfel_listfiles)
 
 
         # Mask menu actions
