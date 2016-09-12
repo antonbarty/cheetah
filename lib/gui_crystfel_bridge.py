@@ -1,85 +1,64 @@
-# -*- coding: utf-8 -*-
-#
-#	CFEL image handling tools
-#	Anton Barty
-#
-
-import os
-import glob
-import shutil
-import lib.cfel_filetools as cfel_file
-import lib.gui_dialogs as gui_dialogs
-
 
 #
-#   Index nolatt
-#   This could be combined later with the more general indexing methods..
+#   Launch indexing
+#   Handles a few special cases (adds some complexity but results in one function call for everything)
 #
-def index_nolatt(dirbase = 'temp', geomfile = None):
-
-    # Data location and destination location
-    h5dir = "../hdf5/" + dirbase
-    indexdir = "../indexing/" + dirbase
-    print("Launching mosflm-nolatt")
-    print(h5dir)
-    print(indexdir)
-    print(os.path.relpath(geomfile))
-
-    # Remove contents of any existing directory then recreate directory
-    shutil.rmtree(indexdir, ignore_errors=True)
-    os.makedirs(indexdir, exist_ok=True)
-
-    # Use find to create file list
-    cmd = 'find '+ os.path.abspath(h5dir) + ' -name \*.cxi > ' + indexdir+'/files.lst'
-    print(cmd)
-    os.system(cmd)
-
-    # Copy scripts and calibrations to target directory
-    crystfel_scriptname = 'index_nocell.sh'
-    cmdarr = ['cp', '../process/'+crystfel_scriptname, indexdir+'/.']
-    cfel_file.spawn_subprocess(cmdarr, wait=True)
-    cmdarr = ['cp', geomfile, indexdir + '/.']
-    cfel_file.spawn_subprocess(cmdarr, wait=True)
-
-    # Send indexing command to batch farm
-    qlabel = 'indx-'+dirbase[1:5]
-    logfile = 'bsub.log'
-    abspath = os.path.abspath(indexdir)
-    bsub_cmd = ['bsub', '-q', 'psanaq', '-x', '-J', qlabel, '-o', logfile, '-cwd', abspath, 'source', './index_nocell.sh', dirbase, 'none.pdb', os.path.basename(geomfile)]
-
-
-    # Submit it
-    cfel_file.spawn_subprocess(bsub_cmd)
-    return
-
-
-#
-#   Launch indexing with known unit cell (with dialog)
-#
-def index_pdb(dirs = None, geomfile = None):
+def index_runs(guiself, dirs=None, nocell=False, geopt=False):
 
     # Just some info
     print("Will process the following directories:")
     print(dirs)
+
+    # Select geometry file and remember it
+    geomfile = guiself.lastgeom
+    if geomfile is None:
+        geomfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=guiself)
+        if geomfile is '':
+            return
+        guiself.lastgeom = geomfile
+
+    # Default unit cell file
+    cell=guiself.lastcell
+
+    # This bit handles which recipe is selected
+    # (including nocell and geopt options)
+    recipe = guiself.lastindex
+    if nocell:
+        recipe = '../process/index_nocell.sh'
+    if geopt:
+        recipe = '../process/index_geopt.sh'
+
+
 
     # Launch dialog box for CrystFEL options
     dialog_in = {
         'pdb_files' : glob.glob('../calib/pdb/*.pdb')+glob.glob('../calib/pdb/*.cell'),
         'geom_files' : glob.glob('../calib/geometry/*.geom'),
         'recipe_files' : glob.glob('../process/index*.sh'),
-        'default_geom' : geomfile
+        'default_geom' : geomfile,
+        'default_cell' : cell,
+        'default_recipe' : recipe
     }
-    dialog_out, ok = gui_dialogs.run_crystfel_dialog.dialog_box(dialog_in)
+    if dialog_in['default_cell'] is None or not cell in dialog_in['pdb_files']:
+        dialog_in['default_cell'] = dialog_in['pdb_files'][0]
 
-    #print(dialog_out)
-    pdbfile = dialog_out['pdbfile']
-    geomfile = dialog_out['geomfile']
-    recipefile = dialog_out['recipefile']
-    geomfile = os.path.abspath(geomfile)
+    dialog_out, ok = gui_dialogs.run_crystfel_dialog.dialog_box(dialog_in)
 
     # Exit if cancel was pressed
     if ok == False:
         return
+
+    # Remember selections for later
+    pdbfile = dialog_out['pdbfile']
+    geomfile = dialog_out['geomfile']
+    recipefile = dialog_out['recipefile']
+    guiself.lastcell = pdbfile
+    guiself.lastgeom = geomfile
+    if not nocell and not geopt:
+        guiself.lastindex = recipefile
+
+    #geomfile = os.path.abspath(geomfile)
+
 
     #
     # Loop through selected directories
@@ -103,9 +82,9 @@ def index_pdb(dirs = None, geomfile = None):
         # Copy scripts and calibrations to target directory
         cmdarr = ['cp', recipefile , indexdir + '/.']
         cfel_file.spawn_subprocess(cmdarr, wait=True)
-        cmdarr = ['cp', pdbfile, indexdir + '/.']
-        cfel_file.spawn_subprocess(cmdarr, wait=True)
         cmdarr = ['cp', geomfile, indexdir + '/.']
+        cfel_file.spawn_subprocess(cmdarr, wait=True)
+        cmdarr = ['cp', pdbfile, indexdir + '/.']
         cfel_file.spawn_subprocess(cmdarr, wait=True)
 
 

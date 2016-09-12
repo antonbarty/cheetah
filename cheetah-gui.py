@@ -731,35 +731,35 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #
     #   CrystFEL menu items
     #
-    def crystfel_mosflmnolatt(self):
-        # Selected runs
-        runs = self.selected_runs()
-        if len(runs['run']) == 0:
-            return
-
-        # Select geometry file (force this action to make people think)
-        geomfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=self)
-        if geomfile is '':
-            return
-
-        # Process each selected directory
-        for dir in runs['directory']:
-            gui_crystfel.index_nolatt(dir, geomfile)
-
-
     def crystfel_indexpdb(self):
         # Selected runs
         runs = self.selected_runs()
         if len(runs['run']) == 0:
             return
 
-        # Select geometry file (force this action to make people think)
-        geomfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=self)
-        if geomfile is '':
+        dirs = runs['directory']
+        gui_crystfel.index_runs(self, dirs)
+
+
+    def crystfel_mosflmnolatt(self):
+        # Selected runs
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
             return
 
         dirs = runs['directory']
-        gui_crystfel.index_pdb(dirs, geomfile)
+        gui_crystfel.index_runs(self, dirs, nocell=True)
+
+
+    def crystfel_indexgeopt(self):
+        # Selected runs
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return
+
+        dirs = runs['directory']
+        gui_crystfel.index_runs(self, dirs, geopt=True)
+
 
 
     def crystfel_viewindex(self):
@@ -921,6 +921,9 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.config = self.parse_config()
         self.lastini = self.config['cheetahini']
         self.lasttag = self.config['cheetahtag']
+        self.lastindex = '../process/index_cell.sh'
+        self.lastcell = None
+        self.lastgeom = None
 
         # Update window title
         dir = os.getcwd()
@@ -956,6 +959,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
         # CrystFEL actions
         self.ui.menu_crystfel_mosflmnolatt.triggered.connect(self.crystfel_mosflmnolatt)
+        self.ui.menu_crystfel_indexgeopt.triggered.connect(self.crystfel_indexgeopt)
         self.ui.menu_crystfel_indexpdb.triggered.connect(self.crystfel_indexpdb)
         self.ui.menu_crystfel_viewindexingresults.triggered.connect(self.crystfel_viewindex)
         self.ui.menu_crystfel_viewindexing_pick.triggered.connect(self.crystfel_viewindex_pick)

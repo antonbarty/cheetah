@@ -316,12 +316,12 @@
     <property name="title">
      <string>View</string>
     </property>
-    <addaction name="menu_powder_hits"/>
-    <addaction name="menu_powder_hits_det"/>
-    <addaction name="menu_powder_blank"/>
-    <addaction name="menu_powder_blank_det"/>
     <addaction name="menu_powder_peaks_hits"/>
     <addaction name="menu_powder_peaks_blank"/>
+    <addaction name="menu_powder_hits_det"/>
+    <addaction name="menu_powder_hits"/>
+    <addaction name="menu_powder_blank_det"/>
+    <addaction name="menu_powder_blank"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -603,6 +603,9 @@
    </property>
   </action>
   <action name="menu_crystfel_listevents">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>List events</string>
    </property>
@@ -629,7 +632,7 @@
   </action>
   <action name="menu_crystfel_indexpdb">
    <property name="text">
-    <string>Index to pdb unit cell</string>
+    <string>Index using unit cell info</string>
    </property>
   </action>
   <action name="menu_crystfel_cellexplorer_pick">
@@ -648,6 +651,9 @@
    </property>
   </action>
   <action name="menu_crystfel_listfiles">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="text">
     <string>List files</string>
    </property>

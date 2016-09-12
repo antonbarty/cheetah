@@ -182,6 +182,8 @@ class run_crystfel_dialog(PyQt4.QtGui.QDialog):
         geom_files = dialog_in['geom_files']
         recipe_files = dialog_in['recipe_files']
         default_geom = dialog_in['default_geom']
+        default_recipe = dialog_in['default_recipe']
+        default_cell = dialog_in['default_cell']
 
         # Empty dialog box
         layout = PyQt4.QtGui.QVBoxLayout(self)
@@ -194,29 +196,15 @@ class run_crystfel_dialog(PyQt4.QtGui.QDialog):
         self.label1 = PyQt4.QtGui.QLabel()
         self.label1.setText("Indexing recipe: ")
         self.cb1 = PyQt4.QtGui.QComboBox()
-        self.cb1.addItem("../process/index_pdb.sh")
+        self.cb1.addItem(os.path.relpath(default_recipe))
         self.cb1.addItems(recipe_files)
         layout1.addWidget(self.label1)
         layout1.addWidget(self.cb1)
         layout.addLayout(layout1)
 
-
-        # List of PDB files
-        layout2 = PyQt4.QtGui.QHBoxLayout()
-        #layout2.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
-        self.label2 = PyQt4.QtGui.QLabel()
-        self.label2.setText("Unit cell (PDB file): ")
-        self.cb2 = PyQt4.QtGui.QComboBox()
-        #self.cb2.addItem("index_pdb.sh")
-        self.cb2.addItems(pdb_files)
-        layout2.addWidget(self.label2)
-        layout2.addWidget(self.cb2)
-        layout.addLayout(layout2)
-
-
         # Geometry files
         layout3 = PyQt4.QtGui.QHBoxLayout()
-        #layout3.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
+        # layout3.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
         self.label3 = PyQt4.QtGui.QLabel()
         self.label3.setText("Geometry file: ")
         self.cb3 = PyQt4.QtGui.QComboBox()
@@ -226,6 +214,17 @@ class run_crystfel_dialog(PyQt4.QtGui.QDialog):
         layout3.addWidget(self.cb3)
         layout.addLayout(layout3)
 
+        # List of cell files
+        layout2 = PyQt4.QtGui.QHBoxLayout()
+        #layout2.setAlignment(PyQt4.QtCore.Qt.AlignLeft)
+        self.label2 = PyQt4.QtGui.QLabel()
+        self.cb2 = PyQt4.QtGui.QComboBox()
+        self.label2.setText("Unit cell file (*.cell,*.pdb): ")
+        self.cb2.addItem(default_cell)
+        self.cb2.addItems(pdb_files)
+        layout2.addWidget(self.label2)
+        layout2.addWidget(self.cb2)
+        layout.addLayout(layout2)
 
         # Default OK and Cancel buttons
         self.buttonBox = PyQt4.QtGui.QDialogButtonBox(self)
