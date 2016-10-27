@@ -15,12 +15,12 @@ import subprocess
 
 
 # Needed for dialog_pickfile()
-import PyQt4
-import PyQt4.QtGui
+import PyQt5
+import PyQt5.QtGui
 
 """ Comment added by Dominik. With that line the GUI isn't rendered. The function of
     the line is not clear to me.
-qtApp = PyQt4.QtGui.QApplication(sys.argv)
+qtApp = PyQt5.QtGui.QApplication(sys.argv)
 """
 
 
@@ -28,17 +28,22 @@ qtApp = PyQt4.QtGui.QApplication(sys.argv)
 # Launch a subprocess (eg: viewer or analysis script) without blocking the GUI
 # Separate routine makes it easy change this globally if needed
 #
-def spawn_subprocess(cmdarr, wait=False, test=False):
+def spawn_subprocess(cmdarr, wait=False, test=False, shell=False):
     command = str.join(' ', cmdarr)
+    print(os.getcwd())
     print(command)
 
     if test:
         return
 
+    # Shell requires command to be a string and not an array
+    if shell:
+        cmdarr = command
+
     if wait:
         subprocess.run(cmdarr)
     else:
-        subprocess.Popen(cmdarr)
+        subprocess.Popen(cmdarr, shell=shell)
 
 
 
@@ -53,29 +58,29 @@ def dialog_pickfile(write=False, directory=False, multiple=False, path=False, fi
     See: http://doc.qt.io/qt-4.8/qfiledialog.html
     """
     if qtmainwin == None:
-        qtApp = PyQt4.QtGui.QApplication(sys.argv)
+        qtApp = PyQt5.QtGui.QApplication(sys.argv)
 
     if path==False:
         path= ''
 
     if write==True:
         caption = 'Select destination file'
-        file = PyQt4.QtGui.QFileDialog.getSaveFileName(qtmainwin, caption, path, filter)
+        file, _ = PyQt5.QtGui.QFileDialog.getSaveFileName(qtmainwin, caption, path, filter)
         return file
 
     elif directory==True:
         caption = 'Select directory'
-        dirname= PyQt4.QtGui.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
+        dirname, _ = PyQt5.QtGui.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
         return dirname
 
     elif multiple==True:
         caption = 'Select Files'
-        files = PyQt4.QtGui.QFileDialog.getOpenFileNames(qtmainwin, caption, path, filter)
+        files, _ = PyQt5.QtGui.QFileDialog.getOpenFileNames(qtmainwin, caption, path, filter)
         return files
 
     else:
         caption = 'Select File'
-        file = PyQt4.QtGui.QFileDialog.getOpenFileName(qtmainwin, caption, path, filter)
+        file, _ = PyQt5.QtGui.QFileDialog.getOpenFileName(qtmainwin, caption, path, filter)
         return file
 
 #end dialog_pickfile()
@@ -285,9 +290,10 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
         event_data = {
             'data': data_array,
             'data_shape': data_array.shape,
+            'mask': [0],
             'nframes': 1,
             'EncoderValue': np.nan,
-            'photon_energy_eV': np.nan,
+            'photon_energy_eV': np.nan
         }
     #end generic_h5
 

@@ -8,11 +8,12 @@ import os
 import sys
 import csv
 import argparse
-import PyQt4.QtCore
-import PyQt4.QtGui
+import PyQt5.QtCore
+import PyQt5.QtGui
 
 import UI.crawler_ui
-import lib.crawler_slac as location
+import lib.crawler_slac as crawler_slac
+import lib.crawler_p11 as crawler_p11
 import lib.crawler_hdf5 as crawler_hdf5
 import lib.crawler_crystfel as crawler_crystfel
 import lib.crawler_merge as merge
@@ -21,7 +22,25 @@ import lib.crawler_merge as merge
 #
 #	CXI viewer code
 #
-class cheetah_crawler(PyQt4.QtGui.QMainWindow):
+class cheetah_crawler(PyQt5.QtGui.QMainWindow):
+
+    #
+    #   Figure out what data crawler to call
+    #
+    def whereami(self):
+        # Default to making each directory name one run
+        self.datatype = 'directories'
+
+        # Now some special cases
+        if '/reg/d/' in self.data_dir:
+            self.datatype = 'XTC'
+        if 'p11' in self.data_dir:
+            self.datatype = 'P11'
+
+        # What have we decided?
+        print("Will use data crawler for ", self.datatype)
+
+
 
     #
     #   Actions to be done each refresh cycle
@@ -33,7 +52,12 @@ class cheetah_crawler(PyQt4.QtGui.QMainWindow):
         # Crawler data (facility dependent)
         self.ui.statusBar.setText('Scanning data files')
         self.ui.progressBar.setValue(0)
-        location.scan_data(self.data_dir)
+        if self.datatype is 'XTC':
+            crawler_slac.scan_data(self.data_dir)
+        elif self.datatype is 'P11':
+            crawler_p11.scan_data(self.data_dir)
+        elif self.datatype is 'directories':
+            crawler_p11.scan_data(self.data_dir)
 
 
         # Crawler HDF5 (facility independent)
@@ -83,11 +107,17 @@ class cheetah_crawler(PyQt4.QtGui.QMainWindow):
         self.ui = UI.crawler_ui.Ui_MainWindow()
         self.ui.setupUi(self)
         self.ui.refreshButton.clicked.connect(self.refresh)
-        self.refresh_timer = PyQt4.QtCore.QTimer()
+        self.refresh_timer = PyQt5.QtCore.QTimer()
         self.refresh_timer.timeout.connect(self.refresh)
 
         self.ui.statusBar.setText('Ready')
         self.ui.progressBar.setValue(100)
+
+        #
+        #   Figure out where the data comes from
+        #
+        self.whereami()
+
 
         #
         # Do the 1st scan
@@ -128,7 +158,7 @@ if __name__ == '__main__':
     #
     #   Spawn the viewer
     #        
-    app = PyQt4.QtGui.QApplication(sys.argv)    
+    app = PyQt5.QtGui.QApplication(sys.argv)    
         
     ex = cheetah_crawler(args)
     ex.show()

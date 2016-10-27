@@ -13,8 +13,8 @@ import os
 import sys
 import numpy
 
-import PyQt4.QtCore
-import PyQt4.QtGui
+import PyQt5.QtCore
+import PyQt5.QtGui
 import pyqtgraph
 import scipy.constants
 
@@ -45,7 +45,7 @@ class InsufficientInformationException(Exception):
 #
 #	CXI viewer code
 #
-class cxiview(PyQt4.QtGui.QMainWindow):
+class cxiview(PyQt5.QtGui.QMainWindow):
     
     #
     # display the main image
@@ -612,7 +612,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             text += "\u03B1 = " + "{:.1f}".format(unit_cell.alpha) + "\u00B0, "
             text += "\u03B2 = " + "{:.1f}".format(unit_cell.beta) + "\u00B0, "
             text += "\u03B3 = " + "{:.1f}".format(unit_cell.gamma) + "\u00B0"
-            #qtext = PyQt4.QtCore.QString(text)
+            #qtext = PyQt5.QtCore.QString(text)
             self.ui.statusBar.setText(text) 
         except NoCrystalException:
             self.ui.statusBar.setText("Ready") 
@@ -657,8 +657,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             # chunks in the streamfile than in the cxi
             self.event_list['nevents'] = self.streamfile.get_number_of_chunks()
         else:
-            self.event_list = cfel_file.list_events(self.img_file_pattern, 
-                field=self.img_h5_field)
+            self.event_list = cfel_file.list_events(self.img_file_pattern, field=self.img_h5_field)
         self.nframes = self.event_list['nevents']
         self.num_lines = self.nframes
 
@@ -675,12 +674,12 @@ class cxiview(PyQt4.QtGui.QMainWindow):
 
     """
     def mousePressEvent(self, event):
-        p = PyQt4.QtGui.QCursor.pos()
+        p = PyQt5.QtGui.QCursor.pos()
         print("pressed here: " + str(p.x()) + ", " + str(p.y()))
     """
 
     def keyPressEvent(self, e):
-        if e.key() == PyQt4.QtCore.Qt.Key_Escape:
+        if e.key() == PyQt5.QtCore.Qt.Key_Escape:
             self.show_unit_cell_info()
 
     #
@@ -765,7 +764,9 @@ class cxiview(PyQt4.QtGui.QMainWindow):
             print("Error: Shape of geometry and image data do not match")
             print('Data size: ', temp.data.flatten().shape)
             print('Geometry size: ', self.geometry['x'].shape)
-            exit(1)
+            print('Displaying images without geometry applied')
+            self.geometry_ok = False
+            #exit(1)
 
 
 
@@ -783,8 +784,8 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         self.ui.randomPushButton.clicked.connect(self.random_pattern)
         self.ui.shufflePushButton.clicked.connect(self.shuffle)
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
-        self.intregex = PyQt4.QtCore.QRegExp('[0-9]+')
-        self.qtintvalidator = PyQt4.QtGui.QRegExpValidator()
+        self.intregex = PyQt5.QtCore.QRegExp('[0-9]+')
+        self.qtintvalidator = PyQt5.QtGui.QRegExpValidator()
         self.qtintvalidator.setRegExp(self.intregex)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
 
@@ -819,7 +820,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Flags needed for play and shuffle (can probably do this better)
         self.shuffle_mode = False
         self.play_mode = False 
-        self.refresh_timer = PyQt4.QtCore.QTimer()
+        self.refresh_timer = PyQt5.QtCore.QTimer()
 
 
         # Put menu inside the window on Macintosh and elsewhere
@@ -850,7 +851,7 @@ class cxiview(PyQt4.QtGui.QMainWindow):
         # Resolution limit ring
         self.resolution_limit_ring_canvas = pyqtgraph.ScatterPlotItem()
         self.ui.imageView.getView().addItem(self.resolution_limit_ring_canvas)
-        self.resolution_limit_ring_pen = pyqtgraph.mkPen(color=(0, 200, 0), width=2, style = PyQt4.QtCore.Qt.DashLine)    
+        self.resolution_limit_ring_pen = pyqtgraph.mkPen(color=(0, 200, 0), width=2, style = PyQt5.QtCore.Qt.DashLine)    
 
 
         self.resolution_rings_in_A = [10.0, 9.0, 8.0, 7.0, 6.0, 5.0, 4.0, 3.0]
@@ -951,7 +952,7 @@ if __name__ == '__main__':
     #
     #   Spawn the viewer
     #        
-    app = PyQt4.QtGui.QApplication(sys.argv)    
+    app = PyQt5.QtGui.QApplication(sys.argv)    
         
     #ex = cxiview(args.g, args.i)
     ex = cxiview(args)

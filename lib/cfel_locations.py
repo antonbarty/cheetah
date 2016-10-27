@@ -28,9 +28,13 @@ def determine_location():
         print("Looks like we are on psana at LCLS.")
         location = 'LCLS'
 
+    elif hostname.startswith('max') and hostname.endswith("desy.de"):
+        print("Looks like we are on a max-cfel node.")
+        location = 'max-cfel'
+
     elif hostname.endswith("desy.de"):
         print("Looks like we are at CFEL/DESY.")
-        location = 'CFEL'
+        location = 'DESY'
 
     elif hostname.endswith("xfel.eu"):
         print("Looks like we are at euXFEL.")
@@ -41,6 +45,8 @@ def determine_location():
         location = 'None'
 
     return location
+
+
 
 
 #

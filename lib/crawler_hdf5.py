@@ -14,7 +14,7 @@ def scan_hdf5(hdf5_dir):
     #print("Crawler HDF5: ", hdf5_dir)
 
     debug = False
-    pattern = hdf5_dir + '/r*/status.txt'
+    pattern = hdf5_dir + '/*/status.txt'
 
     #printf, fout, '# Run, status, directory, processed, hits, hitrate%, mtime'
 
@@ -51,7 +51,11 @@ def scan_hdf5(hdf5_dir):
         directory = dirname2
 
         # Extract the run number (Warning: LCLS-specific)
-        run = directory[:5]
+        if directory.startswith('r'):
+            run = directory[:5]
+        else:
+            part = directory.partition('-')
+            run = part[0]
         #run = directory[1:5]
 
 

@@ -14,6 +14,7 @@ import lib.cfel_filetools as cfel_file
 def crawler_merge():
     #print("Crawler merge")
 
+    p11 = True
 
     #
     #   Fix legacy issue with old datasets.txt format the first time we encounter it
@@ -52,46 +53,50 @@ def crawler_merge():
 
 
     #
-    # Compatibility: convert r0002 (string) to 2 (integer) so that run is in the same format in each dict
+    # Update for P11:
+    #   Run identifier should be a string and not a number, so don't do this conversion at P11
+    #   Eventually adopt this at SLAC too...
+    #
+    # Old: convert r0002 (string) to 2 (integer) so that run is in the same format in each dict
     #   This may disappear later if datasets['run'] is in the same format
     #
-    try:
-        if data != {}:
-            for i, run in enumerate(data['run']):
-                run_num= int(run[1:])
-                data['run'][i] = run_num
-    except:
-        pass
+    if not p11:
+        try:
+            if data != {}:
+                for i, run in enumerate(data['run']):
+                    run_num= int(run[1:])
+                    data['run'][i] = run_num
+        except:
+            pass
 
-    try:
-        if cheetah != {}:
-            for i, run in enumerate(cheetah['run']):
-                run_num = int(run[1:])
-                cheetah['run'][i] = run_num
-    except:
-        pass
+        try:
+            if cheetah != {}:
+                for i, run in enumerate(cheetah['run']):
+                    run_num = int(run[1:])
+                    cheetah['run'][i] = run_num
+        except:
+            pass
 
-    try:
-        if crystfel != {}:
-            for i, run in enumerate(crystfel['run']):
-                run_num = int(run[1:])
-                crystfel['run'][i] = run_num
-    except:
-        pass
+        try:
+            if crystfel != {}:
+                for i, run in enumerate(crystfel['run']):
+                    run_num = int(run[1:])
+                    crystfel['run'][i] = run_num
+        except:
+            pass
 
-    try:
-        if datasets != {}:
-            for i, run in enumerate(datasets['Run']):
-                #run_num = int(run[1:])
-                run_num = int(run)
-                datasets['Run'][i] = run_num
-    except:
-        pass
-    #print(data['run'])
-    #print(datasets['# Run'])
+        try:
+            if datasets != {}:
+                for i, run in enumerate(datasets['Run']):
+                    #run_num = int(run[1:])
+                    run_num = int(run)
+                    datasets['Run'][i] = run_num
+        except:
+            pass
 
 
-    # Find unique run numbers
+
+    # Find unique run identifiers
     # (some runs may be missing from some of the tables)
     all_runs = data['run'] + cheetah['run'] + crystfel['run'] + datasets['Run']
     uniq_runs = list(sorted(set(all_runs)))

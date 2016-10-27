@@ -9,8 +9,8 @@ import sys
 import glob
 import argparse
 import datetime
-import PyQt4.QtCore
-import PyQt4.QtGui
+import PyQt5.QtCore
+import PyQt5.QtGui
 
 import UI.cheetahgui_ui
 import lib.cfel_filetools as cfel_file
@@ -31,7 +31,7 @@ import lib.gui_crystfel_bridge as gui_crystfel
 #
 #	Cheetah GUI code
 #
-class cheetah_gui(PyQt4.QtGui.QMainWindow):
+class cheetah_gui(PyQt5.QtGui.QMainWindow):
 
 
     #
@@ -95,10 +95,10 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
                 #if col in numbercols:
                 if item.isnumeric():
-                    newitem = PyQt4.QtGui.QTableWidgetItem()
-                    newitem.setData(PyQt4.QtCore.Qt.DisplayRole, float(item))
+                    newitem = PyQt5.QtGui.QTableWidgetItem()
+                    newitem.setData(PyQt5.QtCore.Qt.DisplayRole, float(item))
                 else:
-                    newitem = PyQt4.QtGui.QTableWidgetItem(item)
+                    newitem = PyQt5.QtGui.QTableWidgetItem(item)
 
                 self.table.setItem(row,col,newitem)
 
@@ -108,7 +108,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.table.setHorizontalHeaderLabels(status['fieldnames'])
         self.table.verticalHeader().setVisible(False)
         #self.table.resizeColumnsToContents()
-        #self.table.horizontalHeader().setSectionResizeMode(PyQt4.QtGui.QHeaderView.Interactive)
+        #self.table.horizontalHeader().setSectionResizeMode(PyQt5.QtGui.QHeaderView.Interactive)
         self.table.resizeRowsToContents()
         self.table.show()
 
@@ -235,7 +235,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         #
         # QMessageBox for confirmation before proceeding
         #
-        msgBox = PyQt4.QtGui.QMessageBox()
+        msgBox = PyQt5.QtGui.QMessageBox()
         str1 = []
         str1.append('<b>Instrument:</b> ' + str(instr))
         str1.append('<b>Experiment:</b> ' + str(expt))
@@ -246,15 +246,15 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         msgBox.setText(str2)
 
         msgBox.setInformativeText('<b>Proceed?</b>')
-        msgBox.addButton(PyQt4.QtGui.QMessageBox.Yes)
-        msgBox.addButton(PyQt4.QtGui.QMessageBox.Cancel)
-        msgBox.setDefaultButton(PyQt4.QtGui.QMessageBox.Yes)
+        msgBox.addButton(PyQt5.QtGui.QMessageBox.Yes)
+        msgBox.addButton(PyQt5.QtGui.QMessageBox.Cancel)
+        msgBox.setDefaultButton(PyQt5.QtGui.QMessageBox.Yes)
 
         ret = msgBox.exec_();
         #app.exit()
 
 
-        if ret == PyQt4.QtGui.QMessageBox.Cancel:
+        if ret == PyQt5.QtGui.QMessageBox.Cancel:
             print("So long and thanks for all the fish.")
             self.exit_gui()
 
@@ -424,18 +424,21 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         for i, run in enumerate(runs['run']):
             print('------------ Start Cheetah process script ------------')
             cmdarr = [self.config['process'], run, inifile, dataset]
-            cfel_file.spawn_subprocess(cmdarr)
+            cfel_file.spawn_subprocess(cmdarr, shell=True)
 
-            # Format directory string
-            dir = 'r{:04d}'.format(int(run))
+            # Format output directory string
+            if self.location['location'] is 'LCLS':
+                dir = 'r{:04d}'.format(int(run))
+            else:
+                dir = run
             dir += '-'+dataset
 
 
             #Update Dataset and Cheetah status in table
             table_row = runs['row'][i]
-            self.table.setItem(table_row, 1, PyQt4.QtGui.QTableWidgetItem(dataset))
-            self.table.setItem(table_row, 5, PyQt4.QtGui.QTableWidgetItem(dir))
-            self.table.setItem(table_row, 3, PyQt4.QtGui.QTableWidgetItem('Submitted'))
+            self.table.setItem(table_row, 1, PyQt5.QtGui.QTableWidgetItem(dataset))
+            self.table.setItem(table_row, 5, PyQt5.QtGui.QTableWidgetItem(dir))
+            self.table.setItem(table_row, 3, PyQt5.QtGui.QTableWidgetItem('Submitted'))
 
             # Update dataset file
             if run in dataset_csv['Run']:
@@ -459,12 +462,15 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #end run_cheetah()
 
 
-    def run_crystfel(self):
-        print("Run crystfel selected")
 
     def view_hits(self):
         file = '*.cxi'
         field = '/entry_1/data_1/data'
+        # Quick hack for P11 data
+        if 'p11' in self.config['xtcdir']:
+            file = '*.cbf*.h5'
+            field = '/data/data'
+
         self.show_selected_images(file, field)
     #end view_hits()
 
@@ -491,14 +497,14 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #end enableCommands()
 
     def start_crawler(self):
-        cmdarr = ['cheetah-crawler.py', '-l', 'LCLS', '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
+        cmdarr = ['cheetah-crawler.py', '-l', self.location['location'], '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
         cfel_file.spawn_subprocess(cmdarr)
 
 
     def relabel_dataset(self):
 
         # Simple dialog box: http: // www.tutorialspoint.com / pyqt / pyqt_qinputdialog_widget.htm
-        text, ok = PyQt4.QtGui.QInputDialog.getText(self, 'Change dataset label', 'New label:')
+        text, ok = PyQt5.QtGui.QInputDialog.getText(self, 'Change dataset label', 'New label:')
         if ok == False:
             return
         newlabel = str(text)
@@ -515,13 +521,16 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
             newdir = '---'
 
             if olddir != '---':
-                newdir = 'r{:04d}'.format(int(run))
+                if self.location['location'] is 'LCLS':
+                    newdir = 'r{:04d}'.format(int(run))
+                else:
+                    newdir = run
                 newdir += '-' + newlabel
 
             # Update Dataset in table
             table_row = runs['row'][i]
-            self.table.setItem(table_row, 1, PyQt4.QtGui.QTableWidgetItem(newlabel))
-            self.table.setItem(table_row, 5, PyQt4.QtGui.QTableWidgetItem(newdir))
+            self.table.setItem(table_row, 1, PyQt5.QtGui.QTableWidgetItem(newlabel))
+            self.table.setItem(table_row, 5, PyQt5.QtGui.QTableWidgetItem(newdir))
 
             # Update dataset file
             if run in dataset_csv['Run']:
@@ -851,12 +860,12 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
     #   Try to avoid the worst of the ugly Linux GUI layouts
     #
     def change_skins(self):
-        styles = PyQt4.QtGui.QStyleFactory.keys()
+        styles = PyQt5.QtGui.QStyleFactory.keys()
         style = styles[-1]
-        #print("Available Qt4 styles: ", styles)
-        #print("Setting Qt4 style: ", style)
+        #print("Available Qt5 styles: ", styles)
+        #print("Setting Qt5 style: ", style)
         try:
-            PyQt4.QtGui.QApplication.setStyle(PyQt4.QtGui.QStyleFactory.create(style))
+            PyQt5.QtGui.QApplication.setStyle(PyQt5.QtGui.QStyleFactory.create(style))
         except:
             print("Qt style not available:", style)
     #end change_skins
@@ -899,8 +908,8 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
         self.ui.menuBar.setNativeMenuBar(False)
         self.table = self.ui.table_status
         self.table.horizontalHeader().setDefaultSectionSize(75)
-        self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Interactive)
-        #self.table.horizontalHeader().setResizeMode(PyQt4.QtGui.QHeaderView.Stretch)
+        self.table.horizontalHeader().setResizeMode(PyQt5.QtGui.QHeaderView.Interactive)
+        #self.table.horizontalHeader().setResizeMode(PyQt5.QtGui.QHeaderView.Stretch)
         self.table.setSortingEnabled(True)
         #self.change_skins()
 
@@ -1015,7 +1024,7 @@ class cheetah_gui(PyQt4.QtGui.QMainWindow):
 
 
         # Timer for auto-refresh
-        self.refresh_timer = PyQt4.QtCore.QTimer()
+        self.refresh_timer = PyQt5.QtCore.QTimer()
         self.refresh_timer.timeout.connect(self.refresh_table)
 
 
@@ -1051,7 +1060,7 @@ if __name__ == '__main__':
     #
     #   Spawn the viewer
     #
-    app = PyQt4.QtGui.QApplication(sys.argv)
+    app = PyQt5.QtGui.QApplication(sys.argv)
     ex = cheetah_gui(args)
     ex.show()
     ret = app.exec_()
