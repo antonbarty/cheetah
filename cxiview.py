@@ -14,7 +14,7 @@ import sys
 import numpy
 
 import PyQt5.QtCore
-import PyQt5.QtGui
+import PyQt5.QtWidgets
 import pyqtgraph
 import scipy.constants
 
@@ -45,7 +45,7 @@ class InsufficientInformationException(Exception):
 #
 #	CXI viewer code
 #
-class cxiview(PyQt5.QtGui.QMainWindow):
+class cxiview(PyQt5.QtWidgets.QMainWindow):
     
     #
     # display the main image
@@ -674,7 +674,7 @@ class cxiview(PyQt5.QtGui.QMainWindow):
 
     """
     def mousePressEvent(self, event):
-        p = PyQt5.QtGui.QCursor.pos()
+        p = PyQt5.QtWidgets.QCursor.pos()
         print("pressed here: " + str(p.x()) + ", " + str(p.y()))
     """
 
@@ -785,7 +785,7 @@ class cxiview(PyQt5.QtGui.QMainWindow):
         self.ui.shufflePushButton.clicked.connect(self.shuffle)
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
         self.intregex = PyQt5.QtCore.QRegExp('[0-9]+')
-        self.qtintvalidator = PyQt5.QtGui.QRegExpValidator()
+        self.qtintvalidator = PyQt5.QtWidgets.QRegExpValidator()
         self.qtintvalidator.setRegExp(self.intregex)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
 
@@ -952,7 +952,7 @@ if __name__ == '__main__':
     #
     #   Spawn the viewer
     #        
-    app = PyQt5.QtGui.QApplication(sys.argv)    
+    app = PyQt5.QtWidgets.QApplication(sys.argv)    
         
     #ex = cxiview(args.g, args.i)
     ex = cxiview(args)

@@ -10,7 +10,7 @@ import glob
 import argparse
 import datetime
 import PyQt5.QtCore
-import PyQt5.QtGui
+import PyQt5.QtWidgets
 
 import UI.cheetahgui_ui
 import lib.cfel_filetools as cfel_file
@@ -31,7 +31,7 @@ import lib.gui_crystfel_bridge as gui_crystfel
 #
 #	Cheetah GUI code
 #
-class cheetah_gui(PyQt5.QtGui.QMainWindow):
+class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
 
     #
@@ -95,10 +95,10 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
 
                 #if col in numbercols:
                 if item.isnumeric():
-                    newitem = PyQt5.QtGui.QTableWidgetItem()
+                    newitem = PyQt5.QtWidgets.QTableWidgetItem()
                     newitem.setData(PyQt5.QtCore.Qt.DisplayRole, float(item))
                 else:
-                    newitem = PyQt5.QtGui.QTableWidgetItem(item)
+                    newitem = PyQt5.QtWidgets.QTableWidgetItem(item)
 
                 self.table.setItem(row,col,newitem)
 
@@ -108,7 +108,7 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
         self.table.setHorizontalHeaderLabels(status['fieldnames'])
         self.table.verticalHeader().setVisible(False)
         #self.table.resizeColumnsToContents()
-        #self.table.horizontalHeader().setSectionResizeMode(PyQt5.QtGui.QHeaderView.Interactive)
+        #self.table.horizontalHeader().setSectionResizeMode(PyQt5.QtWidgets.QHeaderView.Interactive)
         self.table.resizeRowsToContents()
         self.table.show()
 
@@ -235,7 +235,7 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
         #
         # QMessageBox for confirmation before proceeding
         #
-        msgBox = PyQt5.QtGui.QMessageBox()
+        msgBox = PyQt5.QtWidgets.QMessageBox()
         str1 = []
         str1.append('<b>Instrument:</b> ' + str(instr))
         str1.append('<b>Experiment:</b> ' + str(expt))
@@ -246,15 +246,15 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
         msgBox.setText(str2)
 
         msgBox.setInformativeText('<b>Proceed?</b>')
-        msgBox.addButton(PyQt5.QtGui.QMessageBox.Yes)
-        msgBox.addButton(PyQt5.QtGui.QMessageBox.Cancel)
-        msgBox.setDefaultButton(PyQt5.QtGui.QMessageBox.Yes)
+        msgBox.addButton(PyQt5.QtWidgets.QMessageBox.Yes)
+        msgBox.addButton(PyQt5.QtWidgets.QMessageBox.Cancel)
+        msgBox.setDefaultButton(PyQt5.QtWidgets.QMessageBox.Yes)
 
         ret = msgBox.exec_();
         #app.exit()
 
 
-        if ret == PyQt5.QtGui.QMessageBox.Cancel:
+        if ret == PyQt5.QtWidgets.QMessageBox.Cancel:
             print("So long and thanks for all the fish.")
             self.exit_gui()
 
@@ -436,9 +436,9 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
 
             #Update Dataset and Cheetah status in table
             table_row = runs['row'][i]
-            self.table.setItem(table_row, 1, PyQt5.QtGui.QTableWidgetItem(dataset))
-            self.table.setItem(table_row, 5, PyQt5.QtGui.QTableWidgetItem(dir))
-            self.table.setItem(table_row, 3, PyQt5.QtGui.QTableWidgetItem('Submitted'))
+            self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(dataset))
+            self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
+            self.table.setItem(table_row, 3, PyQt5.QtWidgets.QTableWidgetItem('Submitted'))
 
             # Update dataset file
             if run in dataset_csv['Run']:
@@ -504,7 +504,7 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
     def relabel_dataset(self):
 
         # Simple dialog box: http: // www.tutorialspoint.com / pyqt / pyqt_qinputdialog_widget.htm
-        text, ok = PyQt5.QtGui.QInputDialog.getText(self, 'Change dataset label', 'New label:')
+        text, ok = PyQt5.QtWidgets.QInputDialog.getText(self, 'Change dataset label', 'New label:')
         if ok == False:
             return
         newlabel = str(text)
@@ -529,8 +529,8 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
 
             # Update Dataset in table
             table_row = runs['row'][i]
-            self.table.setItem(table_row, 1, PyQt5.QtGui.QTableWidgetItem(newlabel))
-            self.table.setItem(table_row, 5, PyQt5.QtGui.QTableWidgetItem(newdir))
+            self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(newlabel))
+            self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(newdir))
 
             # Update dataset file
             if run in dataset_csv['Run']:
@@ -860,12 +860,12 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
     #   Try to avoid the worst of the ugly Linux GUI layouts
     #
     def change_skins(self):
-        styles = PyQt5.QtGui.QStyleFactory.keys()
+        styles = PyQt5.QtWidgets.QStyleFactory.keys()
         style = styles[-1]
         #print("Available Qt5 styles: ", styles)
         #print("Setting Qt5 style: ", style)
         try:
-            PyQt5.QtGui.QApplication.setStyle(PyQt5.QtGui.QStyleFactory.create(style))
+            PyQt5.QtWidgets.QApplication.setStyle(PyQt5.QtWidgets.QStyleFactory.create(style))
         except:
             print("Qt style not available:", style)
     #end change_skins
@@ -908,8 +908,8 @@ class cheetah_gui(PyQt5.QtGui.QMainWindow):
         self.ui.menuBar.setNativeMenuBar(False)
         self.table = self.ui.table_status
         self.table.horizontalHeader().setDefaultSectionSize(75)
-        self.table.horizontalHeader().setResizeMode(PyQt5.QtGui.QHeaderView.Interactive)
-        #self.table.horizontalHeader().setResizeMode(PyQt5.QtGui.QHeaderView.Stretch)
+        self.table.horizontalHeader().setResizeMode(PyQt5.QtWidgets.QHeaderView.Interactive)
+        #self.table.horizontalHeader().setResizeMode(PyQt5.QtWidgets.QHeaderView.Stretch)
         self.table.setSortingEnabled(True)
         #self.change_skins()
 
@@ -1060,7 +1060,7 @@ if __name__ == '__main__':
     #
     #   Spawn the viewer
     #
-    app = PyQt5.QtGui.QApplication(sys.argv)
+    app = PyQt5.QtWidgets.QApplication(sys.argv)
     ex = cheetah_gui(args)
     ex.show()
     ret = app.exec_()

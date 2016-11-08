@@ -9,7 +9,7 @@ import sys
 import csv
 import argparse
 import PyQt5.QtCore
-import PyQt5.QtGui
+import PyQt5.QtWidgets
 
 import UI.crawler_ui
 import lib.crawler_slac as crawler_slac
@@ -22,7 +22,7 @@ import lib.crawler_merge as merge
 #
 #	CXI viewer code
 #
-class cheetah_crawler(PyQt5.QtGui.QMainWindow):
+class cheetah_crawler(PyQt5.QtWidgets.QMainWindow):
 
     #
     #   Figure out what data crawler to call
@@ -158,7 +158,7 @@ if __name__ == '__main__':
     #
     #   Spawn the viewer
     #        
-    app = PyQt5.QtGui.QApplication(sys.argv)    
+    app = PyQt5.QtWidgets.QApplication(sys.argv)    
         
     ex = cheetah_crawler(args)
     ex.show()

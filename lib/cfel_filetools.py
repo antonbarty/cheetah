@@ -16,11 +16,11 @@ import subprocess
 
 # Needed for dialog_pickfile()
 import PyQt5
-import PyQt5.QtGui
+import PyQt5.QtWidgets
 
 """ Comment added by Dominik. With that line the GUI isn't rendered. The function of
     the line is not clear to me.
-qtApp = PyQt5.QtGui.QApplication(sys.argv)
+qtApp = PyQt5.QtWidgets.QApplication(sys.argv)
 """
 
 
@@ -58,29 +58,29 @@ def dialog_pickfile(write=False, directory=False, multiple=False, path=False, fi
     See: http://doc.qt.io/qt-4.8/qfiledialog.html
     """
     if qtmainwin == None:
-        qtApp = PyQt5.QtGui.QApplication(sys.argv)
+        qtApp = PyQt5.QtWidgets.QApplication(sys.argv)
 
     if path==False:
         path= ''
 
     if write==True:
         caption = 'Select destination file'
-        file, _ = PyQt5.QtGui.QFileDialog.getSaveFileName(qtmainwin, caption, path, filter)
+        file, _ = PyQt5.QtWidgets.QFileDialog.getSaveFileName(qtmainwin, caption, path, filter)
         return file
 
     elif directory==True:
         caption = 'Select directory'
-        dirname, _ = PyQt5.QtGui.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
+        dirname, _ = PyQt5.QtWidgets.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
         return dirname
 
     elif multiple==True:
         caption = 'Select Files'
-        files, _ = PyQt5.QtGui.QFileDialog.getOpenFileNames(qtmainwin, caption, path, filter)
+        files, _ = PyQt5.QtWidgets.QFileDialog.getOpenFileNames(qtmainwin, caption, path, filter)
         return files
 
     else:
         caption = 'Select File'
-        file, _ = PyQt5.QtGui.QFileDialog.getOpenFileName(qtmainwin, caption, path, filter)
+        file, _ = PyQt5.QtWidgets.QFileDialog.getOpenFileName(qtmainwin, caption, path, filter)
         return file
 
 #end dialog_pickfile()
