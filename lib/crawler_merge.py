@@ -11,10 +11,13 @@ import lib.cfel_filetools as cfel_file
 
 
 
-def crawler_merge():
+def crawler_merge(info):
     #print("Crawler merge")
 
-    p11 = True
+    if info.datatype is 'XTC':
+        XTCdirToInt = True
+    else:
+        XTCdirToInt = False
 
     #
     #   Fix legacy issue with old datasets.txt format the first time we encounter it
@@ -58,9 +61,9 @@ def crawler_merge():
     #   Eventually adopt this at SLAC too...
     #
     # Old: convert r0002 (string) to 2 (integer) so that run is in the same format in each dict
-    #   This may disappear later if datasets['run'] is in the same format
+    #   This may disappear later if datasets['run'] is in the same format and we fix the de-referencing elsewhere
     #
-    if not p11:
+    if XTCdirToInt:
         try:
             if data != {}:
                 for i, run in enumerate(data['run']):

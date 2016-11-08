@@ -25,10 +25,11 @@ def scan_data(data_dir):
         print(files)
 
     # Extract the run bit from XTC file name
+    # Turn the rXXXX string into an integer (for compatibility with old crawler files)
     out = []
     for filename in files:
         thisrun = filename.split('-')[1]
-        #thisrun = thisrun[1:5]
+        thisrun = thisrun[1:5]
         out.append(thisrun)
 
     #print('Number of XTC files: ', len(out))

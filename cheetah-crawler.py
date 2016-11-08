@@ -74,7 +74,7 @@ class cheetah_crawler(PyQt5.QtWidgets.QMainWindow):
         # Crawler merge (facility independent)
         self.ui.statusBar.setText('Merging results')
         self.ui.progressBar.setValue(75)
-        merge.crawler_merge()
+        merge.crawler_merge(self)
 
 
         # Automatic update interval of 1 minute
