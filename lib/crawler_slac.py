@@ -48,9 +48,10 @@ def scan_data(data_dir):
     for filename in files:
         if filename.endswith('.inprogress'):
             thisrun = filename.split('-')[1]
-            #thisrun = thisrun[1:5]
-            run_indx = run_list.index(thisrun)
-            status[run_indx] = 'Copying'
+            thisrun = thisrun[1:5]
+            if thisrun in run_list:
+                run_indx = run_list.index(thisrun)
+                status[run_indx] = 'Copying'
 
 
     # Create the result

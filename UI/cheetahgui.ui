@@ -343,7 +343,6 @@
      <string>CrystFEL</string>
     </property>
     <addaction name="menu_crystfel_mosflmnolatt"/>
-    <addaction name="menu_crystfel_indexgeopt"/>
     <addaction name="menu_crystfel_indexpdb"/>
     <addaction name="separator"/>
     <addaction name="menu_crystfel_viewindexingresults"/>
@@ -361,11 +360,14 @@
     </property>
     <addaction name="menu_calib_darkcal"/>
     <addaction name="menu_calib_copydarkcal"/>
+    <addaction name="menu_calib_setdarkrun"/>
     <addaction name="separator"/>
     <addaction name="menu_calib_currentdarkcal"/>
     <addaction name="menu_calib_currentbadpix"/>
     <addaction name="menu_calib_currentpeakmask"/>
     <addaction name="menu_calib_currentgeom"/>
+    <addaction name="menu_calib_cxiviewgeom"/>
+    <addaction name="menu_calib_geomtopixmap"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCheetah"/>
@@ -612,7 +614,7 @@
   </action>
   <action name="menu_calib_currentdarkcal">
    <property name="text">
-    <string>Set current darkcal</string>
+    <string>Set current darkcal (file)</string>
    </property>
   </action>
   <action name="menu_calib_currentbadpix">
@@ -627,7 +629,7 @@
   </action>
   <action name="menu_calib_currentgeom">
    <property name="text">
-    <string>Set current geometry pixelmap</string>
+    <string>Set current geometry pixelmap (.h5 for Cheetah)</string>
    </property>
   </action>
   <action name="menu_crystfel_indexpdb">
@@ -656,6 +658,21 @@
    </property>
    <property name="text">
     <string>List files</string>
+   </property>
+  </action>
+  <action name="menu_calib_geomtopixmap">
+   <property name="text">
+    <string>Geometry to pixelmap (.geom to .h5)</string>
+   </property>
+  </action>
+  <action name="menu_calib_setdarkrun">
+   <property name="text">
+    <string>Set run as current darkcal (copy + set)</string>
+   </property>
+  </action>
+  <action name="menu_calib_cxiviewgeom">
+   <property name="text">
+    <string>Set current geometry (.geom/.h5 for cxiview)</string>
    </property>
   </action>
  </widget>

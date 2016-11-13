@@ -701,6 +701,29 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 cmdarr = ['cp', dkcal, '../calib/darkcal/.']
                 cfel_file.spawn_subprocess(cmdarr)
 
+    def set_darkrun(self):
+        # This bit repeats copy_darkcal, but allows only one run and remembers filename for symlink
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+        if len(runs['run']) > 1:
+            print('Can only select one run')
+            return;
+
+        # Copy files
+        path = runs['path'][0]
+        path += '*detector0-darkcal.h5'
+        for dkcal in glob.iglob(path):
+            cmdarr = ['cp', dkcal, '../calib/darkcal/.']
+            cfel_file.spawn_subprocess(cmdarr)
+
+        # Create symbolic link
+        file = os.path.relpath(dkcal)
+        basename = os.path.basename(file)
+        cmdarr = ['ln', '-fs', basename, '../calib/darkcal/current-darkcal.h5']
+        cfel_file.spawn_subprocess(cmdarr)
+
+
     def set_current_darkcal(self):
         file = cfel_file.dialog_pickfile(path='../calib/darkcal', filter='*.h5', qtmainwin=self)
         if file != '':
@@ -737,6 +760,21 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             cmdarr = ['ln', '-fs', basename, '../calib/geometry/current-geometry.h5']
             cfel_file.spawn_subprocess(cmdarr)
 
+    def set_cxiview_geom(self):
+        file = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=self)
+        if file != '':
+            file = os.path.relpath(file)
+            basename = os.path.basename(file)
+            dirname = os.path.dirname(file)
+            cmdarr = ['ln', '-fs', basename, '../calib/geometry/current-geometry.geom']
+            cfel_file.spawn_subprocess(cmdarr)
+
+    def geom_to_pixelmap(self):
+        file = cfel_file.dialog_pickfile(path='../calib/geometry', filter='*.geom', qtmainwin=self)
+        if file != '':
+            print('Sorry - not yet implemented...')
+
+
     #
     #   CrystFEL menu items
     #
@@ -758,17 +796,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
         dirs = runs['directory']
         gui_crystfel.index_runs(self, dirs, nocell=True)
-
-
-    def crystfel_indexgeopt(self):
-        # Selected runs
-        runs = self.selected_runs()
-        if len(runs['run']) == 0:
-            return
-
-        dirs = runs['directory']
-        gui_crystfel.index_runs(self, dirs, geopt=True)
-
 
 
     def crystfel_viewindex(self):
@@ -965,13 +992,15 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_calib_darkcal.triggered.connect(self.show_darkcal)
         self.ui.menu_calib_copydarkcal.triggered.connect(self.copy_darkcal)
         self.ui.menu_calib_currentdarkcal.triggered.connect(self.set_current_darkcal)
+        self.ui.menu_calib_setdarkrun.triggered.connect(self.set_darkrun)
         self.ui.menu_calib_currentbadpix.triggered.connect(self.set_current_badpix)
         self.ui.menu_calib_currentpeakmask.triggered.connect(self.set_current_peakmask)
         self.ui.menu_calib_currentgeom.triggered.connect(self.set_current_geometry)
+        self.ui.menu_calib_cxiviewgeom.triggered.connect(self.set_cxiview_geom)
+        self.ui.menu_calib_geomtopixmap.triggered.connect(self.geom_to_pixelmap)
 
         # CrystFEL actions
         self.ui.menu_crystfel_mosflmnolatt.triggered.connect(self.crystfel_mosflmnolatt)
-        self.ui.menu_crystfel_indexgeopt.triggered.connect(self.crystfel_indexgeopt)
         self.ui.menu_crystfel_indexpdb.triggered.connect(self.crystfel_indexpdb)
         self.ui.menu_crystfel_viewindexingresults.triggered.connect(self.crystfel_viewindex)
         self.ui.menu_crystfel_viewindexing_pick.triggered.connect(self.crystfel_viewindex_pick)

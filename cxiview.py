@@ -231,7 +231,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_x_data = cxi['peakXPosRaw']
                 peak_y_data = cxi['peakYPosRaw']
             
-            for ind in xrange(0,n_peaks):                
+            for ind in range(0,n_peaks):                
                 peak_fs = peak_x_data[ind]                
                 peak_ss = peak_y_data[ind]         
                 
@@ -785,7 +785,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.ui.shufflePushButton.clicked.connect(self.shuffle)
         self.ui.jumpToLineEdit.editingFinished.connect(self.jump_to_pattern)
         self.intregex = PyQt5.QtCore.QRegExp('[0-9]+')
-        self.qtintvalidator = PyQt5.QtWidgets.QRegExpValidator()
+        self.qtintvalidator = PyQt5.QtGui.QRegExpValidator()
         self.qtintvalidator.setRegExp(self.intregex)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
 

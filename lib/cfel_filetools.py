@@ -70,7 +70,7 @@ def dialog_pickfile(write=False, directory=False, multiple=False, path=False, fi
 
     elif directory==True:
         caption = 'Select directory'
-        dirname, _ = PyQt5.QtWidgets.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
+        dirname = PyQt5.QtWidgets.QFileDialog.getExistingDirectory(qtmainwin, caption, path)
         return dirname
 
     elif multiple==True:
