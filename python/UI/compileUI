@@ -1,5 +1,0 @@
-
-pyuic4 cxiview.ui > cxiview_ui.py
-pyuic4 cheetahgui.ui > cheetahgui_ui.py
-pyuic4 crawler.ui > crawler_ui.py
-
