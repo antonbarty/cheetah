@@ -1,9 +1,7 @@
-geometry
-*.o
-*.pyc
+.DS_Store
+*pycache*
+*/pycache
 upload
-*.so.*
-.sconsign.dblite
-*.DS_Store
-*.xcodeproj
-build
+testdata
+test.py
+*.swp
