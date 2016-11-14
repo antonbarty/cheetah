@@ -1,0 +1,9 @@
+geometry
+*.o
+*.pyc
+upload
+*.so.*
+.sconsign.dblite
+*.DS_Store
+*.xcodeproj
+build
