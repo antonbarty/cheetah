@@ -166,7 +166,6 @@ void addToRadialAverageStack(cEventData *eventData, cGlobal *global, int powderC
     long	radial_nn = detector->radial_nn;
     long    stackSize = detector->radialStackSize;
 	long    stackCounter;
-    
     pthread_mutex_t mutex = detector->radialStack_mutex[powderClass];
 	
     
