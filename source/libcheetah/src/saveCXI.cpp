@@ -1026,6 +1026,10 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 	if(global->useFEEspectrum) {
 		lcls->createStack("FEEspectrum", H5T_NATIVE_FLOAT, global->FEEspectrumWidth);
 	}
+	// eSpectrum in CXI hutch
+	if(global->espectrum) {
+		lcls->createStack("CXIespectrum", H5T_NATIVE_FLOAT, global->espectrumLength);
+	}
 	
 	// EPICS
 	for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
@@ -1645,7 +1649,11 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	if(eventData->FEEspec_present) {
 		lcls["FEEspectrum"].write(&(eventData->FEEspec_hproj[0]), stackSlice);
 	}
-	
+	// eSpectrum in CXI hutch
+	if(global->espectrum) {
+		lcls["CXIespectrum"].write(&(eventData->energySpectrum1D[0]), stackSlice);
+	}
+
 	// EPICS
 	for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
 		lcls[&global->epicsPvFloatAddresses[i][0]].write(&(eventData->epicsPvFloatValues[i]), stackSlice);

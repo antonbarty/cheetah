@@ -193,15 +193,19 @@ void integrateSpectrum(cEventData *eventData, cGlobal *global, int specWidth,int
 
 void addToSpectrumStack(cEventData *eventData, cGlobal *global, int powderClass){
 	
-    float   *stack = global->espectrumStack[powderClass];
+
+	// Extract variables
+	float   *stack = global->espectrumStack[powderClass];
     double  *spectrum = eventData->energySpectrum1D;
     long	speclength = global->espectrumLength;
-    long    stackCounter = global->espectrumStackCounter[powderClass];
     long    stackSize = global->espectrumStackSize;
-    pthread_mutex_t mutex = global->espectrumStack_mutex[powderClass];
 
-    // Lock
+	
+	// Lock
+	pthread_mutex_t mutex = global->espectrumStack_mutex[powderClass];
 	pthread_mutex_lock(&mutex);
+	long    stackCounter = global->espectrumStackCounter[powderClass];
+
 	
     // Data offsets
     long stackoffset = stackCounter % stackSize;
