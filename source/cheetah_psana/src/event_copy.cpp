@@ -2,7 +2,7 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include "cheetah_ana_mod.h"
+#include "cheetah_psana.h"
 #include <cheetah.h>
 //-----------------
 // C/C++ Headers --
