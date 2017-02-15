@@ -119,9 +119,12 @@ void sortPowderClass(cEventData*, cGlobal*);
 int peakfinder(cGlobal*, cEventData*, int);
 int peakfinder3(tPeakList*, float*, char*, long, long, long, long, float, float, long, long, long);
 int peakfinder6(tPeakList*, float*, char*, long, long, long, long, float, float, long, long, long, float);
+int killNearbyPeaks(tPeakList*, float );
+
+// peakfinder8.cpp
 int peakfinder8(tPeakList*, float*, char*, float*, long, long, long, long, float, float, long, long, long);
 int peakfinder8old(tPeakList*, float*, char*, float*, long, long, long, long, float, float, long, long, long);
-int killNearbyPeaks(tPeakList*, float );
+
 
 // spectrum.cpp
 void addFEEspectrumToStack(cEventData*, cGlobal*, int);
