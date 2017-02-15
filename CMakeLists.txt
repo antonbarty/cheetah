@@ -43,7 +43,7 @@ IF("${isSystemDir}" STREQUAL "-1")
    SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 ENDIF("${isSystemDir}" STREQUAL "-1")
 
-OPTION(BUILD_CHEETAH_ANA_MOD "If ON build cheetah_ana_mod. Otherwise skip it." OFF )
+OPTION(BUILD_CHEETAH_PSANA "If ON build cheetah_ana_mod. Otherwise skip it." OFF )
 OPTION(BUILD_PSANA "If ON build psana. Otherwise skip it." OFF )
 OPTION(BUILD_CHEETAH_MYANA "If ON build cheetah_myana. Otherwise skip it." OFF )
 OPTION(BUILD_CHEETAH_SACLA "If ON build cheetah-sacla. Otherwise skip it." OFF )
