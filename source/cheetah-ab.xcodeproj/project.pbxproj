@@ -27,6 +27,7 @@
 		4D0A406C1A3B51F600FAC112 /* tofDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40671A3B51F600FAC112 /* tofDetector.h */; };
 		4D0A406E1A3B60D400FAC112 /* event_copy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D0A406D1A3B60D400FAC112 /* event_copy.cpp */; };
 		4D5697FD18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D5697FB18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp */; };
+		4D99B1981E547E8800090239 /* peakfinder8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D99B1971E547E8800090239 /* peakfinder8.cpp */; };
 		4DA51BE7189AC55000C97F32 /* main-sacla-hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA51BE6189AC55000C97F32 /* main-sacla-hdf5.cpp */; };
 		4DA51BE8189ACCA600C97F32 /* libcheetah.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */; };
 		4DA51BEB189ACD4100C97F32 /* assemble2DImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D929174F9F80004A0BB4 /* assemble2DImage.cpp */; };
@@ -45,7 +46,7 @@
 		4DA51BF8189ACD6A00C97F32 /* saveFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D936174F9F80004A0BB4 /* saveFrame.cpp */; };
 		4DA51BFA189ACD7000C97F32 /* spectrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D938174F9F80004A0BB4 /* spectrum.cpp */; };
 		4DA51BFB189ACD7400C97F32 /* worker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D939174F9F80004A0BB4 /* worker.cpp */; };
-		4DB277B61C8A74BD006B900B /* streakFinderWrapperWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */; settings = {ASSET_TAGS = (); }; };
+		4DB277B61C8A74BD006B900B /* streakFinderWrapperWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */; };
 		4DF8E8631ACF8991003F9F0B /* timetool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8E8621ACF8991003F9F0B /* timetool.cpp */; };
 /* End PBXBuildFile section */
 
@@ -130,6 +131,7 @@
 		4D93D954174F9F98004A0BB4 /* run-cheetah-psana */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-cheetah-psana"; sourceTree = "<group>"; };
 		4D93D956174F9F98004A0BB4 /* cheetah_ana_mod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cheetah_ana_mod.h; sourceTree = "<group>"; };
 		4D93D958174F9F98004A0BB4 /* cheetah_ana_mod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cheetah_ana_mod.cpp; sourceTree = "<group>"; };
+		4D99B1971E547E8800090239 /* peakfinder8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peakfinder8.cpp; sourceTree = "<group>"; };
 		4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcheetah.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DA51BE5189AC39500C97F32 /* cheetah-sacla */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "cheetah-sacla"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DA51BE6189AC55000C97F32 /* main-sacla-hdf5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "main-sacla-hdf5.cpp"; sourceTree = "<group>"; };
@@ -235,6 +237,7 @@
 				4D0A40521A3B51DC00FAC112 /* modularDetector.cpp */,
 				4D0A40531A3B51DC00FAC112 /* peakDetect.cpp */,
 				4D93D932174F9F80004A0BB4 /* peakfinders.cpp */,
+				4D99B1971E547E8800090239 /* peakfinder8.cpp */,
 				4D0A40541A3B51DC00FAC112 /* pixelmask.cpp */,
 				4D93D933174F9F80004A0BB4 /* powder.cpp */,
 				4D0A40551A3B51DC00FAC112 /* processRateMonitor.cpp */,
@@ -419,6 +422,7 @@
 				4D0A405A1A3B51DC00FAC112 /* global.cpp in Sources */,
 				4DA51BEC189ACD4400C97F32 /* backgroundCorrection.cpp in Sources */,
 				4DA51BF1189ACD5200C97F32 /* hitfinders.cpp in Sources */,
+				4D99B1981E547E8800090239 /* peakfinder8.cpp in Sources */,
 				4DA51BEF189ACD4C00C97F32 /* detectorObject.cpp in Sources */,
 				4DA51BF2189ACD5600C97F32 /* libcheetah.cpp in Sources */,
 				4DA51BED189ACD4600C97F32 /* data2d.cpp in Sources */,

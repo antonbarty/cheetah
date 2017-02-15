@@ -11,5 +11,5 @@ geometry
 upload
 *.so.*
 .sconsign.dblite
-*.xcodeproj
+source/*.xcodeproj
 build
