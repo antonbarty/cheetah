@@ -33,6 +33,8 @@ class cGlobal {
 
 public:
 
+    char    facility[MAX_FILENAME_LENGTH];
+    
 	/** @brief Default constructor (set default values) */
 	cGlobal();
 
@@ -173,6 +175,15 @@ public:
 
 	int		hitfinderFastScan;
 
+        // Hitfinder 9 parameters
+        float   sigmaFactorBiggestPixel;
+        float   sigmaFactorPeakPixel;
+        float   sigmaFactorWholePeak;
+        float   minimumSigma;
+        float   minimumPeakOversizeOverNeighbours;
+        uint_fast8_t windowRadius;
+
+
 	// Sorting criteria
 	int		sortPumpLaserOn;
     char    pumpLaserScheme[MAX_FILENAME_LENGTH];
@@ -271,6 +282,7 @@ public:
     
 	/** @brief Output 1 HDF5 per image by default */
 	bool    saveCXI;
+	long	cxiChunkSize;
 	/** @brief If true save each powder class in a different file */
 	bool    saveByPowderClass;
     char    dataSaveFormat[MAX_FILENAME_LENGTH];
@@ -336,7 +348,7 @@ public:
 	long     nThreads;
 	long     nActiveCheetahThreads;
 	long     threadCounter;
-	long     threadPurge;
+	//long     threadPurge;
 	int      threadTimeoutInSeconds;
 	int      threadSafetyLevel;
 
@@ -358,6 +370,7 @@ public:
 	pthread_mutex_t  datarateWorker_mutex;
 	pthread_mutex_t  saveCXI_mutex;
     pthread_mutex_t  saveinterval_mutex;
+	pthread_mutex_t	 saveSynchronisation_mutex;
 	//pthread_mutex_t  hitVector_mutex;
 	pthread_mutex_t  gmd_mutex;
 	pthread_mutex_t  swmr_mutex;

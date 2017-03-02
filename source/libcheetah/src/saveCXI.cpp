@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <math.h>
 #include <fstream> 
+#include <unistd.h>
 
 #include <saveCXI.h>
 
@@ -66,7 +67,7 @@ namespace CXI{
 		hsize_t dims[4] = {0, length, height, width};
 
 		
-		// Define the chunk size for stacks
+		// Define the default chunk size for stacks
 		if(stackSize == H5S_UNLIMITED && chunkSize <= 0){
 			chunkSize = CXI::chunkSize1D;
 			if(ndims == 3){
@@ -77,7 +78,7 @@ namespace CXI{
 			}
 		}
 
-		// Calculate dimensions for the first chunk
+		// Calculate initial array dimensions based on chunk size
 		if(heightChunkSize == 0){
 			dims[0] = lrintf(((float)chunkSize)/H5Tget_size(dataType)/height/length);
 		}
@@ -93,35 +94,41 @@ namespace CXI{
 			dims[0] = stackSize;
 		}
 
-		// Make sure the chunk size is not 0
+		// Make sure the size is not 0
 		if(dims[0] == 0){
 			dims[0] = 1;
 		}
 
+		printf("    + %s (%iD: %llu x %llu x %llu x %llu)\n",s, ndims, dims[0], dims[1], dims[2], dims[3]);
+		hsize_t maxdims[4] = {stackSize,length,height,width};
 		
 
-		hsize_t maxdims[4] = {stackSize,length,height,width};
-		hsize_t chunkdims[4] = {1L, dims[1], dims[2], dims[3]};
-		printf("    + %s (%iD: %llu x %llu x %llu x %llu)\n",s, ndims, dims[0], dims[1], dims[2], dims[3]);
+		// Set chunk size array
+		// 1D stacks will have chunkSize1D, Stacks (H5S_UNLIMITED) will be read in slices but 2D images (not H5S_UNLIMITED) will not be read as a stack
+		hsize_t chunkdims[4] = {dims[0], dims[1], dims[2], dims[3]};
+		if(stackSize == H5S_UNLIMITED && ndims >= 2) chunkdims[0] = 1;
+		
 		
 		
 		hid_t dataspace = H5Screate_simple(ndims, dims, maxdims);
 		if( dataspace<0 ) {ERROR("Cannot create dataspace.\n");}
 
-		// Set chunking and compression
+		// Set chunking and compression (only makes sense for datasets of dimension > 2)
 		// (optimise for reading one event at a time, ie: avoid decompressing multiple frames to read one)
-		hid_t cparms = H5Pcreate (H5P_DATASET_CREATE);
+		hid_t cparms = H5Pcreate(H5P_DATASET_CREATE);
 		if(chunkSize) {
 			H5Pset_chunk(cparms, ndims, chunkdims);
-			//H5Pset_chunk(cparms, ndims, dims);
-			if (ndims >= 2)
+			if (ndims >= 3 && CXI::h5compress != 0) {
 				H5Pset_deflate(cparms, CXI::h5compress);
+			}
 		}
 		
 		// Set optimal chunk cache size
 		hid_t dapl_id = H5Pcreate(H5P_DATASET_ACCESS);
-		if( (ndims == 3 || ndims == 4) && chunkSize){
-			H5Pset_chunk_cache(dapl_id,H5D_CHUNK_CACHE_NSLOTS_DEFAULT,1024*1024*16,1);
+		if(chunkSize && ndims >= 2) {
+			//long	opt_cachesize = 1024*1024*16;
+			long	opt_cachesize = 4*chunkdims[0]*chunkdims[1]*chunkdims[2]*chunkdims[3]*H5Tget_size(dataType);
+			H5Pset_chunk_cache(dapl_id,H5D_CHUNK_CACHE_NSLOTS_DEFAULT,opt_cachesize,1);
 		}
 		
 		// Create data set
@@ -183,7 +190,7 @@ namespace CXI{
 
 
 	template <class T> 
-	void Node::write(T * data, int stackSlice, int sliceSize, bool variableSlice){  
+	void Node::write(T *data, int stackSlice, int sliceSize, bool variableSlice){
 		bool sliced = true;
 		if(stackSlice == -1){
 			stackSlice = 0;
@@ -192,7 +199,7 @@ namespace CXI{
 
 		hid_t hs,w;
 		hsize_t count[4] = {1,1,1,1};
-		hsize_t offset[4] = {stackSlice,0,0,0};
+		hsize_t offset[4] = {static_cast<hsize_t>(stackSlice),0,0,0};
 		/* stride is irrelevant in this case */
 		hsize_t stride[4] = {1,1,1,1};
 		hsize_t block[4];
@@ -210,8 +217,12 @@ namespace CXI{
 		 */
 		if(ndims > 0 && (int)block[0] <= stackSlice){
 			while((int)block[0] <= stackSlice){
-				//block[0] *= 2;
-				block[0] += 512;
+				if(block[0] < 1024) {
+					block[0] *= 2;
+				}
+				else {
+					block[0] += 1024;
+				}
 			}
 			H5Dset_extent (dataset, block);
 			/* get enlarged dataspace */
@@ -230,7 +241,12 @@ namespace CXI{
 			int tmp_block = block[0];
 			H5Sget_simple_extent_dims(dataspace, block, mdims);
 			while((int)block[1] <= sliceSize){
-				block[1] *= 2;
+				if(block[1] < 1024) {
+					block[1] *= 2;
+				}
+				else {
+					block[1] += 1024;
+				}
 			}
 			H5Dset_extent (dataset, block);
 			block[0] = tmp_block;
@@ -503,16 +519,18 @@ namespace CXI{
 	}
 
 	
+	// Needs global->saveCXI_mutex unlocked
 	uint Node::getStackSlice(){
-	#ifdef __GNUC__
-	return __sync_fetch_and_add(&stackCounter,1);
-	#else
-	pthread_mutex_lock(&global->framefp_mutex);
-	uint ret = stackCounter;
-	cxi->stackCounter++;
-	pthread_mutex_unlock(&global->framefp_mutex);
-	return ret;
-	#endif
+		#ifdef __GNUC__
+		return __sync_fetch_and_add(&stackCounter,1);
+		#else
+		
+		pthread_mutex_lock(&global->saveCXI_mutex);
+		uint ret = stackCounter;
+		cxi->stackCounter++;
+		pthread_mutex_unlock(&global->saveCXI_mutex);
+		return ret;
+		#endif
 }
 
 }
@@ -522,8 +540,13 @@ herr_t cheetahHDF5ErrorHandler(hid_t,void *)
 {
 	// print the error message
 	//H5Eprint1(stderr);
-	H5Eprint(H5E_DEFAULT, stderr);
+	printf("******************************************\n");
+	printf("saveCXI::cheetahHDF5ErrorHandler triggered\n");
+	H5Eprint(H5E_DEFAULT, stdout);
+	
 	// abort such that we get a stack trace to debug
+	printf("Abort triggered in saveCXI.cpp\n");
+	printf("******************************************\n");
 	abort();
 }
 
@@ -603,6 +626,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 	int debugLevel = global->debugLevel;
 	
 	using CXI::Node;
+	//pthread_mutex_lock(&global->saveCXI_mutex);
 	
 	DEBUGL2_ONLY{ DEBUG("Create Skeleton."); }
 
@@ -968,23 +992,82 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 		resultIndex++;
 	}
 
-	Node * aps = root->createGroup("APS");	
-	aps->createStack("exposureTime",H5T_NATIVE_DOUBLE);
-	aps->createStack("exposurePeriod",H5T_NATIVE_DOUBLE);
-	aps->createStack("tau",H5T_NATIVE_DOUBLE);
-	aps->createStack("countCutoff",H5T_NATIVE_INT32);
-	aps->createStack("nExcludedPixels",H5T_NATIVE_INT32);
-	aps->createStack("detectorDistance",H5T_NATIVE_DOUBLE);
-	aps->createStack("beamX",H5T_NATIVE_DOUBLE);
-	aps->createStack("beamY",H5T_NATIVE_DOUBLE);
-	aps->createStack("startAngle",H5T_NATIVE_DOUBLE);
-	aps->createStack("detector2Theta",H5T_NATIVE_DOUBLE);
-	aps->createStack("angleIncrement",H5T_NATIVE_DOUBLE);
-	aps->createStack("shutterTime",H5T_NATIVE_DOUBLE);
-	aps->createStack("timestamp",H5T_NATIVE_CHAR,26);
-	aps->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
-	aps->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
-	aps->createStack("threshold",H5T_NATIVE_DOUBLE);
+    
+    node *instrument;
+    if(!strcmp(global->facility, "APS") ) {
+        instrument = root->createGroup("APS");
+        instrument->createStack("exposureTime",H5T_NATIVE_DOUBLE);
+        instrument->createStack("exposurePeriod",H5T_NATIVE_DOUBLE);
+        instrument->createStack("tau",H5T_NATIVE_DOUBLE);
+        instrument->createStack("countCutoff",H5T_NATIVE_INT32);
+        instrument->createStack("nExcludedPixels",H5T_NATIVE_INT32);
+        instrument->createStack("detectorDistance",H5T_NATIVE_DOUBLE);
+        instrument->createStack("beamX",H5T_NATIVE_DOUBLE);
+        instrument->createStack("beamY",H5T_NATIVE_DOUBLE);
+        instrument->createStack("startAngle",H5T_NATIVE_DOUBLE);
+        instrument->createStack("detector2Theta",H5T_NATIVE_DOUBLE);
+        instrument->createStack("angleIncrement",H5T_NATIVE_DOUBLE);
+        instrument->createStack("shutterTime",H5T_NATIVE_DOUBLE);
+        instrument->createStack("timestamp",H5T_NATIVE_CHAR,26);
+        instrument->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+        instrument->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+        instrument->createStack("threshold",H5T_NATIVE_DOUBLE);
+    }
+    
+    if(!strcmp(global->facility, "LCLS") ) {
+        instrument = root->createGroup("LCLS");
+        instrument->createStack("machineTime",H5T_NATIVE_INT32);
+        instrument->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
+        instrument->createStack("fiducial",H5T_NATIVE_INT32);
+        instrument->createStack("ebeamCharge",H5T_NATIVE_DOUBLE);
+        instrument->createStack("ebeamL3Energy",H5T_NATIVE_DOUBLE);
+        instrument->createStack("ebeamPkCurrBC2",H5T_NATIVE_DOUBLE);
+        instrument->createStack("ebeamLTUPosX",H5T_NATIVE_DOUBLE);
+        instrument->createStack("ebeamLTUPosY",H5T_NATIVE_DOUBLE);
+        instrument->createStack("ebeamLTUAngX",H5T_NATIVE_DOUBLE);
+        instrument->createStack("ebeamLTUAngY",H5T_NATIVE_DOUBLE);
+        instrument->createStack("phaseCavityTime1",H5T_NATIVE_DOUBLE);
+        instrument->createStack("phaseCavityTime2",H5T_NATIVE_DOUBLE);
+        instrument->createStack("phaseCavityCharge1",H5T_NATIVE_DOUBLE);
+        instrument->createStack("phaseCavityCharge2",H5T_NATIVE_DOUBLE);
+        instrument->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+        instrument->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+        instrument->createStack("f_11_ENRC",H5T_NATIVE_DOUBLE);
+        instrument->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
+        instrument->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
+        instrument->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
+        instrument->createStack("evr41",H5T_NATIVE_DOUBLE);
+        instrument->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
+        instrument->createLink("eventTime","eventTimeString");
+        instrument->createLink("experiment_identifier","/entry_1/experiment_identifier");
+    
+        // TimeTool
+        if(global->useTimeTool) {
+            instrument->createStack("timeToolTrace", H5T_NATIVE_FLOAT, global->TimeToolStackWidth);
+        }
+        // FEE spectrum
+        if(global->useFEEspectrum) {
+            instrument->createStack("FEEspectrum", H5T_NATIVE_FLOAT, global->FEEspectrumWidth);
+        }
+        // eSpectrum in CXI hutch
+        if(global->espectrum) {
+            instrument->createStack("CXIespectrum", H5T_NATIVE_FLOAT, global->espectrumLength);
+        }
+        
+        // EPICS
+        for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
+            instrument->createStack(&global->epicsPvFloatAddresses[i][0], H5T_NATIVE_FLOAT);
+        }
+        
+
+        
+        DETECTOR_LOOP{
+            Node* detector = instrument->createGroup("detector",detIndex+1);
+            detector->createStack("position",H5T_NATIVE_DOUBLE);
+            detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
+            detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
+        }
+    }
 
 	// Save cheetah variables  
 	Node * cheetah = root->createGroup("cheetah");
@@ -1094,6 +1177,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 	#endif
 
 	H5Fflush(root->hid(), H5F_SCOPE_GLOBAL);
+	//pthread_mutex_unlock(&global->saveCXI_mutex);
 
 	return root;
 }
@@ -1108,37 +1192,48 @@ static std::vector<CXI::Node* > openFiles = std::vector<CXI::Node *>();
 
 static CXI::Node *getCXIFileByName(cGlobal *global, cEventData *eventData, int powderClass){
 	char filename[MAX_FILENAME_LENGTH];
+	long chunk;
+	
 	if(global->saveByPowderClass){
-		sprintf(filename,"%s-r%04d-class%d.cxi", global->experimentID, global->runNumber, powderClass);
+		// Powder class CXI chunks according to number of frames in each powder class
+		chunk = global->detector[0].nPowderFrames[powderClass];
+		chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
+		sprintf(filename,"%s-r%04d-class%d-c%02ld.cxi", global->experimentID, global->runNumber, powderClass, chunk);
 	}
 	else{
-		sprintf(filename,"%s-r%04d.cxi", global->experimentID, global->runNumber);
+		// All-in-one CXI file chunks by number of hits
+		chunk = global->nhits;
+		chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
+		sprintf(filename,"%s-r%04d-c%02ld.cxi", global->experimentID, global->runNumber, chunk);
 	}
 	if (eventData != NULL)
 		strcpy(eventData->filename, filename);
-	
 
-	pthread_mutex_lock(&global->framefp_mutex);
+
 	/* search for filename in list */
+	pthread_mutex_lock(&global->saveCXI_mutex);
 	for(uint i=0; i<openFilenames.size(); i++){
 		if(openFilenames[i] == std::string(filename)){
 			DEBUG2("Found file pointer to already opened file.");
-			pthread_mutex_unlock(&global->framefp_mutex);
+			pthread_mutex_unlock(&global->saveCXI_mutex);
 			return openFiles[i];
 		}
 	}
 
+	/* Create new file if none found in list */
 	DEBUG2("Creating a new file.");
 	printf("Creating %s\n",filename);
 	CXI::Node *cxi = createCXISkeleton(filename, global);
 	openFilenames.push_back(filename);
 	openFiles.push_back(cxi);
-	pthread_mutex_unlock(&global->framefp_mutex);
+	
+	pthread_mutex_unlock(&global->saveCXI_mutex);
 	return cxi;
 }
 
 void writeAccumulatedCXI(cGlobal * global){
 	using CXI::Node;
+
 	#ifdef H5F_ACC_SWMR_WRITE
 	if(global->cxiSWMR){
 		pthread_mutex_lock(&global->swmr_mutex);
@@ -1148,7 +1243,12 @@ void writeAccumulatedCXI(cGlobal * global){
 
 	DETECTOR_LOOP{
 		POWDER_LOOP {
-			CXI::Node * cxi = getCXIFileByName(global, NULL, powderClass);
+			CXI::Node *cxi = getCXIFileByName(global, NULL, powderClass);
+
+			if( cxi->stackCounter == 0)
+				continue;
+			
+			pthread_mutex_lock(&global->saveCXI_mutex);
 			Node & det_node = (*cxi)["cheetah"]["global_data"].child("detector",detIndex+1);
 			Node & cl = det_node.child("class",powderClass+1);
 			FOREACH_DATAFORMAT_T(i_f, cDataVersion::DATA_FORMATS) {
@@ -1197,6 +1297,7 @@ void writeAccumulatedCXI(cGlobal * global){
 				uint16_t *histData = global->detector[detIndex].histogramData;
 				det_node["pixel_histogram"]["histogram"].write(histData, -1, N);
 			}
+			pthread_mutex_unlock(&global->saveCXI_mutex);
 		}
 	}
 	
@@ -1205,13 +1306,42 @@ void writeAccumulatedCXI(cGlobal * global){
 		pthread_mutex_unlock(&global->swmr_mutex);
 	}
 	#endif
+
 }
+
+
+/*
+ *	Flush CXI file data
+ */
+static void  flushCXI(CXI::Node *cxi){
+	//if( cxi->stackCounter == 0)
+	//	return;
+	H5Fflush(cxi->hid(), H5F_SCOPE_GLOBAL);
+}
+
+
+void flushCXIFiles(cGlobal * global){
+	/* Flush each open file */
+	
+	for(uint i=0; i<openFilenames.size(); i++){
+		printf("Flushing %s\n",openFilenames[i].c_str());
+		pthread_mutex_lock(&global->saveCXI_mutex);
+		flushCXI(openFiles[i]);
+		pthread_mutex_unlock(&global->saveCXI_mutex);
+		usleep(100000);
+	}
+}
+
 
 
 /*
  *	Close CXI files
  */
 static void  closeCXI(CXI::Node *cxi){
+
+	//if( cxi->stackCounter == 0)
+	//	return;
+
 	cxi->trimAll();
 	H5Fflush(cxi->hid(), H5F_SCOPE_GLOBAL);
 	H5Fclose(cxi->hid());
@@ -1228,16 +1358,17 @@ void closeCXIFiles(cGlobal * global){
 	//#else
 	#endif
 	
-	pthread_mutex_lock(&global->framefp_mutex);
-	
+
 	/* Go through each file and resize them to their right size */
+	pthread_mutex_lock(&global->saveCXI_mutex);
 	for(uint i=0; i<openFilenames.size(); i++){
 		printf("Closing %s\n",openFilenames[i].c_str());
 		closeCXI(openFiles[i]);
 	}
 	openFiles.clear();
 	openFilenames.clear();
-	pthread_mutex_unlock(&global->framefp_mutex);
+	pthread_mutex_unlock(&global->saveCXI_mutex);
+
 	//#endif
 	
 
@@ -1245,29 +1376,11 @@ void closeCXIFiles(cGlobal * global){
 }
 
 
-/*
- *	Flush CXI file data
- */
-static void  flushCXI(CXI::Node *cxi){
-	H5Fflush(cxi->hid(), H5F_SCOPE_GLOBAL);
-}
-
-
-void flushCXIFiles(cGlobal * global){
-	/* Flush each open file */
-	
-	pthread_mutex_lock(&global->framefp_mutex);
-	for(uint i=0; i<openFilenames.size(); i++){
-		printf("Flushing %s\n",openFilenames[i].c_str());
-		flushCXI(openFiles[i]);
-	}
-	pthread_mutex_unlock(&global->framefp_mutex);
-}
-
 
 
 void writeCXIHitstats(cEventData *info, cGlobal *global ){
 	DEBUG2("Writing Hitstats.");
+
 	#ifdef H5F_ACC_SWMR_WRITE
 	if(global->cxiSWMR){
 		pthread_mutex_lock(&global->swmr_mutex);
@@ -1276,6 +1389,7 @@ void writeCXIHitstats(cEventData *info, cGlobal *global ){
 	/* Get the existing CXI file or open a new one */
 	CXI::Node * cxi = getCXIFileByName(global, info, info->powderClass);
 
+	pthread_mutex_lock(&global->saveCXI_mutex);
 	(*cxi)["cheetah"]["global_data"]["hit"].write(&info->hit,global->nCXIEvents);
 	(*cxi)["cheetah"]["global_data"]["nPeaks"].write(&info->nPeaks,global->nCXIEvents);
 	global->nCXIEvents += 1;
@@ -1284,6 +1398,7 @@ void writeCXIHitstats(cEventData *info, cGlobal *global ){
 		pthread_mutex_unlock(&global->swmr_mutex);
 	}
 	#endif
+	pthread_mutex_unlock(&global->saveCXI_mutex);
 }
 
 
@@ -1304,38 +1419,29 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	}
 	#endif
 
-	/* Get the existing CXI file or open a new one */
+	/* 
+	 *	Get the existing CXI file or open a new one
+	 *	(needs &global->saveCXI_mutex unlocked)
+	 */
 	CXI::Node *cxi = getCXIFileByName(global, eventData, eventData->powderClass);
 	Node &root = *cxi;
 	char sBuffer[1024];
 	uint stackSlice = cxi->getStackSlice();
 	eventData->stackSlice = stackSlice;
 	//printf("WriteCXI: powderClass=%i, stackSlice=%u\n",eventData->powderClass, stackSlice);
-	
-	
-	
-    
-    /*
-     *	Update text file log
-     *  (If changing what's in the file, paste the new version into function saveCXI.cpp-->writeCXI() and saveFrame.cpp-->writeHDF5 to avoid incompatibilities)
-     *  Beamtime hack at 2am - fix this with one function later.
-     */
-    pthread_mutex_lock(&global->framefp_mutex);
-    fprintf(global->cleanedfp, "r%04u/%s/%s, %li, %i, %g, %g, %g, %g, %g\n",global->runNumber, eventData->eventSubdir, eventData->eventname, eventData->frameNumber, eventData->nPeaks, eventData->peakNpix, eventData->peakTotal, eventData->peakResolution, eventData->peakResolutionA, eventData->peakDensity);
-    pthread_mutex_unlock(&global->framefp_mutex);
 
-    
-    
+	
+	/*
+	 *	Lock writing to one thread at a time
+	 */
+	pthread_mutex_lock(&global->saveCXI_mutex);
+
+	
 	global->nCXIHits += 1;
 	double en = eventData->photonEnergyeV * 1.60217646e-19;
 	root["entry_1"]["instrument_1"]["source_1"]["energy"].write(&en,stackSlice);
-	// remove the '.h5' from eventname
-	// This is now done in nameEvent procedure
-	//eventData->eventname[strlen(eventData->eventname) - 3] = 0;
 	root["entry_1"]["experiment_identifier"].write(eventData->eventname,stackSlice);
-	// put it back
-	//eventData->eventname[strlen(eventData->eventname)] = '.';
-  
+	
 	if(global->samplePosXPV[0] || global->samplePosYPV[0] || global->samplePosZPV[0] || global->sampleVoltage[0]){
 		root["entry_1"]["sample_1"]["geometry_1"]["translation"].write(eventData->samplePos,stackSlice);
 		root["entry_1"]["sample_1"]["injection_1"]["voltage"].write(eventData->sampleVoltage,stackSlice);
@@ -1525,24 +1631,93 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 		result["peakNPixels"].write(eventData->peaklist.peak_npix, stackSlice, nPeaks, true);
 	}
 
-	/*Write APS information*/
-	Node &aps = root["APS"];
-	aps["exposureTime"].write(&eventData->exposureTime,stackSlice);
-	aps["exposurePeriod"].write(&eventData->exposurePeriod, stackSlice);
-	aps["tau"].write(&eventData->tau,stackSlice);
-	aps["countCutoff"].write(&eventData->countCutoff,stackSlice);
-	aps["nExcludedPixels"].write(&eventData->nExcludedPixels,stackSlice);
-	aps["detectorDistance"].write(&eventData->detectorDistance,stackSlice);
-	aps["beamX"].write(&eventData->beamX,stackSlice);
-	aps["beamY"].write(&eventData->beamY,stackSlice);
-	aps["startAngle"].write(&eventData->startAngle,stackSlice);
-	aps["detector2Theta"].write(&eventData->detector2Theta,stackSlice);
-	aps["angleIncrement"].write(&eventData->angleIncrement,stackSlice);
-	aps["shutterTime"].write(&eventData->shutterTime,stackSlice);
-	aps["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
-	aps["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
-	aps["timestamp"].write(eventData->timeString,stackSlice);
-	aps["threshold"].write(&eventData->threshold,stackSlice);
+    
+    /*Write LCLS information*/
+    if(!strcmp(global->facility, "LCLS")) {
+        /*Write LCLS informations*/
+        Node &lcls = root["LCLS"];
+        DETECTOR_LOOP{
+            lcls.child("detector",detIndex+1)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
+            lcls.child("detector",detIndex+1)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
+            lcls.child("detector",detIndex+1)["SolidAngleConst"].write(&global->detector[detIndex].solidAngleConst,stackSlice);
+        }
+        lcls["machineTime"].write(&eventData->seconds,stackSlice);
+        lcls["machineTimeNanoSeconds"].write(&eventData->nanoSeconds, stackSlice);
+        lcls["fiducial"].write(&eventData->fiducial,stackSlice);
+        lcls["ebeamCharge"].write(&eventData->fEbeamCharge,stackSlice);
+        lcls["ebeamL3Energy"].write(&eventData->fEbeamL3Energy,stackSlice);
+        lcls["ebeamLTUAngX"].write(&eventData->fEbeamLTUAngX,stackSlice);
+        lcls["ebeamLTUAngY"].write(&eventData->fEbeamLTUAngY,stackSlice);
+        lcls["ebeamLTUPosX"].write(&eventData->fEbeamLTUPosX,stackSlice);
+        lcls["ebeamLTUPosY"].write(&eventData->fEbeamLTUPosY,stackSlice);
+        lcls["ebeamPkCurrBC2"].write(&eventData->fEbeamPkCurrBC2,stackSlice);
+        lcls["phaseCavityTime1"].write(&eventData->phaseCavityTime1,stackSlice);
+        lcls["phaseCavityTime2"].write(&eventData->phaseCavityTime2,stackSlice);
+        lcls["phaseCavityCharge1"].write(&eventData->phaseCavityCharge1,stackSlice);
+        lcls["phaseCavityCharge2"].write(&eventData->phaseCavityCharge2,stackSlice);
+        lcls["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
+        lcls["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
+        lcls["f_11_ENRC"].write(&eventData->gmd11,stackSlice);
+        lcls["f_12_ENRC"].write(&eventData->gmd12,stackSlice);
+        lcls["f_21_ENRC"].write(&eventData->gmd12,stackSlice);
+        lcls["f_22_ENRC"].write(&eventData->gmd22,stackSlice);
+        
+        // Time tool trace
+        if(eventData->TimeTool_present && eventData->TimeTool_hproj != NULL) {
+            lcls["timeToolTrace"].write(&(eventData->TimeTool_hproj[0]), stackSlice);
+        }
+        // FEE spectrometer
+        if(eventData->FEEspec_present) {
+            lcls["FEEspectrum"].write(&(eventData->FEEspec_hproj[0]), stackSlice);
+        }
+        // eSpectrum in CXI hutch
+        if(global->espectrum) {
+            lcls["CXIespectrum"].write(&(eventData->energySpectrum1D[0]), stackSlice);
+        }
+        
+        // EPICS
+        for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
+            lcls[&global->epicsPvFloatAddresses[i][0]].write(&(eventData->epicsPvFloatValues[i]), stackSlice);
+        }
+        
+        
+        if(eventData->TOFPresent){
+            for(int i = 0; i<global->nTOFDetectors;i++){
+                int tofDetIndex = i+global->nDetectors;
+                Node & detector = root["entry_1"]["instrument_1"].child("detector",tofDetIndex+1);
+                detector["data"].write(&(eventData->tofDetector[i].voltage[0]),stackSlice);
+                detector["tofTime"].write(&(eventData->tofDetector[i].time[0]),stackSlice);
+            }
+        }
+        int LaserOnVal = (eventData->pumpLaserCode)?1:0;
+        lcls["evr41"].write(&LaserOnVal,stackSlice);
+        char timestr[26];
+        time_t eventTime = eventData->seconds;
+        ctime_r(&eventTime,timestr);
+        lcls["eventTimeString"].write(timestr,stackSlice);
+    }
+
+    /*Write APS information*/
+    if(!strcmp(global->facility, "APS")) {
+        Node &aps = root["APS"];
+        aps["exposureTime"].write(&eventData->exposureTime,stackSlice);
+        aps["exposurePeriod"].write(&eventData->exposurePeriod, stackSlice);
+        aps["tau"].write(&eventData->tau,stackSlice);
+        aps["countCutoff"].write(&eventData->countCutoff,stackSlice);
+        aps["nExcludedPixels"].write(&eventData->nExcludedPixels,stackSlice);
+        aps["detectorDistance"].write(&eventData->detectorDistance,stackSlice);
+        aps["beamX"].write(&eventData->beamX,stackSlice);
+        aps["beamY"].write(&eventData->beamY,stackSlice);
+        aps["startAngle"].write(&eventData->startAngle,stackSlice);
+        aps["detector2Theta"].write(&eventData->detector2Theta,stackSlice);
+        aps["angleIncrement"].write(&eventData->angleIncrement,stackSlice);
+        aps["shutterTime"].write(&eventData->shutterTime,stackSlice);
+        aps["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
+        aps["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
+        aps["timestamp"].write(eventData->timeString,stackSlice);
+        aps["threshold"].write(&eventData->threshold,stackSlice);
+    }
+
 
 	Node & event_data = root["cheetah"]["event_data"];
 	event_data["eventName"].write(eventData->eventname,stackSlice);
@@ -1570,6 +1745,8 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 		Node & detector2 = root["cheetah"]["event_data"].child("detector",detIndex+1);
 		detector2["sum"].write(&eventData->detector[detIndex].sum,stackSlice);		
 	}
+	
+	
 	#ifdef H5F_ACC_SWMR_WRITE
 	if(global->cxiSWMR){
 		if(global->cxiFlushPeriod && (stackSlice % global->cxiFlushPeriod) == 0){
@@ -1584,6 +1761,20 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 		pthread_mutex_unlock(&global->swmr_mutex);
 	}
 	#endif
+	pthread_mutex_unlock(&global->saveCXI_mutex);
+	
+	
+	/*
+	 *	Update text file log
+	 *  (If changing what's in the file, paste the new version into function saveCXI.cpp-->writeCXI() and saveFrame.cpp-->writeHDF5 to avoid incompatibilities)
+	 *  Beamtime hack at 2am - fix this with one function later.
+	 */
+	pthread_mutex_lock(&global->framefp_mutex);
+	fprintf(global->cleanedfp, "r%04u/%s/%s, %li, %i, %g, %g, %g, %g, %g\n",global->runNumber, eventData->eventSubdir, eventData->eventname, eventData->frameNumber, eventData->nPeaks, eventData->peakNpix, eventData->peakTotal, eventData->peakResolution, eventData->peakResolutionA, eventData->peakDensity);
+	pthread_mutex_unlock(&global->framefp_mutex);
+	
+
+
 }
 
 

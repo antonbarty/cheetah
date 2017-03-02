@@ -30,10 +30,11 @@ void saveTimeToolStacks(cGlobal *global) {
     if(global->useTimeTool) {
 		printf("Saving Time tool stacks\n");
 		for(long powderType=0; powderType < global->nPowderClasses; powderType++) {
+            pthread_mutex_lock(&global->TimeToolStack_mutex[powderType]);
 			saveTimeToolStack(global, powderType);
+            pthread_mutex_unlock(&global->TimeToolStack_mutex[powderType]);
 		}
 	}
-	
 }
 
 
@@ -64,10 +65,11 @@ void addTimeToolToStack(cEventData *eventData, cGlobal *global, int powderClass)
     long dataoffset = stackoffset*length;
 	
     // Copy data and increment counter
-    for(long i=0; i<length; i++) {
-        stack[dataoffset+i] = (float) timetrace[i];
-    }
-	
+	if (timetrace != NULL) {
+		for(long i=0; i<length; i++) {
+			stack[dataoffset+i] = (float) timetrace[i];
+		}
+	}
 	
 	// Write filename to log file in sync with stack positions (** Important for being able to index the patterns!)
 	fprintf(global->TimeToolLogfp[powderClass], "%li, %li, %li, %s/%s\n", stackCounter, eventData->frameNumber, eventData->stackSlice, eventData->eventSubdir, eventData->eventname);
@@ -108,13 +110,12 @@ void saveTimeToolStack(cGlobal *global, int powderClass) {
 	if(global->TimeToolStackCounter[powderClass]==0)
 		return;
 	
-    // Lock
-	pthread_mutex_lock(&mutex);
+    // Lock - moved, due to double lock when called from addTimeToolToStack() causing lockup
+	//pthread_mutex_lock(&mutex);
 	
 	
-	// We re-use stacks, what is this number?
+	// We re-use stacks - this number is so that we dont overwrite old stacks
 	long	stackNum = stackCounter / stackSize;
-// 	if(stackNum == 0) stackNum = 1;
 	
 	// If stack is not full, how many rows are full?
     long    nRows = stackSize;
@@ -130,7 +131,7 @@ void saveTimeToolStack(cGlobal *global, int powderClass) {
 	if(global->TimeToolLogfp[powderClass] != NULL)
 		fflush(global->TimeToolLogfp[powderClass]);
 	
-	pthread_mutex_unlock(&mutex);
+	//pthread_mutex_unlock(&mutex);
 	
 }
 
