@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 CFEL. All rights reserved.
 //
 
-#include <Python.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -22,8 +21,18 @@
 
 #include "cheetah.h"
 
+/* Python dependency removed by AB in February 2017 for simplification */
+/* Not really used, and creates and unnecessary python dependency */
+/* Which in turn pulled in an MPI dependency */
+/* Uncomment again only if REALLY needed */
+/* Also re-enable Python and MPI in src/libcheetah/CMakeLists.txt
+//#define ALLOW_PYTHON_CALLS
+
+#ifdef ALLOW_PYTHON_CALLS
+#include <Python.h>
 void spawnPython(char*);
 void* pythonWorker(void*);
+#endif
 
 
 /*
@@ -65,10 +74,12 @@ int cheetahInit(cGlobal *global) {
 	H5Eset_auto(H5E_DEFAULT, cheetahHDF5ErrorHandler, NULL);
 	//H5Eset_auto(cheetahHDF5ErrorHandler, NULL);
 
+    #ifdef ALLOW_PYTHON_CALLS
 	if (global->pythonFile[0]) {
 		printf("Initialising embedded Python visualisation now\n");
 		spawnPython(global->pythonFile);
 	}
+    #endif
 
 	// Initialise streak finder (will skip contents if streakfinder not in use)
 	initStreakFinder(global);
@@ -496,6 +507,13 @@ void cheetahError(const char *filename, int line, const char *format, ...){
 /* Very crude embedding of a Python interpreter for shared memory visualization */
 /* Note that this code implicitly assumes to be the only Python interpreter within the process */
 /* No synchronization at all, not even proper signal handling */
+
+/* Python dependency removed by AB in February 2017 for simplification */
+/* Not really used, and creates and unnecessary python dependency */
+/* Which in turn pulled in an MPI dependency */
+/* Uncomment again only if REALLY needed */
+
+#ifdef ALLOW_PYTHON_CALLS
 void* pythonWorker(void* threadarg)
 {
 	char* pythonFile = (char*) threadarg;
@@ -528,7 +546,6 @@ void spawnPython(char* pythonFile)
 		ERROR("Failed to create python thread!");
 	}
 }
-
-
+#endif
 
 
