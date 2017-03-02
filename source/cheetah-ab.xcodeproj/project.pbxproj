@@ -119,6 +119,7 @@
 		4D99B1971E547E8800090239 /* peakfinder8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peakfinder8.cpp; sourceTree = "<group>"; };
 		4D99B1991E54981B00090239 /* cheetah_psana */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_psana; sourceTree = "<group>"; };
 		4D99B19A1E5498F100090239 /* cheetah-sacla */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "cheetah-sacla"; sourceTree = "<group>"; };
+		4D99B19B1E68709F00090239 /* cheetah-cbf */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "cheetah-cbf"; sourceTree = "<group>"; };
 		4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcheetah.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DA51BE5189AC39500C97F32 /* cheetah-sacla */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "cheetah-sacla"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DB277B31C8A259B006B900B /* cheetah_extensions_yaroslav */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_extensions_yaroslav; sourceTree = "<group>"; };
@@ -151,6 +152,7 @@
 			children = (
 				4DA51BE5189AC39500C97F32 /* cheetah-sacla */,
 				4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */,
+				4D99B19B1E68709F00090239 /* cheetah-cbf */,
 				4D99B19A1E5498F100090239 /* cheetah-sacla */,
 				4D99B1991E54981B00090239 /* cheetah_psana */,
 				4D93D919174F9F80004A0BB4 /* libcheetah */,

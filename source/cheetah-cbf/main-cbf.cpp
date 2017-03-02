@@ -64,6 +64,8 @@ int main(int argc, const char * argv[])
     strcpy(cheetahGlobal.experimentID, "APS2016");
 	cheetahInit(&cheetahGlobal);
     cheetahGlobal.runNumber = runNumber;
+    strcpy(cheetahGlobal.facility,"APS")
+    
 
     // Open List file
     FILE *fh = fopen(argv[1], "r");
