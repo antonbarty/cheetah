@@ -993,76 +993,75 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 	}
 
     
-    node *instrument;
     if(!strcmp(global->facility, "APS") ) {
-        instrument = root->createGroup("APS");
-        instrument->createStack("exposureTime",H5T_NATIVE_DOUBLE);
-        instrument->createStack("exposurePeriod",H5T_NATIVE_DOUBLE);
-        instrument->createStack("tau",H5T_NATIVE_DOUBLE);
-        instrument->createStack("countCutoff",H5T_NATIVE_INT32);
-        instrument->createStack("nExcludedPixels",H5T_NATIVE_INT32);
-        instrument->createStack("detectorDistance",H5T_NATIVE_DOUBLE);
-        instrument->createStack("beamX",H5T_NATIVE_DOUBLE);
-        instrument->createStack("beamY",H5T_NATIVE_DOUBLE);
-        instrument->createStack("startAngle",H5T_NATIVE_DOUBLE);
-        instrument->createStack("detector2Theta",H5T_NATIVE_DOUBLE);
-        instrument->createStack("angleIncrement",H5T_NATIVE_DOUBLE);
-        instrument->createStack("shutterTime",H5T_NATIVE_DOUBLE);
-        instrument->createStack("timestamp",H5T_NATIVE_CHAR,26);
-        instrument->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
-        instrument->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
-        instrument->createStack("threshold",H5T_NATIVE_DOUBLE);
+        Node *aps = root->createGroup("APS");
+        aps->createStack("exposureTime",H5T_NATIVE_DOUBLE);
+        aps->createStack("exposurePeriod",H5T_NATIVE_DOUBLE);
+        aps->createStack("tau",H5T_NATIVE_DOUBLE);
+        aps->createStack("countCutoff",H5T_NATIVE_INT32);
+        aps->createStack("nExcludedPixels",H5T_NATIVE_INT32);
+        aps->createStack("detectorDistance",H5T_NATIVE_DOUBLE);
+        aps->createStack("beamX",H5T_NATIVE_DOUBLE);
+        aps->createStack("beamY",H5T_NATIVE_DOUBLE);
+        aps->createStack("startAngle",H5T_NATIVE_DOUBLE);
+        aps->createStack("detector2Theta",H5T_NATIVE_DOUBLE);
+        aps->createStack("angleIncrement",H5T_NATIVE_DOUBLE);
+        aps->createStack("shutterTime",H5T_NATIVE_DOUBLE);
+        aps->createStack("timestamp",H5T_NATIVE_CHAR,26);
+        aps->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+        aps->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+        aps->createStack("threshold",H5T_NATIVE_DOUBLE);
     }
     
     if(!strcmp(global->facility, "LCLS") ) {
-        instrument = root->createGroup("LCLS");
-        instrument->createStack("machineTime",H5T_NATIVE_INT32);
-        instrument->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
-        instrument->createStack("fiducial",H5T_NATIVE_INT32);
-        instrument->createStack("ebeamCharge",H5T_NATIVE_DOUBLE);
-        instrument->createStack("ebeamL3Energy",H5T_NATIVE_DOUBLE);
-        instrument->createStack("ebeamPkCurrBC2",H5T_NATIVE_DOUBLE);
-        instrument->createStack("ebeamLTUPosX",H5T_NATIVE_DOUBLE);
-        instrument->createStack("ebeamLTUPosY",H5T_NATIVE_DOUBLE);
-        instrument->createStack("ebeamLTUAngX",H5T_NATIVE_DOUBLE);
-        instrument->createStack("ebeamLTUAngY",H5T_NATIVE_DOUBLE);
-        instrument->createStack("phaseCavityTime1",H5T_NATIVE_DOUBLE);
-        instrument->createStack("phaseCavityTime2",H5T_NATIVE_DOUBLE);
-        instrument->createStack("phaseCavityCharge1",H5T_NATIVE_DOUBLE);
-        instrument->createStack("phaseCavityCharge2",H5T_NATIVE_DOUBLE);
-        instrument->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
-        instrument->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
-        instrument->createStack("f_11_ENRC",H5T_NATIVE_DOUBLE);
-        instrument->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
-        instrument->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
-        instrument->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
-        instrument->createStack("evr41",H5T_NATIVE_DOUBLE);
-        instrument->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
-        instrument->createLink("eventTime","eventTimeString");
+        Node *lcls = root->createGroup("LCLS");
+        lcls->createStack("machineTime",H5T_NATIVE_INT32);
+        lcls->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
+        lcls->createStack("fiducial",H5T_NATIVE_INT32);
+        lcls->createStack("ebeamCharge",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamL3Energy",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamPkCurrBC2",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUPosX",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUPosY",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUAngX",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUAngY",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityTime1",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityTime2",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityCharge1",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityCharge2",H5T_NATIVE_DOUBLE);
+        lcls->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+        lcls->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_11_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("evr41",H5T_NATIVE_DOUBLE);
+        lcls->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
+        lcls->createLink("eventTime","eventTimeString");
         instrument->createLink("experiment_identifier","/entry_1/experiment_identifier");
     
         // TimeTool
         if(global->useTimeTool) {
-            instrument->createStack("timeToolTrace", H5T_NATIVE_FLOAT, global->TimeToolStackWidth);
+            lcls->createStack("timeToolTrace", H5T_NATIVE_FLOAT, global->TimeToolStackWidth);
         }
         // FEE spectrum
         if(global->useFEEspectrum) {
-            instrument->createStack("FEEspectrum", H5T_NATIVE_FLOAT, global->FEEspectrumWidth);
+            lcls->createStack("FEEspectrum", H5T_NATIVE_FLOAT, global->FEEspectrumWidth);
         }
         // eSpectrum in CXI hutch
         if(global->espectrum) {
-            instrument->createStack("CXIespectrum", H5T_NATIVE_FLOAT, global->espectrumLength);
+            lcls->createStack("CXIespectrum", H5T_NATIVE_FLOAT, global->espectrumLength);
         }
         
         // EPICS
         for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
-            instrument->createStack(&global->epicsPvFloatAddresses[i][0], H5T_NATIVE_FLOAT);
+            lcls->createStack(&global->epicsPvFloatAddresses[i][0], H5T_NATIVE_FLOAT);
         }
         
 
         
         DETECTOR_LOOP{
-            Node* detector = instrument->createGroup("detector",detIndex+1);
+            Node* detector = lcls->createGroup("detector",detIndex+1);
             detector->createStack("position",H5T_NATIVE_DOUBLE);
             detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
             detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
