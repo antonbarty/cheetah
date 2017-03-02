@@ -22,15 +22,66 @@
 #include <math.h>
 #include <stdlib.h>
 
-#include "detectorObject.h"
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
-#include "median.h"
-#include "hitfinders.h"
+//#include "detectorObject.h"
+//#include "cheetahGlobal.h"
+//#include "cheetahEvent.h"
+//#include "median.h"
+//#include "hitfinders.h"
+//#include "peakfinder9.h"
+//#include "cheetahmodules.h"
 #include "peakfinders.h"
-#include "peakfinder9.h"
-#include "cheetahmodules.h"
 
+
+/*
+ *	Create arrays for remembering Bragg peak data
+ */
+void allocatePeakList(tPeakList *peak, long NpeaksMax)
+{
+    peak->nPeaks = 0;
+    peak->nPeaks_max = NpeaksMax;
+    peak->nHot = 0;
+    peak->peakResolution = 0;
+    peak->peakResolutionA = 0;
+    peak->peakDensity = 0;
+    peak->peakNpix = 0;
+    peak->peakTotal = 0;
+    
+    peak->peak_maxintensity = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_totalintensity = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_sigma = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_snr = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_npix = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_x = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_y = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_index = (long *) calloc(NpeaksMax, sizeof(long));
+    peak->peak_com_x_assembled = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_y_assembled = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_r_assembled = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_q = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->peak_com_res = (float *) calloc(NpeaksMax, sizeof(float));
+    peak->memoryAllocated = 1;
+}
+
+/*
+ *	Clean up Bragg peak arrays
+ */
+void freePeakList(tPeakList peak)
+{
+    free(peak.peak_maxintensity);
+    free(peak.peak_totalintensity);
+    free(peak.peak_sigma);
+    free(peak.peak_snr);
+    free(peak.peak_npix);
+    free(peak.peak_com_x);
+    free(peak.peak_com_y);
+    free(peak.peak_com_index);
+    free(peak.peak_com_x_assembled);
+    free(peak.peak_com_y_assembled);
+    free(peak.peak_com_r_assembled);
+    free(peak.peak_com_q);
+    free(peak.peak_com_res);
+    peak.memoryAllocated = 0;
+}
 
 
 /*
