@@ -6,7 +6,6 @@
 //  Copyright (c) 2012 CFEL. All rights reserved.
 //
 
-#include <Python.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
@@ -22,14 +21,40 @@
 
 #include "cheetah.h"
 
+/* Python dependency removed by AB in February 2017 for simplification */
+/* Not really used, and creates and unnecessary python dependency */
+/* Which in turn pulled in an MPI dependency */
+/* Uncomment again only if REALLY needed */
+/* Also re-enable Python and MPI in src/libcheetah/CMakeLists.txt
+//#define ALLOW_PYTHON_CALLS
+
+#ifdef ALLOW_PYTHON_CALLS
+#include <Python.h>
 void spawnPython(char*);
 void* pythonWorker(void*);
+#endif
 
 
 /*
  *  libCheetah initialisation function
  */
 int cheetahInit(cGlobal *global) {
+    
+	// Check if we're using psana of the same git commit
+	if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
+		fprintf(stderr,    "*******************************************************************************************\n");
+		fprintf(stderr,"*** WARNING %s:%d ***\n",__FILE__,__LINE__);
+		
+		if(getenv("PSANA_GIT_SHA")){
+			fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
+			fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
+		}
+		else{
+			fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
+		}
+		fprintf(stderr,    "*******************************************************************************************\n");
+		sleep(10);
+	}
 	setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 
 	global->self = global;
@@ -49,12 +74,15 @@ int cheetahInit(cGlobal *global) {
 	H5Eset_auto(H5E_DEFAULT, cheetahHDF5ErrorHandler, NULL);
 	//H5Eset_auto(cheetahHDF5ErrorHandler, NULL);
 
+    #ifdef ALLOW_PYTHON_CALLS
 	if (global->pythonFile[0]) {
 		printf("Initialising embedded Python visualisation now\n");
 		spawnPython(global->pythonFile);
 	}
+    #endif
 
-
+	// Initialise streak finder (will skip contents if streakfinder not in use)
+	initStreakFinder(global);
 
 	printf("Cheetah clean initialisation\n");
 	return 0;
@@ -256,7 +284,7 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
 	}
    
 	/* Further wavelength testing */
-	if ( ! isfinite(eventData->photonEnergyeV ) ) {
+	if ( ! std::isfinite(eventData->photonEnergyeV ) ) {
 		if ( global->defaultPhotonEnergyeV > 0 ) {
 			eventData->photonEnergyeV = global->defaultPhotonEnergyeV;
 			eventData->wavelengthA = 12398.42/eventData->photonEnergyeV;
@@ -404,6 +432,8 @@ void cheetahExit(cGlobal *global) {
 		saveTimeToolStacks(global);
 	if(global->saveRadialStacks)
 		saveRadialStacks(global);
+	if(global->espectrum)
+		saveEspectrumStacks(global);
 	
 	
     global->writeFinalLog();
@@ -423,7 +453,8 @@ void cheetahExit(cGlobal *global) {
 		printf("with Npeaks ranging from %i to %i\n",global->nPeaksMin[1],global->nPeaksMax[1]);
 		printf("Blanks: %li (%2.2f%%) ",global->nhitsandblanks-global->nhits, 100.*( (global->nhitsandblanks-global->nhits)/ (float) global->nhitsandblanks));
 		printf("with Npeaks ranging from %i to %i\n",global->nPeaksMin[0],global->nPeaksMax[0]);
-    } else {
+    }
+	else {
 		printf("%li hits (%2.2f%%)\n",global->nhits, 100.*( global->nhits / (float) global->nhitsandblanks));
     }
     printf("%li frames processed\n",global->nprocessedframes);
@@ -434,17 +465,25 @@ void cheetahExit(cGlobal *global) {
 
 	// Destroy memory and destroy mutexes
 	global->freeMemory();
+	destroyStreakFinder(global);
 
     global->writeStatus("Finished");    
     printf("Cheetah clean exit\n");
 }
 
-
+/*
+ *	Error handling
+ *	Output directed to stdout so that it appears in batch system log files for debugging
+ *	(stderr goes elsewhere)
+ */
 void cheetahDebug(const char *filename, int line, const char *format, ...){
 	va_list ap;
 	va_start(ap,format);
+	fprintf(stdout,"*********************************************\n");
+	fprintf(stdout,"cheetahDebug(...) in libCheetah.cpp triggered\n");
 	fprintf(stdout,"CHEETAH-DEBUG in %s:%d: ",filename,line);
 	vfprintf(stdout,format,ap);
+	fprintf(stdout,"*********************************************\n");
 	va_end(ap);
 	puts("");
 }
@@ -452,8 +491,11 @@ void cheetahDebug(const char *filename, int line, const char *format, ...){
 void cheetahError(const char *filename, int line, const char *format, ...){
 	va_list ap;
 	va_start(ap,format);
-	fprintf(stderr,"CHEETAH-ERROR in %s:%d: ",filename,line);
-	vfprintf(stderr,format,ap);
+	fprintf(stdout,"*********************************************\n");
+	fprintf(stdout,"cheetahError(...) in libCheetah.cpp triggered\n");
+	fprintf(stdout,"CHEETAH-ERROR in %s:%d: ",filename,line);
+	vfprintf(stdout,format,ap);
+	fprintf(stdout,"*********************************************\n");
 	va_end(ap);
 	puts("");
 	abort();
@@ -465,6 +507,13 @@ void cheetahError(const char *filename, int line, const char *format, ...){
 /* Very crude embedding of a Python interpreter for shared memory visualization */
 /* Note that this code implicitly assumes to be the only Python interpreter within the process */
 /* No synchronization at all, not even proper signal handling */
+
+/* Python dependency removed by AB in February 2017 for simplification */
+/* Not really used, and creates and unnecessary python dependency */
+/* Which in turn pulled in an MPI dependency */
+/* Uncomment again only if REALLY needed */
+
+#ifdef ALLOW_PYTHON_CALLS
 void* pythonWorker(void* threadarg)
 {
 	char* pythonFile = (char*) threadarg;
@@ -497,7 +546,6 @@ void spawnPython(char* pythonFile)
 		ERROR("Failed to create python thread!");
 	}
 }
-
-
+#endif
 
 

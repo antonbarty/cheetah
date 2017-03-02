@@ -1,0 +1,5 @@
+
+pyuic5 cxiview.ui > cxiview_ui.py
+pyuic5 cheetahgui.ui > cheetahgui_ui.py
+pyuic5 crawler.ui > crawler_ui.py
+

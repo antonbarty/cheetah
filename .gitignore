@@ -1,9 +1,42 @@
+.DS_Store
+python/.DS_Store
+python/*pycache*
+python/*/pycache
+python/upload
+python/testdata
+python/test.py
+python/*.swp
 geometry
 *.o
 *.pyc
 upload
 *.so.*
 .sconsign.dblite
-*.DS_Store
-*.xcodeproj
+source/*.xcodeproj
 build
+
+# OS X Finder
+.DS_Store
+
+# Xcode per-user config
+*.mode1
+*.mode1v3
+*.mode2v3
+*.perspective
+*.perspectivev3
+*.pbxuser
+*.xcworkspace
+xcuserdata
+
+# Build products
+build/
+*.o
+*.LinkFileList
+*.hmap
+
+# Automatic backup files
+*~.nib/
+*.swp
+*~
+*.dat
+*.dep

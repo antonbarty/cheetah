@@ -8,6 +8,7 @@
 #include <string.h>
 #include <typeinfo>
 #include <vector>
+#include <pthread.h>
 
 
 #include <detectorObject.h>
@@ -27,10 +28,10 @@ namespace CXI{
 	
 	const int version = 140;
 	const int thumbnailScale = 8;
-	// The preferred chunk size for 2D stacks is 16 MBytes
-	const int chunkSize2D = 16777216;
 	// The preferred chunk size for 1D stacks is 1 MByte
 	const int chunkSize1D = 1048576;
+	// The preferred chunk size for 2D stacks is 16 MBytes
+	const int chunkSize2D = 16777216;
 	// chunk sizes for peak list, assumes most images have less
 	// than 4096/sizeof(float) = 1024 peaks
 	const int peaksChunkSize[2] = {4194304, 4096};
@@ -127,6 +128,7 @@ namespace CXI{
 			Node & child(std::string prefix, int n);
 			void trimAll(int stackSize = -1);
 			uint getStackSlice();
+			uint stackCounter;
 
 			std::string name;
 			
@@ -147,8 +149,11 @@ namespace CXI{
 			
 			/*  This counter defines where in the file each image is stored.
 			 *  It is atomically incremented by each thread */
-			uint stackCounter;
+			//uint stackCounter;
 			int ignoreConversionExceptions;
+		
+			// Mutex
+		
 	};
 
 }

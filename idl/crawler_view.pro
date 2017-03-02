@@ -89,6 +89,8 @@ pro crawler_config, pState
 	(*pstate).geometry = '../calib/geometry/cspad-front-12feb2013.h5'
 	(*pstate).process = '../process/process'
 	(*pstate).cheetahIni = 'lys.ini'
+	(*pstate).cheetahTag = 'lys'
+	
 
 
 	;; Configuration file names
@@ -123,6 +125,16 @@ pro crawler_config, pState
 			(*pstate).process = (info[4])[1]
 			(*pstate).cheetahIni = (info[5])[1]
 		endif 
+		if n_elements(info) eq 7 then begin
+			info = strsplit(info, '=', /extract)
+			(*pstate).xtcdir = (info[0])[1]
+			(*pstate).h5dir = (info[1])[1]
+			(*pstate).h5filter = (info[2])[1]
+			(*pstate).geometry = (info[3])[1]
+			(*pstate).process = (info[4])[1]
+			(*pstate).cheetahIni = (info[5])[1]
+			(*pstate).cheetahTag = (info[6])[1]
+		endif 
 	endif  $
 	
 	;; Else throw an error
@@ -143,6 +155,7 @@ pro crawler_config, pState
 	print, 'Process script: ', (*pState).process
 	print, 'Geometry file: ', (*pState).geometry
 	print, 'Default cheetah.ini: ', (*pstate).cheetahIni
+	print, 'Default tag: ', (*pstate).cheetahTag
 
 end
 
@@ -179,6 +192,7 @@ pro crawler_configMenu, pState
 			printf, lun, 'geometry=',(*pstate).geometry
 			printf, lun, 'process=',(*pstate).process
 			printf, lun, 'cheetahini=',(*pstate).cheetahIni
+			printf, lun, 'cheetahtag=',(*pstate).cheetahTag
 			close, lun
 			free_lun, lun
 	endif
@@ -279,15 +293,27 @@ pro crawler_startCheetah, pState, run, menu=menu
 	endrun = run[nruns]
 	cheetah = sState.process
 	ini = sState.cheetahIni
+	tag = sState.cheetahTag
+	
 	
 	
 	;; Menu when performing this interactively
+	;;					'2, text, '+ini+', ', $
 	if keyword_set(menu) then begin
+		;;	Find .ini files
+		list_in = file_search('../process/*.ini')
+		list_in = file_basename(list_in)
+		list_str = 	strjoin(list_in,'|')
+		list_w = where(list_in eq ini)
+		list_w = list_w[0]
+		if list_w eq -1 then list_w = 0
+
 		desc = [ 	'1, base, , column', $
 					'0, label, Start run: '+startrun+', left', $
 					'0, label, End run: '+endrun+', left', $
 					'0, label, Command: '+cheetah+', left', $
-					'2, text, '+ini+', label_left=cheetah.ini file:, width=50, tag=ini', $
+					'0, text, '+tag+', label_left=Directory tag:, width=50, tag=ctag', $
+					'2, droplist, '+list_str+', label_left=cheetah.ini file:, set_value='+string(list_w)+', tag=wini', $
 					'1, base,, row', $
 					'0, button, OK, Quit, Tag=OK', $
 					'2, button, Cancel, Quit' $
@@ -298,19 +324,18 @@ pro crawler_startCheetah, pState, run, menu=menu
 			return
 
 		;; Only do this if OK is pressed (!!)
-		ini = a.ini
-		(*pstate).cheetahIni = a.ini
+		;;ini = a.cini
+		ini = list_in[a.wini]
+		tag = a.ctag
+		(*pstate).cheetahIni = ini
+		(*pstate).cheetahTag = tag
 	endif
+
+	print, 'Selected .ini file: ', ini
 		
 		
-	
-	
-	;; Base of the .ini filename is the run tag
-	wini = strpos(ini,'.ini')
-	if wini ne -1 then $
-		tag=strmid(ini,0,wini) $
-	else $
-		tag=ini
+	;; Strip whitespace from tag
+	tag = strcompress(tag, /remove_all)	
 	print, tag
 	
 	for i=0L, nruns do begin
@@ -328,7 +353,6 @@ pro crawler_startCheetah, pState, run, menu=menu
 		endif
 		crawler_updateDatasetLog, pstate
 	endfor
-	
 end
 
 ;;
@@ -468,9 +492,7 @@ pro crawler_labelDataset, pState, run
 	endrun = run[nruns]
 	
 	ini = sState.cheetahIni
-	wini = strpos(ini,'.ini')
-	if wini ne -1 then tag=strmid(ini,0,wini) $
-		else tag=ini
+	tag = sState.cheetahTag
 
 	desc = [ 	'1, base, , column', $
 				'0, label, Start run: '+startrun+', left', $
@@ -486,13 +508,30 @@ pro crawler_labelDataset, pState, run
 	if a.OK eq 1 then begin		
 		tag = a.tag
 
-		;; Swap labels to the new tag		
+		;; Swap labels to the new tag	 and rename directory
+		;; Warning:  renaming the directory may terminate jobs still in progress
 		for i=0L, nruns do begin
 			w = where(table_runs eq run[i])
 			if w[0] ne -1 then begin 
 				widget_control, sState.table, use_table_select = [sState.table_datasetcol, w[0], sState.table_datasetcol, w[0]], set_value = [tag]
+
+				dir_old = ''
+				widget_control, sState.table, use_table_select = [sState.table_dircol, w[0], sState.table_dircol, w[0]], get_value = dir_old		
+				dir_old = dir_old[0]
+							
+				if dir_old[0] ne '---'  then begin
+					dir_new = string(format='(%"r%04i-%s")', run[i], tag) 
+					if dir_old ne dir_new then begin
+						print, dir_old, ' --> ', dir_new
+						cmd = 'mv ../hdf5/'+dir_old+'  ../hdf5/'+dir_new
+						print, cmd
+						spawn, cmd
+						widget_control, sState.table, use_table_select = [sState.table_dircol, w[0], sState.table_dircol, w[0]], set_value = [dir_new]		
+					endif
+				endif
 			endif
 		endfor
+
 
 		;; Update the datasets file
 		crawler_updateDatasetLog, pstate
@@ -823,6 +862,11 @@ pro crawler_event, ev
 		end
 
 		;;
+		;;	Clear previous HDF5 errors
+		;;
+		;;h5_close
+
+		;;
 		;;	Action buttons
 		;;
 		;; Launch Cheetah
@@ -843,11 +887,41 @@ pro crawler_event, ev
 
 
 		;; View hits
-		sState.button_hits : begin
+		sState.mbview_idlviewer : begin
 			dir = crawler_whichRun(pstate, /path)
 			print, 'Launching cheetahview, dir=', dir, ', geometry= ', sState.geometry
 			cheetahview, dir=dir, geometry=sState.geometry
 		end
+		
+		sState.mbview_pyqtviewer : begin
+			dir = crawler_whichRun(pstate, /path)
+			print, 'Launching cxiview.py'			
+			file = file_search(dir,'*.cxi')
+			filepat = dir+'/*.cxi'
+			;filepat = "'" + filepat + "'"
+			;cmd = 'cxiview.py -g ' +sState.geometry+ ' -i '+file
+			;print, cmd
+			;spawn, cmd, unit=unit
+			;cmdarr = ['python3', '/reg/g/cfel/cheetah/cheetah-dev/python/cxiview.py', '-g', sState.geometry,'-i', file]
+			;cmdarr = ['python3', 'cxiview.py', '-g', sState.geometry,'-i', file]
+			cmdarr = ['cxiview.py', '-g', sState.geometry,'-i', filepat]
+			print, cmdarr
+			spawn, cmdarr, unit=unit, /noshell
+		end
+
+		sState.button_hits : begin
+			dir = crawler_whichRun(pstate, /path)
+			print, 'Launching cxiview.py'			
+			file = file_search(dir,'*.cxi')
+			filepat = dir+'/*.cxi'
+			;filepat = "'" + filepat + "'"
+			cmdarr = ['cxiview.py', '-g', sState.geometry,'-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			;spawn, cmdarr, unit=unit, /noshell
+			spawn, cmdarr, unit=unit, /noshell
+		end
+
+	
 
 		;; View hitrate graph
 		sState.button_hitrate : begin
@@ -867,12 +941,18 @@ pro crawler_event, ev
 		sState.button_powder : begin
 			dir = crawler_whichRun(pstate, /path)
 			f = file_search(dir,'*detector0-class1-sum.h5')
-			;crawler_displayfile, f[0]
-			crawler_displayfile, f[0], field='data/correcteddata', geometry=sState.geometry, /hist
+			;crawler_displayfile, f[0], field='data/correcteddata', geometry=sState.geometry, /hist
+			filepat = dir+'/*detector*-class*-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/non_assembled_detector_corrected' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
 		end
 
 		sState.mbfile_unlock : begin
 			widget_control, sState.mbfile_configure, sensitive=1
+			widget_control, sState.mbfile_pycrawl, sensitive=1
 			widget_control, sState.mbfile_crawl, sensitive=1
 			widget_control, sState.mbcheetah_run, sensitive=1
 			widget_control, sState.mbcheetah_label, sensitive=1
@@ -897,6 +977,16 @@ pro crawler_event, ev
 					widget_control, sState.button_refresh,  timer=sState.table_autorefresh
 			endif
 		end
+		sState.mbfile_pycrawl : begin
+			cmdarr = ['cheetah-crawler.py', '-l', 'LCLS', '-d',  (*pState).xtcdir, '-c', (*pState).h5dir]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
+			if sState.table_autorefresh ne 0 then begin
+					widget_control, sState.button_refresh,  timer=sState.table_autorefresh
+			endif
+		end
+		
+		
 		sState.mbcheetah_run : begin
 			run = crawler_whichRun(pstate, /run, /multiple)
 			crawler_startCheetah, pState, run, /menu
@@ -922,24 +1012,63 @@ pro crawler_event, ev
 
 		sState.mbview_cxipowder_class1_detcorr : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class1-sum.h5')
-			crawler_displayfile, f[0], field='data/non_assembled_detector_corrected', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class1-sum.h5')
+			;crawler_displayfile, f[0], field='data/non_assembled_detector_corrected', geometry=sState.geometry, /hist, gamma=1
+			filepat = dir+'/*detector0-class1-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/non_assembled_detector_corrected' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
 		end
 		sState.mbview_cxipowder_class1_detphotcorr : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class1-sum.h5')
-			crawler_displayfile, f[0], field='data/non_assembled_detector_and_photon_corrected', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class1-sum.h5')
+			;crawler_displayfile, f[0], field='data/non_assembled_detector_and_photon_corrected', geometry=sState.geometry, /hist, gamma=1
+			filepat = dir+'/*detector0-class1-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/non_assembled_detector_and_photon_corrected' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
 		end
 		sState.mbview_cxipowder_class0_detcorr : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class0-sum.h5')
-			crawler_displayfile, f[0], field='data/non_assembled_detector_corrected', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class0-sum.h5')
+			;crawler_displayfile, f[0], field='data/non_assembled_detector_corrected', geometry=sState.geometry, /hist, gamma=1
+			filepat = dir+'/*detector0-class0-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/non_assembled_detector_corrected' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
 		end
 		sState.mbview_cxipowder_class0_detphotcorr : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class0-sum.h5')
-			crawler_displayfile, f[0], field='data/non_assembled_detector_and_photon_corrected', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class0-sum.h5')
+			;crawler_displayfile, f[0], field='data/non_assembled_detector_and_photon_corrected', geometry=sState.geometry, /hist, gamma=1
+			filepat = dir+'/*detector0-class0-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/non_assembled_detector_and_photon_corrected' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
 		end
+
+		sState.mbview_cxipowder_diff : begin
+			dir = crawler_whichRun(pstate, /path)
+			f0 = file_search(dir,'*detector0-class0-sum.h5')
+			f1 = file_search(dir,'*detector0-class1-sum.h5')
+			d0 = read_h5(f0[0], field='data/non_assembled_detector_corrected')
+			d1 = read_h5(f1[0], field='data/non_assembled_detector_corrected')
+			diff = d1 - (total(d1)/total(d0))*d0
+			fout = strmid(f1[0], 0, strlen(f1[0])-6) + 'class0-diff.h5'
+			write_h5,fout, diff
+			crawler_displayfile, fout, field='data/data', geometry=sState.geometry, /hist, gamma=1
+		end
+		
+		
+		
 		sState.mbview_powder : begin
 			dir = crawler_whichRun(pstate, /path)
 			f = file_search(dir,'*detector0-class1-sum.h5')
@@ -947,18 +1076,32 @@ pro crawler_event, ev
 		end
 		sState.mbview_powderdark : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class0-sum.h5')
-			crawler_displayfile, f[0], field='data/correcteddata', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class0-sum.h5')
+			;crawler_displayfile, f[0], field='data/correcteddata', geometry=sState.geometry, /hist, gamma=1
+
 		end
 		sState.mbview_peakpowder : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class1-sum.h5')
-			crawler_displayfile, f[0], field='data/peakpowder', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class1-sum.h5')
+			;crawler_displayfile, f[0], field='data/peakpowder', geometry=sState.geometry, /hist, gamma=1
+			filepat = dir+'/*detector0-class1-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/peakpowder' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
+
 		end
 		sState.mbview_peakpowderdark : begin
 			dir = crawler_whichRun(pstate, /path)
-			f = file_search(dir,'*detector0-class0-sum.h5')
-			crawler_displayfile, f[0], field='data/peakpowder', geometry=sState.geometry, /hist, gamma=1
+			;f = file_search(dir,'*detector0-class0-sum.h5')
+			;crawler_displayfile, f[0], field='data/peakpowder', geometry=sState.geometry, /hist, gamma=1
+			filepat = dir+'/*detector0-class0-sum.h5'
+			;filepat = "'" + filepat + "'"
+			field ='data/peakpowder' 
+			cmdarr = ['cxiview.py', '-g',  sState.geometry, '-e', field, '-i', filepat]
+			print, strjoin(cmdarr, ' ')
+			spawn, cmdarr, unit=unit, /noshell
 		end
 		sState.mbview_bsub : begin
 			dir = crawler_whichRun(pstate, /path)
@@ -1007,6 +1150,17 @@ pro crawler_event, ev
 			saturation_check, file
 		end
 		
+		sState.mbview_peakogram : begin
+			dir = crawler_whichRun(pstate, /path)
+			file = file_search(dir,'peaks.txt')
+			cmd = 'peakogram -i '+file
+			print, cmd
+			spawn, cmd, unit=unit
+			;wait, 10
+			;free_lun, unit
+		end
+		
+		
 		sState.mbview_gainmap : begin
 			cd, current=dir
 			dir = file_dirname(dir)+'/calib'
@@ -1044,6 +1198,7 @@ pro crawler_event, ev
 				desc = [ 	'1, base, , column', $
 							'0, label, Automatically start Cheetah when new runs appear using last used .ini file., left', $
 							'0, label, (current .ini file would be '+sState.cheetahIni+'), left', $
+							'0, label, (current sample tag would be '+sState.cheetahTag+'), left', $
 							'2, label, Uncheck menu item to stop, left', $
 							'1, base,, row', $
 							'0, button, OK, Quit, Tag=OK', $
@@ -1118,23 +1273,25 @@ pro crawler_view
 	mbfile = widget_button(bar, value='File')
 	mbfile_configure = widget_button(mbfile, value='Configure', sensitive=0)
 	mbfile_unlock = widget_button(mbfile, value='Unlock command operations')
-	mbfile_crawl = widget_button(mbfile, value='Start crawler', sensitive=0)
+	mbfile_pycrawl = widget_button(mbfile, value='Start  crawler (python)', sensitive=0)
+	mbfile_crawl = widget_button(mbfile, value='Start old crawler (IDL)', sensitive=0)
 	mbfile_refresh = widget_button(mbfile, value='Refresh table')
 	mbfile_autorefresh = widget_button(mbfile, value='Auto refresh table')
 	mbfile_quit = widget_button(mbfile, value='Quit')
 
 	mbfile = widget_button(bar, value='Cheetah')
 	mbcheetah_run = widget_button(mbfile, value='Process selected runs', sensitive=0)
-	mbcheetah_label = widget_button(mbfile, value='Label dataset', sensitive=0)
+	mbcheetah_label = widget_button(mbfile, value='Label or relabel dataset', sensitive=0)
 	mbcheetah_autorun = widget_button(mbfile, value='Autorun when new data is ready', sensitive=0, /checked)
 	
 
 	mbtool = widget_button(bar, value='Tools')
 	mbview_badpix = widget_button(mbtool, value='Make bad pixel mask from darkcal')
-	mbview_badpix2 = widget_button(mbtool, value='Make bad pixel mask from powder')
+	mbview_badpix2 = widget_button(mbtool, value='Make bad pixel mask from brightfield')
 	mbview_combinemasks = widget_button(mbtool, value='Combine masks')
 	mbview_satplot1 = widget_button(mbtool, value='Plot peak maximum vs radius')
 	mbview_satcheck = widget_button(mbtool, value='Saturation check')
+	mbview_peakogram = widget_button(mbtool, value='Peakogram')
 	mbview_gainmap = widget_button(mbtool, value='Create CSPAD gain map')
 	mbview_translategainmap = widget_button(mbtool, value='Translate CSPAD gain map')
 
@@ -1148,10 +1305,13 @@ pro crawler_view
 	mbview_images = widget_button(mbfile, value='HDF5 files')
 	mbview_hitrate = widget_button(mbfile, value='Hit rate plot')
 	mbview_resolution = widget_button(mbfile, value='Resolution plot')
+	mbview_idlviewer = widget_button(mbfile, value='View hits (IDL viewer)')
+	mbview_pyqtviewer = widget_button(mbfile, value='View hits (pyQtGraph viewer)')
 	mbview_cxipowder_class1_detphotcorr = widget_button(mbfile, value='Virtual powder hits (class 1, background subtracted)')
 	mbview_cxipowder_class1_detcorr = widget_button(mbfile, value='Virtual powder hits (class 1, detector corrected only)')
 	mbview_cxipowder_class0_detphotcorr = widget_button(mbfile, value='Virtual powder blanks (class 0, background subtracted)')
 	mbview_cxipowder_class0_detcorr = widget_button(mbfile, value='Virtual powder blanks (class 0, detector corrected only)')
+	mbview_cxipowder_diff = widget_button(mbfile, value='Virtual powder difference (class1-class0, detector corrected)')
 	mbview_peakpowder = widget_button(mbfile, value='Peakfinder virtual powder hits (class 1)')
 	mbview_peakpowderdark = widget_button(mbfile, value='Peakfinder virtual powder blanks (class 0)')
 	mbview_powder = widget_button(mbfile, value='Virtual powder hits (data/correcteddata)')
@@ -1226,6 +1386,8 @@ pro crawler_view
 			
 			mbfile_configure : mbfile_configure, $
 			mbfile_crawl : mbfile_crawl, $
+			mbfile_pycrawl : mbfile_pycrawl , $
+
 			mbfile_refresh : mbfile_refresh, $
 			mbfile_unlock : mbfile_unlock , $ 
 			mbfile_autorefresh : mbfile_autorefresh, $ 
@@ -1235,6 +1397,7 @@ pro crawler_view
 			mbcheetah_autorun : mbcheetah_autorun, $
 			
 			mbview_satcheck : mbview_satcheck, $
+			mbview_peakogram : mbview_peakogram, $
 			mbview_gainmap : mbview_gainmap, $
 			mbview_translategainmap : mbview_translategainmap, $
 
@@ -1245,10 +1408,13 @@ pro crawler_view
 			mbview_powderdark : mbview_powderdark, $
 			mbview_peakpowder : mbview_peakpowder, $
 			mbview_peakpowderdark : mbview_peakpowderdark, $
+			mbview_idlviewer : mbview_idlviewer, $
+			mbview_pyqtviewer : mbview_pyqtviewer, $
 			mbview_cxipowder_class1_detcorr : mbview_cxipowder_class1_detcorr, $
 			mbview_cxipowder_class1_detphotcorr : mbview_cxipowder_class1_detphotcorr, $
 			mbview_cxipowder_class0_detcorr : mbview_cxipowder_class0_detcorr, $
 			mbview_cxipowder_class0_detphotcorr : mbview_cxipowder_class0_detphotcorr, $
+			mbview_cxipowder_diff : mbview_cxipowder_diff, $
 			
 			mbview_badpix : mbview_badpix, $
 			mbview_badpix2 : mbview_badpix2, $
@@ -1278,6 +1444,7 @@ pro crawler_view
 			process : 'Not set', $
 			geometry : 'Not set', $
 			cheetahIni : 'Not set', $
+			cheetahTag : 'Not set', $
 			crystfelIni : '../process/lys.crystfel', $
 			postprocess_command : '../process/postprocess.sh' $
 	}

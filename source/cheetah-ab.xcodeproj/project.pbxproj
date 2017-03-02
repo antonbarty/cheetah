@@ -25,9 +25,7 @@
 		4D0A406A1A3B51F600FAC112 /* peakDetect.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40651A3B51F600FAC112 /* peakDetect.h */; };
 		4D0A406B1A3B51F600FAC112 /* processRateMonitor.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40661A3B51F600FAC112 /* processRateMonitor.h */; };
 		4D0A406C1A3B51F600FAC112 /* tofDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40671A3B51F600FAC112 /* tofDetector.h */; };
-		4D0A406E1A3B60D400FAC112 /* event_copy.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D0A406D1A3B60D400FAC112 /* event_copy.cpp */; };
-		4D5697FD18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D5697FB18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp */; };
-		4DA51BE7189AC55000C97F32 /* main-sacla-hdf5.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DA51BE6189AC55000C97F32 /* main-sacla-hdf5.cpp */; };
+		4D99B1981E547E8800090239 /* peakfinder8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D99B1971E547E8800090239 /* peakfinder8.cpp */; };
 		4DA51BE8189ACCA600C97F32 /* libcheetah.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */; };
 		4DA51BEB189ACD4100C97F32 /* assemble2DImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D929174F9F80004A0BB4 /* assemble2DImage.cpp */; };
 		4DA51BEC189ACD4400C97F32 /* backgroundCorrection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D92A174F9F80004A0BB4 /* backgroundCorrection.cpp */; };
@@ -45,6 +43,7 @@
 		4DA51BF8189ACD6A00C97F32 /* saveFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D936174F9F80004A0BB4 /* saveFrame.cpp */; };
 		4DA51BFA189ACD7000C97F32 /* spectrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D938174F9F80004A0BB4 /* spectrum.cpp */; };
 		4DA51BFB189ACD7400C97F32 /* worker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D939174F9F80004A0BB4 /* worker.cpp */; };
+		4DB277B61C8A74BD006B900B /* streakFinderWrapperWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */; };
 		4DF8E8631ACF8991003F9F0B /* timetool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8E8621ACF8991003F9F0B /* timetool.cpp */; };
 /* End PBXBuildFile section */
 
@@ -89,9 +88,6 @@
 		4D0A40651A3B51F600FAC112 /* peakDetect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = peakDetect.h; sourceTree = "<group>"; };
 		4D0A40661A3B51F600FAC112 /* processRateMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = processRateMonitor.h; sourceTree = "<group>"; };
 		4D0A40671A3B51F600FAC112 /* tofDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tofDetector.h; sourceTree = "<group>"; };
-		4D0A406D1A3B60D400FAC112 /* event_copy.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = event_copy.cpp; sourceTree = "<group>"; };
-		4D5697FB18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "sacla-hdf5-reader.cpp"; sourceTree = "<group>"; };
-		4D5697FC18A4E63C0008E0C2 /* sacla-hdf5-reader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "sacla-hdf5-reader.h"; sourceTree = "<group>"; };
 		4D93D91A174F9F80004A0BB4 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		4D93D91C174F9F80004A0BB4 /* cheetah.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cheetah.ini; sourceTree = "<group>"; };
 		4D93D91E174F9F80004A0BB4 /* cheetah.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cheetah.h; sourceTree = "<group>"; };
@@ -120,18 +116,14 @@
 		4D93D936174F9F80004A0BB4 /* saveFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = saveFrame.cpp; sourceTree = "<group>"; };
 		4D93D938174F9F80004A0BB4 /* spectrum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spectrum.cpp; sourceTree = "<group>"; };
 		4D93D939174F9F80004A0BB4 /* worker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = worker.cpp; sourceTree = "<group>"; };
-		4D93D94C174F9F98004A0BB4 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
-		4D93D94E174F9F98004A0BB4 /* ChangeLog */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = ChangeLog; sourceTree = "<group>"; };
-		4D93D94F174F9F98004A0BB4 /* myPsana */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.csh; path = myPsana; sourceTree = "<group>"; };
-		4D93D950174F9F98004A0BB4 /* README */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = README; sourceTree = "<group>"; };
-		4D93D952174F9F98004A0BB4 /* psana.1.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = psana.1.cfg; sourceTree = "<group>"; };
-		4D93D953174F9F98004A0BB4 /* psana.cfg */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = psana.cfg; sourceTree = "<group>"; };
-		4D93D954174F9F98004A0BB4 /* run-cheetah-psana */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.script.sh; path = "run-cheetah-psana"; sourceTree = "<group>"; };
-		4D93D956174F9F98004A0BB4 /* cheetah_ana_mod.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cheetah_ana_mod.h; sourceTree = "<group>"; };
-		4D93D958174F9F98004A0BB4 /* cheetah_ana_mod.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = cheetah_ana_mod.cpp; sourceTree = "<group>"; };
+		4D99B1971E547E8800090239 /* peakfinder8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peakfinder8.cpp; sourceTree = "<group>"; };
+		4D99B1991E54981B00090239 /* cheetah_psana */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_psana; sourceTree = "<group>"; };
+		4D99B19A1E5498F100090239 /* cheetah-sacla */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "cheetah-sacla"; sourceTree = "<group>"; };
 		4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libcheetah.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		4DA51BE5189AC39500C97F32 /* cheetah-sacla */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "cheetah-sacla"; sourceTree = BUILT_PRODUCTS_DIR; };
-		4DA51BE6189AC55000C97F32 /* main-sacla-hdf5.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "main-sacla-hdf5.cpp"; sourceTree = "<group>"; };
+		4DB277B31C8A259B006B900B /* cheetah_extensions_yaroslav */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_extensions_yaroslav; sourceTree = "<group>"; };
+		4DB277B41C8A25AE006B900B /* cheetah_extensions_yaroslav */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_extensions_yaroslav; sourceTree = "<group>"; };
+		4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streakFinderWrapperWrapper.cpp; sourceTree = "<group>"; };
 		4DF8E8621ACF8991003F9F0B /* timetool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timetool.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -159,8 +151,8 @@
 			children = (
 				4DA51BE5189AC39500C97F32 /* cheetah-sacla */,
 				4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */,
-				4D93D94B174F9F98004A0BB4 /* cheetah_ana_pkg */,
-				4DA51BD1189ABA3D00C97F32 /* cheetah-sacla */,
+				4D99B19A1E5498F100090239 /* cheetah-sacla */,
+				4D99B1991E54981B00090239 /* cheetah_psana */,
 				4D93D919174F9F80004A0BB4 /* libcheetah */,
 				4D93D91D174F9F80004A0BB4 /* include */,
 			);
@@ -202,6 +194,7 @@
 				4D0A40661A3B51F600FAC112 /* processRateMonitor.h */,
 				4D93D927174F9F80004A0BB4 /* saveCXI.h */,
 				4D0A40671A3B51F600FAC112 /* tofDetector.h */,
+				4DB277B41C8A25AE006B900B /* cheetah_extensions_yaroslav */,
 			);
 			name = include;
 			path = libcheetah/include;
@@ -230,77 +223,21 @@
 				4D0A40521A3B51DC00FAC112 /* modularDetector.cpp */,
 				4D0A40531A3B51DC00FAC112 /* peakDetect.cpp */,
 				4D93D932174F9F80004A0BB4 /* peakfinders.cpp */,
+				4D99B1971E547E8800090239 /* peakfinder8.cpp */,
 				4D0A40541A3B51DC00FAC112 /* pixelmask.cpp */,
 				4D93D933174F9F80004A0BB4 /* powder.cpp */,
 				4D0A40551A3B51DC00FAC112 /* processRateMonitor.cpp */,
 				4D93D934174F9F80004A0BB4 /* radialAverage.cpp */,
 				4D93D935174F9F80004A0BB4 /* saveCXI.cpp */,
 				4D93D936174F9F80004A0BB4 /* saveFrame.cpp */,
+				4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */,
 				4D93D938174F9F80004A0BB4 /* spectrum.cpp */,
 				4DF8E8621ACF8991003F9F0B /* timetool.cpp */,
 				4D0A40561A3B51DC00FAC112 /* tofDetector.cpp */,
 				4D93D939174F9F80004A0BB4 /* worker.cpp */,
+				4DB277B31C8A259B006B900B /* cheetah_extensions_yaroslav */,
 			);
 			path = src;
-			sourceTree = "<group>";
-		};
-		4D93D94B174F9F98004A0BB4 /* cheetah_ana_pkg */ = {
-			isa = PBXGroup;
-			children = (
-				4D93D94C174F9F98004A0BB4 /* CMakeLists.txt */,
-				4D93D94D174F9F98004A0BB4 /* doc */,
-				4D93D951174F9F98004A0BB4 /* examples */,
-				4D93D955174F9F98004A0BB4 /* include */,
-				4D93D957174F9F98004A0BB4 /* src */,
-			);
-			path = cheetah_ana_pkg;
-			sourceTree = "<group>";
-		};
-		4D93D94D174F9F98004A0BB4 /* doc */ = {
-			isa = PBXGroup;
-			children = (
-				4D93D94E174F9F98004A0BB4 /* ChangeLog */,
-				4D93D94F174F9F98004A0BB4 /* myPsana */,
-				4D93D950174F9F98004A0BB4 /* README */,
-			);
-			path = doc;
-			sourceTree = "<group>";
-		};
-		4D93D951174F9F98004A0BB4 /* examples */ = {
-			isa = PBXGroup;
-			children = (
-				4D93D952174F9F98004A0BB4 /* psana.1.cfg */,
-				4D93D953174F9F98004A0BB4 /* psana.cfg */,
-				4D93D954174F9F98004A0BB4 /* run-cheetah-psana */,
-			);
-			path = examples;
-			sourceTree = "<group>";
-		};
-		4D93D955174F9F98004A0BB4 /* include */ = {
-			isa = PBXGroup;
-			children = (
-				4D93D956174F9F98004A0BB4 /* cheetah_ana_mod.h */,
-			);
-			path = include;
-			sourceTree = "<group>";
-		};
-		4D93D957174F9F98004A0BB4 /* src */ = {
-			isa = PBXGroup;
-			children = (
-				4D93D958174F9F98004A0BB4 /* cheetah_ana_mod.cpp */,
-				4D0A406D1A3B60D400FAC112 /* event_copy.cpp */,
-			);
-			path = src;
-			sourceTree = "<group>";
-		};
-		4DA51BD1189ABA3D00C97F32 /* cheetah-sacla */ = {
-			isa = PBXGroup;
-			children = (
-				4DA51BE6189AC55000C97F32 /* main-sacla-hdf5.cpp */,
-				4D5697FC18A4E63C0008E0C2 /* sacla-hdf5-reader.h */,
-				4D5697FB18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp */,
-			);
-			path = "cheetah-sacla";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -362,7 +299,7 @@
 		4D93D905174F9F52004A0BB4 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0460;
+				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Anton Barty";
 			};
 			buildConfigurationList = 4D93D908174F9F52004A0BB4 /* Build configuration list for PBXProject "cheetah-ab" */;
@@ -388,8 +325,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D5697FD18A4E63C0008E0C2 /* sacla-hdf5-reader.cpp in Sources */,
-				4DA51BE7189AC55000C97F32 /* main-sacla-hdf5.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -407,15 +342,16 @@
 				4D0A40581A3B51DC00FAC112 /* event.cpp in Sources */,
 				4DA51BF0189ACD4F00C97F32 /* histogram.cpp in Sources */,
 				4DA51BEB189ACD4100C97F32 /* assemble2DImage.cpp in Sources */,
-				4D0A406E1A3B60D400FAC112 /* event_copy.cpp in Sources */,
 				4D0A405D1A3B51DC00FAC112 /* log.cpp in Sources */,
 				4D0A405A1A3B51DC00FAC112 /* global.cpp in Sources */,
 				4DA51BEC189ACD4400C97F32 /* backgroundCorrection.cpp in Sources */,
 				4DA51BF1189ACD5200C97F32 /* hitfinders.cpp in Sources */,
+				4D99B1981E547E8800090239 /* peakfinder8.cpp in Sources */,
 				4DA51BEF189ACD4C00C97F32 /* detectorObject.cpp in Sources */,
 				4DA51BF2189ACD5600C97F32 /* libcheetah.cpp in Sources */,
 				4DA51BED189ACD4600C97F32 /* data2d.cpp in Sources */,
 				4D0A405C1A3B51DC00FAC112 /* integratePattern.cpp in Sources */,
+				4DB277B61C8A74BD006B900B /* streakFinderWrapperWrapper.cpp in Sources */,
 				4DA51BF5189ACD5F00C97F32 /* powder.cpp in Sources */,
 				4DA51BF7189ACD6500C97F32 /* saveCXI.cpp in Sources */,
 				4DA51BF6189ACD6200C97F32 /* radialAverage.cpp in Sources */,
@@ -446,7 +382,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -456,6 +391,7 @@
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
@@ -490,7 +426,6 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
 				CLANG_CXX_LIBRARY = "libc++";
 				CLANG_ENABLE_OBJC_ARC = YES;
@@ -503,6 +438,7 @@
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 3;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNINITIALIZED_AUTOS = YES;
@@ -588,6 +524,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				COMBINE_HIDPI_IMAGES = YES;
 				EXECUTABLE_PREFIX = "";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
 				GCC_OPTIMIZATION_LEVEL = 3;
@@ -616,6 +553,7 @@
 				CLANG_WARN_BOOL_CONVERSION = YES;
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				COMBINE_HIDPI_IMAGES = YES;
 				ENABLE_NS_ASSERTIONS = NO;
 				EXECUTABLE_PREFIX = "";
 				GCC_C_LANGUAGE_STANDARD = "compiler-default";
