@@ -524,14 +524,18 @@ namespace CXI{
 		#ifdef __GNUC__
 		return __sync_fetch_and_add(&stackCounter,1);
 		#else
-		
 		pthread_mutex_lock(&global->saveCXI_mutex);
 		uint ret = stackCounter;
 		cxi->stackCounter++;
 		pthread_mutex_unlock(&global->saveCXI_mutex);
 		return ret;
 		#endif
-}
+    }
+
+    // Manually set stack slice (used for synchronising stack position across multiple files)
+    void Node::setStackSlice(uint slice){
+        stackCounter = slice;
+    }
 
 }
 
@@ -1182,25 +1186,285 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 }
 
 
+/*
+ *	Create the initial skeleton for the Results file.
+ */
+static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
+    int debugLevel = global->debugLevel;
+    
+    using CXI::Node;
+    //pthread_mutex_lock(&global->saveCXI_mutex);
+    
+    DEBUGL2_ONLY{ DEBUG("Create Skeleton."); }
+    
+    CXI::h5compress = global->h5compress;
+    
+    
+    int ignoreConversionFlags = 0;
+    if(global->ignoreConversionOverflow){
+        ignoreConversionFlags |= CXI::IgnoreOverflow;
+    }
+    if(global->ignoreConversionTruncate){
+        ignoreConversionFlags |= CXI::IgnoreTruncate;
+    }
+    if(global->ignoreConversionPrecision){
+        ignoreConversionFlags |= CXI::IgnorePrecision;
+    }
+    if(global->ignoreConversionNAN){
+        ignoreConversionFlags |= CXI::IgnoreNAN;
+    }
+    CXI::Node *root = new Node(filename,global->cxiSWMR,ignoreConversionFlags);
+    
+    // Check what data type format we want to save things in. Defaults to float
+    hid_t h5type = H5T_NATIVE_FLOAT;
+    if(!strcasecmp(global->dataSaveFormat,"INT16")){
+        h5type = H5T_STD_I16LE;
+    }
+    else if(!strcasecmp(global->dataSaveFormat,"INT32")){
+        h5type = H5T_STD_I32LE;
+    }
+    else if(!strcasecmp(global->dataSaveFormat,"float")){
+        h5type = H5T_NATIVE_FLOAT;
+    }
+    
+    
+    root->createDataset("cxi_version",H5T_NATIVE_INT,1)->write(&CXI::version);
+    root->createDataset("cheetah_version_commit",H5T_NATIVE_CHAR,strlen(GIT_SHA1))->write(GIT_SHA1);
+    char *psana_git_sha = getenv("PSANA_GIT_SHA");
+    if (psana_git_sha)
+        root->createDataset("psana_version_commit",H5T_NATIVE_CHAR,strlen(psana_git_sha))->write(psana_git_sha);
+    
+    Node *entry = root->addClass("entry");
+    entry->createStack("experiment_identifier",H5T_NATIVE_CHAR,CXI::stringSize);
+    
+    Node *instrument = entry->addClass("instrument");
+    Node *source = instrument->addClass("source");
+    char sBuffer[1024];
+    
+    source->createStack("energy",H5T_NATIVE_DOUBLE);
+    source->createLink("experiment_identifier", "/entry_1/experiment_identifier");
+    
+    // If we have sample translation or electrojet voltage configured, write it out to file
+    if(global->samplePosXPV[0] || global->samplePosYPV[0] || global->samplePosZPV[0] || global->sampleVoltage[0]){
+        Node * sample = entry->addClass("sample");
+        sample->addClass("geometry")->createDataset("translation",H5T_NATIVE_FLOAT,3,0,H5S_UNLIMITED);
+        sample->addClass("injection")->createStack("voltage",H5T_NATIVE_FLOAT);
+    }
+    
+    
+    if(!strcmp(global->facility, "APS") ) {
+        Node *aps = root->createGroup("APS");
+        aps->createStack("exposureTime",H5T_NATIVE_DOUBLE);
+        aps->createStack("exposurePeriod",H5T_NATIVE_DOUBLE);
+        aps->createStack("tau",H5T_NATIVE_DOUBLE);
+        aps->createStack("countCutoff",H5T_NATIVE_INT32);
+        aps->createStack("nExcludedPixels",H5T_NATIVE_INT32);
+        aps->createStack("detectorDistance",H5T_NATIVE_DOUBLE);
+        aps->createStack("beamX",H5T_NATIVE_DOUBLE);
+        aps->createStack("beamY",H5T_NATIVE_DOUBLE);
+        aps->createStack("startAngle",H5T_NATIVE_DOUBLE);
+        aps->createStack("detector2Theta",H5T_NATIVE_DOUBLE);
+        aps->createStack("angleIncrement",H5T_NATIVE_DOUBLE);
+        aps->createStack("shutterTime",H5T_NATIVE_DOUBLE);
+        aps->createStack("timestamp",H5T_NATIVE_CHAR,26);
+        aps->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+        aps->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+        aps->createStack("threshold",H5T_NATIVE_DOUBLE);
+    }
+    
+    if(!strcmp(global->facility, "LCLS") ) {
+        Node *lcls = root->createGroup("LCLS");
+        lcls->createStack("machineTime",H5T_NATIVE_INT32);
+        lcls->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
+        lcls->createStack("fiducial",H5T_NATIVE_INT32);
+        lcls->createStack("ebeamCharge",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamL3Energy",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamPkCurrBC2",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUPosX",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUPosY",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUAngX",H5T_NATIVE_DOUBLE);
+        lcls->createStack("ebeamLTUAngY",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityTime1",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityTime2",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityCharge1",H5T_NATIVE_DOUBLE);
+        lcls->createStack("phaseCavityCharge2",H5T_NATIVE_DOUBLE);
+        lcls->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+        lcls->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_11_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
+        lcls->createStack("evr41",H5T_NATIVE_DOUBLE);
+        lcls->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
+        lcls->createLink("eventTime","eventTimeString");
+        instrument->createLink("experiment_identifier","/entry_1/experiment_identifier");
+        
+        // TimeTool
+        if(global->useTimeTool) {
+            lcls->createStack("timeToolTrace", H5T_NATIVE_FLOAT, global->TimeToolStackWidth);
+        }
+        // FEE spectrum
+        if(global->useFEEspectrum) {
+            lcls->createStack("FEEspectrum", H5T_NATIVE_FLOAT, global->FEEspectrumWidth);
+        }
+        // eSpectrum in CXI hutch
+        if(global->espectrum) {
+            lcls->createStack("CXIespectrum", H5T_NATIVE_FLOAT, global->espectrumLength);
+        }
+        
+        // EPICS
+        for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
+            lcls->createStack(&global->epicsPvFloatAddresses[i][0], H5T_NATIVE_FLOAT);
+        }
+        
+        
+        
+        DETECTOR_LOOP{
+            Node* detector = lcls->createGroup("detector",detIndex+1);
+            detector->createStack("position",H5T_NATIVE_DOUBLE);
+            detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
+            detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
+        }
+    }
+    
+    // Save cheetah variables
+    Node * cheetah = root->createGroup("cheetah");
+    Node * event_data = cheetah->createGroup("event_data");
+    
+    /* For some reason the swmr version of hdf5 can't cope with string stacks larger than 255 characters */
+    event_data->createStack("eventName",H5T_NATIVE_CHAR,255);
+    event_data->createStack("frameNumber",H5T_NATIVE_LONG);
+    event_data->createStack("frameNumberIncludingSkipped",H5T_NATIVE_LONG);
+    event_data->createStack("threadID",H5T_NATIVE_LONG);
+    event_data->createStack("nPeaks",H5T_NATIVE_INT);
+    event_data->createStack("peakNpix",H5T_NATIVE_FLOAT);
+    event_data->createStack("peakTotal",H5T_NATIVE_FLOAT);
+    event_data->createStack("peakResolution",H5T_NATIVE_FLOAT);
+    event_data->createStack("peakResolutionA",H5T_NATIVE_FLOAT);
+    event_data->createStack("peakDensity",H5T_NATIVE_FLOAT);
+    event_data->createStack("imageClass",H5T_NATIVE_INT);
+    event_data->createStack("hit",H5T_NATIVE_INT);
+    DETECTOR_LOOP{
+        Node * detector = event_data->createGroup("detector",detIndex+1);
+        detector->createStack("sum",H5T_NATIVE_FLOAT);
+    }
+    
+    Node *global_data = cheetah->createGroup("global_data");
+    global_data->createStack("hit",H5T_NATIVE_INT);
+    global_data->createStack("nPeaks",H5T_NATIVE_INT);
+    
+    // First read configuration file to memory
+    std::ifstream file(global->configFile, std::ios::binary);
+    file.seekg(0, std::ios::end);
+    std::streamsize size = file.tellg();
+    file.seekg(0, std::ios::beg);
+    
+    std::vector<char> buffer(size);
+    if(!file.read(buffer.data(), size)){
+        ERROR("Could not read configuration file");
+    }
+    // Just write out input configuration file
+    
+    Node * configuration = cheetah->createGroup("configuration");
+    configuration->createDataset("input",H5T_NATIVE_CHAR,size)->write(&(buffer[0]));
+    
+    DETECTOR_LOOP{
+        Node * det_node = global_data->createGroup("detector",detIndex+1);
+        det_node->createStack("lastBgUpdate",H5T_NATIVE_LONG);
+        det_node->createStack("nHot",H5T_NATIVE_LONG);
+        det_node->createStack("lastHotPixUpdate",H5T_NATIVE_LONG);
+        det_node->createStack("hotPixBufferCounter",H5T_NATIVE_LONG);
+        det_node->createStack("nNoisy",H5T_NATIVE_LONG);
+        det_node->createStack("lastNoisyPixUpdate",H5T_NATIVE_LONG);
+        det_node->createStack("noisyPixBufferCounter",H5T_NATIVE_LONG);
+        
+        POWDER_LOOP{
+            Node * cl = det_node->createGroup("class",powderClass+1);
+            // Mean and sigma
+            FOREACH_DATAFORMAT_T(i_f, cDataVersion::DATA_FORMATS) {
+                if (isBitOptionSet(global->detector[detIndex].powderFormat,*i_f)) {
+                    cDataVersion dataV(NULL, &global->detector[detIndex], global->detector[detIndex].powderVersion, *i_f);
+                    while (dataV.next()) {
+                        if (*i_f != cDataVersion::DATA_FORMAT_RADIAL_AVERAGE) {
+                            sprintf(sBuffer,"mean_%s",dataV.name);
+                            cl->createDataset(sBuffer,H5T_NATIVE_DOUBLE,dataV.pix_nx,dataV.pix_ny);
+                            sprintf(sBuffer,"sigma_%s",dataV.name);
+                            cl->createDataset(sBuffer,H5T_NATIVE_DOUBLE,dataV.pix_nx,dataV.pix_ny);				
+                        } else {
+                            sprintf(sBuffer,"mean_%s",dataV.name);
+                            cl->createDataset(sBuffer,H5T_NATIVE_DOUBLE,dataV.pix_nn);
+                            sprintf(sBuffer,"sigma_%s",dataV.name);
+                            cl->createDataset(sBuffer,H5T_NATIVE_DOUBLE,dataV.pix_nn);									
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Persistent background (median)
+        if (global->detector[detIndex].useSubtractPersistentBackground) {
+            sprintf(sBuffer,"perisistent_background"); 
+            det_node->createDataset(sBuffer,H5T_NATIVE_FLOAT,global->detector[detIndex].pix_nx,global->detector[detIndex].pix_ny);
+        }
+        
+        // Pixel value histogram
+        if (global->detector[detIndex].histogram) {
+            sprintf(sBuffer,"pixel_histogram");
+            Node * hist_node = det_node->createGroup(sBuffer);
+            sprintf(sBuffer,"histogram");
+            hist_node->createDataset(sBuffer, H5T_NATIVE_UINT16, global->detector[detIndex].histogramNbins, global->detector[detIndex].histogram_nfs, global->detector[detIndex].histogram_nss);
+            sprintf(sBuffer,"histogram_scale");
+            hist_node->createDataset(sBuffer, H5T_NATIVE_FLOAT, global->detector[detIndex].histogramNbins)->write(global->detector[detIndex].histogramScale);
+        }
+        
+    }
+    
+    if (global->debugLevel > 2) {
+        DEBUG("Skeleton created.");
+    }
+    
+    #if defined H5F_ACC_SWMR_READ
+    if(global->cxiSWMR){  
+        root->closeAll();
+        if(H5Fstart_swmr_write(root->hid()) < 0){
+            ERROR("Cannot change to SWMR mode.\n");			
+        }
+        puts("Changed to SWMR mode.");
+        root->openAll();
+    }
+    #endif
+    
+    H5Fflush(root->hid(), H5F_SCOPE_GLOBAL);
+    
+    return root;
+}
+
+
+
 
 /*
  *	CXI file handling
  */
-static std::vector<std::string> openFilenames = std::vector<std::string>();
-static std::vector<CXI::Node* > openFiles = std::vector<CXI::Node *>();
+static std::vector<std::string> openCXIFilenames = std::vector<std::string>();
+static std::vector<CXI::Node* > openCXIFiles = std::vector<CXI::Node *>();
 
+static std::vector<std::string> openResultsFilenames = std::vector<std::string>();
+static std::vector<CXI::Node* > openResultsFiles = std::vector<CXI::Node *>();
+
+
+// CXI file
 static CXI::Node *getCXIFileByName(cGlobal *global, cEventData *eventData, int powderClass){
 	char filename[MAX_FILENAME_LENGTH];
 	long chunk;
 	
 	if(global->saveByPowderClass){
-		// Powder class CXI chunks according to number of frames in each powder class
+		// Powder class chunks according to number of frames in each powder class
 		chunk = global->detector[0].nPowderFrames[powderClass];
 		chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
 		sprintf(filename,"%s-r%04d-class%d-c%02ld.cxi", global->experimentID, global->runNumber, powderClass, chunk);
 	}
 	else{
-		// All-in-one CXI file chunks by number of hits
+		// All-in-one file chunks by number of hits
 		chunk = global->nhits;
 		chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
 		sprintf(filename,"%s-r%04d-c%02ld.cxi", global->experimentID, global->runNumber, chunk);
@@ -1211,11 +1475,11 @@ static CXI::Node *getCXIFileByName(cGlobal *global, cEventData *eventData, int p
 
 	/* search for filename in list */
 	pthread_mutex_lock(&global->saveCXI_mutex);
-	for(uint i=0; i<openFilenames.size(); i++){
-		if(openFilenames[i] == std::string(filename)){
+	for(uint i=0; i<openCXIFilenames.size(); i++){
+		if(openCXIFilenames[i] == std::string(filename)){
 			DEBUG2("Found file pointer to already opened file.");
 			pthread_mutex_unlock(&global->saveCXI_mutex);
-			return openFiles[i];
+			return openCXIFiles[i];
 		}
 	}
 
@@ -1223,12 +1487,55 @@ static CXI::Node *getCXIFileByName(cGlobal *global, cEventData *eventData, int p
 	DEBUG2("Creating a new file.");
 	printf("Creating %s\n",filename);
 	CXI::Node *cxi = createCXISkeleton(filename, global);
-	openFilenames.push_back(filename);
-	openFiles.push_back(cxi);
+	openCXIFilenames.push_back(filename);
+	openCXIFiles.push_back(cxi);
 	
 	pthread_mutex_unlock(&global->saveCXI_mutex);
 	return cxi;
 }
+
+// Results file
+static CXI::Node *getResultsFileByName(cGlobal *global, cEventData *eventData, int powderClass){
+    char filename[MAX_FILENAME_LENGTH];
+    long chunk;
+    
+    if(global->saveByPowderClass){
+        // Powder class chunks according to number of frames in each powder class
+        chunk = global->detector[0].nPowderFrames[powderClass];
+        chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
+        sprintf(filename,"%s-r%04d-class%d-c%02ld.h5", global->experimentID, global->runNumber, powderClass, chunk);
+    }
+    else{
+        // All-in-one file chunks by number of hits
+        chunk = global->nhits;
+        chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
+        sprintf(filename,"%s-r%04d-c%02ld.h5", global->experimentID, global->runNumber, chunk);
+    }
+    if (eventData != NULL)
+        strcpy(eventData->filename, filename);
+    
+    
+    /* search for filename in list */
+    pthread_mutex_lock(&global->saveCXI_mutex);
+    for(uint i=0; i<openResultsFilenames.size(); i++){
+        if(openResultsFilenames[i] == std::string(filename)){
+            DEBUG2("Found file pointer to already opened file.");
+            pthread_mutex_unlock(&global->saveCXI_mutex);
+            return openResultsFiles[i];
+        }
+    }
+    
+    /* Create new file if none found in list */
+    DEBUG2("Creating a new file.");
+    printf("Creating %s\n",filename);
+    CXI::Node *results = createResultsSkeleton(filename, global);
+    openResultsFilenames.push_back(filename);
+    openResultsFiles.push_back(results);
+    
+    pthread_mutex_unlock(&global->saveCXI_mutex);
+    return results;
+}
+
 
 void writeAccumulatedCXI(cGlobal * global){
 	using CXI::Node;
@@ -1319,22 +1626,32 @@ static void  flushCXI(CXI::Node *cxi){
 }
 
 
+/* Flush each open file */
 void flushCXIFiles(cGlobal * global){
-	/* Flush each open file */
 	
-	for(uint i=0; i<openFilenames.size(); i++){
-		printf("Flushing %s\n",openFilenames[i].c_str());
-		pthread_mutex_lock(&global->saveCXI_mutex);
-		flushCXI(openFiles[i]);
-		pthread_mutex_unlock(&global->saveCXI_mutex);
-		usleep(100000);
+    pthread_mutex_lock(&global->saveCXI_mutex);
+
+    // CXI files
+	for(uint i=0; i<openCXIFilenames.size(); i++){
+		printf("Flushing %s\n",openCXIFilenames[i].c_str());
+		flushCXI(openCXIFiles[i]);
+		usleep(1000);
 	}
+
+    // Results files
+    for(uint i=0; i<openResultsFilenames.size(); i++){
+        printf("Flushing %s\n",openResultsFilenames[i].c_str());
+        flushCXI(openResultsFiles[i]);
+        usleep(1000);
+    }
+    pthread_mutex_unlock(&global->saveCXI_mutex);
+
 }
 
 
 
 /*
- *	Close CXI files
+ *	Close CXI and results files
  */
 static void  closeCXI(CXI::Node *cxi){
 
@@ -1347,6 +1664,7 @@ static void  closeCXI(CXI::Node *cxi){
 	delete cxi;
 }
 
+/* Close each open file */
 void closeCXIFiles(cGlobal * global){
 
 	#if H5_VERS_MAJOR == 1 && H5_VERS_MINOR == 8 && H5_VERS_RELEASE < 9
@@ -1358,19 +1676,27 @@ void closeCXIFiles(cGlobal * global){
 	#endif
 	
 
-	/* Go through each file and resize them to their right size */
+	/* CXI: Go through each file and resize them to their right size */
 	pthread_mutex_lock(&global->saveCXI_mutex);
-	for(uint i=0; i<openFilenames.size(); i++){
-		printf("Closing %s\n",openFilenames[i].c_str());
-		closeCXI(openFiles[i]);
+	for(uint i=0; i<openCXIFilenames.size(); i++){
+		printf("Closing %s\n",openCXIFilenames[i].c_str());
+		closeCXI(openCXIFiles[i]);
 	}
-	openFiles.clear();
-	openFilenames.clear();
-	pthread_mutex_unlock(&global->saveCXI_mutex);
+	openCXIFiles.clear();
+	openCXIFilenames.clear();
+
+    /* Results: Go through each file and resize them to their right size */
+    for(uint i=0; i<openResultsFilenames.size(); i++){
+        printf("Closing %s\n",openResultsFilenames[i].c_str());
+        closeCXI(openResultsFiles[i]);
+    }
+    openResultsFiles.clear();
+    openResultsFilenames.clear();
+
+    pthread_mutex_unlock(&global->saveCXI_mutex);
 
 	//#endif
 	
-
 	H5close();
 }
 
@@ -1401,11 +1727,17 @@ void writeCXIHitstats(cEventData *info, cGlobal *global ){
 }
 
 
+/*
+ *  Write event data to CXI file
+ */
 void writeCXI(cEventData *eventData, cGlobal *global ){
 	DEBUG2("Write a data of one frame to CXI file.");
-	using CXI::Node;
+
+    using CXI::Node;
+    char sBuffer[1024];
 	
-	#ifdef H5F_ACC_SWMR_WRITE
+
+    #ifdef H5F_ACC_SWMR_WRITE
 	bool didDecreaseActive = false;
 	if(global->cxiSWMR){
 		pthread_mutex_lock(&global->nActiveThreads_mutex);
@@ -1418,23 +1750,33 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	}
 	#endif
 
-	/* 
-	 *	Get the existing CXI file or open a new one
+    
+    
+    /*
+	 *	Get the existing CXI and Results file or open a new one
 	 *	(needs &global->saveCXI_mutex unlocked)
 	 */
 	CXI::Node *cxi = getCXIFileByName(global, eventData, eventData->powderClass);
-	Node &root = *cxi;
-	char sBuffer[1024];
-	uint stackSlice = cxi->getStackSlice();
-	eventData->stackSlice = stackSlice;
+    CXI::Node *results = getResultsFileByName(global, eventData, eventData->powderClass);
+
+    uint stackSlice = cxi->getStackSlice();
+    eventData->stackSlice = stackSlice;
+    results->setStackSlice(stackSlice);
+
+    
+    
+    /*
+     *  Writing of CXI file (frame data)
+     */
+    Node &root = *cxi;
 	//printf("WriteCXI: powderClass=%i, stackSlice=%u\n",eventData->powderClass, stackSlice);
 
 	
-	/*
-	 *	Lock writing to one thread at a time
-	 */
-	pthread_mutex_lock(&global->saveCXI_mutex);
-
+    /*
+     *	Lock writing to one thread at a time
+     */
+    pthread_mutex_lock(&global->saveCXI_mutex);
+    
 	
 	global->nCXIHits += 1;
 	double en = eventData->photonEnergyeV * 1.60217646e-19;
