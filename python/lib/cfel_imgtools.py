@@ -60,12 +60,16 @@ def histogram_clip(data, value):
     Return modified array with values clipped - use histogram_clip_levels(...) to find out the clipping levels only
     <value> is typically 0.001 or 0.01 (equivalent to clipping top and bottom 0.1% and 1% of pixels respectively)    
     """
-    top, bottom = histogram_clip_levels(data, value)
     
-    result = data
-    result[result > top] = top
-    result[result < bottom] = bottom
+    bottom, top = histogram_clip_levels(data, value)
+    result = data.clip(bottom, top)
     return result
+
+#    top, bottom = histogram_clip_levels(data, value)
+#    result = data
+#    result[result > top] = top
+#    result[result < bottom] = bottom
+#    return result
 #end histogram_clip
     
 

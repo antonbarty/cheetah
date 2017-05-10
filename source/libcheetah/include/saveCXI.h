@@ -128,6 +128,7 @@ namespace CXI{
 			Node & child(std::string prefix, int n);
 			void trimAll(int stackSize = -1);
 			uint getStackSlice();
+            void setStackSlice(uint);
 			uint stackCounter;
 
 			std::string name;
