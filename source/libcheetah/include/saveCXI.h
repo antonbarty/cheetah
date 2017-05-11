@@ -159,6 +159,9 @@ namespace CXI{
 
 }
 
+void writeCXIData(CXI::Node*, cEventData*, cGlobal*, uint );
+void writeResultsData(CXI::Node*, cEventData*, cGlobal*, uint );
+
 
 
 

@@ -196,6 +196,9 @@ cGlobal::cGlobal(void)
 
     // Use .cxi format rather than one HDF5 per image
     saveCXI = 1;
+    cxiLegacyFileFormat = 0;
+    cxiSaveFrames = 1;
+
     cxiChunkSize = 10000;
     saveByPowderClass = false;
 
@@ -1287,7 +1290,13 @@ int cGlobal::parseConfigTag(char *tag, char *value)
     else if (!strcmp(tag, "cxichunksize")) {
         cxiChunkSize = atoi(value);
     }
-
+    else if (!strcmp(tag, "cxilegacyfileformat")) {
+        cxiLegacyFileFormat = atoi(value);
+    }
+    else if (!strcmp(tag, "cxisaveframes")) {
+        cxiSaveFrames = atoi(value);
+    }
+    
     else if (!strcmp(tag, "savebypowderclass")) {
         saveByPowderClass = atoi(value);
     }
