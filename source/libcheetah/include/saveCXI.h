@@ -82,6 +82,7 @@ namespace CXI{
 					return *children.find(s)->second;
 				}
 				else{
+                    printf("Could not find child: \"%s\"\n", s.c_str());
 					ERROR("Could not find child.\n");
 					return *this;
 				}
