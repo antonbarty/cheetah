@@ -182,6 +182,9 @@
 .graphic_textbox_layout_style_default_External_651_484 {
     position: relative;
 }
+.graphic_textbox_layout_style_default_External_651_33 {
+    position: relative;
+}
 .graphic_textbox_layout_style_default_External_651_344 {
     position: relative;
 }
@@ -215,6 +218,10 @@ a:hover {
     text-decoration: underline;
 }
 .bumper {
+    font-size: 1px;
+    line-height: 1px;
+}
+.tinyText {
     font-size: 1px;
     line-height: 1px;
 }

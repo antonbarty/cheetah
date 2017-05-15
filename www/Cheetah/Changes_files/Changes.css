@@ -179,6 +179,10 @@ ol  {
     font-size: 1px;
     line-height: 1px;
 }
+.tinyText {
+    font-size: 1px;
+    line-height: 1px;
+}
 #widget0 a:hover {
     color: rgb(224, 133, 102);
     text-decoration: underline;
