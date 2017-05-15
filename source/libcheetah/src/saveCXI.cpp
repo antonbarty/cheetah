@@ -306,6 +306,19 @@ namespace CXI{
 		return createGroup(key.c_str());
 	}
 
+    std::string Node::nextKey(const char * s){
+        int i = 0;
+        char buffer[1024];
+        for(;;i++){
+            //sprintf(buffer,"%s%d",s,i);
+            sprintf(buffer,"%s%d",s,i);
+            if(children.find(buffer) == children.end()){
+                break;
+            }
+        }
+        return std::string(buffer);
+    }
+    
 	Node * Node::createGroup(const char * s){
 		hid_t gid = H5Gcreate(hid(),s, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		if(gid < 0){
@@ -313,16 +326,47 @@ namespace CXI{
 		}
 		return addNode(s,gid, Group);
 	}
-
+    
 	Node * Node::createGroup(const char * prefix, int n){
 		char buffer[1024];
-		sprintf(buffer,"%s_%d",prefix,n);
+		sprintf(buffer,"%s%d",prefix,n);
 		hid_t gid = H5Gcreate(hid(),buffer, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 		if(gid < 0){
 			return NULL;
 		}
 		return addNode(buffer,gid, Group);
 	}
+
+
+    // CXI format specifies underscore and starting from 1 not 0
+    // So we have a duplicate set of entries here to follow that format
+    Node * Node::createCXIGroup(const char * prefix, int n){
+        char buffer[1024];
+        sprintf(buffer,"%s_%d",prefix,n);
+        hid_t gid = H5Gcreate(hid(),buffer, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        if(gid < 0){
+            return NULL;
+        }
+        return addNode(buffer,gid, Group);
+    }
+    
+    Node * Node::addCXIClass(const char * s){
+        std::string key = nextCXIKey(s);
+        return createGroup(key.c_str());
+    }
+    std::string Node::nextCXIKey(const char * s){
+        int i = 1;
+        char buffer[1024];
+        for(;;i++){
+            //sprintf(buffer,"%s%d",s,i);
+            sprintf(buffer,"%s_%d",s,i);
+            if(children.find(buffer) == children.end()){
+                break;
+            }
+        }
+        return std::string(buffer);
+    }
+
 
 	Node * Node::addClassLink(const char * s, std::string target){
 		std::string key = nextKey(s);
@@ -382,10 +426,18 @@ namespace CXI{
 
 	Node & Node::child(std::string prefix, int n){
 		char buffer[1024];
-		sprintf(buffer,"%s_%d",prefix.c_str(),n);
+		sprintf(buffer,"%s%d",prefix.c_str(),n);
 		return (*this)[buffer];
 	}
 
+    
+    Node & Node::cxichild(std::string prefix, int n){
+        char buffer[1024];
+        sprintf(buffer,"%s_%d",prefix.c_str(),n);
+        return (*this)[buffer];
+    }
+
+    
 	void Node::trimAll(int stackSize){
 		if(stackSize < 0){
 			stackSize = stackCounter;
@@ -420,18 +472,6 @@ namespace CXI{
 		return n;
 	}
 
-	std::string Node::nextKey(const char * s){			
-		int i = 1;
-		char buffer[1024];			
-		for(;;i++){
-			//sprintf(buffer,"%s%d",s,i);
-            sprintf(buffer,"%s_%d",s,i);
-			if(children.find(buffer) == children.end()){
-				break;
-			}
-		}
-		return std::string(buffer);
-	}
 
 	void Node::addStackAttributes(hid_t dataset, int ndims, const char * userAxis){
 		const char * axis_1d = "experiment_identifier";
@@ -672,9 +712,9 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 
     
     // Create top level entries
-	Node *entry = root->addClass("entry");
-	Node *instrument = entry->addClass("instrument");
-	Node *source = instrument->addClass("source");
+	Node *entry = root->addCXIClass("entry");
+	Node *instrument = entry->addCXIClass("instrument");
+	Node *source = instrument->addCXIClass("source");
 
     source->createStack("energy",H5T_NATIVE_DOUBLE);
     source->createLink("experiment_identifier", "/entry_1/experiment_identifier");
@@ -696,8 +736,10 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         lcls->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
         lcls->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
         lcls->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
+        lcls->createStack("machineTime",H5T_NATIVE_INT32);
+        lcls->createStack("fiducial",H5T_NATIVE_INT32);
         DETECTOR_LOOP{
-            Node* detector = lcls->createGroup("detector",detIndex);
+            Node* detector = lcls->createCXIGroup("detector",detIndex+1);
             detector->createStack("position",H5T_NATIVE_DOUBLE);
             detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
             detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
@@ -705,9 +747,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         instrument->createLink("experiment_identifier","/entry_1/experiment_identifier");
         
         if(global->cxiLegacyFileFormat == 2015) {
-            lcls->createStack("machineTime",H5T_NATIVE_INT32);
             lcls->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
-            lcls->createStack("fiducial",H5T_NATIVE_INT32);
             lcls->createStack("ebeamCharge",H5T_NATIVE_DOUBLE);
             lcls->createStack("ebeamL3Energy",H5T_NATIVE_DOUBLE);
             lcls->createStack("ebeamPkCurrBC2",H5T_NATIVE_DOUBLE);
@@ -805,7 +845,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
             int downsampling = global->detector[detIndex].downsampling;
 
             // /entry_1/instrument_1/detector_[i]/
-            Node * detector = instrument->createGroup("detector",detIndex+1);
+            Node * detector = instrument->createCXIGroup("detector",detIndex+1);
             // Create symbolic link /entry_1/data_[i]/ which points to /entry_1/instrument_1/detector_[i]/
             entry->addClassLink("data",detector->path().c_str());
 
@@ -904,7 +944,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
                 // Create group /entry_1/image_i
                 int i_image = 1+global->nDetectors*image_counter+detIndex;
                 image_counter += 1;
-                Node * image_node = entry->createGroup("image",i_image);
+                Node * image_node = entry->createCXIGroup("image",i_image);
                 image_node->addClassLink("detector",detector->path());
                 image_node->addClassLink("source",source->path());
                 cDataVersion dataV(NULL, &global->detector[detIndex], global->detector[detIndex].saveVersion, cDataVersion::DATA_FORMAT_ASSEMBLED);
@@ -950,7 +990,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
                 image_counter += 1;
                 // Create group /entry_1/image_[i]
                 Node * image_node;
-                image_node = entry->createGroup("image",i_image);
+                image_node = entry->createCXIGroup("image",i_image);
                 image_node->addClassLink("detector",detector->path());
                 image_node->addClassLink("source",source->path());
                 cDataVersion dataV(NULL, &global->detector[detIndex], global->detector[detIndex].saveVersion, cDataVersion::DATA_FORMAT_ASSEMBLED_AND_DOWNSAMPLED);
@@ -1004,7 +1044,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
                     // Create group /entry_1/image_[i]
                     int i_image = 1+global->nDetectors*image_counter+detIndex;
                     image_counter += 1;
-                    Node *image_node = entry->createGroup("image",i_image);
+                    Node *image_node = entry->createCXIGroup("image",i_image);
                     image_node->addClassLink("detector",detector->path());
                     image_node->addClassLink("source",source->path());			
                     cDataVersion dataV(NULL, &global->detector[detIndex], global->detector[detIndex].saveVersion, cDataVersion::DATA_FORMAT_RADIAL_AVERAGE);
@@ -1050,7 +1090,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
     //
     int resultIndex = 1;
     if(global->savePeakInfo && global->hitfinder){
-        Node * result = entry->createGroup("result",resultIndex);
+        Node * result = entry->createCXIGroup("result",resultIndex);
         
         result->createStack("powderClass", H5T_NATIVE_INT);
         
@@ -1088,7 +1128,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         if(global->TOFPresent){
             for(int i = 0;i<global->nTOFDetectors;i++){
                 char buffer[1024];
-                Node * detector = instrument->createGroup("detector",1+i+global->nDetectors);
+                Node * detector = instrument->createCXIGroup("detector",1+i+global->nDetectors);
                 detector->createStack("data",H5T_NATIVE_DOUBLE,global->tofDetector[i].numSamples);
                 detector->createStack("tofTime",H5T_NATIVE_DOUBLE,global->tofDetector[i].numSamples);
                 int buffLen = sprintf(buffer,"TOF detector\nSource identifier: %s\nChannel number: %d\nDescription: %s\n",global->tofDetector[i].sourceIdentifier,
@@ -1130,7 +1170,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         event_data->createStack("imageClass",H5T_NATIVE_INT);
         event_data->createStack("hit",H5T_NATIVE_INT);
         DETECTOR_LOOP{
-            Node * detector = event_data->createGroup("detector",detIndex+1);
+            Node * detector = event_data->createCXIGroup("detector",detIndex+1);
             detector->createStack("sum",H5T_NATIVE_FLOAT);
         }
 
@@ -1158,7 +1198,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         //  Accumulated detector stuff
         //
         DETECTOR_LOOP{
-            Node * det_node = global_data->createGroup("detector",detIndex+1);
+            Node * det_node = global_data->createCXIGroup("detector",detIndex+1);
             det_node->createStack("lastBgUpdate",H5T_NATIVE_LONG);
             det_node->createStack("nHot",H5T_NATIVE_LONG);
             det_node->createStack("lastHotPixUpdate",H5T_NATIVE_LONG);
@@ -1168,7 +1208,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
             det_node->createStack("noisyPixBufferCounter",H5T_NATIVE_LONG);
 
             POWDER_LOOP{
-                Node * cl = det_node->createGroup("class",powderClass+1);
+                Node * cl = det_node->createCXIGroup("class",powderClass+1);
                 // Mean and sigma
                 FOREACH_DATAFORMAT_T(i_f, cDataVersion::DATA_FORMATS) {
                     if (isBitOptionSet(global->detector[detIndex].powderFormat,*i_f)) {
@@ -1354,24 +1394,7 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
             detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
         }
     }
-    
-    //
-    // TOF data
-    //
-    if(global->TOFPresent){
-        for(int i = 0;i<global->nTOFDetectors;i++){
-            char buffer[1024];
-            Node * detector = entry->createGroup("detector",i+global->nDetectors);
-            detector->createStack("data",H5T_NATIVE_DOUBLE,global->tofDetector[i].numSamples);
-            detector->createStack("tofTime",H5T_NATIVE_DOUBLE,global->tofDetector[i].numSamples);
-            int buffLen = sprintf(buffer,"TOF detector\nSource identifier: %s\nChannel number: %d\nDescription: %s\n",global->tofDetector[i].sourceIdentifier,
-                                  global->tofDetector[i].channel, global->tofDetector[i].description);
-            detector->createDataset("description",H5T_NATIVE_CHAR,buffLen)->write(buffer);
-        }
-    }
-
-    
-    
+	
     // APS
     if(!strcmp(global->facility, "APS") ) {
         Node *aps = facility;
@@ -1395,8 +1418,25 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         aps->createStack("threshold",H5T_NATIVE_DOUBLE);
     }
     
-    
-    
+	
+	//
+	// TOF data (Aqiris)
+	//
+	if(global->TOFPresent){
+		for(int i = 0;i<global->nTOFDetectors;i++){
+			char buffer[1024];
+			Node * detector = entry->createGroup("detector",i+global->nDetectors);
+			detector->createStack("data",H5T_NATIVE_DOUBLE,global->tofDetector[i].numSamples);
+			detector->createStack("tofTime",H5T_NATIVE_DOUBLE,global->tofDetector[i].numSamples);
+			int buffLen = sprintf(buffer,"TOF detector\nSource identifier: %s\nChannel number: %d\nDescription: %s\n",global->tofDetector[i].sourceIdentifier,
+								  global->tofDetector[i].channel, global->tofDetector[i].description);
+			detector->createDataset("description",H5T_NATIVE_CHAR,buffLen)->write(buffer);
+		}
+	}
+	
+	
+	
+	
     //
     //  Detector images
     //
@@ -1696,19 +1736,15 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         Node * result = entry->createGroup("result",resultIndex);
         
         result->createStack("powderClass", H5T_NATIVE_INT);
-        
         result->createStack("nPeaks", H5T_NATIVE_INT);
-        
         result->createStack("peakXPosAssembled", H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
         result->createStack("peakYPosAssembled",H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
-        
         result->createStack("peakXPosRaw", H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
         result->createStack("peakYPosRaw", H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
-        
         result->createStack("peakTotalIntensity", H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
         result->createStack("peakMaximumValue", H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
@@ -1717,8 +1753,6 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
         result->createStack("peakNPixels", H5T_NATIVE_FLOAT, 0,H5S_UNLIMITED,H5S_UNLIMITED,0,
                             CXI::peaksChunkSize[0],CXI::peaksChunkSize[1],"experiment_identifier:nPeaks");
-        
-        result->createLink("data", "peakTotalIntensity");
         resultIndex++;
     }
     
@@ -2232,16 +2266,16 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
 
         lcls["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
         lcls["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
+        lcls["machineTime"].write(&eventData->seconds,stackSlice);
+        lcls["fiducial"].write(&eventData->fiducial,stackSlice);
         DETECTOR_LOOP{
-            lcls.child("detector",detIndex)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
-            lcls.child("detector",detIndex)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
-            lcls.child("detector",detIndex)["SolidAngleConst"].write(&global->detector[detIndex].solidAngleConst,stackSlice);
+            lcls.cxichild("detector",detIndex+1)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
+            lcls.cxichild("detector",detIndex+1)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
+            lcls.cxichild("detector",detIndex+1)["SolidAngleConst"].write(&global->detector[detIndex].solidAngleConst,stackSlice);
         }
         
         if(global->cxiLegacyFileFormat == 2015) {
-            lcls["machineTime"].write(&eventData->seconds,stackSlice);
             lcls["machineTimeNanoSeconds"].write(&eventData->nanoSeconds, stackSlice);
-            lcls["fiducial"].write(&eventData->fiducial,stackSlice);
             lcls["ebeamCharge"].write(&eventData->fEbeamCharge,stackSlice);
             lcls["ebeamL3Energy"].write(&eventData->fEbeamL3Energy,stackSlice);
             lcls["ebeamLTUAngX"].write(&eventData->fEbeamLTUAngX,stackSlice);
@@ -2323,7 +2357,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
     if(global->cxiSaveFrames) {
         DETECTOR_LOOP {
             /* Save assembled image under image groups */
-            Node & detector = root["entry_1"]["instrument_1"].child("detector",detIndex+1);
+            Node & detector = root["entry_1"]["instrument_1"].cxichild("detector",detIndex+1);
             double tmp = global->detector[detIndex].detectorZ/1000.0;
             
             // For convenience dereference some detector specific variables
@@ -2424,7 +2458,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
                     // Assembled images (3D: N_frames x Ny_image x Nx_image)
                     float * data = dataV.getData();
                     uint16_t * pixelmask = dataV.getPixelmask();
-                    Node & data_node = root["entry_1"].child("image",i_image)[dataV.name_version];
+                    Node & data_node = root["entry_1"].cxichild("image",i_image)[dataV.name_version];
                     data_node["data"].write(data, stackSlice, image_nn);
                     if(global->detector[detIndex].savePixelmask){
                         data_node["mask"].write(pixelmask, stackSlice, image_nn);
@@ -2449,7 +2483,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
                     // Assembled images (3D: N_frames x Ny_imageXxX x Nx_imageXxX)
                     float * data = dataV.getData();
                     uint16_t * pixelmask = dataV.getPixelmask();
-                    Node & data_node = root["entry_1"].child("image",i_image)[dataV.name_version];
+                    Node & data_node = root["entry_1"].cxichild("image",i_image)[dataV.name_version];
                     data_node["data"].write(data, stackSlice, imageXxX_nn);
                     if(global->detector[detIndex].savePixelmask){
                         data_node["mask"].write(pixelmask, stackSlice, imageXxX_nn);
@@ -2475,7 +2509,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
                         // Radial average (2D: N_frames x N_radial)
                         float * data = dataV.getData();
                         uint16_t * pixelmask = dataV.getPixelmask();
-                        Node & data_node = root["entry_1"].child("image",i_image)[dataV.name_version];
+                        Node & data_node = root["entry_1"].cxichild("image",i_image)[dataV.name_version];
                         data_node["data"].write(data, stackSlice, radial_nn);
                         if(global->detector[detIndex].savePixelmask){
                             data_node["mask"].write(pixelmask, stackSlice, radial_nn);
@@ -2497,7 +2531,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         long nPeaks = eventData->peaklist.nPeaks;
         long powderClass = eventData->powderClass;
         
-        Node & result = root["entry_1"].child("result",resultIndex);
+        Node & result = root["entry_1"].cxichild("result",resultIndex);
         
         result["powderClass"].write(&powderClass, stackSlice);
         result["nPeaks"].write(&nPeaks, stackSlice);
@@ -2522,7 +2556,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         if(eventData->TOFPresent){
             for(int i = 0; i<global->nTOFDetectors;i++){
                 int tofDetIndex = i+global->nDetectors;
-                Node & detector = root["entry_1"]["instrument_1"].child("detector",tofDetIndex+1);
+                Node & detector = root["entry_1"]["instrument_1"].cxichild("detector",tofDetIndex+1);
                 detector["data"].write(&(eventData->tofDetector[i].voltage[0]),stackSlice);
                 detector["tofTime"].write(&(eventData->tofDetector[i].time[0]),stackSlice);
             }
@@ -2551,13 +2585,13 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         event_data["hit"].write(&eventData->hit,stackSlice);
         
         DETECTOR_LOOP{
-            Node & detector = root["cheetah"]["global_data"].child("detector",detIndex+1);
+            Node & detector = root["cheetah"]["global_data"].cxichild("detector",detIndex+1);
             detector["lastBgUpdate"].write(&global->detector[detIndex].bgLastUpdate,stackSlice);
             detector["nHot"].write(&global->detector[detIndex].nHot,stackSlice);
             detector["lastHotPixUpdate"].write(&global->detector[detIndex].hotPixLastUpdate,stackSlice);
             detector["nNoisy"].write(&global->detector[detIndex].nNoisy,stackSlice);
             detector["lastNoisyPixUpdate"].write(&global->detector[detIndex].noisyPixLastUpdate,stackSlice);
-            Node & detector2 = root["cheetah"]["event_data"].child("detector",detIndex+1);
+            Node & detector2 = root["cheetah"]["event_data"].cxichild("detector",detIndex+1);
             detector2["sum"].write(&eventData->detector[detIndex].sum,stackSlice);		
         }
     }
@@ -2601,9 +2635,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
     //double en = eventData->photonEnergyeV * 1.60217646e-19;
     //root["entry_1"]["instrument_1"]["source_1"]["energy"].write(&en,stackSlice);
     
-    root["entry_1"]["experiment_identifier"].write(eventData->eventname,stackSlice);
-    
-    printf("Writing results file...\n");
+    root["entry0"]["experiment_identifier"].write(eventData->eventname,stackSlice);
     
     /*
      *  Write instrument information
@@ -2728,7 +2760,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         long nPeaks = eventData->peaklist.nPeaks;
         long powderClass = eventData->powderClass;
         
-        Node & result = root["entry_1"].child("result",resultIndex);
+        Node & result = root["entry0"].child("result",resultIndex);
         
         result["powderClass"].write(&powderClass, stackSlice);
         result["nPeaks"].write(&nPeaks, stackSlice);
@@ -2753,7 +2785,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
     if(eventData->TOFPresent){
         for(int i = 0; i<global->nTOFDetectors;i++){
             int tofDetIndex = i+global->nDetectors;
-            Node &detector = root["entry_1"].child("detector",tofDetIndex);
+            Node &detector = root["entry0"].child("detector",tofDetIndex);
             detector["data"].write(&(eventData->tofDetector[i].voltage[0]),stackSlice);
             detector["tofTime"].write(&(eventData->tofDetector[i].time[0]),stackSlice);
         }
@@ -2773,7 +2805,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
     //
     DETECTOR_LOOP {
         /* Save assembled image under image groups */
-        Node & detector = root["entry_1"].child("detector",detIndex);
+        Node & detector = root["entry0"].child("detector",detIndex);
         
         // For convenience dereference some detector specific variables
         //int asic_nx = global->detector[detIndex].asic_nx;
@@ -2814,7 +2846,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
                 // Radial average (2D: N_frames x N_radial)
                 float * data = dataV.getData();
                 uint16_t * pixelmask = dataV.getPixelmask();
-                Node & det_node = root["entry_1"].child("detector",detIndex);
+                Node & det_node = root["entry0"].child("detector",detIndex);
                 Node & data_node = det_node["radialaverage"][dataV.name_version];
                 data_node["data"].write(data, stackSlice, radial_nn);
                 if(global->detector[detIndex].savePixelmask){
@@ -2826,10 +2858,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         }
     }
     
-    printf("End writing results file...\n");
-
-    
-  
+	
     #ifdef H5F_ACC_SWMR_WRITE
     if(global->cxiSWMR){
         if(global->cxiFlushPeriod && (stackSlice % global->cxiFlushPeriod) == 0){
