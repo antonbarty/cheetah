@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="Generator" content="iWeb 3.0.4" />
+    <meta name="iWeb-Build" content="local-build-20170407" />
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+    <meta name="viewport" content="width=700" />
+    <title>Crystal hit finding</title>
+    <link rel="stylesheet" type="text/css" media="screen,print" href="SFX_hitfinding_files/SFX_hitfinding.css" />
+    <!--[if lt IE 8]><link rel='stylesheet' type='text/css' media='screen,print' href='SFX_hitfinding_files/SFX_hitfindingIE.css'/><![endif]-->
+    <!--[if gte IE 8]><link rel='stylesheet' type='text/css' media='screen,print' href='Media/IE8.css'/><![endif]-->
+    <script type="text/javascript" src="Scripts/iWebSite.js"></script>
+    <script type="text/javascript" src="Scripts/Widgets/SharedResources/WidgetCommon.js"></script>
+    <script type="text/javascript" src="Scripts/Widgets/Navbar/navbar.js"></script>
+    <script type="text/javascript" src="SFX_hitfinding_files/SFX_hitfinding.js"></script>
+  </head>
+  <body style="background: rgb(101, 101, 101); margin: 0pt; " onload="onPageLoad();" onunload="onPageUnload();">
+    <div style="text-align: center; ">
+      <div style="margin-bottom: 10px; margin-left: auto; margin-right: auto; margin-top: 10px; overflow: hidden; position: relative; word-wrap: break-word;  background: rgb(255, 255, 255); text-align: left; width: 700px; " id="body_content">
+        <div style="margin-left: 0px; position: relative; width: 700px; z-index: 0; " id="nav_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div style="height: 1px; line-height: 1px; " class="tinyText"> </div>
+          <div class="com-apple-iweb-widget-navbar flowDefining" id="widget0" style="margin-left: 20px; margin-top: 24px; opacity: 1.00; position: relative; width: 660px; z-index: 1; ">
+    
+            <div id="widget0-navbar" class="navbar">
+
+      
+              <div id="widget0-bg" class="navbar-bg">
+
+        
+                <ul id="widget0-navbar-list" class="navbar-list">
+ <li></li> 
+</ul>
+                
+      
+</div>
+              
+    
+</div>
+          </div>
+          <script type="text/javascript"><!--//--><![CDATA[//><!--
+new NavBar('widget0', 'Scripts/Widgets/Navbar', 'Scripts/Widgets/SharedResources', '.', {"path-to-root": "", "navbar-css": ".navbar {\n\tfont-family: 'Helvetica Neue', Arial, sans-serif;\n\tfont-size: .8em;\n\tcolor: #666666;\n\tline-height: 30px;\n\tborder-bottom: 3px solid #ccc;\n}\n\n.navbar-bg {\n\ttext-align: right;}\n\n.navbar-bg ul {\n\tlist-style: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\n\n\nli {\n\tlist-style-type: none;\n\tdisplay: inline;\n\tpadding: 0px 5px 0px 0px;\n}\n\n\nli a {\n\ttext-decoration: none;\n\tpadding: 10px;\n\tcolor: #666666;\n\tfont-weight: bold;\n}\n\nli a:visited {\n\ttext-decoration: none;\n\tpadding: 10px;\n\tcolor: #666666;\n\tfont-weight: bold;\n}\n\nli a:hover\r{\r\n \tcolor: #999999;\n\ttext-decoration: none;\r}\n\n\nli.current-page a\r{\r\t color: #66ABC5;\n\ttext-decoration: none;\r}\n", "current-page-GUID": "CB6BAFEE-D19C-4EE4-A82F-ED3CFDBC483B", "isCollectionPage": "NO"});
+//--><!]]></script>
+          <div style="clear: both; height: 0px; line-height: 0px; " class="spacer"> </div>
+        </div>
+        <div style="height: 155px; margin-left: 0px; position: relative; width: 700px; z-index: 10; " id="header_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div id="id1" style="height: 43px; left: 20px; position: absolute; top: 20px; width: 515px; z-index: 1; " class="style_SkipStroke shape-with-text">
+            <div class="text-content Normal_External_515_43" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="Header">Crystal hit finding</p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id2" style="height: 78px; left: 27px; position: absolute; top: 77px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_78" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Serial Crystallography hit finding:  <br /></p>
+                <p class="Free_Form">Save all frames with more than <span class="style">n</span> Bragg peaks<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form"><a title="lys.ini.html" href="lys.ini.html">Sample .ini file for hit finding using the cspad detector</a><br /></p>
+                <p style="padding-bottom: 0pt; " class="Free_Form"><a title="Indexing.html" href="Indexing.html">Instructions for using CrystFEL through the GUI</a></p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div style="height: 296px; width: 338px;  height: 296px; left: 342px; position: absolute; top: 24px; width: 338px; z-index: 1; " class="tinyText style_SkipStroke_2">
+            <img src="SFX_hitfinding_files/droppedImage.png" alt="" style="border: none; height: 296px; width: 339px; " />
+          </div>
+        </div>
+        <div style="margin-left: 0px; position: relative; width: 700px; z-index: 5; " id="body_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div id="id3" style="height: 20px; left: 15px; position: absolute; top: 176px; width: 515px; z-index: 1; " class="style_SkipStroke_3 shape-with-text">
+            <div class="text-content Normal_External_515_20" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="paragraph_style">1)  detector corrections </p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id4" style="height: 405px; left: 22px; position: absolute; top: 201px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_405" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Usually the default settings work pretty well and are enough to get started. <br /></p>
+                <p class="Free_Form">For best results pay attention to the following:<br /></p>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="1">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">1.</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">Use a recent dark calibration</span>.  At least one per shift is recommended<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="2">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; " class="Bullet">2.</span><span style="width: 3px; " class="inline-block"></span>Decide whether to use<span class="style_1"> common mode correction</span>.  It works well if all cspad modules have unbonded pixels.  If they do not, it produces bad results.  Look at a few powder patterns to see whether there is strange subtraction occurring.<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="3">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">3.</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">Use a recent geometry.</span> Hit finding is normally not very sensitive to a perfect geometry, unlike crystal indexing. However, radial background subtraction is sensitive to geometry, and can be quite so in the presence of concentric ‘powder rings’ from ice or other polycrystalline sample in the beam.  SAXS/WAXS traces also benefit from use of a refined geometry so that radial averages are averaged across the same scattering angles. Accurate geometry files are best obtained using the results of crystal indexing.  Geometry refinement is extensively discussed on the <a title="http://www.desy.de/~twhite/crystfel/manual-geoptimiser.html" href="http://www.desy.de/~twhite/crystfel/manual-geoptimiser.html">CrystFEL web pages</a>.<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="4">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">4.</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">Use a recent bad pixel mask.</span>  New bad pixel masks need to be created each time the detector is rebuilt, and sometimes after it is damaged. A good idea to check they make sense (bad pixels are zeroed and ignored)<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="5">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; " class="Bullet">5.</span><span style="width: 3px; " class="inline-block"></span>Check for <span class="style_1">regions to be excluded from analysis </span>and include in the peakmask. For example:<br />    - Regions shadowed by shroud, beamstop, or other equipment as in the above picture<br />    - Regions containing jet streaks<br />    - Powder rings from substrates or ice<br />Exclusion regions can change whenever the detector is moved, injector changed, or shift to shift.  Look for suspicious regions (shadows, jet positions) in the powder pattern for each run (View--&gt;powder).<br />Forgetting to exclude these regions from analysis (a) leads to false peaks, and (b) will pollute your indexing results with false reflection measurements when CrystFEL tries to integrate reflections predicted to be in these regions.<br /><br /></p>
+                  </li>
+                </ol>
+                <p style="padding-bottom: 0pt; " class="Free_Form">See the <a title="Detector_correction.html" href="Detector_correction.html">Detector Corrections </a>page for more details. </p>
+              </div>
+            </div>
+          </div>
+          <div style="height: 606px; line-height: 606px; " class="spacer"> </div>
+        </div>
+        <div style="height: 1560px; margin-left: 0px; position: relative; width: 700px; z-index: 15; " id="footer_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div id="id5" style="height: 20px; left: 20px; position: absolute; top: 46px; width: 515px; z-index: 1; " class="style_SkipStroke_3 shape-with-text">
+            <div class="text-content Normal_External_515_20" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="paragraph_style">2) Optimise peak finding</p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id6" style="height: 221px; left: 19px; position: absolute; top: 73px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_221" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Accurately finding Bragg peaks is essential for both crystal hit finding and obtaining a high indexing rate.  Effort spent on peak finding inevitably pays off in the end. <br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Too few peaks and both the hit rate (fewer peaks) and indexing rate drops (too few peaks to find lattice orientations).  Too many false peaks and the hit rate becomes artificially high (counting lots of “peaks” which are not really peaks) and the indexing rate drops (false peaks confuse indexing algorithms so that they can’t determine the orientation of the crystal lattice).<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">The following recipes work in most cases. <br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 18px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_2"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">snr8pix2.ini  </span>  (peak = two connected pixels above 8 sigma threshold, good for bright sharp peaks)<br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 18px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_2"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">snr6pix3.ini</span>    (peak = three connected pixels above 6 sigma threshold, better for weaker but fatter peaks)<br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 18px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_2"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">snr4pix4.ini  </span>  (peak = four connected pixels above 4 sigma threshold, for very weak and fat peaks)<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form">(from /reg/g/cfel/cheetah/template/cheetah/process)<br /></p>
+                <p class="Free_Form"><br /></p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id7" style="height: 20px; left: 20px; position: absolute; top: 314px; width: 515px; z-index: 1; " class="style_SkipStroke_3 shape-with-text">
+            <div class="text-content Normal_External_515_20" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="paragraph_style">3) Peakfinder 8</p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id8" style="height: 912px; left: 19px; position: absolute; top: 341px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_912" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Peakfinder8 has been found to be fairly robust for SFX peak finding and operates as follows:<br /></p>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="1">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">1)</span><span style="width: 3px; " class="inline-block"></span>Compute the radial average and standard deviation over regions not excluded from analysis.  This produces two arrays mean(r) and stddev(r) which are a function of radius from beam centre.  The threshold as a function of radius becomes thresh(r) = mean(r) + SNR * stddev(r), where SNR is the input threshold hitfinderMinSNR.<br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="2">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">2)</span><span style="width: 3px; " class="inline-block"></span>Loop over the above calculation five times, each time excluding pixels above thresh(r) from the radial average calculation.  This serves to reject outliers such as Bragg peaks and jet regions from the average calculation (the idea being to calculate mean(r) and stddev(r) only in background regions).  Five loops is rather arbitrary but we found it works well. <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="3">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">3)</span><span style="width: 3px; " class="inline-block"></span>Recalculate thresh(r) = mean(r) + SNR * stddev(r) and apply a minimum ADC criterion of hitfinderADC so that thresh(r) = MAX(thresh(r), hitfinderADC).  Remember for the next step. <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="4">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">4)</span><span style="width: 3px; " class="inline-block"></span>Loop over each logical detector module (ASIC, or similar).  Within each module search for regions of n or more connected pixels above thresh(r).  A potential peak is a region satisfying this criterion. <br />Detail: it is actually hitfinderMinPixCount &lt; n &lt; hitfinderMaxPixCount to enable really large peaks to be excluded, and remember threshold has a floor at hitfinderADC so that thresh(r) = MAX(thresh(r), hitfinderADC).  For Pilatus you will want to change hitfinderADC =1 or 2 whereas for the cspad in high gain mode usually 100 or so works well. <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="5">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">5)</span><span style="width: 3px; " class="inline-block"></span>Integrate each potential peak to find the ‘centre of mass’ and maximum ADC value.  Compute local background using three-ring approach, and check that the peak really does satisfy the stated minimum signal to noise ratio. This cross-check is to avoid false peaks in noisier regions.<br />Detail: Three-ring radius found automatically but can be set using hitfinderLocalBgRadius.  <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="6">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">6)</span><span style="width: 3px; " class="inline-block"></span>Return list of found leaks satisfying local background check. <br />Note: Coordinate of each pixel is at it’s measurement centre (not the corner). <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="7">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">7)</span><span style="width: 3px; " class="inline-block"></span>Optional: Exclude peaks that are too close together (hitfinderMinPeakSeparation), keeping only the brighter of peaks that are too close together. <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 13px; text-indent: -13px; " class="full-width" value="8">
+                    <p style="text-indent: -13px; " class="paragraph_style_3"><span style="font-size: 12px; " class="Bullet">8)</span><span style="width: 3px; " class="inline-block"></span>Hits are frames with more than hitfinderNpeaks found peaks after all the above steps.<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">The key parameters to change are:<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinSNR</span> (signal-to-noise required to count as a pixel that is a part of a peak)<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinPixCount</span> (number of connected pixels above hitfinderMinSNR required to constitute a peak)<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderNpeaks</span> (number of peaks to count as a hit)<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Less frequently adjusted but also useful are:<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderADC</span> (minimum ADC value for the threshold, applied over the entire image) <br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinRes</span> (inner radius of peak search, in pixels)<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMaxRes</span> (outer radius of peak search, in pixels)<br /></p>
+                <p class="Free_Form">    <span class="style_1">peakmask</span> (a user-defined pixel mask identifying regions of the image to exclude from peak searching)<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">The following are two good starting points which usually find something:<br /></p>
+                <p class="Free_Form">For small, intense peaks that illuminate few pixels:<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinSNR=8</span><br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinPixCount=2</span><br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">For slightly larger, less intense peaks the following values typically work better<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinSNR=6</span><br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinPixCount=3</span><br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Each sample is different, and there is no substitute for looking at the peak finding performance and adjusting values to suit your data.   Inspect hits found using the “View Hits” button, then select “Crystals--&gt;Default crystal display settings” to circle the peaks found by Cheetah.  This will immediately give some idea of whether many peaks are being missed, or whether most found peaks are in fact junk.  The definition of what constitutes a peak, where to search and number of peaks to count as a hit can be adjusted accordingly. <br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Tweak values according to intuition - there is unfortunately no substitute for using your brain and intelligence.  <br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Note that peaks found by Cheetah can be used for indexing by CrystFEL.  Reliably selecting peaks at the hit finding stage benefits both indexing rate as well as accurate hit finding. <br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Source code::  source/libcheetah/src/peakfinder8.cpp<br /></p>
+                <ol>
+                  <li style="line-height: 13px; padding-left: 10px; text-indent: -10px; " class="full-width">
+                    <p style="text-indent: -10px; " class="paragraph_style_4"><span style="font-size: 0px; position: relative; top: -7px; " class="Bullet"></span><span style="width: 10px; " class="inline-block"></span><span class="style_2">int</span> peakfinder8(tPeakList *peaklist, <span class="style_2">float</span> *data, <span class="style_2">char</span> *mask, <span class="style_2">float</span> *pix_r, <span class="style_2">long</span> asic_nx, <span class="style_2">long</span> asic_ny, <span class="style_2">long</span> nasics_x, <span class="style_2">long</span> nasics_y, <span class="style_2">float</span> ADCthresh, <span class="style_2">float</span> hitfinderMinSNR, <span class="style_2">long</span> hitfinderMinPixCount, <span class="style_2">long</span> hitfinderMaxPixCount, <span class="style_2">long</span> hitfinderLocalBGRadius) {.....}<br /></p>
+                  </li>
+                </ol>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id9" style="height: 20px; left: 20px; position: absolute; top: 1268px; width: 515px; z-index: 1; " class="style_SkipStroke_3 shape-with-text">
+            <div class="text-content Normal_External_515_20" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="paragraph_style">4) maximum and minimum radius limits</p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id10" style="height: 265px; left: 19px; position: absolute; top: 1295px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_265" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Maximum and minimum radii for peak finding (or any hit finding) can be set using<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinRes</span> (inner radius of peak search, in pixels)<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMaxRes</span> (outer radius of peak search, in pixels)<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="paragraph_style_5">Advantage: <br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 8px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_6"><span style="font-size: 12px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span>Makes it very easy to focus on the low resolution region where the brightest Bragg peaks are found.<br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 8px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_6"><span style="font-size: 12px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span>Quick and easy<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <p class="paragraph_style_5">Dangers:<br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 8px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_6"><span style="font-size: 12px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span>No peaks are found outside of this region, by definition<br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 8px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_6"><span style="font-size: 12px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span>CrystFEL compares locations of found and predicted peaks to determine the per-pattern resolution cutoff.  Thus <span class="style_1">hitfinderMaxRes, by definition, sets an upper limit on the crystal resolution estimated by CrystFEL</span>.  This may affect your peak integration and final resolution.  Used too freely it may even limit the resolution of your whole data set. Be warned.  <br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 8px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_6"><span style="font-size: 12px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span>Additional peaks may help fine refinement of crystal orientation<br /></p>
+                  </li>
+                  <li style="line-height: 14px; padding-left: 8px; text-indent: -8px; " class="full-width">
+                    <p style="text-indent: -8px; " class="paragraph_style_6"><span style="font-size: 12px; " class="Bullet">-</span><span style="width: 3px; " class="inline-block"></span>peakograms become useless above outside of set limits. <br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+

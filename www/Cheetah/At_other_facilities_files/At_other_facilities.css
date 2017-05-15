@@ -31,14 +31,23 @@
     background: transparent;
     opacity: 1.00;
 }
+.style_SkipStroke {
+    background: transparent;
+    opacity: 1.00;
+}
+.style_SkipStroke_3 {
+    background: transparent;
+    opacity: 1.00;
+}
 .style_External_515_20 {
     bottom: 0px;
     position: relative;
     width: 515px;
 }
-.style_SkipStroke {
-    background: transparent;
-    opacity: 1.00;
+.style_External_609_87 {
+    bottom: 0px;
+    position: relative;
+    width: 609px;
 }
 .Free_Form {
     color: rgb(81, 81, 81);
@@ -62,8 +71,35 @@
     text-indent: 0px;
     text-transform: none;
 }
+.Header {
+    color: rgb(121, 121, 121);
+    font-family: 'HelveticaNeue-Light', 'Helvetica Neue', 'Arial', sans-serif;
+    font-size: 36px;
+    font-stretch: normal;
+    font-style: normal;
+    font-variant: normal;
+    font-weight: 300;
+    letter-spacing: 0;
+    line-height: 44px;
+    margin-bottom: 0px;
+    margin-left: 0px;
+    margin-right: 0px;
+    margin-top: 0px;
+    opacity: 1.00;
+    padding-bottom: 0px;
+    padding-top: 0px;
+    text-align: left;
+    text-decoration: none;
+    text-indent: 0px;
+    text-transform: none;
+}
 .Normal {
     padding: 0px;
+}
+.Normal_External_609_87 {
+    bottom: 0px;
+    position: absolute;
+    width: 609px;
 }
 .Normal_External_515_20 {
     bottom: 0px;
@@ -92,6 +128,10 @@
     text-indent: 0px;
     text-transform: none;
 }
+.graphic_generic_header_textbox_style_default_SkipStroke {
+    background: transparent;
+    opacity: 1.00;
+}
 .graphic_generic_title_textbox_style_default_SkipStroke {
     background: transparent;
     opacity: 1.00;
@@ -105,10 +145,10 @@
 .graphic_textbox_layout_style_default_External_662_62 {
     position: relative;
 }
-.graphic_textbox_layout_style_default_External_662_51 {
+.graphic_textbox_layout_style_default_External_662_78 {
     position: relative;
 }
-.graphic_textbox_layout_style_default_External_662_78 {
+.graphic_textbox_layout_style_default_External_662_51 {
     position: relative;
 }
 .graphic_textbox_style_default_SkipStroke {
@@ -150,6 +190,10 @@ a:hover {
     text-decoration: underline;
 }
 .bumper {
+    font-size: 1px;
+    line-height: 1px;
+}
+.tinyText {
     font-size: 1px;
     line-height: 1px;
 }

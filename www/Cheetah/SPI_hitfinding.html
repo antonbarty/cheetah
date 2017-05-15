@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <meta name="Generator" content="iWeb 3.0.4" />
+    <meta name="iWeb-Build" content="local-build-20170407" />
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE7" />
+    <meta name="viewport" content="width=700" />
+    <title>Single particle hit finding</title>
+    <link rel="stylesheet" type="text/css" media="screen,print" href="SPI_hitfinding_files/SPI_hitfinding.css" />
+    <!--[if lt IE 8]><link rel='stylesheet' type='text/css' media='screen,print' href='SPI_hitfinding_files/SPI_hitfindingIE.css'/><![endif]-->
+    <!--[if gte IE 8]><link rel='stylesheet' type='text/css' media='screen,print' href='Media/IE8.css'/><![endif]-->
+    <script type="text/javascript" src="Scripts/iWebSite.js"></script>
+    <script type="text/javascript" src="Scripts/Widgets/SharedResources/WidgetCommon.js"></script>
+    <script type="text/javascript" src="Scripts/Widgets/Navbar/navbar.js"></script>
+    <script type="text/javascript" src="SPI_hitfinding_files/SPI_hitfinding.js"></script>
+  </head>
+  <body style="background: rgb(101, 101, 101); margin: 0pt; " onload="onPageLoad();" onunload="onPageUnload();">
+    <div style="text-align: center; ">
+      <div style="margin-bottom: 10px; margin-left: auto; margin-right: auto; margin-top: 10px; overflow: hidden; position: relative; word-wrap: break-word;  background: rgb(255, 255, 255); text-align: left; width: 700px; " id="body_content">
+        <div style="margin-left: 0px; position: relative; width: 700px; z-index: 0; " id="nav_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div style="height: 1px; line-height: 1px; " class="tinyText"> </div>
+          <div class="com-apple-iweb-widget-navbar flowDefining" id="widget0" style="margin-left: 20px; margin-top: 24px; opacity: 1.00; position: relative; width: 660px; z-index: 1; ">
+    
+            <div id="widget0-navbar" class="navbar">
+
+      
+              <div id="widget0-bg" class="navbar-bg">
+
+        
+                <ul id="widget0-navbar-list" class="navbar-list">
+ <li></li> 
+</ul>
+                
+      
+</div>
+              
+    
+</div>
+          </div>
+          <script type="text/javascript"><!--//--><![CDATA[//><!--
+new NavBar('widget0', 'Scripts/Widgets/Navbar', 'Scripts/Widgets/SharedResources', '.', {"path-to-root": "", "navbar-css": ".navbar {\n\tfont-family: 'Helvetica Neue', Arial, sans-serif;\n\tfont-size: .8em;\n\tcolor: #666666;\n\tline-height: 30px;\n\tborder-bottom: 3px solid #ccc;\n}\n\n.navbar-bg {\n\ttext-align: right;}\n\n.navbar-bg ul {\n\tlist-style: none;\n\tmargin: 0px;\n\tpadding: 0px;\n}\n\n\nli {\n\tlist-style-type: none;\n\tdisplay: inline;\n\tpadding: 0px 5px 0px 0px;\n}\n\n\nli a {\n\ttext-decoration: none;\n\tpadding: 10px;\n\tcolor: #666666;\n\tfont-weight: bold;\n}\n\nli a:visited {\n\ttext-decoration: none;\n\tpadding: 10px;\n\tcolor: #666666;\n\tfont-weight: bold;\n}\n\nli a:hover\r{\r\n \tcolor: #999999;\n\ttext-decoration: none;\r}\n\n\nli.current-page a\r{\r\t color: #66ABC5;\n\ttext-decoration: none;\r}\n", "current-page-GUID": "BE7B420E-71E3-4D91-9DE5-53DCE10EA13A", "isCollectionPage": "NO"});
+//--><!]]></script>
+          <div style="clear: both; height: 0px; line-height: 0px; " class="spacer"> </div>
+        </div>
+        <div style="height: 141px; margin-left: 0px; position: relative; width: 700px; z-index: 10; " id="header_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div id="id1" style="height: 43px; left: 20px; position: absolute; top: 20px; width: 515px; z-index: 1; " class="style_SkipStroke shape-with-text">
+            <div class="text-content Normal_External_515_43" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="Header">Single particle hit finding</p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id2" style="height: 64px; left: 27px; position: absolute; top: 77px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_64" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Single particle hit finding:  <br /></p>
+                <p class="Free_Form">Save all frames with more than <span class="style">n</span> pixels above threshold<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p style="padding-bottom: 0pt; " class="Free_Form"><a title="ms2.ini.html" href="ms2.ini.html">Sample .ini file for hit finding using the pnccd detector</a></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="margin-left: 0px; position: relative; width: 700px; z-index: 5; " id="body_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div id="id3" style="height: 20px; left: 15px; position: absolute; top: 25px; width: 515px; z-index: 1; " class="style_SkipStroke_2 shape-with-text">
+            <div class="text-content Normal_External_515_20" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="paragraph_style">1)  detector corrections </p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id4" style="height: 587px; left: 22px; position: absolute; top: 50px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_587" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="Free_Form">Require care for single particle data sets because the signal is typically low, and there are no convenient bright Bragg peaks to look for.<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">For best results pay attention to the following:<br /></p>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="1">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">1.</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">Use a recent dark calibration</span>.  At least one per shift is recommended.  SPI signals are weak, photon conversion is very sensitive to drifts in detector offset of even a few counts, so more frequent measurement may be needed for SPI data. <br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="2">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; " class="Bullet">2.</span><span style="width: 3px; " class="inline-block"></span>Decide whether to use<span class="style_1"> common mode correction</span>.  It works well if all cspad modules have unbonded pixels.  If they do not, it produces bad results.  Look at a few powder patterns to see whether there is strange subtraction occurring.<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="3">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">3.</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">Use a recent geometry.</span> Hit finding is normally not very sensitive to a perfect geometry, particularly SPI data evaluation.  Usually the detector defaults are adequate, but it’s worth getting this right. Especially SAXS/WAXS traces benefit from use of a refined geometry so that radial averages are averaged across the same scattering angles. Accurate geometry files are best obtained using the results of crystal indexing.  Geometry refinement is extensively discussed on the <a title="http://www.desy.de/~twhite/crystfel/manual-geoptimiser.html" href="http://www.desy.de/~twhite/crystfel/manual-geoptimiser.html">CrystFEL web pages</a>.<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="4">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; position: relative; top: 0px; " class="Bullet">4.</span><span style="width: 3px; " class="inline-block"></span><span class="style_1">Use a recent bad pixel mask.</span>  New bad pixel masks need to be created each time the detector is rebuilt, and sometimes after it is damaged. A good idea to check they make sense (bad pixels are zeroed and ignored)<br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="5">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; " class="Bullet">5.</span><span style="width: 3px; " class="inline-block"></span>Check for <span class="style_1">regions to be excluded from analysis </span>and include in the peakmask. For example:<br />    - Regions shadowed by shroud, beamstop, or other equipment as in the above picture<br />    - Regions containing jet streaks<br />    - Powder rings from substrates or ice<br />Exclusion regions can change whenever the detector is moved, injector changed, or shift to shift.  Look for suspicious regions (shadows, jet positions) in the powder pattern for each run (View--&gt;powder).<br />Forgetting to exclude these regions from analysis (a) leads to false peaks, and (b) will pollute your indexing results with false reflection measurements when CrystFEL tries to integrate reflections predicted to be in these regions.<br />peakmask is a bad name; that’s historical (as described in the detector section). <br /></p>
+                  </li>
+                </ol>
+                <p class="Free_Form"><br /></p>
+                <ol>
+                  <li style="line-height: 14px; padding-left: 23px; text-indent: -13px; " class="full-width" value="6">
+                    <p style="text-indent: -13px; " class="paragraph_style_1"><span style="font-size: 12px; " class="Bullet">6.</span><span style="width: 3px; " class="inline-block"></span>Photon conversion is very useful for SPI data.  <br />You need to know the number of ADU for a single photon of given energy and set<br />    # Photon counting conversion<br />    photonCount=1<br />    photconv_ev=8600<br />    photconv_adu=27<br /><a title="histogram.ini.html" href="histogram.ini.html">Full detector histograms</a> from sparse photon signals are very useful for determining these values. <br /><br /><br /></p>
+                  </li>
+                </ol>
+                <p style="padding-bottom: 0pt; " class="Free_Form">See the <a title="Detector_correction.html" href="Detector_correction.html">Detector Corrections </a>page for more details. </p>
+              </div>
+            </div>
+          </div>
+          <div style="height: 637px; line-height: 637px; " class="spacer"> </div>
+        </div>
+        <div style="height: 334px; margin-left: 0px; position: relative; width: 700px; z-index: 15; " id="footer_layer">
+          <div style="height: 0px; line-height: 0px; " class="bumper"> </div>
+          <div id="id5" style="height: 20px; left: 20px; position: absolute; top: 31px; width: 515px; z-index: 1; " class="style_SkipStroke_2 shape-with-text">
+            <div class="text-content Normal_External_515_20" style="padding: 0px; ">
+              <div class="Normal">
+                <p style="padding-bottom: 0pt; padding-top: 0pt; " class="paragraph_style">Optimising hit finding</p>
+              </div>
+            </div>
+          </div>
+          
+
+
+          <div id="id6" style="height: 281px; left: 27px; position: absolute; top: 53px; width: 662px; z-index: 1; " class="style_SkipStroke_1 shape-with-text">
+            <div class="text-content graphic_textbox_layout_style_default_External_662_281" style="padding: 0px; ">
+              <div class="graphic_textbox_layout_style_default">
+                <p style="padding-top: 0pt; " class="paragraph_style_2">hitfinderAlgorithm=1: count number of pixels above threshold.<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">Threshold can either be in ADU (for data without photon conversion) or number of photons per pixel (if photon conversion has been performed). <br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">The key parameters to change are:<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderADC</span> (minimum ADC value for the threshold, applied over the entire image) <br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinPixCount</span> (number of pixels above threshold to qualify as a hit)<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMinRes</span> (inner radius of peak search, in pixels)<br /></p>
+                <p class="Free_Form">    <span class="style_1">hitfinderMaxRes</span> (outer radius of peak search, in pixels)<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form">    <span class="style_1">peakmask</span> (a user-defined pixel mask identifying regions of the image to exclude from peak searching)<br /></p>
+                <p class="Free_Form"><br /></p>
+                <p class="Free_Form"><span class="style_1"><br /></span></p>
+                <p class="Free_Form">There is no substitute for looking at the hit finding results.  You will have to play with your data to see what works for your experiment. Hard to offer further advice given the variability of SPI experiments to date and low level of signal. <br /></p>
+                <p class="Free_Form"><br /></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+
