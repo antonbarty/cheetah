@@ -103,7 +103,9 @@ namespace CXI{
 			*/
 			Node * addClass(const char * s);
 			Node * createGroup(const char * s);
-			Node * createGroup(const char * prefix, int n);
+            Node * createGroup(const char * prefix, int n);
+            Node * addCXIClass(const char * s);
+            Node * createCXIGroup(const char * prefix, int n);
 			Node * createLink(const char * s, std::string target);
 			Node * addDatasetLink(const char * s, std::string target);
 			
@@ -127,6 +129,7 @@ namespace CXI{
 			void openAll();
 			std::string path();
 			Node & child(std::string prefix, int n);
+            Node & cxichild(std::string prefix, int n);
 			void trimAll(int stackSize = -1);
 			uint getStackSlice();
             void setStackSlice(uint);
@@ -140,6 +143,7 @@ namespace CXI{
 			void addStackAttributes(hid_t dataset, int ndims, const char * userAxis);
 			hid_t writeNumEvents(hid_t dataset, int stackSlice);
 			std::string nextKey(const char * s);
+            std::string nextCXIKey(const char * s);
 			template <class T>
 				hid_t get_datatype(const T * foo);
 
