@@ -102,6 +102,27 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
                 self.table.setItem(row,col,newitem)
 
+                # Coloring of table elements
+                self.table.item(row,col).setBackground(PyQt5.QtGui.QColor(255,255,255))
+                if key=='XTC':
+                    if item=='Ready':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(200, 255, 200))
+                    if item == 'Copying':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
+
+                if key=='Cheetah':
+                    if item=='Finished':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(200, 255, 200))
+                    if item=='Not finished' or item=='Started':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(0, 255, 255))
+                    if item=='Submitted':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
+                    if item=='Terminated':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(255, 200, 200))
+                    if item=='Error':
+                        self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(255, 100, 100))
+
+
         # Table fiddling
         #TODO: Make columns resizeable
         self.table.setWordWrap(False)
@@ -439,6 +460,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(dataset))
             self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
             self.table.setItem(table_row, 3, PyQt5.QtWidgets.QTableWidgetItem('Submitted'))
+            self.table.item(table_row, 3).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
 
             # Update dataset file
             if run in dataset_csv['Run']:

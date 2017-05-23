@@ -385,6 +385,7 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
         # For files which have finished being written this can be inferred from the data array shape
         # For files still being written there are blank frames at the end, so look for non-zero entries in x_pixel_size
         # The minimum of these two values is the number of events actually written so far
+        #pix_size = hdf5_fh['entry_1/instrument_1/detector_1/data'][:]
         size = hdf5_fh['/entry_1/data_1/data'].shape
         nframes_1 = size[0]
 
