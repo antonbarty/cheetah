@@ -2213,7 +2213,9 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
      */
     pthread_mutex_lock(&global->saveCXI_mutex);
     global->nCXIHits += 1;
+    pthread_mutex_unlock(&global->saveCXI_mutex);       // Moved up here on 23 May, should work.... revert if problems
 
+    
     
     /*
      *  Write CXI and results data
@@ -2223,7 +2225,6 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
     
     
     
-	pthread_mutex_unlock(&global->saveCXI_mutex);
 	
 	
 	/*
