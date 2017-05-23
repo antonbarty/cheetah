@@ -305,6 +305,10 @@ namespace CXI{
 		std::string key = nextKey(s);
 		return createGroup(key.c_str());
 	}
+    Node * Node::addCXIClass(const char * s){
+        std::string key = nextCXIKey(s);
+        return createGroup(key.c_str());
+    }
 
     std::string Node::nextKey(const char * s){
         int i = 0;
@@ -312,6 +316,18 @@ namespace CXI{
         for(;;i++){
             //sprintf(buffer,"%s%d",s,i);
             sprintf(buffer,"%s%d",s,i);
+            if(children.find(buffer) == children.end()){
+                break;
+            }
+        }
+        return std::string(buffer);
+    }
+    std::string Node::nextCXIKey(const char * s){
+        int i = 1;
+        char buffer[1024];
+        for(;;i++){
+            //sprintf(buffer,"%s%d",s,i);
+            sprintf(buffer,"%s_%d",s,i);
             if(children.find(buffer) == children.end()){
                 break;
             }
@@ -336,8 +352,6 @@ namespace CXI{
 		}
 		return addNode(buffer,gid, Group);
 	}
-
-
     // CXI format specifies underscore and starting from 1 not 0
     // So we have a duplicate set of entries here to follow that format
     Node * Node::createCXIGroup(const char * prefix, int n){
@@ -350,28 +364,17 @@ namespace CXI{
         return addNode(buffer,gid, Group);
     }
     
-    Node * Node::addCXIClass(const char * s){
+
+    Node * Node::addClassLink(const char * s, std::string target){
+        std::string key = nextKey(s);
+        return createLink(key.c_str(), target);
+    }
+    Node * Node::addCXIClassLink(const char * s, std::string target){
         std::string key = nextCXIKey(s);
-        return createGroup(key.c_str());
-    }
-    std::string Node::nextCXIKey(const char * s){
-        int i = 1;
-        char buffer[1024];
-        for(;;i++){
-            //sprintf(buffer,"%s%d",s,i);
-            sprintf(buffer,"%s_%d",s,i);
-            if(children.find(buffer) == children.end()){
-                break;
-            }
-        }
-        return std::string(buffer);
+        return createLink(key.c_str(), target);
     }
 
-
-	Node * Node::addClassLink(const char * s, std::string target){
-		std::string key = nextKey(s);
-		return createLink(key.c_str(), target);
-	}
+    
 
 	Node * Node::addDatasetLink(const char * s, std::string target){
 		char buffer[1024];
@@ -742,7 +745,6 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
             Node* detector = lcls->createCXIGroup("detector",detIndex+1);
             detector->createStack("position",H5T_NATIVE_DOUBLE);
             detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
-            detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
         }
         instrument->createLink("experiment_identifier","/entry_1/experiment_identifier");
         
@@ -847,7 +849,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
             // /entry_1/instrument_1/detector_[i]/
             Node * detector = instrument->createCXIGroup("detector",detIndex+1);
             // Create symbolic link /entry_1/data_[i]/ which points to /entry_1/instrument_1/detector_[i]/
-            entry->addClassLink("data",detector->path().c_str());
+            entry->addCXIClassLink("data",detector->path().c_str());
 
             detector->createStack("distance",H5T_NATIVE_DOUBLE);
             detector->createStack("x_pixel_size",H5T_NATIVE_DOUBLE);
@@ -1788,7 +1790,7 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         detector->createStack("sum",H5T_NATIVE_FLOAT);
     }
     
-    Node *global_data = cheetah->createGroup("global_data");
+    Node *global_data = cheetah->createGroup("run_data");
     global_data->createStack("hit",H5T_NATIVE_INT);
     global_data->createStack("nPeaks",H5T_NATIVE_INT);
     
@@ -1997,7 +1999,7 @@ void writeAccumulatedCXI(cGlobal * global){
 				continue;
 			
 			pthread_mutex_lock(&global->saveCXI_mutex);
-			Node & det_node = (*cxi)["cheetah"]["global_data"].child("detector",detIndex);
+			Node & det_node = (*cxi)["cheetah"]["run_data"].child("detector",detIndex);
 			Node & cl = det_node.child("class",powderClass);
 			FOREACH_DATAFORMAT_T(i_f, cDataVersion::DATA_FORMATS) {
 				if (isBitOptionSet(global->detector[detIndex].powderFormat,*i_f)) {
@@ -2157,8 +2159,8 @@ void writeCXIHitstats(cEventData *info, cGlobal *global ){
 	CXI::Node * cxi = getResultsFileByName(global, info, info->powderClass);
 
 	pthread_mutex_lock(&global->saveCXI_mutex);
-	(*cxi)["cheetah"]["global_data"]["hit"].write(&info->hit,global->nCXIEvents);
-	(*cxi)["cheetah"]["global_data"]["nPeaks"].write(&info->nPeaks,global->nCXIEvents);
+	(*cxi)["cheetah"]["run_data"]["hit"].write(&info->hit,global->nCXIEvents);
+	(*cxi)["cheetah"]["run_data"]["nPeaks"].write(&info->nPeaks,global->nCXIEvents);
 	global->nCXIEvents += 1;
 	#ifdef H5F_ACC_SWMR_WRITE
 	if(global->cxiSWMR){
@@ -2210,12 +2212,12 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
      *	Lock writing to one thread at a time to ensure stack synchronisation
      */
     pthread_mutex_lock(&global->saveCXI_mutex);
+    global->nCXIHits += 1;
 
     
     /*
      *  Write CXI and results data
      */
-    global->nCXIHits += 1;
     writeCXIData(cxi, eventData, global, stackSlice);
     writeResultsData(results, eventData, global, stackSlice);
     
@@ -2271,7 +2273,6 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         DETECTOR_LOOP{
             lcls.cxichild("detector",detIndex+1)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
             lcls.cxichild("detector",detIndex+1)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
-            lcls.cxichild("detector",detIndex+1)["SolidAngleConst"].write(&global->detector[detIndex].solidAngleConst,stackSlice);
         }
         
         if(global->cxiLegacyFileFormat == 2015) {
@@ -2744,7 +2745,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
     event_data["hit"].write(&eventData->hit,stackSlice);
     
     DETECTOR_LOOP{
-        Node & detector = root["cheetah"]["global_data"].child("detector",detIndex);
+        Node & detector = root["cheetah"]["run_data"].child("detector",detIndex);
         detector["lastBgUpdate"].write(&global->detector[detIndex].bgLastUpdate,stackSlice);
         detector["nHot"].write(&global->detector[detIndex].nHot,stackSlice);
         detector["lastHotPixUpdate"].write(&global->detector[detIndex].hotPixLastUpdate,stackSlice);

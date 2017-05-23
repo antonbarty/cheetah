@@ -107,6 +107,7 @@ namespace CXI{
             Node * addCXIClass(const char * s);
             Node * createCXIGroup(const char * prefix, int n);
 			Node * createLink(const char * s, std::string target);
+            Node * addCXIClassLink(const char * s, std::string target);
 			Node * addDatasetLink(const char * s, std::string target);
 			
 			/*

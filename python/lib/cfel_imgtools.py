@@ -39,8 +39,15 @@ def histogram_clip_levels(data, value):
     w_top = numpy.where(c <= (1-value))
     w_bottom = numpy.where(c >= value)
 
-    i_top = numpy.amax(w_top)
-    i_bottom = numpy.amin(w_bottom)
+    try:
+        i_top = numpy.amax(w_top)
+    except:
+        i_top = c.size
+
+    try:
+        i_bottom = numpy.amin(w_bottom)
+    except:
+        i_bottom = 0
 
 
     bottom = e[i_bottom]
