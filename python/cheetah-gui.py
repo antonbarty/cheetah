@@ -107,7 +107,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 if key=='XTC':
                     if item=='Ready':
                         self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(200, 255, 200))
-                    if item == 'Copying':
+                    if item == 'Copying' or item == 'Restoring':
                         self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
 
                 if key=='Cheetah':

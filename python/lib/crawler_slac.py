@@ -53,6 +53,12 @@ def scan_data(data_dir):
                 run_indx = run_list.index(thisrun)
                 status[run_indx] = 'Copying'
 
+        if filename.endswith('.fromtape'):
+            thisrun = filename.split('-')[1]
+            thisrun = thisrun[1:5]
+            if thisrun in run_list:
+                run_indx = run_list.index(thisrun)
+                status[run_indx] = 'Restoring'
 
     # Create the result
     result = {
