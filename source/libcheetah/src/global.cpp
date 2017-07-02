@@ -60,6 +60,11 @@ cGlobal::cGlobal(void)
         strcpy(detector[i].configGroup, "none");
         detector[i].detectorID = i;
     }
+	
+	for(long powderClass=0; powderClass<nPowderClasses; powderClass++){
+		nPowderFrames[powderClass] = 0;
+		nFramesSavedPerClass[powderClass] = 0;
+	}
 
     // Statistics
     summedPhotonEnergyeV = 0;
@@ -84,6 +89,7 @@ cGlobal::cGlobal(void)
 
     // Misc. PV values
     nEpicsPvFloatValues = 0;
+	nEvrValuesToSave = 0;
 
     // Start and stop frames
     startAtFrame = 0;
@@ -323,6 +329,9 @@ void cGlobal::setup()
         else if (strcmp(pumpLaserScheme, "LK27") == 0) {
             nPowderClasses = 8;
         }
+		else if (strcmp(pumpLaserScheme, "LP41") == 0) {
+			nPowderClasses = 5;
+		}
         else {
             printf("Error: Unknown pump laser scheme\n");
             printf("pumpLaserScheme = %s\n", pumpLaserScheme);
@@ -961,6 +970,10 @@ int cGlobal::parseConfigTag(char *tag, char *value)
         strcpy(&epicsPvFloatAddresses[nEpicsPvFloatValues][0], value);
         nEpicsPvFloatValues++;
     }
+	else if (!strcmp(tag, "saveevr")) {
+		evrValuesToSave[nEvrValuesToSave] = atoi(value);
+		nEvrValuesToSave++;
+	}
     else if (!strcmp(tag, "startatframe")) {
         startAtFrame = atoi(value);
     }

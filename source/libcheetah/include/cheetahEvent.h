@@ -47,6 +47,7 @@ public:
 
 	// Misc. EPICS data
 	float       epicsPvFloatValues[MAX_EPICS_PVS];
+	int			evrValue[MAX_EPICS_PVS];
 	
 	// TOF Detector data
 	cTOFDetectorEvent		tofDetector[MAX_TOF_DETECTORS];

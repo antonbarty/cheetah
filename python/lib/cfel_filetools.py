@@ -124,7 +124,7 @@ def read_h5(filename='', field="/data/data"):
             fp.close()
     except:
         print('Error reading field ', field, ' from ', filename)
-        data = []
+        data = np.nan
 
 
     # return
@@ -264,16 +264,24 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
     :return:
     """
 
+    # Assume reading has not worked unless we get what we expect
+    fail = True
+
     if event_list['format'][eventID] == 'cxi':
         event_data = read_cxi(event_list['filename'][eventID], event_list['event'][eventID], data=data, peaks=peaks, mask=mask, photon_energy=photon_energy, camera_length=camera_length, num_frames=num_frames, slab_size=slab_size)
+        fail = True
     #end cxi
 
     elif event_list['format'][eventID] == 'cheetah_h5':
         data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
         # Need to add reading of peaks, photon energy, detector distance
         # Lower priority since this is an old file format
+        if data is np.nan:
+            fail = True
+        # Need to add: Fail if data is not 2D array
 
         event_data = {
+            'fail' : fail,
             'data': data_array,
             'data_shape': data_array.shape,
             'mask': [0],
@@ -287,7 +295,10 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
 
     elif event_list['format'][eventID] == 'generic_h5':
         data_array = read_h5(event_list['filename'][eventID], field=event_list['h5field'][eventID])
+        fail = False
+
         event_data = {
+            'fail' : fail,
             'data': data_array,
             'data_shape': data_array.shape,
             'mask': [0],
@@ -299,6 +310,7 @@ def read_event(event_list, eventID, data=False, mask=False, peaks=False, photon_
 
     else:
         print("Unsupported file format: ", event_list['format'][eventID])
+        fail = True
         exit(1)
     #end error
 
