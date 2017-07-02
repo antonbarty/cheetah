@@ -48,9 +48,16 @@ public:
 	float    defaultPhotonEnergyeV;
 
 	float    fixedPhotonEnergyeV;
+	
+	// EPICS values to save
 	char     epicsPvFloatAddresses[MAX_EPICS_PVS][MAX_EPICS_PV_NAME_LENGTH];
 	int      nEpicsPvFloatValues;
 
+	// EVR values to save
+	int		 evrValuesToSave[MAX_EPICS_PVS];
+	int      nEvrValuesToSave;
+	
+	
 	/** @brief Number of pixel-array detectors present. */
 	int      nDetectors;
 
@@ -390,7 +397,8 @@ public:
 	 *	Powder patterns/sums
 	 */
 	long     nPowderClasses;
-	long     nPowderFrames[MAX_POWDER_CLASSES];
+	long	 nPowderFrames[MAX_POWDER_CLASSES];
+	long     nFramesSavedPerClass[MAX_POWDER_CLASSES];
 	FILE    *powderlogfp[MAX_POWDER_CLASSES];
 	FILE	*framelist[MAX_POWDER_CLASSES];
 	int nPeaksMin[MAX_POWDER_CLASSES];
@@ -409,8 +417,9 @@ public:
 	long     nrecentprocessedframes;
 	long     nrecenthits;
     long     nespechits;
-    long	nCXIEvents;
-    long	nCXIHits;
+    long	 nCXIEvents;
+    long	 nCXIHits;
+	long     nCXIFramesSaved[MAX_POWDER_CLASSES];
     
 	// FEE spectrum
 	int		useFEEspectrum;

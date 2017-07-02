@@ -154,7 +154,11 @@ namespace cheetah_ana_pkg {
             if (verbose) {
                 cout << "***** beamOn: " << beamOn << endl;
             }
-            
+			
+			for(long i=0; i < cheetahGlobal.nEvrValuesToSave; i++) {
+				eventData->evrValue[i] = eventCodePresent(data4->fifoEvents(), cheetahGlobal.evrValuesToSave[i]);
+			}
+				
             /*
              *  Pump laser schemas (EvrData::DataV4)
              *  Search for 'Pump laser logic' to find all places in which code needs to be changed to implement a new schema
@@ -217,6 +221,32 @@ namespace cheetah_ana_pkg {
 				if(evr180) pumpLaserCode = 2;
 				if(evr181) pumpLaserCode = 3;
 			}
+			// Standfuss, June 2017 LP41
+			else if(strcmp(cheetahGlobal.pumpLaserScheme, "LP41") == 0) {
+				//  Step  EventCode  X-ray	           Device
+				//	0	   42        Sync pulse (30Hz)
+				//  1     183        X-ray pulse 1     Delay 1 (30Hz)
+				//  2     179        X-ray pulse 2     Delay 2 (30Hz)
+				//  3     180        X-ray pulse 3     Delay 3 (30Hz)
+				//  4     192        X-ray pulse 4     Delay 4 (30Hz)
+				//
+				// IR camera = evr140
+				// Dropshots = evr162
+				
+				int evr42 = eventCodePresent(data4->fifoEvents(), 42);
+				int evr179 = eventCodePresent(data4->fifoEvents(), 179);
+				int evr180 = eventCodePresent(data4->fifoEvents(), 180);
+				int evr183 = eventCodePresent(data4->fifoEvents(), 183);
+				int evr192 = eventCodePresent(data4->fifoEvents(), 192);
+				
+				pumpLaserOn = evr183;
+				if(evr183) pumpLaserCode = 0;
+				if(evr179) pumpLaserCode = 1;
+				if(evr180) pumpLaserCode = 2;
+				if(evr192) pumpLaserCode = 3;
+				printf("evr{42,183,179,180,192} = {%li,%li,%li,%li}\n", evr42, evr183, evr179, evr180, evr192);
+			}
+			
 		}
 		else if (data3.get()) {
 			   numEvrData = data3->numFifoEvents();
@@ -1172,8 +1202,9 @@ namespace cheetah_ana_pkg {
 					long tt_nn = tt_nx*tt_ny;
 					long value;
 					
-					eventData->TimeTool_hproj = (float*) malloc(tt_nx * sizeof(float));
-					eventData->TimeTool_vproj = (float*) malloc(tt_ny * sizeof(float));
+					// Want to start with a zeroed array
+					eventData->TimeTool_hproj = (float*) calloc(tt_nx, sizeof(float));
+					eventData->TimeTool_vproj = (float*) calloc(tt_ny, sizeof(float));
 					
 					if(eventData->TimeTool_hproj == NULL || eventData->TimeTool_vproj == NULL )
 						printf("Event %li: Warning: Error allocating memory for time tool\n", frameNumber);
@@ -1182,6 +1213,8 @@ namespace cheetah_ana_pkg {
 					for(long jj=0; jj<tt_ny; jj++) {
 						for(long ii=0; ii<tt_nx; ii++) {
 							value = data16[jj][ii];
+							//if(value < 0 || value > 10000)
+							//	continue;
 							eventData->TimeTool_hproj[ii] += value;
 							eventData->TimeTool_vproj[jj] += value;
 						}
