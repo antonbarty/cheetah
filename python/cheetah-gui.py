@@ -199,8 +199,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     def list_experiments(self):
 
         expfile = os.path.expanduser('~/.cheetah-crawler')
-        #expfile = '~/.cheetah-crawler'
-        #expfile = './cheetah-crawler'
 
         # Does it exist?
         if os.path.isfile(expfile):
@@ -217,6 +215,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
         return exptlist
     #end list_experiments
+
 
     #
     #   Set up a new experiment based on template and selected directory
