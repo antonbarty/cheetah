@@ -490,6 +490,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
             out += u"\u0305"
             
         return out
+    #end _overline_string()
 
     def mouse_in_predicted_peak(self, mouse_x, mouse_y, text):
         """

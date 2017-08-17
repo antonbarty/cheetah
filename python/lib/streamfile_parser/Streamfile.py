@@ -5,6 +5,7 @@
 
 import tempfile
 import os
+import sys
 import textwrap
 
 from  ..geometry_parser import GeometryFileParser as geom
@@ -368,6 +369,11 @@ class Streamfile:
                     skip_chunk = False
                     flag_changed = True
 
+                    # Update the user, particularly useful for very long stream files which take a long time to read
+                    if len(self.chunks) % 1000 == 0:
+                        sys.stdout.write("\r%i CrystFEL chunks loaded" % len(self.chunks))
+                        sys.stdout.flush()
+
 
                 # Process active flags, python dictionary switch-case
                 # alternative doesn't work here because we may need to
@@ -401,3 +407,7 @@ class Streamfile:
         except IOError:
             print("Cannot read from streamfile: ", self.filename)
             exit()
+
+        print("   ")
+        print("Stream file processed: ", self.filename)
+        print("Number of CrystFEL chunks: ", len(self.chunks))
