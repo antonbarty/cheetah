@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/gui_configuration.py" afterPath="$PROJECT_DIR$/lib/gui_configuration.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../source/libcheetah/src/detectorObject.cpp" afterPath="$PROJECT_DIR$/../source/libcheetah/src/detectorObject.cpp" />
-    </list>
+    <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="" />
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -44,11 +41,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gui_configuration.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="gui_configuration.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="406">
-              <caret line="175" column="38" lean-forward="true" selection-start-line="175" selection-start-column="38" selection-end-line="175" selection-end-column="38" />
+            <state relative-caret-position="343">
+              <caret line="186" column="38" lean-forward="true" selection-start-line="186" selection-start-column="38" selection-end-line="186" selection-end-column="38" />
               <folding>
                 <element signature="e#139#148#0" expanded="true" />
               </folding>
@@ -59,14 +56,14 @@
       <file leaf-file-name="cfel_filetools.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="239">
+            <state relative-caret-position="270">
               <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gui_dialogs.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="gui_dialogs.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="-386">
@@ -492,14 +489,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="239">
-          <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="515">
@@ -510,22 +499,30 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="343">
+          <caret line="186" column="38" lean-forward="true" selection-start-line="186" selection-start-column="38" selection-end-line="186" selection-end-column="38" />
+          <folding>
+            <element signature="e#139#148#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="270">
+          <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="-386">
           <caret line="224" column="34" lean-forward="true" selection-start-line="224" selection-start-column="34" selection-end-line="224" selection-end-column="34" />
           <folding>
             <element signature="e#1#10#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="406">
-          <caret line="175" column="38" lean-forward="true" selection-start-line="175" selection-start-column="38" selection-end-line="175" selection-end-column="38" />
-          <folding>
-            <element signature="e#139#148#0" expanded="true" />
           </folding>
         </state>
       </provider>

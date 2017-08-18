@@ -225,7 +225,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 	 */
 	printf("Configuring for detector: %s\n",detectorName);
 	
-	if(strcmp(detectorType, "cspad") || strcmp(detectorName, "cspad") ||
+	if(strcmp(detectorType, "cspad") == 0 || strcmp(detectorName, "cspad")==0 ||
 	   strcmp(detectorName, "CxiDs1") == 0 || strcmp(detectorName, "CxiDs2") == 0 ||
 	   strcmp(detectorName, "CxiDsd") == 0 || strcmp(detectorName, "XppGon") == 0) {
 		strcpy(detectorType, "cspad");
@@ -238,7 +238,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = CSPAD_ASIC_NY*CSPAD_nASICS_Y;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	} else if(strcmp(detectorType, "cspad2x2") || strcmp(detectorName, "cspad2x2") ||
+	} else if(strcmp(detectorType, "cspad2x2") == 0 || strcmp(detectorName, "cspad2x2") == 0 ||
 			  strcmp(detectorName, "CxiSc2") == 0 || strcmp(detectorName, "CxiDg2") == 0) {
 		strcpy(detectorType, "cspad2x2");
 		asic_nx = CSPAD_ASIC_NX;
@@ -250,7 +250,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = nasics_y*asic_ny;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	} else if(strcmp(detectorType, "pnccd") || strcmp(detectorName, "pnCCD") == 0 ) {
+	} else if(strcmp(detectorType, "pnccd") == 0 || strcmp(detectorName, "pnCCD") == 0 ) {
 		strcpy(detectorType, "pnccd");
 		asic_nx = PNCCD_ASIC_NX;
 		asic_ny = PNCCD_ASIC_NY;
@@ -263,7 +263,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 75e-6;
 		
 	}
-	else if(strcmp(detectorType, "sacla_mpCCD") || strcmp(detectorName, "sacla_mpCCD") == 0 ) {
+	else if(strcmp(detectorType, "sacla_mpCCD") == 0 || strcmp(detectorName, "sacla_mpCCD") == 0 ) {
 		strcpy(detectorType, "sacla_mpCCD");
 		asic_nx = mpCCD_ASIC_NX;
 		asic_ny = mpCCD_ASIC_NY;
@@ -276,7 +276,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 50e-6;
       
 	}
-	else if(strcmp(detectorType, "mx170hs-1x") || strcmp(detectorName, "mx170hs-1x") == 0 ) {
+	else if(strcmp(detectorType, "mx170hs-1x") == 0 || strcmp(detectorName, "mx170hs-1x") == 0 ) {
 		strcpy(detectorType, "mx170hs-1x");
 		asic_nx = MX170HS_ASIC_NX;
 		asic_ny = MX170HS_ASIC_NY;
@@ -289,7 +289,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 44e-6;
 		
 	}
-	else if(strcmp(detectorType, "mx170hs-2x") || strcmp(detectorName, "mx170hs-2x") == 0 ) {
+	else if(strcmp(detectorType, "mx170hs-2x") == 0 || strcmp(detectorName, "mx170hs-2x") == 0 ) {
 		strcpy(detectorType, "mx170hs-2x");
 		asic_nx = MX170HS_ASIC_NX/2;
 		asic_ny = MX170HS_ASIC_NY/2;
@@ -302,7 +302,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 89e-6;
 		
 	}
-    else if(strcmp(detectorType, "pilatus6M") || strcmp(detectorName, "pilatus6M") == 0 ) {
+    else if(strcmp(detectorType, "pilatus6M") == 0 || strcmp(detectorName, "pilatus6M") == 0 ) {
 		strcpy(detectorType, "pilatus6M");
 		asic_nx = PILATUS6M_ASIC_NX;
 		asic_ny = PILATUS6M_ASIC_NY;
