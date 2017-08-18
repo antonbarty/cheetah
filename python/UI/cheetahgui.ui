@@ -280,6 +280,7 @@
     <addaction name="menu_file_command"/>
     <addaction name="menu_file_startcrawler"/>
     <addaction name="menu_file_newgeometry"/>
+    <addaction name="menu_file_modify_beamline_configuration"/>
     <addaction name="separator"/>
     <addaction name="menu_file_quit"/>
    </widget>
@@ -673,6 +674,11 @@
   <action name="menu_calib_cxiviewgeom">
    <property name="text">
     <string>Set current geometry (.geom/.h5 for cxiview)</string>
+   </property>
+  </action>
+  <action name="menu_file_modify_beamline_configuration">
+   <property name="text">
+    <string>Modify beamline configuration</string>
    </property>
   </action>
  </widget>

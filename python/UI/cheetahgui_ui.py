@@ -262,9 +262,12 @@ class Ui_MainWindow(object):
         self.menu_calib_setdarkrun.setObjectName("menu_calib_setdarkrun")
         self.menu_calib_cxiviewgeom = QtWidgets.QAction(MainWindow)
         self.menu_calib_cxiviewgeom.setObjectName("menu_calib_cxiviewgeom")
+        self.menu_file_modify_beamline_configuration = QtWidgets.QAction(MainWindow)
+        self.menu_file_modify_beamline_configuration.setObjectName("menu_file_modify_beamline_configuration")
         self.menuFile.addAction(self.menu_file_command)
         self.menuFile.addAction(self.menu_file_startcrawler)
         self.menuFile.addAction(self.menu_file_newgeometry)
+        self.menuFile.addAction(self.menu_file_modify_beamline_configuration)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.menu_file_quit)
         self.menuCheetah.addAction(self.menu_cheetah_processselected)
@@ -420,4 +423,5 @@ class Ui_MainWindow(object):
         self.menu_calib_geomtopixmap.setText(_translate("MainWindow", "Geometry to pixelmap (.geom to .h5)"))
         self.menu_calib_setdarkrun.setText(_translate("MainWindow", "Set run as current darkcal (copy + set)"))
         self.menu_calib_cxiviewgeom.setText(_translate("MainWindow", "Set current geometry (.geom/.h5 for cxiview)"))
+        self.menu_file_modify_beamline_configuration.setText(_translate("MainWindow", "Modify beamline configuration"))
 

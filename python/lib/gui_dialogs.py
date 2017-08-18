@@ -27,8 +27,6 @@ class expt_select_gui(PyQt5.QtWidgets.QDialog):
 
         # Combo box for experiment list
         self.cb = PyQt5.QtWidgets.QComboBox()
-        #self.cb.addItem("C")
-        #self.cb.addItems(["Java", "C#", "Python"])
         self.cb.addItems(explist)
         layout.addWidget(self.cb)
 
@@ -168,6 +166,99 @@ class run_cheetah_gui(PyQt5.QtWidgets.QDialog):
         selection = dialog.getCheetahIni()
         return (selection, result == PyQt5.QtWidgets.QDialog.Accepted)
 
+#
+#   Dialog box for configuring Cheetah options
+#
+class configure_cheetah_lcls_gui(PyQt5.QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(configure_cheetah_lcls_gui, self).__init__(parent)
+
+        detectorTypes = ['cspad','cspad2x2','mx170hs-1x','mx170hs-2x','pnCCD','sacla_mpCCD','pilatus6M']
+        detectorNames = ['CxiDs1.0:Cspad.0','CxiDs2.0:Cspad.0','CxiDsd.0:Cspad.0','DscCsPad','MfxEndstation.0:Cspad.0','XppGon.0:Cspad.0',
+                         'CxiEndstation.0:Rayonix.0','MfxEndstation.0:Rayonix.0','XppGon.0:Rayonix.0',
+                         'Camp.0:pnCCD.0','Camp.0:pnCCD.1']
+        detectorZEncoder = ['CXI:DS2:MMS:06.RBV','CXI:DS2:MMS:06.RBV','MFX:DET:MMS:04.RBV']
+
+
+        layout = PyQt5.QtWidgets.QVBoxLayout(self)
+        self.setWindowTitle("Configure for LCLS instrument")
+
+        # Add a useful label
+        self.label1a = PyQt5.QtWidgets.QLabel()
+        self.label1a.setText("Change the following in relevent locations:")
+        layout.addWidget(self.label1a)
+
+
+        # Combo box for detector type
+        layout2 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label2 = PyQt5.QtWidgets.QLabel()
+        self.label2.setText("Detector type: ")
+        self.cb2 = PyQt5.QtWidgets.QComboBox()
+        self.cb2.addItems(detectorTypes)
+        layout2.addWidget(self.label2)
+        layout2.addWidget(self.cb2)
+        layout.addLayout(layout2)
+
+        # Combo box for detector name
+        layout3 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label3 = PyQt5.QtWidgets.QLabel()
+        self.label3.setText("Detector name: ")
+        self.cb3 = PyQt5.QtWidgets.QComboBox()
+        self.cb3.addItems(detectorNames)
+        layout3.addWidget(self.label3)
+        layout3.addWidget(self.cb3)
+        layout.addLayout(layout3)
+
+        # Combo box for detector distance encoder
+        layout4 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label4 = PyQt5.QtWidgets.QLabel()
+        self.label4.setText("Detector distance encoder: ")
+        self.cb4 = PyQt5.QtWidgets.QComboBox()
+        self.cb4.addItems(detectorZEncoder)
+        layout4.addWidget(self.label4)
+        layout4.addWidget(self.cb4)
+        layout.addLayout(layout4)
+
+        # Add for default geometry
+        # Add for default masks
+
+        #inifile_list = []
+        #for file in glob.iglob('../process/*.ini'):
+        #    basename = os.path.basename(file)
+        #    inifile_list.append(basename)
+
+
+        # Get out of here
+        self.label1b = PyQt5.QtWidgets.QLabel()
+        self.label1b.setText("(Cancel will make no changes and retain existing values)")
+        layout.addWidget(self.label1b)
+
+
+        # Default OK and Cancel buttons
+        self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox(self)
+        self.buttonBox.setOrientation(PyQt5.QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(
+            PyQt5.QtWidgets.QDialogButtonBox.Ok | PyQt5.QtWidgets.QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addWidget(self.buttonBox)
+
+    # get selected text
+    def getCheetahConfig(self):
+        selection = {
+            'detectorType' : self.cb2.currentText(),
+            'dataSource' : self.cb3.currentText(),
+            'detectorZEncoder' : self.cb4.currentText()
+        }
+        return selection
+
+    # static method to create the dialog and return
+    @staticmethod
+    def configure_cheetah_dialog(parent=None):
+        dialog = configure_cheetah_lcls_gui(parent=parent)
+        result = dialog.exec_()
+        selection = dialog.getCheetahConfig()
+        return (selection, result == PyQt5.QtWidgets.QDialog.Accepted)
 
 
 #
