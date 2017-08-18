@@ -225,7 +225,8 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 	 */
 	printf("Configuring for detector: %s\n",detectorName);
 	
-	if(strcmp(detectorName, "CxiDs1") == 0 || strcmp(detectorName, "CxiDs2") == 0 ||
+	if(strcmp(detectorType, "cspad") || strcmp(detectorName, "cspad") ||
+	   strcmp(detectorName, "CxiDs1") == 0 || strcmp(detectorName, "CxiDs2") == 0 ||
 	   strcmp(detectorName, "CxiDsd") == 0 || strcmp(detectorName, "XppGon") == 0) {
 		strcpy(detectorType, "cspad");
 		asic_nx = CSPAD_ASIC_NX;
@@ -237,7 +238,8 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = CSPAD_ASIC_NY*CSPAD_nASICS_Y;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	} else if(strcmp(detectorName, "CxiSc2") == 0 || strcmp(detectorName, "CxiDg2") == 0) {
+	} else if(strcmp(detectorType, "cspad2x2") || strcmp(detectorName, "cspad2x2") ||
+			  strcmp(detectorName, "CxiSc2") == 0 || strcmp(detectorName, "CxiDg2") == 0) {
 		strcpy(detectorType, "cspad2x2");
 		asic_nx = CSPAD_ASIC_NX;
 		asic_ny = CSPAD_ASIC_NY;
@@ -248,7 +250,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = nasics_y*asic_ny;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	} else if(strcmp(detectorName, "pnCCD") == 0 ) {
+	} else if(strcmp(detectorType, "pnccd") || strcmp(detectorName, "pnCCD") == 0 ) {
 		strcpy(detectorType, "pnccd");
 		asic_nx = PNCCD_ASIC_NX;
 		asic_ny = PNCCD_ASIC_NY;
@@ -261,7 +263,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 75e-6;
 		
 	}
-	else if(strcmp(detectorName, "sacla_mpCCD") == 0 ) {
+	else if(strcmp(detectorType, "sacla_mpCCD") || strcmp(detectorName, "sacla_mpCCD") == 0 ) {
 		strcpy(detectorType, "sacla_mpCCD");
 		asic_nx = mpCCD_ASIC_NX;
 		asic_ny = mpCCD_ASIC_NY;
@@ -274,7 +276,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 50e-6;
       
 	}
-	else if(strcmp(detectorName, "mx170hs-1x") == 0 ) {
+	else if(strcmp(detectorType, "mx170hs-1x") || strcmp(detectorName, "mx170hs-1x") == 0 ) {
 		strcpy(detectorType, "mx170hs-1x");
 		asic_nx = MX170HS_ASIC_NX;
 		asic_ny = MX170HS_ASIC_NY;
@@ -287,7 +289,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 44e-6;
 		
 	}
-	else if(strcmp(detectorName, "mx170hs-2x") == 0 ) {
+	else if(strcmp(detectorType, "mx170hs-2x") || strcmp(detectorName, "mx170hs-2x") == 0 ) {
 		strcpy(detectorType, "mx170hs-2x");
 		asic_nx = MX170HS_ASIC_NX/2;
 		asic_ny = MX170HS_ASIC_NY/2;
@@ -300,7 +302,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 89e-6;
 		
 	}
-    else if(strcmp(detectorName, "pilatus6M") == 0 ) {
+    else if(strcmp(detectorType, "pilatus6M") || strcmp(detectorName, "pilatus6M") == 0 ) {
 		strcpy(detectorType, "pilatus6M");
 		asic_nx = PILATUS6M_ASIC_NX;
 		asic_ny = PILATUS6M_ASIC_NY;
@@ -315,6 +317,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 	}
 	else {
 		printf("Error: unknown detector name %s\n", detectorName);
+		printf("Detector type %s\n", detectorType);
 		printf("cPixelDetectorCommon::configure()\n");
 		printf("Quitting\n");
 		exit(1);
@@ -1409,37 +1412,9 @@ void cPixelDetectorCommon::readDarkcal(char *filename)
 
     // Correct geometry?
     if (temp2d.nx != pix_nx || temp2d.ny != pix_ny) {
-        printf("\tGeometry mismatch: %lix%li != %lix%li\n", temp2d.nx, temp2d.ny, pix_nx, pix_ny);
+        printf("\tGeometry mismatch: Darkcal is %lix%li != Detector %lix%li\n", temp2d.nx, temp2d.ny, pix_nx, pix_ny);
         printf("\tAborting...\n");
         exit(1);
-    }
-
-    // Correct detector name?
-    if (strcmp(temp2d.detectorName, "") == 0) {
-        printf(
-                "\tWARNING: The attribute detectorName could not be read from the darkcal file. Cannot verify whether the darkcal file was generated from the detector of the specified detector type.\n");
-    } else {
-        if (strcmp(temp2d.detectorName, detectorName) == 0) {
-            printf("\tDetector names from darkcal (%s) and the associated detector (%s) match.\n", temp2d.detectorName, detectorName);
-        } else {
-            printf("\tDetector names from darkcal (%s) and the associated detector (%s) do not match.\n", temp2d.detectorName, detectorName);
-            printf("\tAborting...\n");
-            exit(1);
-        }
-    }
-
-    // Correct detector ID?
-    if (temp2d.detectorID == -1) {
-        printf(
-                "\tWARNING: The attribute detectorID could not be read from the darkcal file. Cannot verify whether the darkcal file was generated from the detector of the specified detector ID.\n");
-    } else {
-        if (temp2d.detectorID == detectorID) {
-            printf("\tDetector IDs from darkcal (%li) and the associated detector (%li) match.\n", temp2d.detectorID, detectorID);
-        } else {
-            printf("\tDetector IDs from darkcal (%li) and the associated detector (%li) do not match.\n", temp2d.detectorID, detectorID);
-            printf("\tAborting...\n");
-            exit(1);
-        }
     }
 
     // Copy into darkcal array

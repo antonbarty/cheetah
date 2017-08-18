@@ -170,6 +170,8 @@ def modify_cheetah_config_files(self):
     for file in glob.iglob(prefix+'/process/*.ini'):
         cmd = ["sed", "-i", "-r", "/^detectorType/s/(detectorType=).*/\\1" + detectorType + "/", file]
         cfel_file.spawn_subprocess(cmd, wait=True)
+        cmd = ["sed", "-i", "-r", "/^detectorName/s/(detectorName=).*/\\1" + detectorType + "/", file]
+        cfel_file.spawn_subprocess(cmd, wait=True)
 
     # Modify detector Z encoder string
     print("Modifying detector Z encoder...")
