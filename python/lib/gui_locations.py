@@ -16,8 +16,11 @@ def determine_location():
     hostname = socket.getfqdn()
     print("Hostname: ", hostname)
 
+
+
+
     #
-    #   Only determine where we are
+    #   Determine where we are
     #   Enables location configuration to be overridden separately from what is determined here, eg: from command line
     #
     if hostname.endswith("slac.stanford.edu"):
@@ -52,7 +55,7 @@ def determine_location():
 #
 #   Set location specific default directory paths, batch queue commands, etc
 #
-def configuration(location="Default"):
+def set_location_configuration(location="Default"):
 
     print("Setting location as ", location)
     #
@@ -61,11 +64,11 @@ def configuration(location="Default"):
     result = {}
 
     if  location=='LCLS':
+
         LCLS = {
             'qcommand' : 'bsub -q psanaq'
         }
         result.update(LCLS)
-
 
     elif  location=='CFEL':
         CFEL = {
