@@ -335,7 +335,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
             # Format output directory string
-            if self.location['location'] is 'LCLS':
+            if self.compute_location['location'] is 'LCLS':
                 dir = 'r{:04d}'.format(int(run))
             else:
                 dir = run
@@ -406,8 +406,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #end enableCommands()
 
     def start_crawler(self):
-        cmdarr = ['cheetah-crawler.py', '-l', self.location['location'], '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
-        cfel_file.spawn_subprocess(cmdarr)
+        cmdarr = ['cheetah-crawler.py', '-l', self.compute_location['location'], '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
+        cfel_file.spawn_subprocess(cmdarr, shell=True)
 
     def modify_beamline_config(self):
         gui_configuration.modify_cheetah_config_files(self)
@@ -432,7 +432,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             newdir = '---'
 
             if olddir != '---':
-                if self.location['location'] is 'LCLS':
+                if self.compute_location['location'] is 'LCLS':
                     newdir = 'r{:04d}'.format(int(run))
                 else:
                     newdir = run
@@ -833,8 +833,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         #
         #   Where are we?
         #
-        location = gui_locations.determine_location()
-        self.location = gui_locations.set_location_configuration(location)
+        compute_location = gui_locations.determine_location()
+        self.compute_location = gui_locations.set_location_configuration(compute_location )
 
 
         #
