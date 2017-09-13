@@ -399,6 +399,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     def enableCommands(self):
         self.ui.button_runCheetah.setEnabled(True)
         self.ui.button_index.setEnabled(True)
+        self.ui.button_runDetCorr.setEnabled(True)
         self.ui.menu_file_startcrawler.setEnabled(True)
         self.ui.menu_cheetah_processselected.setEnabled(True)
         self.ui.menu_cheetah_autorun.setEnabled(True)
@@ -407,7 +408,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
     def start_crawler(self):
         cmdarr = ['cheetah-crawler.py', '-l', self.compute_location['location'], '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
-        cfel_file.spawn_subprocess(cmdarr, shell=True)
+        cfel_file.spawn_subprocess(cmdarr) #, shell=True)
 
     def modify_beamline_config(self):
         gui_configuration.modify_cheetah_config_files(self)
@@ -957,6 +958,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         # Disable action commands until enabled
         self.ui.button_runCheetah.setEnabled(False)
         self.ui.button_index.setEnabled(False)
+        self.ui.button_runDetCorr.setEnabled(False)
         self.ui.menu_file_startcrawler.setEnabled(False)
         self.ui.menu_cheetah_processselected.setEnabled(False)
         self.ui.menu_cheetah_autorun.setEnabled(False)
