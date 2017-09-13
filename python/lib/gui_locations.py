@@ -31,8 +31,12 @@ def determine_location():
         print("Looks like we are on psana at LCLS.")
         location = 'LCLS'
 
+    elif hostname.startswith('max-exfl') and hostname.endswith("desy.de"):
+        print("Looks like we are on the EuXFEL Maxwell nodes.")
+        location = 'max-exfl'
+
     elif hostname.startswith('max') and hostname.endswith("desy.de"):
-        print("Looks like we are on a max-cfel node.")
+        print("Looks like we are on a maxwell node.")
         location = 'max-cfel'
 
     elif hostname.endswith("desy.de"):
@@ -40,7 +44,7 @@ def determine_location():
         location = 'DESY'
 
     elif hostname.endswith("xfel.eu"):
-        print("Looks like we are at euXFEL.")
+        print("Looks like we are on the euXFEL network.")
         location = 'euXFEL'
 
     else:
@@ -65,23 +69,29 @@ def set_location_configuration(location="Default"):
 
     if  location=='LCLS':
 
-        LCLS = {
+        config = {
             'qcommand' : 'bsub -q psanaq'
         }
-        result.update(LCLS)
+        result.update(config)
+
+    elif location == 'max-exfl':
+        config = {
+            'qcommand': 'slurm'
+        }
+        result.update(config)
 
     elif  location=='CFEL':
-        CFEL = {
+        config = {
             'qcommand' : 'slurm'
         }
-        result.update(CFEL)
+        result.update(config)
 
 
     elif  location=='euXFEL':
-        euXFEL = {
+        config = {
             'qcommand' : 'bsub'
         }
-        result.update(euXFEL)
+        result.update(config)
 
     else:
         default = {

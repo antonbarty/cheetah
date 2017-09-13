@@ -51,6 +51,19 @@
          </widget>
         </item>
         <item>
+         <widget class="QPushButton" name="button_runDetCorr">
+          <property name="maximumSize">
+           <size>
+            <width>100</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Run DetCorr</string>
+          </property>
+         </widget>
+        </item>
+        <item>
          <widget class="QPushButton" name="button_runCheetah">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -323,6 +336,8 @@
     <addaction name="menu_powder_hits"/>
     <addaction name="menu_powder_blank_det"/>
     <addaction name="menu_powder_blank"/>
+    <addaction name="menu_powder_all_det"/>
+    <addaction name="menu_powder_all"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -369,6 +384,8 @@
     <addaction name="menu_calib_currentgeom"/>
     <addaction name="menu_calib_cxiviewgeom"/>
     <addaction name="menu_calib_geomtopixmap"/>
+    <addaction name="separator"/>
+    <addaction name="menu_calib_XFELdetcorr"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuCheetah"/>
@@ -679,6 +696,21 @@
   <action name="menu_file_modify_beamline_configuration">
    <property name="text">
     <string>Modify beamline configuration</string>
+   </property>
+  </action>
+  <action name="menu_powder_all_det">
+   <property name="text">
+    <string>Virtual powder all (detector corrected only)</string>
+   </property>
+  </action>
+  <action name="menu_powder_all">
+   <property name="text">
+    <string>Virtual powder all (background subtracted)</string>
+   </property>
+  </action>
+  <action name="menu_calib_XFELdetcorr">
+   <property name="text">
+    <string>Run XFEL detector calibration script</string>
    </property>
   </action>
  </widget>
