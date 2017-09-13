@@ -238,7 +238,8 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = CSPAD_ASIC_NY*CSPAD_nASICS_Y;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	} else if(strcmp(detectorType, "cspad2x2") == 0 || strcmp(detectorName, "cspad2x2") == 0 ||
+	}
+	else if(strcmp(detectorType, "cspad2x2") == 0 || strcmp(detectorName, "cspad2x2") == 0 ||
 			  strcmp(detectorName, "CxiSc2") == 0 || strcmp(detectorName, "CxiDg2") == 0) {
 		strcpy(detectorType, "cspad2x2");
 		asic_nx = CSPAD_ASIC_NX;
@@ -250,7 +251,20 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = nasics_y*asic_ny;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	} else if(strcmp(detectorType, "pnccd") == 0 || strcmp(detectorName, "pnCCD") == 0 ) {
+	}
+	else if(strcmp(detectorType, "agipd-1M") == 0 || strcmp(detectorName, "agipd-1M") == 0 ) {
+		strcpy(detectorType, "agipd-1M");
+		asic_nx = AGIPD1M_ASIC_NX;
+		asic_ny = AGIPD1M_ASIC_NY;
+		nasics_x = AGIPD1M_nASICS_X;
+		nasics_y = AGIPD1M_nASICS_Y;
+		asic_nn = asic_nx*asic_ny;
+		pix_nx = asic_nx * nasics_x;
+		pix_ny = asic_ny * nasics_y;
+		pix_nn = pix_nx * pix_ny;
+		pixelSize = 200e-6;
+	}
+	else if(strcmp(detectorType, "pnccd") == 0 || strcmp(detectorName, "pnCCD") == 0 ) {
 		strcpy(detectorType, "pnccd");
 		asic_nx = PNCCD_ASIC_NX;
 		asic_ny = PNCCD_ASIC_NY;

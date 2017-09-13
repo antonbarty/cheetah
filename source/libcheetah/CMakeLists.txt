@@ -9,7 +9,7 @@ mark_as_advanced(HDF5_DIR)
 mark_as_advanced(CLEAR HDF5_C_INCLUDE_DIR)
 mark_as_advanced(CLEAR HDF5_hdf5_LIBRARY_RELEASE)
 mark_as_advanced(CLEAR HDF5_hdf5_LIBRARY_DEBUG)
-
+mark_as_advanced(CLEAR HDF5_HL_LIBRARIES)
 
 # Add source files here
 LIST(APPEND sources "src/assemble2DImage.cpp")

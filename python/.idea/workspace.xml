@@ -54,8 +54,8 @@
       <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="502">
-              <caret line="959" column="46" lean-forward="true" selection-start-line="959" selection-start-column="46" selection-end-line="959" selection-end-column="46" />
+            <state relative-caret-position="457">
+              <caret line="956" column="0" lean-forward="true" selection-start-line="956" selection-start-column="0" selection-end-line="956" selection-end-column="0" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
@@ -625,8 +625,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="502">
-          <caret line="959" column="46" lean-forward="true" selection-start-line="959" selection-start-column="46" selection-end-line="959" selection-end-column="46" />
+        <state relative-caret-position="457">
+          <caret line="956" column="0" lean-forward="true" selection-start-line="956" selection-start-column="0" selection-end-line="956" selection-end-column="0" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
           </folding>

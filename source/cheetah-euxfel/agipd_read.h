@@ -84,7 +84,7 @@ public:
 	cAgipdReader();
 	~cAgipdReader();
 	
-	void open(char[]);
+	void open(char*);
 	void close(void);
 	void readFrame(long);
 

@@ -8,13 +8,13 @@
 #ifndef INCLUDE_STREAKFINDER_H_
 #define INCLUDE_STREAKFINDER_H_
 
-#include <Point2D.h>
+#include "Point2D.h"
 #include <stdint.h>
 #include <vector>
 #include "detectorGeometry.h"
 #include "ImageRectangle.h"
-#include <Eigen/Dense>
-#include <Eigen/StdVector>
+#include "Eigen/Dense"
+#include "Eigen/StdVector"
 
 typedef struct {
     uint_fast8_t filterLength;

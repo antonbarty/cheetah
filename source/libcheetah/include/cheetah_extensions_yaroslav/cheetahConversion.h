@@ -9,7 +9,7 @@
 #define INCLUDE_CHEETAHCONVERSION_H_
 
 #include "detectorGeometry.h"
-#include <Eigen/Dense>
+#include "Eigen/Dense"
 
 void cheetahGetDetectorGeometryMatrix(const float* pix_x, const float* pix_y, const detectorRawSize_cheetah_t detectorRawSize_cheetah,
         Eigen::Vector2f** detectorGeometryMatrix);
