@@ -8,12 +8,12 @@
 #ifndef INCLUDE_DETECTORGEOMETRY_H_
 #define INCLUDE_DETECTORGEOMETRY_H_
 
-#include <Point2D.h>
+#include "Point2D.h"
 #include <stdint.h>
 #include <vector>
 #include "ImageRectangle.h"
-#include <Eigen/Dense>
-#include <Eigen/StdVector>
+#include "Eigen/Dense"
+#include "Eigen/StdVector"
 
 typedef struct {
     uint_fast16_t asic_nx;

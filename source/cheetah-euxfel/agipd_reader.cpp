@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include <string>
 #include <vector>
+#include <cstring>
 
 #include "agipd_read.h"
 

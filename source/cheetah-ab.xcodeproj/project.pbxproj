@@ -88,6 +88,7 @@
 		4D0A40651A3B51F600FAC112 /* peakDetect.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = peakDetect.h; sourceTree = "<group>"; };
 		4D0A40661A3B51F600FAC112 /* processRateMonitor.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = processRateMonitor.h; sourceTree = "<group>"; };
 		4D0A40671A3B51F600FAC112 /* tofDetector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tofDetector.h; sourceTree = "<group>"; };
+		4D1F75AB1F69AF6B00874F75 /* cheetah-euxfel */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "cheetah-euxfel"; sourceTree = "<group>"; };
 		4D93D91A174F9F80004A0BB4 /* CMakeLists.txt */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
 		4D93D91C174F9F80004A0BB4 /* cheetah.ini */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cheetah.ini; sourceTree = "<group>"; };
 		4D93D91E174F9F80004A0BB4 /* cheetah.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = cheetah.h; sourceTree = "<group>"; };
@@ -150,6 +151,7 @@
 		4D93D904174F9F52004A0BB4 = {
 			isa = PBXGroup;
 			children = (
+				4D1F75AB1F69AF6B00874F75 /* cheetah-euxfel */,
 				4DA51BE5189AC39500C97F32 /* cheetah-sacla */,
 				4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */,
 				4D99B19B1E68709F00090239 /* cheetah-cbf */,

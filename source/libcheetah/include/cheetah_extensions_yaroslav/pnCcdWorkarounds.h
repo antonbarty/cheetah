@@ -11,7 +11,7 @@
 #include "streakFinder.h"
 #include "detectorGeometry.h"
 #include <vector>
-#include <Eigen/StdVector>
+#include "Eigen/StdVector"
 
 void rearrangePnCcdDataForStreakFinder(float* data_rearranged_linear, const float* data_linear);
 void reRearrangePnCcdDataForStreakFinder(float* data_linear, const float* data_rearranged_linear);

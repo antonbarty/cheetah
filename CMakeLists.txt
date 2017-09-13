@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.6)
 PROJECT (cheetah)
 
 INCLUDE(CTest)
-ENABLE_TESTING()
+#ENABLE_TESTING()
 
 SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
@@ -45,6 +45,7 @@ ENDIF("${isSystemDir}" STREQUAL "-1")
 
 OPTION(BUILD_CHEETAH_PSANA "If ON build cheetah_ana_mod. Otherwise skip it." OFF )
 OPTION(BUILD_PSANA "If ON build psana. Otherwise skip it." OFF )
+OPTION(BUILD_CHEETAH_EUXFEL "If ON build cheetah-EuXFEL. Otherwise skip it." OFF )
 OPTION(BUILD_CHEETAH_MYANA "If ON build cheetah_myana. Otherwise skip it." OFF )
 OPTION(BUILD_CHEETAH_SACLA "If ON build cheetah-sacla. Otherwise skip it." OFF )
 OPTION(BUILD_CHEETAH_CBF "If ON build cheetah-rayonix. Otherwise skip it." OFF )

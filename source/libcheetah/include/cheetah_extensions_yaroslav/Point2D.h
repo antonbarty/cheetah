@@ -13,9 +13,9 @@
 //#include <math.h>
 #include <cmath>
 #include <stdint.h>
-#include <boost/type_traits/common_type.hpp>
-#include <Eigen/Dense>
-#include <boost/math/special_functions/round.hpp>
+#include "boost/type_traits/common_type.hpp"
+#include "Eigen/Dense"
+//#include "boost/math/special_functions/round.hpp"
 
 #define STATIC_ASSERT( e ) static_assert( e, "!(" #e ")" )
 
@@ -173,8 +173,8 @@ public:
 
     void round()
     {
-        data[0] = boost::math::round(data[0]);
-        data[1] = boost::math::round(data[1]);
+		data[0] = 0;//boost::math::round(data[0]);
+		data[1] = 0;//boost::math::round(data[1]);
     }
 
     Point2D getRounded() const

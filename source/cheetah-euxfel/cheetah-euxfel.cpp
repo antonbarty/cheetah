@@ -1,271 +1,212 @@
 //
-//  main.cpp
-//  cheetah-cbf
+//  cheetah-euxfel
 //
-//
-//  Based a little bit on cheetah-sacla-hdf5.cpp and cheetah-rayonix (main-rayonix.cpp):
-//  Created by Natasha Stander December, 2015.
+//  Created by Anton Barty on 24/8/17.
+//	Distributed under the GPLv3 license
 //
 
-#include <iostream>
-#include <hdf5.h>
-#include <hdf5_hl.h>
-#include <stdlib.h>
-#include <string.h>
 #include <stdio.h>
-#include <math.h>
-#include <cbf.h>
-#include <cbf_simple.h>
-
+#include <stdlib.h>
+#include <getopt.h>
+#include <unistd.h>
+#include <iostream>
+#include <string>
+#include "agipd_read.h"
 #include "cheetah.h"
 
-#define CHECK_RETURN(x,y) { if (x) { ERROR(y); } }
 
-static void chomp(char *s)
-{
-	size_t i;
 
-	if ( !s ) return;
+// This is for parsing getopt_long()
+struct tCheetahEuXFELparams {
+	std::vector<std::string> inputFiles;
+	std::string iniFile;
+	int verbose;
+} CheetahEuXFELparams;
+void parse_config(int, char *[], tCheetahEuXFELparams*);
 
-	for ( i=0; i<strlen(s); i++ ) {
-		if ( (s[i] == '\n') || (s[i] == '\r') ) {
-			s[i] = '\0';
-			return;
+
+//static char testfile[]="R0126-AGG01-S00002.h5";
+
+
+// Main entry point for EuXFEL version of Cheetah
+// Usage:
+// > cheetah-euxfel -i inifile.ini <*AGIPD00*.h5>
+//
+int main(int argc, char* argv[]) {
+	
+	
+	std::cout << "Cheetah interface for EuXFEL\n";
+	std::cout << "Anton Barty, September 2015-\n";
+
+	// Parse configurations
+	parse_config(argc, argv, &CheetahEuXFELparams);
+	
+	
+	// For testing
+	std::cout << "----------------" << std::endl;
+	std::cout << "Program name: " << argv[0] << std::endl;
+	std::cout << "cheetah.ini file: " << CheetahEuXFELparams.iniFile << std::endl;
+	std::cout << "Input files: " << std::endl;
+	for(int i=0; i< CheetahEuXFELparams.inputFiles.size(); i++) {
+		std::cout << "\t " << CheetahEuXFELparams.inputFiles[i] << std::endl;
+	}
+	
+	std::cout << "----------------" << std::endl;
+
+	
+	// Initialize Cheetah
+	std::cout << "Setting up Cheetah" << std::endl;
+
+	static cGlobal cheetahGlobal;
+	static long frameNumber = 0;
+	static time_t startT;
+	time(&startT);
+
+	strcpy(cheetahGlobal.configFile, argv[2]);				// FIX ME
+	strcpy(cheetahGlobal.experimentID, "XFEL2012");			// FIX ME
+	cheetahGlobal.runNumber = 1;							// FIX ME
+	strcpy(cheetahGlobal.facility,"EuXFEL");				// FIX ME
+
+	cheetahInit(&cheetahGlobal);
+	
+
+	static char testfile[]="RAW-R0283-AGIPD00-S00000.h5";
+	
+	
+	// Initialise AGIPD frame reading stuff
+	cAgipdReader agipd;
+	agipd.verbose=1;
+
+	// Loop through all listed *AGIPD00*.h5 files
+	for(long fnum=0; fnum < CheetahEuXFELparams.inputFiles.size(); fnum++) {
+
+		// Open the file
+		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
+		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
+		
+		// Process frames in this file
+		std::cout << "Reading individual frames\n";
+		for(long i=0; i<agipd.nframes; i++) {
+			
+			// Read the data frame
+			agipd.readFrame(i);
+			
+			
+			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
+			eventData->frameNumber = frameNumber;
+			strcpy(eventData->eventname,CheetahEuXFELparams.inputFiles[fnum].c_str());
+			eventData->runNumber = 0;
+			eventData->nPeaks = 0;
+			eventData->pumpLaserCode = 0;
+			eventData->pumpLaserDelay = 0;
+			eventData->photonEnergyeV = cheetahGlobal.defaultPhotonEnergyeV;
+			eventData->wavelengthA = 0;
+			eventData->pGlobal = &cheetahGlobal;
+			
+			int detId = 0;
+			if (agipd.n0 != cheetahGlobal.detector[detId].pix_nx || agipd.n1 != cheetahGlobal.detector[detId].pix_ny) {
+				printf("Error: File image dimensions of %zu x %zu did not match detector dimensions of %li x %li\n", agipd.n0, agipd.n1, eventData->pGlobal->detector[detId].pix_nx, eventData->pGlobal->detector[detId].pix_ny);
+			}
+
+			// Allocate memory for image data
+			eventData->detector[detId].data_raw16 = (uint16_t*) malloc(eventData->pGlobal->detector[detId].pix_nn* sizeof(uint16_t));
+			memcpy(eventData->detector[detId].data_raw16, agipd.data, agipd.nn*sizeof(uint16_t));
+					   
+			
+			// Process event
+			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+		}
+	
+		agipd.close();
+		
+		
+		
+		// Test code for reading an individual AGIPD module
+		if(false) {
+			cAgipdModuleReader	agipdModule;
+			agipdModule.verbose = 1;
+			agipdModule.open(testfile);
+			agipdModule.readHeaders();
+			
+			// Read stack
+			//agipdModule.readImageStack();
+			
+			
+			// Read images
+			std::cout << "Reading individual frames\n";
+			for(long i=0; i<10; i++) {
+				agipdModule.readFrame(i);
+			}
+			
+			// Close
+			agipdModule.close();
 		}
 	}
+
+	
+	
+	// Cleanup
+	cheetahExit(&cheetahGlobal);
+	printf("Clean Exit\n");
+	return 0;
 }
 
-// Return 0 on success.
-int parseCBFHeader(cbf_handle &, cEventData*);
-int loadImage(cbf_handle &, cEventData*);
 
-int main(int argc, const char * argv[])
-{
-    // Parse Arguments
-    printf("CBF file parser\n");
-    printf("Natasha Stander, December 2015\n");
-
-    if (argc != 4) {
-        printf("Usage: cheetah-cbf listfile inifile runnumber\n");
-        return 0;
-    }
-
-    char filename[1024];
-    strcpy(filename, argv[1]);
-
-    // Initialize Cheetah
-	printf("Setting up Cheetah...\n");
-    static long frameNumber = 0;
-    long runNumber = atoi(argv[3]); /* ?? */
-	static cGlobal cheetahGlobal;
-	static time_t startT = 0;
-	time(&startT);
-    strcpy(cheetahGlobal.configFile, argv[2]);
-    strcpy(cheetahGlobal.experimentID, "APS2016");
-	cheetahInit(&cheetahGlobal);
-    cheetahGlobal.runNumber = runNumber;
-    strcpy(cheetahGlobal.facility,"APS")
-    
-
-    // Open List file
-    FILE *fh = fopen(argv[1], "r");
-    if (fh == NULL) {
-        fprintf(stderr, "Couldn't open '%s'\n", argv[1]);
-		return 1;
+/*
+ *	Configuration parser (getopt_long)
+ */
+void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
+	
+	// Add getopt-long options
+	const struct option longOpts[] = {
+		{ "inifile", required_argument, NULL, 'i' },
+		{ "verbose", no_argument, NULL, 'v' },
+		{ "help", no_argument, NULL, 'h' },
+		{ NULL, no_argument, NULL, 0 }
+	};
+	const char optString[] = "i:vh?";
+	
+	int opt;
+	int longIndex;
+	while( (opt=getopt_long(argc, argv, optString, longOpts, &longIndex )) != -1 ) {
+		switch( opt ) {
+			case 'v':
+				global->verbose++;
+				break;
+			case 'i':
+				global->iniFile = optarg;
+				break;
+			case 'h':   /* fall-through is intentional */
+			case '?':
+				std::cout << "Provide help files later on" << std::endl;
+				exit(1);
+				break;
+			case 0:     /* long option without a short arg */
+				if( strcmp( "random", longOpts[longIndex].name ) == 0 ) {
+					//global->random = 1;
+				}
+				break;
+			default:
+				/* You won't actually get here. */
+				break;
+		}
+	}
+	
+	// This is where unprocessed arguments end up
+	std::cout << "optind: " << optind << std::endl;
+	std::cout << "Number of unprocessed arguments: " << argc << std::endl;
+	for(long i=optind; i<argc; i++) {
+		global->inputFiles.push_back(argv[i]);
+		std::cout << "\t" << global->inputFiles.back() << std::endl;
 	}
 
-    // Loop through each CBF file given
-    char curline[MAX_FILENAME_LENGTH];
-    char * curFile;
-    while ( (curFile = fgets(curline, MAX_FILENAME_LENGTH, fh)) ) {
-        chomp(curFile);
-        printf("Processing %s\n", curFile);
-        frameNumber ++;
+	if(global->inputFiles.size() == 0) {
+		std::cout << "No input files specified" << std::endl;
+		exit(1);
+	}
 
-        // Create CBF Object for file
-        cbf_handle cbfh;
-        CHECK_RETURN(cbf_make_handle(&cbfh), "creating cbf handle");
+	std::cout << "cheetah.ini file: " << global->iniFile << std::endl;
 
-        // Open File
-        FILE* cbfFH = fopen(curFile, "rb");
-        if (cbfFH == NULL)
-            ERROR("Couldn't open %s\n", curFile);
-
-        // Read into cbf object
-        CHECK_RETURN(cbf_read_widefile(cbfh, cbfFH, MSG_NODIGEST), "reading cbf file");
-
-        // Build Event Data
-        cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
-
-        eventData->frameNumber = frameNumber;
-        strcpy(eventData->eventname,strrchr(curFile,'/')+1);
-        eventData->runNumber = runNumber;
-        eventData->nPeaks = 0;
-        eventData->pumpLaserCode = 0;
-        eventData->pumpLaserDelay = 0;
-        eventData->photonEnergyeV = cheetahGlobal.defaultPhotonEnergyeV;
-        eventData->wavelengthA = 0; // find in parseSLSHeader
-        eventData->pGlobal = &cheetahGlobal;
-
-        // Header will fill in photonEnergyeV and wavelengthA
-        parseCBFHeader(cbfh, eventData);
-
-        // Now, load image
-        loadImage(cbfh, eventData);
-
-        // done with that cbf file, cleanup
-        CHECK_RETURN(cbf_free_handle(cbfh), "Cleaning up cbf file\n");
-
-        // Process event
-        cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
-
-    }
-
-    // Cleanup
-    fclose(fh);
-    cheetahExit(&cheetahGlobal);
-    
-    printf("Clean Exit\n");
-
-    return 0;
 }
 
-int parseCBFHeader(cbf_handle &cbfh, cEventData* eventData) {
-    // First, try the built-in function for non-SLS headers
-    if (cbf_get_wavelength(cbfh, &(eventData->wavelengthA)) == 0)
-        return 0; // success
-
-    // Built-in function didn't work, so try SLS header
-    // Find Header
-    const char * headerconst;
-    const char * headertype;
-    CHECK_RETURN(cbf_find_category(cbfh, "array_data"), "Finding array_data category");
-    CHECK_RETURN(cbf_find_column(cbfh, "header_contents"), "Finding header_contents column");
-    CHECK_RETURN(cbf_select_row(cbfh, 0), "Selecting row 0 of header_contents column");
-    CHECK_RETURN(cbf_get_value(cbfh, &headerconst), "Getting header value");
-    CHECK_RETURN(cbf_get_typeofvalue(cbfh, &headertype), "Getting header value");
-
-    if (strcmp(headertype, "text") != 0)
-        ERROR("Unable to find SLS header.\n");
-
-    // In the SLS header, we're looking specifically for the line
-    // # Wavelength 1.0000 A
-    eventData->wavelengthA = 0;
-
-    // copy header so we can modify the c string
-    char * header = new char[strlen(headerconst) + 1];
-    strcpy(header, headerconst);
-    char * cur = header; // start of line
-    char * end = header; // end of line
-    bool atEnd = false; // at end of header
-    char prefix[6];
-    prefix[5] = 0;
-    while (!atEnd) {
-        // find the newline that signals end of line
-        while (*end != '\r' && *end != '\n' && *end != 0) end++;
-        if (*end == 0)
-            atEnd = true; // done after this, found end of header str
-
-        // make the newline appear as the end of the str
-        *end = 0;
-
-        // check the line for the values we're interested in
-        
-        sscanf(cur,"# Wavelength %lf", &(eventData->wavelengthA));
-
-        sscanf(cur,"# Exposure_time %lf", &(eventData->exposureTime));
-        sscanf(cur,"# Exposure_period %lf", &(eventData->exposurePeriod));
-        sscanf(cur,"# Tau = %lf", &(eventData->tau));
-        sscanf(cur,"# Count_cutoff %i", &(eventData->countCutoff));
-        sscanf(cur,"# Threshold_setting %lf", &(eventData->threshold));
-        sscanf(cur,"# N_excluded_pixels = %i", &(eventData->nExcludedPixels));
-        sscanf(cur,"# Detector_distance %lf", &(eventData->detectorDistance));
-        sscanf(cur,"# Beam_xy (%lf, %lf)", &(eventData->beamX), &(eventData->beamY));
-        sscanf(cur,"# Start_angle %lf", &(eventData->startAngle));
-        sscanf(cur,"# Angle_increment %lf", &(eventData->angleIncrement));
-        sscanf(cur,"# Detector_2theta %lf", &(eventData->detector2Theta));
-        sscanf(cur,"# Shutter_time %lf", &(eventData->shutterTime));
-
-
-       // This is a hack that will break after the year 2019
-       strncpy(prefix,cur,5);
-       if (strcmp(prefix,"# 201") == 0) {
-           strcpy(eventData->timeString,cur + 2);
-       }
-           
-        
-
-        // prepare current and end for next line
-        end ++;
-        cur = end;
-    }
-    // done with header, cleanup
-    delete [] header;
-
-    // Error if wavelength or photonEv not found
-    if (eventData->wavelengthA == 0)       
-        printf("Warning: Could not find wavelength in cbf file!\n");
-    //printf("Debugging: found wavelength %f and photon ev %f\n", eventData->wavelengthA, eventData->photonEnergyeV);
-    eventData->detector[0].detectorZ = eventData->detectorDistance;
-    return 0;
-}
-
-int loadImage(cbf_handle & cbfh, cEventData* eventData) {
-    const char * headertype;
-    // First, find binary section in cbf
-    CHECK_RETURN(cbf_find_category(cbfh, "array_data"), "Finding array_data category");
-    CHECK_RETURN(cbf_find_column(cbfh, "data"), "Finding data column");
-    CHECK_RETURN(cbf_select_row(cbfh, 0), "Selecting row 0 of data column");
-    CHECK_RETURN(cbf_get_typeofvalue(cbfh, &headertype), "Finding binary data");
-    if (strcmp(headertype, "bnry") != 0)
-        ERROR("Unable to find binary image.\n");
-
-    // a whole bunch of variables needed to get cbf_get_integerarrayparameters_wdims
-    unsigned int compression;
-    int binId, elSigned, elUnsigned, minEl, maxEl;
-    size_t elSize, elements, fs, ss, sss, padding;
-    const char * byteOrder;
-
-    CHECK_RETURN(cbf_get_integerarrayparameters_wdims(cbfh, &compression, & binId, & elSize,
-        &elSigned, &elUnsigned, &elements, &minEl, &maxEl, &byteOrder, & fs,
-        & ss, &sss, &padding), "reading image meta data");
-
-    // Sanity check that image matches what cheetah is expecting
-    int detId = 0;
-    if (fs != (size_t) eventData->pGlobal->detector[detId].pix_nx ||
-        ss != (size_t) eventData->pGlobal->detector[detId].pix_ny)
-        ERROR("Error: File image dimensions of %zu x %zu did not match detector dimensions of %li x %li\n",
-               fs, ss, eventData->pGlobal->detector[detId].pix_nx, eventData->pGlobal->detector[detId].pix_ny);
-
-    // At least with the files I'm testing with, the binary data is signed 32 bit integers,
-    // which matches neither data_raw16 (uint16_t type nor data_raw (float)). So, like SACLA,
-    // read into temporary array and then convert.
-    size_t elements_read = 0;
-    int* arr = (int*) calloc(eventData->pGlobal->detector[detId].pix_nn, sizeof(int));
-    CHECK_RETURN(cbf_get_integerarray(cbfh, &binId, arr, sizeof(int), 1, elements, &elements_read), "Reading image");
-
-//    printf("Debugging: Read %zu elements debug\n", elements_read);
-//    printf("Debugging: First 10 elements debug are: ");
-//    for (int i = 0; i < 10; i++) {
-//        printf ("%i, ", arr[i]);
-//    }
-
-    // Prepare buffer for event data
-    eventData->detector[detId].data_raw16 = (uint16_t*) calloc(eventData->pGlobal->detector[detId].pix_nn, sizeof(uint16_t));
-
-    // copy, setting negative values to 0
-    for (size_t i = 0; i < elements_read; i++) {
-        eventData->detector[detId].data_raw16[i] = arr[i] < 0? 0 : (uint16_t) arr[i];
-    }
-
-//    printf("Debugging: First 10 elements are: ");
-//    for (int i = 0; i < 10; i++) {
-//        printf ("%u, ", eventData->detector[detId].data_raw16[i]);
-//    }
-
-    free(arr);
-    arr=NULL;
-
-    return 0;
-}
 
