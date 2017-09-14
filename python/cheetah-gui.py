@@ -371,6 +371,20 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #end run_cheetah()
 
 
+    #
+    #   Action button items
+    #
+    def run_XFEL_detectorcalibration(self):
+        runs = self.selected_runs()
+        for i, run in enumerate(runs['run']):
+            print('------------ Start XFEL detector calibration script ------------')
+
+            #cmdarr = [self.config['process'], run]
+            cmdarr = ["../process/calibrate_euxfel.sh, run]
+            cfel_file.spawn_subprocess(cmdarr, shell=True)
+
+
+
 
     def view_hits(self):
         file = '*.cxi'
@@ -887,6 +901,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.button_runCheetah.clicked.connect(self.run_cheetah)
         self.ui.button_index.clicked.connect(self.crystfel_indexpdb)
         self.ui.button_viewhits.clicked.connect(self.view_hits)
+        self.ui.button_runDetCorr.clicked.connect(self.run_XFEL_detectorcalibration)
         self.ui.button_virtualpowder.clicked.connect(self.view_powder)
         self.ui.button_peakogram.clicked.connect(self.view_peakogram)
 
@@ -911,6 +926,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_calib_currentgeom.triggered.connect(self.set_current_geometry)
         self.ui.menu_calib_cxiviewgeom.triggered.connect(self.set_cxiview_geom)
         self.ui.menu_calib_geomtopixmap.triggered.connect(self.geom_to_pixelmap)
+        self.ui.menu_calib_XFELdetcorr.triggered.connect(self.run_XFEL_detectorcalibration)
 
         # CrystFEL actions
         self.ui.menu_crystfel_mosflmnolatt.triggered.connect(self.crystfel_mosflmnolatt)

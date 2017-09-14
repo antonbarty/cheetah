@@ -86,11 +86,7 @@ int main(int argc, char* argv[]) {
 		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
-		for(long i=0; i<agipd.nframes; i++) {
-			
-			// Read the data frame
-			agipd.readFrame(i);
-			
+		while (agipd.nextFrame()) {
 			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
@@ -109,6 +105,7 @@ int main(int argc, char* argv[]) {
 			}
 
 			// Allocate memory for image data
+			// *** Change this to accept float ****
 			eventData->detector[detId].data_raw16 = (uint16_t*) malloc(eventData->pGlobal->detector[detId].pix_nn* sizeof(uint16_t));
 			memcpy(eventData->detector[detId].data_raw16, agipd.data, agipd.nn*sizeof(uint16_t));
 					   
