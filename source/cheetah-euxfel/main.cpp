@@ -31,27 +31,41 @@ int main(int argc, char* argv[]) {
 	
 	// Parse configurations
 	std::cout << "AGIPD file reader test\n";
-	parse_config(argc, argv, &global);
+	//parse_config(argc, argv, &global);
 	
-	static char testfile[]="RAW-R0283-AGIPD00-S00000.h5";
-	
+	//static char testfile[]="calibrated_RAW-R0283-AGIPD00-S00000.h5";
+
+	if (argc <= 1)
+	{
+		std::cout << "Please specify the first calibrated file - \n";
+		std::cout << "For example,\n\tcalibrated_RAW-R0283-AGIPD00-S00000.h5\n";
+		std::cout << "or alternatively,\n\tRAW-R0283-AGIPD00-S00000.h5\n\n";
+		std::cout << "Please have all the modules (AGIPD00 ... AGIPD15)\n";
+		std::cout << "present in your working directory.\n";
+		std::cout << "\t\t\tLots of love,\n";
+		std::cout << "\t\t\t\tagipd-reader";
+		exit(0);
+	}
+
 	cAgipdReader agipd;
-	agipd.verbose=1;
-	agipd.open(testfile);
+	agipd.verbose=0;
+	agipd.open(argv[1]);
 
 	std::cout << "Reading individual frames\n";
 	for(long i=0; i<20; i++) {
-		agipd.readFrame(i);
+		agipd.nextFrame();
 	}
+	agipd.maxAllFrames();
+
 	agipd.close();
-	
-	
-	
+
+
 	// Test code for reading an individual AGIPD module
 	if(false) {
 		cAgipdModuleReader	agipdModule;
 		agipdModule.verbose = 1;
-		agipdModule.open(testfile);
+		/* Will be broken apart from for first detector */
+		agipdModule.open(argv[1], 0);
 		agipdModule.readHeaders();
 
 		// Read stack
@@ -75,6 +89,7 @@ int main(int argc, char* argv[]) {
 /*
  *	Configuration parser (getopt_long)
  */
+/*
 void parse_config(int argc, char *argv[], tGlobal *global) {
 
 	// Add getopt-long options
@@ -97,17 +112,17 @@ void parse_config(int argc, char *argv[], tGlobal *global) {
 			case 'v':
 				global->verbose++;
 				break;
-			case 'h':   /* fall-through is intentional */
+			case 'h':
 			case '?':
 				// Display_usage();
 				break;
-			case 0:     /* long option without a short arg */
+			case 0:
 				if( strcmp( "random", longOpts[longIndex].name ) == 0 ) {
 					global->random = 1;
 				}
 				break;
 			default:
-				/* You won't actually get here. */
+
 				break;
 		}
 	}
@@ -120,3 +135,4 @@ void parse_config(int argc, char *argv[], tGlobal *global) {
 	}
 	
 }
+*/
