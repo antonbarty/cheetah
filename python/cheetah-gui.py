@@ -380,7 +380,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             print('------------ Start XFEL detector calibration script ------------')
 
             #cmdarr = [self.config['process'], run]
-            cmdarr = ["../process/calibrate_euxfel.sh, run]
+            cmdarr = ["../process/calibrate_euxfel.sh", run]
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
 
