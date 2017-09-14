@@ -11,6 +11,7 @@
 #include <vector>
 #include <hdf5.h>
 #include <hdf5_hl.h>
+#include <sstream>
 
 #include "agipd_read.h"
 
@@ -45,16 +46,24 @@ static char h5_image_status_field[] = "/INSTRUMENT/DETLAB_LAB_DAQ-0/DET/0:xtdf/i
 */
 
 // AGIPD at SPB
+/*
 static char h5_trainId_field[] = "/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/trainId";
 static char h5_pulseId_field[] = "/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/pulseId";
 static char h5_cellId_field[] = "/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/cellId";
 static char h5_image_data_field[] = "/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/data";
 static char h5_image_status_field[] = "/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/status";
+*/
 
-
+static char h5_instrument_prefix[] = "/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/";
+static char h5_image_prefix[] = "CH0:xtdf/image/";
+static char h5_trainId_suffix[] = "trainId";
+static char h5_pulseId_suffix[] = "pulseId";
+static char h5_cellId_suffix[] = "cellId";
+static char h5_image_data_suffix[] = "data";
+static char h5_image_status_suffix[] = "status";
 
 cAgipdModuleReader::cAgipdModuleReader(void){
-	h5_file_id = NULL;
+	h5_file_id = 0;
 	pulseIDlist = NULL;
 	trainIDlist = NULL;
 	cellIDlist = NULL;
@@ -62,6 +71,7 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 	data = NULL;
 	digitalGain = NULL;
 	rawDetectorData = true;
+
 	verbose = 0;
 };
 
@@ -72,7 +82,7 @@ cAgipdModuleReader::~cAgipdModuleReader(){
 /*
  *	Open HDF5 file and perfom some checks
  */
-void cAgipdModuleReader::open(char filename[]){
+void cAgipdModuleReader::open(char filename[], int mNum){
 	
 	std::cout << "Opening " << filename << std::endl;
 	cAgipdModuleReader::filename = filename;
@@ -126,8 +136,38 @@ void cAgipdModuleReader::open(char filename[]){
 	}
 	*/
 	std::cout << "\tFile check OK\n";
-	
-	
+
+	/* Now to make our new field names using the module number */
+
+	std::string prefix = h5_instrument_prefix + i_to_str(mNum) + h5_image_prefix;
+	h5_trainId_field = prefix + h5_trainId_suffix;
+
+	h5_pulseId_field = prefix + h5_pulseId_suffix;
+
+	h5_cellId_field = prefix + h5_cellId_suffix;
+
+	h5_image_data_field = prefix + h5_image_data_suffix;
+
+	h5_image_status_field = prefix + h5_image_status_suffix;
+
+	if (true)
+	{
+		std::cout << h5_trainId_field << std::endl;
+		std::cout << h5_pulseId_field << std::endl;
+		std::cout << h5_cellId_field << std::endl;
+		std::cout << h5_image_data_field << std::endl;
+		std::cout << h5_image_status_field << std::endl;
+	}
+
+	// filename starts with 'RAW_' we have raw data
+	if(cAgipdModuleReader::filename.substr(0,3) == "RAW") {
+		std::cout << "\tData is RAW detector data" << std::endl;
+		rawDetectorData = true;
+	}
+	else {
+		std::cout << "\tData might have been calibrated" << std::endl;
+		rawDetectorData = false;
+	}
 	
 	// Find data set size
 	// Use size of image data or length of pulseID to determine the number of frames in this data set
@@ -140,28 +180,32 @@ void cAgipdModuleReader::open(char filename[]){
 	//H5LTget_dataset_info(h5_file_id, h5_pulseId_field, dims, &dataclass, &datasize);
 	//nframes = dims[0];
 	// Image data gives number of frames, logical block size, stack depth
-	H5LTget_dataset_info(h5_file_id, h5_image_data_field, dims, &dataclass, &datasize);
+	H5LTget_dataset_info(h5_file_id, h5_image_data_field.c_str(), dims, &dataclass, &datasize);
+
+	if (h5_file_id < 0)
+	{
+		std::cout << "Get dataset info for image - failed.\n";
+		exit(0);
+	}
+
 	nframes = dims[0];
 	nstack = dims[1];
 	n0 = dims[3];
 	n1 = dims[2];
+
+	if (!rawDetectorData)
+	{
+		n0 = dims[2];
+		n1 = dims[1];
+		nstack = 1;
+	}
+
 	nn = n0*n1;
 	
 	printf("\tNumber of frames: %li\n", nframes);
 	printf("\tImage block size: %lix%li\n", n0, n1);
 	printf("\tStack depth: %li\n", nstack);
 
-	
-	// filename starts with 'RAW_' we have raw data
-	if(cAgipdModuleReader::filename.substr(0,3) == "RAW") {
-		std::cout << "\tData is RAW detector data" << std::endl;
-		rawDetectorData = true;
-	}
-	else {
-		std::cout << "\tData might have been calibrated" << std::endl;
-		rawDetectorData = false;
-	}
-	
 };
 // cAgipdReader::open
 
@@ -190,7 +234,7 @@ void cAgipdModuleReader::close(void){
 
 	
 	// Return quetly if there is nothing more to do
-	if (h5_file_id == NULL)
+	if (h5_file_id == 0)
 		return;
 	
 	// Cleanup stale IDs
@@ -213,7 +257,7 @@ void cAgipdModuleReader::close(void){
 
 	// Close HDF5 file
 	H5Fclose(h5_file_id);
-	h5_file_id = NULL;
+	h5_file_id = 0;
 };
 // cAgipdReader::close
 
@@ -225,16 +269,16 @@ void cAgipdModuleReader::readHeaders(void){
 	std::cout << "Reading vector fields from " << filename << "\n";
 	
 	// PulseID (H5T_STD_U64LE)
-	pulseIDlist = (uint64_t*) checkAllocRead(h5_pulseId_field, nframes, H5T_STD_U64LE, sizeof(uint64_t));
+	pulseIDlist = (uint64_t*) checkAllocRead((char *)h5_pulseId_field.c_str(), nframes, H5T_STD_U64LE, sizeof(uint64_t));
 
 	// TrainID (H5T_STD_U64LE)
-	trainIDlist = (uint64_t*) checkAllocRead(h5_trainId_field, nframes, H5T_STD_U64LE, sizeof(uint64_t));
+	trainIDlist = (uint64_t*) checkAllocRead((char *)h5_trainId_field.c_str(), nframes, H5T_STD_U64LE, sizeof(uint64_t));
 
 	// CellID (H5T_STD_U64LE)
-	cellIDlist = (uint16_t*) checkAllocRead(h5_cellId_field, nframes, H5T_STD_U16LE, sizeof(uint16_t));
+	cellIDlist = (uint16_t*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(uint16_t));
 
 	// Status (H5T_STD_U16LE)
-	statusIDlist = (uint16_t*) checkAllocRead(h5_image_status_field, nframes, H5T_STD_U16LE, sizeof(uint16_t));
+	statusIDlist = (uint16_t*) checkAllocRead((char *)h5_image_status_field.c_str(), nframes, H5T_STD_U16LE, sizeof(uint16_t));
 	
 	if(verbose) {
 		std::cout << "\tDone reading vector fields in " << filename << "\n";
@@ -263,19 +307,21 @@ void* cAgipdModuleReader::checkAllocRead(char fieldName[], long targetnframes, h
 	}
 	
 	// Check number of events
-	if(dims[0] != targetnframes) {
+	if(dims[0] != targetnframes && verbose) {
 		printf("\tSize of this data set does not match desired number of frames\n");
 		printf("\tNumber of events in this dataset: %llu\n", dims[0]);
-		return NULL;
+		printf("\tContinuing anyway, feel free to return NULL if you really want to fail\n");
+
+		//	return NULL;
 	}
 
 	// Check size of data unit (crude way to check data types match)
-	if(datasize != targetsize) {
+	if(datasize != targetsize && verbose) {
 		printf("\tSize of data elements does not match desired size\n");
 		printf("\ttargetsize=%li, datasize=%li\n", targetsize, datasize);
-		return NULL;
+		printf("\tContinuing anyway, feel free to return NULL if you really want to fail\n");
+		//	return NULL;
 	}
-	
 
 	// Number of data points to allocate
 	long n=1;
@@ -345,6 +391,7 @@ void* cAgipdModuleReader::checkAllocReadHyperslab(char fieldName[], int ndims, h
 		H5Sclose (dataspace_id);
 		return NULL;
 	}
+
 	for(int i=0; i<h5_ndims; i++) {
 		if(slab_start[i] < 0 || slab_start[i]+slab_size[i] > h5_dims[i]){
 			std::cout << "\tcheckAllocReadHyperslab error: One array dimension runs out of bounds (oops), dim=" << i << std::endl;
@@ -378,7 +425,7 @@ void* cAgipdModuleReader::checkAllocReadHyperslab(char fieldName[], int ndims, h
 	for(int i = 0;i<ndims;i++)
 		nelements *= slab_size[i];
 
-	void *databuffer = malloc(nelements*sizeof(uint16_t));;
+	void *databuffer = malloc(nelements*targetsize);;
 	
 	
 	// Define how to map the hyperslab into memory
@@ -417,11 +464,14 @@ void cAgipdModuleReader::readImageStack(void){
 	
 	std::cout << "Reading entire image data array (all frames)\n" ;
 	std::cout << "\tMemory required: " << mem_bytes / 1e6 << " (MB)" << std::endl ;
-	
+
+	std::cout << "A useful function perhaps, but broken. Please fix code and re-run." << std::endl;
+	exit(1);
+
 	// Read in all image data
-	if(data != NULL) free(data);
-	data = (uint16_t*) checkAllocRead(h5_image_data_field, nframes, H5T_STD_U16LE, sizeof(uint16_t));
-	std::cout << "\tDone reading " << filename << " (all frames)" << std::endl;
+//	if(data != NULL) free(data);
+//	data = (uint16_t*) checkAllocRead(h5_image_data_field, nframes, H5T_STD_U16LE, sizeof(uint16_t));
+//	std::cout << "\tDone reading " << filename << " (all frames)" << std::endl;
 	
 };
 // cAgipdModuleReader::readImageStack
@@ -435,19 +485,24 @@ void cAgipdModuleReader::readFrame(long frameNum){
 	// Will have both fs and ss, and stack...
 	
 	if(frameNum < 0 || frameNum >= nframes) {
-		std::cout << "\treadFrame::franeNum out of bounds " << frameNum << std::endl;
+		std::cout << "\treadFrame::frameNum out of bounds " << frameNum << std::endl;
 		return;
 	}
 	
 	if(verbose) {
-		std::cout << "\tReading frame " << frameNum << std::endl;
+		std::cout << "\tReading frame " << frameNum << " from " << filename << std::endl;
 	}
 	
 	currentFrame = frameNum;
 	
 	// At the moment we only read RAW data files
-	if(rawDetectorData) {
-		readFrameRAW(frameNum);
+	if (rawDetectorData)
+	{
+		readFrameRawOrCalib(frameNum, true);
+	}
+	else
+	{
+		readFrameRawOrCalib(frameNum, false);
 	}
 }
 // cAgipdModuleReader::readFrame
@@ -456,7 +511,8 @@ void cAgipdModuleReader::readFrame(long frameNum){
 /*
  *	Read one frame of data from RAW files
  */
-void cAgipdModuleReader::readFrameRAW(long frameNum){
+void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
+{
 
 	// Define hyperslab in RAW data file
 	hsize_t     slab_start[4];
@@ -470,21 +526,43 @@ void cAgipdModuleReader::readFrameRAW(long frameNum){
 	slab_size[2] = n1;
 	slab_size[3] = n0;
 
+	if (!isRaw)
+	{
+		slab_size[1] = n1;
+		slab_size[2] = n0;
+	}
+
+	int ndims = isRaw ? 4 : 3;
+	hid_t type = isRaw ? H5T_STD_U16LE : H5T_IEEE_F32LE;
+	hid_t size = isRaw ? sizeof(uint16_t) : sizeof(float);
 
 	// Free existing memory
 	free(data); data = NULL;
 	free(digitalGain); digitalGain = NULL;
-	
 
-	// Read data from hyperslab
-	data = (uint16_t*) checkAllocReadHyperslab(h5_image_data_field, 4, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
-	
+	if (rawDetectorData)
+	{
+		uint16_t *tempdata = NULL;
+		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+		data = (float *)malloc(n0 * n1 * sizeof(float));
+
+		for (int i = 0; i < n0 * n1; i++)
+		{
+			data[i] = tempdata[i];
+		}
+
+		free(tempdata);
+	}
+	else
+	{
+		// Read data from hyperslab
+		data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+	}
 	
 	// Digital gain is in the second dimension (at least in the current layout)
 	slab_start[1] = 0;
-	digitalGain = (uint16_t*) checkAllocReadHyperslab(h5_image_data_field, 4, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
-	
-    
+	digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+
     // Update timestamp, status bits and other stuff
     trainID = trainIDlist[frameNum];
     pulseID = pulseIDlist[frameNum];
@@ -492,6 +570,4 @@ void cAgipdModuleReader::readFrameRAW(long frameNum){
     statusID = statusIDlist[frameNum];
 
 };
-// cAgipdModuleReader::readFrameRAW
-
 

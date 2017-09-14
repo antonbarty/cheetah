@@ -86,10 +86,10 @@ int main(int argc, char* argv[]) {
 		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
-		for(long i=0; i<agipd.nframes; i++) {
+		while (agipd.nextFrame()) {
 			
 			// Read the data frame
-			agipd.readFrame(i);
+//			agipd.readFrame(i);
 			
 			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
 		agipd.close();
 		
 		
-		
+/*		
 		// Test code for reading an individual AGIPD module
 		if(false) {
 			cAgipdModuleReader	agipdModule;
@@ -141,6 +141,7 @@ int main(int argc, char* argv[]) {
 			// Close
 			agipdModule.close();
 		}
+*/
 	}
 
 	

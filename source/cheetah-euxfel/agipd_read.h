@@ -11,7 +11,21 @@
 #include <vector>
 #include <hdf5.h>
 #include <hdf5_hl.h>
+#include <map>
+#include <sstream>
 
+typedef std::pair<long, int> TrainPulsePair; // pairs of trains and pulses
+typedef std::pair<TrainPulsePair, int> TrainPulseModulePair; // pairs of train-pulses and module numbers
+typedef std::map<TrainPulseModulePair, long> TrainPulseMap; // map of train-pulse & module number to frame num.
+
+inline std::string i_to_str(int val)
+{
+	std::ostringstream ss;
+	ss << val;
+	std::string temp = ss.str();
+
+	return temp;
+}
 
 /*
  *	This class handles reading and writing for one AGIPD module file
@@ -23,7 +37,7 @@ public:
 	cAgipdModuleReader();
 	~cAgipdModuleReader();
 
-	void open(char[]);
+	void open(char[], int i);
 	void close(void);
 	void readHeaders(void);
 	void readImageStack(void);
@@ -38,7 +52,7 @@ public:
 	long		nn;
 
 	// data and ID for the last read event.  Only updated after readFrame is called! 
-	uint16_t	*data;
+	float   	*data;
 	uint16_t	*digitalGain;
     uint64_t	trainID;
     uint64_t	pulseID;
@@ -60,12 +74,18 @@ private:
 	std::string	filename;
 	hid_t		h5_file_id;
 	long		currentFrame;
-	
+
+	std::string h5_trainId_field;
+	std::string h5_pulseId_field;
+	std::string h5_cellId_field;
+	std::string h5_image_data_field;
+	std::string h5_image_status_field;
+
 // Private functions
 private:
 	void*		checkAllocRead(char[], long, hid_t, size_t);
 	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
-	void		readFrameRAW(long);
+	void		readFrameRawOrCalib(long frameNum, bool isRaw);
 };
 
 
@@ -77,34 +97,41 @@ private:
 class cAgipdReader {
 
 public:
-    static const int nAGIPDmodules = 16;
+	static const int nAGIPDmodules = 16;
 
-    
+
 public:
 	cAgipdReader();
 	~cAgipdReader();
 	
-	void open(char*);
+	void open(char[]);
 	void close(void);
-	void readFrame(long);
+	bool readFrame(long trainID, long pulseID);
+	bool nextFrame();
+	void resetCurrentFrame();
+	void maxAllFrames();
+	float *getCellAverage(int i);
 
+	void writePNG(float *pngData, std::string filename);
 	
 public:
 	// Data slab dimensions
 	long		nframes;
-	
-	// Dimenations and of the composite data slab
+
+	bool                firstModule;
+	long                currentTrain;
+	long                currentPulse;
+
+	// Dimensions and of the composite data slab
 	long		dims[2];
 	long		n0;
 	long		n1;
 	long		nn;
-	uint16_t	*data;
+	float    	*data;
 	uint16_t	*digitalGain;
 	uint16_t	*mask;
 	
 	// Metadata for this event
-	uint64_t	trainID;
-	uint64_t	pulseID;
 	uint16_t	cellID[nAGIPDmodules];
 	uint16_t	statusID[nAGIPDmodules];
 	
@@ -115,14 +142,19 @@ public:
 	
 	// Pointer to the data location for each module for easy memcpy()
 	// and those who want to look at the data as a stack of panels
-	uint16_t*	pdata[nAGIPDmodules];
+	float*  	pdata[nAGIPDmodules];
 	uint16_t*	pgain[nAGIPDmodules];
 	uint16_t*	pmask[nAGIPDmodules];
-	
+
 	int			verbose;
 	bool		rawDetectorData;
-	
-	
+
+	// Individual cells - means for each of the ~30 or whatever cells held here.
+	// Dynamically allocated when number of cells is known
+
+	float **    cellAveData;
+	int **      cellAveCounts;
+
 private:
 	void				generateModuleFilenames(char[]);
 
@@ -130,7 +162,18 @@ private:
 	std::string			moduleFilename[nAGIPDmodules];
 	cAgipdModuleReader	module[nAGIPDmodules];
 	bool				moduleOK[nAGIPDmodules];
-	
+
+	/* Housekeeping for trains and pulses */
+	long                minTrain;
+	long                maxTrain;
+	long                minPulse;
+	long                maxPulse;
+	long                minCell;
+	long                maxCell;
+
+
+	TrainPulseMap       trainPulseMap;
+
 };
 
 
