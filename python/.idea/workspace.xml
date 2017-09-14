@@ -32,8 +32,8 @@
       <file leaf-file-name="cheetah-crawler.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cheetah-crawler.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="343">
-              <caret line="30" column="23" lean-forward="true" selection-start-line="30" selection-start-column="23" selection-end-line="30" selection-end-column="23" />
+            <state relative-caret-position="314">
+              <caret line="38" column="34" lean-forward="false" selection-start-line="38" selection-start-column="29" selection-end-line="38" selection-end-column="34" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
@@ -54,8 +54,8 @@
       <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="526">
-              <caret line="382" column="43" lean-forward="true" selection-start-line="382" selection-start-column="43" selection-end-line="382" selection-end-column="43" />
+            <state relative-caret-position="341">
+              <caret line="378" column="23" lean-forward="false" selection-start-line="378" selection-start-column="23" selection-end-line="378" selection-end-column="23" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
@@ -92,6 +92,7 @@
       <find>cfel_locations</find>
       <find>location</find>
       <find>crawler</find>
+      <find>runCheetah</find>
     </findStrings>
     <replaceStrings>
       <replace>gui_locations</replace>
@@ -113,6 +114,7 @@
         <option value="$PROJECT_DIR$/lib/gui_locations.py" />
         <option value="$PROJECT_DIR$/cheetah-crawler.py" />
         <option value="$PROJECT_DIR$/lib/crawler_exfel.py" />
+        <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
         <option value="$PROJECT_DIR$/cheetah-gui.py" />
       </list>
     </option>
@@ -418,6 +420,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="825">
           <caret line="59" column="0" lean-forward="true" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>
@@ -512,13 +515,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/crawler_hdf5.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="825">
-          <caret line="59" column="0" lean-forward="true" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_detcorr.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
@@ -595,16 +591,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cheetah-crawler.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="343">
-          <caret line="30" column="23" lean-forward="true" selection-start-line="30" selection-start-column="23" selection-end-line="30" selection-end-column="23" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="330">
@@ -623,10 +609,36 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cheetah-crawler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="314">
+          <caret line="38" column="34" lean-forward="false" selection-start-line="38" selection-start-column="29" selection-end-line="38" selection-end-column="34" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="239">
+          <caret line="20" column="0" lean-forward="true" selection-start-line="20" selection-start-column="0" selection-end-line="20" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_hdf5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="59" column="0" lean-forward="true" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="526">
-          <caret line="382" column="43" lean-forward="true" selection-start-line="382" selection-start-column="43" selection-end-line="382" selection-end-column="43" />
+        <state relative-caret-position="341">
+          <caret line="378" column="23" lean-forward="false" selection-start-line="378" selection-start-column="23" selection-end-line="378" selection-end-column="23" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
           </folding>

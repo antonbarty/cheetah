@@ -376,6 +376,10 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #
     def run_XFEL_detectorcalibration(self):
         runs = self.selected_runs()
+        if len(runs) is 0:
+            print('No runs selected')
+            return
+
         for i, run in enumerate(runs['run']):
             print('------------ Start XFEL detector calibration script ------------')
 

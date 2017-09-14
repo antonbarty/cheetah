@@ -14,7 +14,7 @@ import lib.cfel_filetools as cfel_file
 def crawler_merge(info):
     #print("Crawler merge")
 
-    if info.datatype is 'XTC':
+    if info.datatype is 'XTC' or info.datatype is 'exfel':
         XTCdirToInt = True
     else:
         XTCdirToInt = False
