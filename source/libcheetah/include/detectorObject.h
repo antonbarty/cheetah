@@ -525,6 +525,7 @@ public:
     uint16_t *data_raw16;
     // Raw data as read from the XTC file but converted to float
     float *data_raw;
+	bool data_raw_is_float;
     // Data after detector corrections applied (common-mode, detector artefacts...)
     float *data_detCorr;
     // Data after both detector corrections and photon corrections (subtraction of persistent parasitic scattering, water ring removal,...)

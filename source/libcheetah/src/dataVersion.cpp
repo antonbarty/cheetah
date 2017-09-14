@@ -26,9 +26,13 @@
 
 void initRaw(cEventData *eventData, cGlobal *global){
 	// Copy raw detector data into float array
-	// Add flag:  If data already copued into float just return
+	// Add flag:
 	// if  global->alreadyIsFloat is not true:
 	DETECTOR_LOOP {
+		// Just return if data has already been copied into a float
+		if(eventData->detector[detIndex].data_raw_is_float)
+			continue;
+		
 		DEBUG3("Initializing raw data array (float). (detectorID=%ld)",global->detector[detIndex].detectorID);
 		for(long i=0;i<global->detector[detIndex].pix_nn;i++){
 			eventData->detector[detIndex].data_raw[i] = eventData->detector[detIndex].data_raw16[i];
