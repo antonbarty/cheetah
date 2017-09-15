@@ -72,6 +72,7 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 	data = NULL;
 	digitalGain = NULL;
 	rawDetectorData = true;
+	noData = false;
 
 	verbose = 0;
 };
@@ -94,24 +95,32 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 	testfp = fopen(filename, "r");
 	if (testfp == NULL) {
 		printf("cAgipdReader::open: File does not exist (%s)\n",filename);
-		exit(1);
+		printf("Module set to blank.\n");
+		noData = true;
+		return;
 	}
-	fclose(testfp);
-	
-	
+	else
+	{
+		fclose(testfp);
+	}
+
 	// Is it an HDF5 file
 	htri_t file_test;
 	file_test = H5Fis_hdf5(filename);
 	if(file_test == 0){
 		printf("cAgipdReader::open: Not an HDF5 file (%s)\n",filename);
-		exit(1);
+		printf("Module set to blank.\n");
+		noData = true;
+		return;
 	}
 	
 	// Open the file
 	h5_file_id = H5Fopen(filename,H5F_ACC_RDONLY,H5P_DEFAULT);
 	if(h5_file_id < 0){
 		printf("cAgipdReader::open: Could not open HDF5 file (%s)\n",filename);
-		exit(1);
+		printf("Module set to blank.\n");
+		noData = true;
+		return;
 	}
 	//std::cout << "\tFile found\n";
 
@@ -215,6 +224,8 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 
 
 void cAgipdModuleReader::close(void){
+	if (noData) return;
+
 	if(data==NULL)
 		return;
 	if(h5_file_id==NULL)
@@ -274,7 +285,9 @@ void cAgipdModuleReader::close(void){
 
 
 
-void cAgipdModuleReader::readHeaders(void){
+void cAgipdModuleReader::readHeaders(void)
+{
+	if (noData) return;
 
 	//std::cout << "Reading headers " << filename << "\n";
 	std::cout << "Reading vector fields from " << filename << "\n";
@@ -473,6 +486,8 @@ void* cAgipdModuleReader::checkAllocReadHyperslab(char fieldName[], int ndims, h
 
 void cAgipdModuleReader::readImageStack(void){
 	
+	if (noData) return;
+
 	long mem_bytes = nframes*nn*sizeof(uint16_t);
 	
 	std::cout << "Reading entire image data array (all frames)\n" ;
@@ -496,7 +511,9 @@ void cAgipdModuleReader::readImageStack(void){
 void cAgipdModuleReader::readFrame(long frameNum){
 	// Read a single image at position frameNum
 	// Will have both fs and ss, and stack...
-	
+
+	if (noData) return;
+
 	if(frameNum < 0 || frameNum >= nframes) {
 		std::cout << "\treadFrame::frameNum out of bounds " << frameNum << std::endl;
 		return;
@@ -507,7 +524,7 @@ void cAgipdModuleReader::readFrame(long frameNum){
 	}
 	
 	currentFrame = frameNum;
-	
+
 	// At the moment we only read RAW data files
 	if (rawDetectorData)
 	{

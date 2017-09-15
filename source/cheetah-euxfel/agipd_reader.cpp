@@ -111,6 +111,9 @@ void cAgipdReader::open(char *baseFilename){
 	std::cout << "\tChecking number of events in each file" << std::endl;
 	moduleOK[0] = true;
 	for(long i=1; i<nAGIPDmodules; i++) {
+		if (module[i].noData)
+			continue;
+
 		if(module[i].nframes != module[0].nframes) {
 			std::cout << "\tInconsistent number of frames between modules 0 and " << i << std::endl;
 			std::cout << "\t" << module[i].nframes << " != " << module[0].nframes << std::endl;
@@ -124,6 +127,9 @@ void cAgipdReader::open(char *baseFilename){
 	std::cout << "\tChecking all data is of the same type" << std::endl;
 	rawDetectorData = module[0].rawDetectorData;
 	for(long i=1; i<nAGIPDmodules; i++) {
+		if (module[i].noData)
+			continue;
+
 		if(module[i].rawDetectorData != rawDetectorData) {
 			std::cout << "\tInconsistent data, some is RAW and some is not: " << i << std::endl;
 			exit(1);
@@ -135,6 +141,9 @@ void cAgipdReader::open(char *baseFilename){
 	moduleOK[0] = true;
 	for(long i=1; i<nAGIPDmodules; i++)
 	{
+		if (module[i].noData)
+			continue;
+
 		if(module[i].n0 != module[0].n0 || module[i].n1 != module[0].n1) {
 			std::cout << "\tInconsistent image sizes between modules 0 and " << i << std::endl;
 			std::cout << "\t ( " << module[i].n0 << " != " << module[0].n0 << " )" << std::endl;
@@ -151,6 +160,9 @@ void cAgipdReader::open(char *baseFilename){
 
 	for(long i=0; i<nAGIPDmodules; i++)
 	{
+		if (module[i].noData)
+			continue;
+
 		if (moduleOK[i] == false)
 			continue;
 
@@ -192,7 +204,7 @@ void cAgipdReader::open(char *baseFilename){
 	std::cout << "Current pulse set to minimum, " << minPulse << std::endl;
 	std::cout << "Cells of module readout extend from IDs " << minCell << " to " << maxCell << std::endl;
 
-	for(long i=1; i<nAGIPDmodules; i++)
+	for(long i=0; i<nAGIPDmodules; i++)
 	{
 		for (long k = minTrain; k < maxTrain; k++)
 		{
@@ -208,8 +220,10 @@ void cAgipdReader::open(char *baseFilename){
 		}
 	}
 
-	for(long i=1; i<nAGIPDmodules; i++)
+	for(long i=0; i<nAGIPDmodules; i++)
 	{
+		if (module[i].noData) continue;
+
 		for(long j=0; j < module[i].nframes; j++)
 		{
 			long trainID = module[i].trainIDlist[j];
@@ -313,6 +327,11 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 			statusID[i] = 1;
 			memset(pdata[i], 0, modulenn*sizeof(float));
 			memset(pgain[i], 0, modulenn*sizeof(uint16_t));
+			continue;
+		}
+
+		if (module[i].noData)
+		{
 			continue;
 		}
 
