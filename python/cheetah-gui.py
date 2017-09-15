@@ -335,11 +335,15 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
             # Format output directory string
-            if self.compute_location['location'] is 'LCLS':
+            print("Location: ", self.compute_location['location'])
+            if 'LCLS' in self.compute_location['location']:
+                dir = 'r{:04d}'.format(int(run))
+            elif 'max-exfl' in self.compute_location['location']:
                 dir = 'r{:04d}'.format(int(run))
             else:
                 dir = run
             dir += '-'+dataset
+            print('Output directory: ', dir)
 
 
             #Update Dataset and Cheetah status in table
@@ -451,7 +455,9 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             newdir = '---'
 
             if olddir != '---':
-                if self.compute_location['location'] is 'LCLS':
+                if 'LCLS' in self.compute_location['location']:
+                    newdir = 'r{:04d}'.format(int(run))
+                elif 'max-exfl' in self.compute_location['location']:
                     newdir = 'r{:04d}'.format(int(run))
                 else:
                     newdir = run
