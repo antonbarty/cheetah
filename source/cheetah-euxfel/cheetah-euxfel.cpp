@@ -116,6 +116,19 @@ int main(int argc, char* argv[]) {
 			eventData->pulseID = 0;
 			eventData->cellID = 0;
 			
+			//
+			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfel_pulseid") == 0) {
+				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
+					eventData->pumpLaserCode = agipd.currentPulse+1;
+					eventData->powderClass = agipd.currentPulse+1;
+				}
+				else {
+					eventData->pumpLaserCode = 0;
+					eventData->powderClass = 0;
+				}
+			}
+
+			
 			// Check image dimensions
 			int detId = 0;
 			if (agipd.n0 != cheetahGlobal.detector[detId].pix_nx || agipd.n1 != cheetahGlobal.detector[detId].pix_ny) {
