@@ -332,6 +332,9 @@ void cGlobal::setup()
 		else if (strcmp(pumpLaserScheme, "LP41") == 0) {
 			nPowderClasses = 5;
 		}
+		else if (strcmp(pumpLaserScheme, "xfel_pulseid") == 0) {
+			nPowderClasses = 32;
+		}
         else {
             printf("Error: Unknown pump laser scheme\n");
             printf("pumpLaserScheme = %s\n", pumpLaserScheme);
