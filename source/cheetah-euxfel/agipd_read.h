@@ -67,7 +67,7 @@ public:
 
 	int			verbose;
 	bool		rawDetectorData;
-
+	bool        noData;
 	
 // Private variables
 private:
