@@ -132,9 +132,11 @@ int main(int argc, char* argv[]) {
 			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 		}
 	
-		std::cout << "Closing AGIPD modules" << std::endl;
-		//agipd.close();
 		usleep(5000);
+		std::cout << "Closing AGIPD modules" << std::endl;
+		agipd.close();
+		std::cout << "Finished with " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
+
 	}
 	// File loop
 
