@@ -77,7 +77,8 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 };
 
 cAgipdModuleReader::~cAgipdModuleReader(){
-	close();
+	std::cout << "\tModule destructor called" << std::endl;
+	cAgipdModuleReader::close();
 };
 
 /*
@@ -214,6 +215,11 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 
 
 void cAgipdModuleReader::close(void){
+	if(data==NULL)
+		return;
+	if(h5_file_id==NULL)
+		return;
+	
 
 	if(verbose) {
 		std::cout << "\tClosing " << filename << "\n";
@@ -221,6 +227,7 @@ void cAgipdModuleReader::close(void){
 
 	// Free array memory
 	if(data != NULL) {
+		std::cout << "\tFreeing memory " << filename << "\n";
 		free(pulseIDlist);
 		free(trainIDlist);
 		free(cellIDlist);
@@ -239,6 +246,7 @@ void cAgipdModuleReader::close(void){
 	
 	
 	if (h5_file_id != 0) {
+		std::cout << "\tClosing HDF5 links " << filename << "\n";
 		// Cleanup stale IDs
 		hid_t ids[256];
 		long n_ids = H5Fget_obj_ids(h5_file_id, H5F_OBJ_ALL, 256, ids);
@@ -287,6 +295,8 @@ void cAgipdModuleReader::readHeaders(void){
 		std::cout << "\tDone reading vector fields in " << filename << "\n";
 	}
 
+	
+	
 };
 // cAgipdReader::readHeaders
 
@@ -547,13 +557,12 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	{
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+		
 		data = (float *)malloc(n0 * n1 * sizeof(float));
-
-		for (int i = 0; i < n0 * n1; i++)
-		{
+		for (int i = 0; i < n0 * n1; i++) {
 			data[i] = tempdata[i];
 		}
-
+		
 		free(tempdata);
 	}
 	else
@@ -563,8 +572,10 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	}
 	
 	// Digital gain is in the second dimension (at least in the current layout)
-	slab_start[1] = 0;
-	digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+	if(rawDetectorData) {
+		slab_start[1] = 1;
+		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+	}
 
     // Update timestamp, status bits and other stuff
     trainID = trainIDlist[frameNum];

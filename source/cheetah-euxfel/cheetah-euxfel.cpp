@@ -23,6 +23,8 @@ struct tCheetahEuXFELparams {
 	int verbose;
 } CheetahEuXFELparams;
 void parse_config(int, char *[], tCheetahEuXFELparams*);
+void waitForCheetahWorkers(cGlobal*);
+
 
 
 //static char testfile[]="R0126-AGG01-S00002.h5";
@@ -56,7 +58,6 @@ int main(int argc, char* argv[]) {
 	
 	// Initialize Cheetah
 	std::cout << "Setting up Cheetah" << std::endl;
-
 	static cGlobal cheetahGlobal;
 	static long frameNumber = 0;
 	static time_t startT;
@@ -74,12 +75,20 @@ int main(int argc, char* argv[]) {
 	
 	
 	// Initialise AGIPD frame reading stuff
+	cAgipdReader agipd;
+	agipd.verbose=1;
 
+	//for(long fnum=0; fnum<CheetahEuXFELparams.inputFiles.size(); fnum++) {
+	//	std::cout << "\t" << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
+	//}
+	
 	// Loop through all listed *AGIPD00*.h5 files
-	for(long fnum=0; fnum < CheetahEuXFELparams.inputFiles.size(); fnum++) {
-		cAgipdReader agipd;
-		agipd.verbose=1;
+	for(long fnum=0; fnum<CheetahEuXFELparams.inputFiles.size(); fnum++) {
 
+		// Add code to deduce run number from filename
+		int runNumber;
+		
+		
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
@@ -87,6 +96,8 @@ int main(int argc, char* argv[]) {
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
 		while (agipd.nextFrame()) {
+			
+			// Add more sensible event name
 			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
@@ -98,10 +109,18 @@ int main(int argc, char* argv[]) {
 			eventData->photonEnergyeV = cheetahGlobal.defaultPhotonEnergyeV;
 			eventData->wavelengthA = 0;
 			eventData->pGlobal = &cheetahGlobal;
+			//eventData->detectorZ = 15e-3;
 			
+			// Add train and pulse ID to event data.
+			eventData->trainID = 0;
+			eventData->pulseID = 0;
+			eventData->cellID = 0;
+			
+			// Check image dimensions
 			int detId = 0;
 			if (agipd.n0 != cheetahGlobal.detector[detId].pix_nx || agipd.n1 != cheetahGlobal.detector[detId].pix_ny) {
 				printf("Error: File image dimensions of %zu x %zu did not match detector dimensions of %li x %li\n", agipd.n0, agipd.n1, eventData->pGlobal->detector[detId].pix_nx, eventData->pGlobal->detector[detId].pix_ny);
+				continue;
 			}
 
 			// Allocate memory for image data
@@ -113,31 +132,44 @@ int main(int argc, char* argv[]) {
 			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 		}
 	
-		agipd.close();
-		
-		
-/*		
+		std::cout << "Closing AGIPD modules" << std::endl;
+		//agipd.close();
+		usleep(5000);
+	}
+	// File loop
+
+	
+	/*
 		// Test code for reading an individual AGIPD module
 		if(false) {
-			cAgipdModuleReader	agipdModule;
-			agipdModule.verbose = 1;
-			agipdModule.open(testfile);
-			agipdModule.readHeaders();
-			
-			// Read stack
-			//agipdModule.readImageStack();
-			
-			
-			// Read images
-			std::cout << "Reading individual frames\n";
-			for(long i=0; i<10; i++) {
-				agipdModule.readFrame(i);
-			}
-			
-			// Close
-			agipdModule.close();
+	 cAgipdModuleReader	agipdModule;
+	 agipdModule.verbose = 1;
+	 agipdModule.open(testfile);
+	 agipdModule.readHeaders();
+	 
+	 // Read stack
+	 //agipdModule.readImageStack();
+	 
+	 
+	 // Read images
+	 std::cout << "Reading individual frames\n";
+	 for(long i=0; i<10; i++) {
+	 agipdModule.readFrame(i);
+	 }
+	 
+	 // Close
+	 agipdModule.close();
 		}
-*/
+	 */
+	
+	
+	
+	
+	waitForCheetahWorkers(&cheetahGlobal);
+	if(cheetahGlobal.saveCXI) {
+		printf("Writing accumulated CXIDB file\n");
+		writeAccumulatedCXI(&cheetahGlobal);
+		closeCXIFiles(&cheetahGlobal);
 	}
 
 	
@@ -146,6 +178,33 @@ int main(int argc, char* argv[]) {
 	cheetahExit(&cheetahGlobal);
 	printf("Clean Exit\n");
 	return 0;
+}
+
+
+void waitForCheetahWorkers(cGlobal *cheetahGlobal){
+	time_t	tstart, tnow;
+	time(&tstart);
+	double	dtime;
+	int p=0, pp=0;
+	
+	while(cheetahGlobal->nActiveCheetahThreads > 0) {
+		p = cheetahGlobal->nActiveCheetahThreads;
+		if ( pp != p){
+			pp = p;
+			printf("Waiting for %li worker threads to finish.\n", cheetahGlobal->nActiveCheetahThreads);
+		}
+		time(&tnow);
+		dtime = difftime(tnow, tstart);
+		if(( dtime > ((float) cheetahGlobal->threadTimeoutInSeconds) ) && (cheetahGlobal->threadTimeoutInSeconds > 0)) {
+			printf("\t%li threads still active after waiting %f seconds\n", cheetahGlobal->nActiveCheetahThreads, dtime);
+			printf("\tGiving up and exiting anyway\n");
+			cheetahGlobal->nActiveCheetahThreads = 0;
+			break;
+		}
+		usleep(500000);
+	}
+	printf("Cheetah workers stopped successfully.\n");
+	
 }
 
 

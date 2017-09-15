@@ -118,9 +118,10 @@ public:
 	// Data slab dimensions
 	long		nframes;
 
-	bool                firstModule;
-	long                currentTrain;
-	long                currentPulse;
+	bool        firstModule;
+	long        currentTrain;
+	long        currentPulse;
+	uint16_t	currentCell;
 
 	// Dimensions and of the composite data slab
 	long		dims[2];
