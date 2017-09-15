@@ -251,15 +251,18 @@ void cAgipdReader::close(void){
 		std::cout << "\tClosing " << moduleFilename[i] << std::endl;
 		module[i].close();
 	}
+	std::cout << "\tModule elements closed " << std::endl;
 	
 	// Clean up memory
-	free(data);
-	free(mask);
-	free(digitalGain);
-	data = NULL;
-	mask = NULL;
-	digitalGain = NULL;
-
+	if(data != NULL) {
+		free(data);
+		free(mask);
+		free(digitalGain);
+		data = NULL;
+		mask = NULL;
+		digitalGain = NULL;
+	}
+	std::cout << "\tAGIPD reader closed " << std::endl;
 }
 // cAgipdReader::close()
 

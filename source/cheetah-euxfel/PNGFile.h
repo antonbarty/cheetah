@@ -20,6 +20,8 @@ typedef enum
     FlagNone, FlagThreshold
 } Flag;
 
+std::string getBaseFilename(std::string filename);
+
 class PNGFile
 {
 private:

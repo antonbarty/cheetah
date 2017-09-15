@@ -74,11 +74,11 @@ int main(int argc, char* argv[]) {
 	
 	
 	// Initialise AGIPD frame reading stuff
-	cAgipdReader agipd;
-	agipd.verbose=1;
 
 	// Loop through all listed *AGIPD00*.h5 files
 	for(long fnum=0; fnum < CheetahEuXFELparams.inputFiles.size(); fnum++) {
+		cAgipdReader agipd;
+		agipd.verbose=1;
 
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
