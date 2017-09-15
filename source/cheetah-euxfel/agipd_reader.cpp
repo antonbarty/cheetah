@@ -340,6 +340,11 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		// Read the requested frame number (and update metadata in structure)
 		module[i].readFrame(frameNum);
 
+		if (module[i].noData)
+		{
+			continue;
+		}
+
 		// Copy across
 		cellID[i] = module[i].cellID;
 		statusID[i] = module[i].statusID;

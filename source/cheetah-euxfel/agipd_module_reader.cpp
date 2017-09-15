@@ -193,12 +193,13 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 	//H5LTget_dataset_info(h5_file_id, h5_pulseId_field, dims, &dataclass, &datasize);
 	//nframes = dims[0];
 	// Image data gives number of frames, logical block size, stack depth
-	H5LTget_dataset_info(h5_file_id, h5_image_data_field.c_str(), dims, &dataclass, &datasize);
+	int success = H5LTget_dataset_info(h5_file_id, h5_image_data_field.c_str(), dims, &dataclass, &datasize);
 
-	if (h5_file_id < 0)
+	if (success < 0)
 	{
-		std::cout << "Get dataset info for image - failed.\n";
-		exit(0);
+		std::cout << "Get dataset info for image - failed. Module set to blank.\n";
+		noData = true;
+		return;
 	}
 
 	nframes = dims[0];
@@ -322,9 +323,22 @@ void* cAgipdModuleReader::checkAllocRead(char fieldName[], long targetnframes, h
 	H5T_class_t dataclass;
 
 	// Get size and type of this data set
-	H5LTget_dataset_ndims(h5_file_id, fieldName, &ndims);
+	int success = H5LTget_dataset_ndims(h5_file_id, fieldName, &ndims);
+
+	if (success < 0)
+	{
+		noData = true;
+		return NULL;
+	}
+
 	H5LTget_dataset_info(h5_file_id, fieldName, dims, &dataclass, &datasize);
-	
+
+	if (success < 0)
+	{
+		noData = true;
+		return NULL;
+	}
+
 	if(verbose) {
 		std::cout << "\t" << fieldName << "\n";
 		printf("\tndims=%i  (",ndims);
@@ -386,6 +400,13 @@ void* cAgipdModuleReader::checkAllocReadHyperslab(char fieldName[], int ndims, h
 	hid_t dataset_id;
 	hid_t dataspace_id;
 	dataset_id = H5Dopen(h5_file_id, fieldName, H5P_DEFAULT);
+
+	if (dataset_id < 0)
+	{
+		noData = true;
+		return NULL;
+	}
+
 	dataspace_id = H5Dget_space(dataset_id);
 	
 	
@@ -574,7 +595,12 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	{
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
-		
+
+		if (noData)
+		{
+			return;
+		}
+
 		data = (float *)malloc(n0 * n1 * sizeof(float));
 		for (int i = 0; i < n0 * n1; i++) {
 			data[i] = tempdata[i];
@@ -586,13 +612,18 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	{
 		// Read data from hyperslab
 		data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+
+		if (noData)
+		{
+			return;
+		}
 	}
 	
 	// Digital gain is in the second dimension (at least in the current layout)
 	if(rawDetectorData) {
 		slab_start[1] = 1;
 		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
-	}
+}
 
     // Update timestamp, status bits and other stuff
     trainID = trainIDlist[frameNum];
