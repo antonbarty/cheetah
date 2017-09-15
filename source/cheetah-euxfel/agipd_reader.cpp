@@ -223,7 +223,7 @@ void cAgipdReader::open(char *baseFilename){
 	}
 
 	// Allocate memory for data and masks
-	data = (float*) malloc(nn*sizeof(uint16_t));
+	data = (float*) malloc(nn*sizeof(float));
 	mask = (uint16_t*) malloc(nn*sizeof(uint16_t));
 	digitalGain = (uint16_t*) malloc(nn*sizeof(uint16_t));
 	
