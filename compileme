@@ -7,7 +7,7 @@ echo Creating new build directory
 mkdir build
 cd build
 echo Configuring....
-cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/ginnh/bin/cheetah/cheetah-stable/ -DBUILD_TESTING=OFF -DCMAKE_EXE_LINKER_FLAGS="-lhdf5_hl -lpng"
+cmake ../ -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/home/barty/bin/ -DBUILD_TESTING=OFF -DCMAKE_EXE_LINKER_FLAGS="-lhdf5_hl -lpng"
 echo ""
 echo ""
 read -p "Finished. Press any key to open ccmake and double ceck all settings. Remember to set CMAKE_INSTALLATION_PREFIX to the install directory " -n1 -s

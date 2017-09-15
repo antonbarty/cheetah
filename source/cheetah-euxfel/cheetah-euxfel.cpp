@@ -88,10 +88,6 @@ int main(int argc, char* argv[]) {
 		std::cout << "Reading individual frames\n";
 		while (agipd.nextFrame()) {
 			
-			// Read the data frame
-//			agipd.readFrame(i);
-			
-			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
 			strcpy(eventData->eventname,CheetahEuXFELparams.inputFiles[fnum].c_str());
