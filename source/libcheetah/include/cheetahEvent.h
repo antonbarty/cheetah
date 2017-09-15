@@ -130,6 +130,12 @@ public:
 	int         pumpLaserCode;
 	double      pumpLaserDelay;
 	
+	// EuXFEL specific things
+	uint64_t	trainID;
+	uint64_t	pulseID;
+	uint16_t	cellID;
+	
+	
 	// Position of the sample stage
 	double      samplePos[3]; // in um
 
