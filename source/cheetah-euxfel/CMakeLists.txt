@@ -1,5 +1,5 @@
 
-find_package(HDF5 REQUIRED)
+find_package(HDF5 REQUIRED C HL)
 
 mark_as_advanced(CLEAR HDF5_HL_LIBRARIES)
 
