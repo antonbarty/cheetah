@@ -63,12 +63,28 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 
 		// Replace the AGIPD00 number with 00-15
 		pos = moduleFilename[i].find("AGIPD");
+
+		if (pos == std::string::npos)
+		{
+			std::cout << "Cannot generate AGIPD module filename"\
+			"as I can't find the string 'AGIPD'!" << std::endl;
+			continue;
+		}
+
 		sprintf(tempstr, "%0.2li", i);
 		moduleFilename[i].replace(pos+5,2,tempstr);
 		
 		// Which chunk/sequence are we looking at?
 		pos = moduleFilename[i].find(".h5");
+		if (pos == std::string::npos || (pos + 5 < 0))
+		{
+			std::cout << "Cannot decide if first stack - never mind" << std::endl;
+			continue;
+		}
+
 		long stackPos = pos - 5; /* Position of the stack thing */
+
+
 		std::string stackNum = moduleFilename[i].substr(stackPos, 5);
 		int stackInt = atoi(stackNum.c_str());
 
