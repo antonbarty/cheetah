@@ -2202,8 +2202,8 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
 		euxfel["cellID"].write(&eventData->cellID,stackSlice);
 		
 		DETECTOR_LOOP{
-			euxfel.child("detector",detIndex)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
-			euxfel.child("detector",detIndex)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
+			euxfel.cxichild("detector",detIndex+1)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
+			euxfel.cxichild("detector",detIndex+1)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
 		}
 	}
 	
@@ -2602,6 +2602,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
 		euxfel["trainID"].write(&eventData->trainID,stackSlice);
 		euxfel["pulseID"].write(&eventData->pulseID,stackSlice);
 		euxfel["cellID"].write(&eventData->cellID,stackSlice);
+		
 		
 		DETECTOR_LOOP{
 			euxfel.child("detector",detIndex)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
