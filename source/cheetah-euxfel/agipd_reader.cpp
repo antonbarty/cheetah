@@ -28,7 +28,8 @@ cAgipdReader::cAgipdReader(void){
 	minCell = 0;
 	maxCell = 0;
 	verbose = 0;
-	
+	_skip = 1;
+
 	gaincalFile = "No_file_specified";
 	darkcalFile = "No_file_specified";
 	for(long i=0; i<nAGIPDmodules; i++) {
@@ -321,10 +322,11 @@ void cAgipdReader::close(void){
 
 bool cAgipdReader::nextFrame()
 {
-	currentPulse++;
+	currentPulse += _skip;
 	if (currentPulse >= maxPulse)
 	{
 		currentPulse = minPulse;
+		currentPulse += _skip;
 		currentTrain++;
 	}
 
