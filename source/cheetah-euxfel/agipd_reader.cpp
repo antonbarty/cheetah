@@ -337,15 +337,23 @@ void cAgipdReader::close(void){
 
 bool cAgipdReader::nextFrame()
 {
-	currentPulse += _skip;
-	if (currentPulse >= maxPulse)
+	lastModule = -1;
+	bool success = true;
+
+	while (lastModule < 0 && success)
 	{
-		currentPulse = minPulse;
 		currentPulse += _skip;
-		currentTrain++;
+		if (currentPulse >= maxPulse)
+		{
+			currentPulse = minPulse;
+			currentPulse += _skip;
+			currentTrain++;
+		}
+
+		success = readFrame(currentTrain, currentPulse);
 	}
 
-	return readFrame(currentTrain, currentPulse);
+	return success;
 }
 
 void cAgipdReader::resetCurrentFrame()
