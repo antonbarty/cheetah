@@ -73,8 +73,13 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 	digitalGain = NULL;
 	rawDetectorData = true;
 	noData = false;
-
 	verbose = 0;
+
+	calibDarkOffset = NULL;
+	calibGainFactor = NULL;
+
+	darkcalFilename = "No_file_specified";
+	gaincalFilename = "No_file_specified";
 };
 
 cAgipdModuleReader::~cAgipdModuleReader(){
@@ -219,6 +224,8 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 	printf("\tNumber of frames: %li\n", nframes);
 	printf("\tImage block size: %lix%li\n", n0, n1);
 	printf("\tStack depth: %li\n", nstack);
+	printf("\tDarkcal file: %s\n", darkcalFilename.c_str());
+	printf("\tGaincal file: %s\n", gaincalFilename.c_str());
 
 };
 // cAgipdReader::open
@@ -309,10 +316,43 @@ void cAgipdModuleReader::readHeaders(void)
 		std::cout << "\tDone reading vector fields in " << filename << "\n";
 	}
 
-	
-	
 };
 // cAgipdReader::readHeaders
+
+
+void cAgipdModuleReader::readDarkcal(char *filename){
+	if(strcmp(filename, "No_file_specified")) {
+		return;
+	}
+	darkcalFilename = filename;
+
+	// checkAllocRead the dark setting field for this module into an array....
+	//	[max-exfl014:barty]user/kuhnm/dark> h5ls -r dark_AGIPD00_agipd_2017-09-16.h5
+	//	/                        Group
+	//	/offset                  Dataset {3, 30, 128, 512}
+	//	/stddev                  Dataset {3, 30, 128, 512}
+	//	/threshold               Dataset {2, 30, 128, 512}
+	
+	// Check sanity of this line - it has not been edited for content!
+	//calibDarkOffset = (float*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(float*));
+	
+}
+// cAgipdModuleReader::readDarkcal
+
+
+void cAgipdModuleReader::readGaincal(char *filename){
+	if(strcmp(filename, "No_file_specified")) {
+		return;
+	}
+	gaincalFilename = filename;
+	
+	// checkAllocRead the gain setting field for this module into an array....
+
+	// Check sanity of this line - it has not been edited for content!  THink we may need hyperslab instead
+	//calibDarkOffset = (float*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(float*));
+
+}
+// cAgipdModuleReader::readDarkcal
 
 
 
@@ -625,6 +665,12 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 }
 
+	//	Apply calibration constants (if known).
+	// if(applyCalibration) {
+	//	applyCalibration
+	//}
+
+	
     // Update timestamp, status bits and other stuff
     trainID = trainIDlist[frameNum];
     pulseID = pulseIDlist[frameNum];
@@ -632,4 +678,11 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
     statusID = statusIDlist[frameNum];
 
 };
+
+// Apply calibration constants (if known) 
+void cAgipdModuleReader::applyCalibration(void) {
+	if(calibDarkOffset == NULL && calibGainFactor == NULL)
+		return;
+}
+//  cAgipdModuleReader::applyCalibration
 

@@ -40,6 +40,8 @@ public:
 	void open(char[], int i);
 	void close(void);
 	void readHeaders(void);
+	void readDarkcal(char[]);
+	void readGaincal(char[]);
 	void readImageStack(void);
 	void readFrame(long);
 
@@ -80,12 +82,20 @@ private:
 	std::string h5_cellId_field;
 	std::string h5_image_data_field;
 	std::string h5_image_status_field;
+	
+	std::string	darkcalFilename;
+	std::string	gaincalFilename;
+
+	float		*calibDarkOffset;
+	float		*calibGainFactor;
+	
 
 // Private functions
 private:
 	void*		checkAllocRead(char[], long, hid_t, size_t);
 	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
 	void		readFrameRawOrCalib(long frameNum, bool isRaw);
+	void		applyCalibration(void);
 };
 
 
@@ -109,9 +119,9 @@ public:
 	bool readFrame(long trainID, long pulseID);
 	bool nextFrame();
 	void resetCurrentFrame();
+	
 	void maxAllFrames();
 	float *getCellAverage(int i);
-
 	void writePNG(float *pngData, std::string filename);
 	
 public:
@@ -122,6 +132,11 @@ public:
 	long        currentTrain;
 	long        currentPulse;
 	uint16_t	currentCell;
+	
+	// Calibration files (set to "No_file_specified" in constructor)
+	std::string	gaincalFile;
+	std::string	darkcalFile;
+	
 
 	// Dimensions and of the composite data slab
 	long		dims[2];
@@ -163,6 +178,11 @@ private:
 	std::string			moduleFilename[nAGIPDmodules];
 	cAgipdModuleReader	module[nAGIPDmodules];
 	bool				moduleOK[nAGIPDmodules];
+
+	std::string			darkcalFilename[nAgipdModules];
+	std::string			gaincalFilename[nAgipdModules];
+	
+	
 
 	/* Housekeeping for trains and pulses */
 	long                minTrain;
