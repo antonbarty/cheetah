@@ -164,7 +164,7 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 
 	h5_image_status_field = prefix + h5_image_status_suffix;
 
-	if (true)
+	if (false)
 	{
 		std::cout << h5_trainId_field << std::endl;
 		std::cout << h5_pulseId_field << std::endl;
