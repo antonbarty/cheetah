@@ -28,6 +28,13 @@ cAgipdReader::cAgipdReader(void){
 	minCell = 0;
 	maxCell = 0;
 	verbose = 0;
+	
+	gaincalFile = "No_file_specified";
+	darkcalFile = "No_file_specified";
+	for(long i=0; i<nAGIPDmodules; i++) {
+		darkcalFilename[i] = "No_file_specified";
+		gaincalFilename[i] = "No_file_specified";
+	}
 };
 
 cAgipdReader::~cAgipdReader()
@@ -46,17 +53,22 @@ cAgipdReader::~cAgipdReader()
  *	Small function but isolated here so it's easy to swap conventions if needed
  */
 void cAgipdReader::generateModuleFilenames(char *module0filename){
+	long	pos;
+	char	tempstr[10];
+
+	// Filenames for all the other modules
 	for(long i=0; i<nAGIPDmodules; i++) {
 		moduleFilename[i] = module0filename;
 		
-		long	pos;
-		char	tempstr[10];
+
+		// Replace the AGIPD00 number with 00-15
 		pos = moduleFilename[i].find("AGIPD");
 		sprintf(tempstr, "%0.2li", i);
 		moduleFilename[i].replace(pos+5,2,tempstr);
+		
+		// Which chunk/sequence are we looking at?
 		pos = moduleFilename[i].find(".h5");
 		long stackPos = pos - 5; /* Position of the stack thing */
-
 		std::string stackNum = moduleFilename[i].substr(stackPos, 5);
 		int stackInt = atoi(stackNum.c_str());
 
@@ -65,6 +77,29 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 
 		if(verbose) {
 			printf("\tModule %0.2li = %s\n",i, moduleFilename[i].c_str());
+		}
+	}
+	
+	// Filenames for all the other darkcal files
+	if(darkcalFile != "No_file_specified") {
+		for(long i=0; i<nAGIPDmodules; i++) {
+			// Replace the AGIPD00 number with 00-15
+			darkcalFilename[i] = darkcalFile;
+			pos = darkcalFilename[i].find("AGIPD");
+			sprintf(tempstr, "%0.2li", i);
+			darkcalFilename[i].replace(pos+5,2,tempstr);
+		}
+	}
+
+	
+	// Filenames for all the other gaincal files
+	if(gaincalFile != "No_file_specified") {
+		for(long i=0; i<nAGIPDmodules; i++) {
+			// Replace the AGIPD00 number with 00-15
+			gaincalFilename[i] = gaincalFile;
+			pos = gaincalFilename[i].find("AGIPD");
+			sprintf(tempstr, "%0.2li", i);
+			gaincalFilename[i].replace(pos+5,2,tempstr);
 		}
 	}
 }
@@ -90,6 +125,8 @@ void cAgipdReader::open(char *baseFilename){
 		module[i].verbose = 0;
 		module[i].open((char *) moduleFilename[i].data(), i);
 		module[i].readHeaders();
+		//module[i].readDarkcal(darkcalFilename[i].c_str());
+		//module[i].readGaincal(gaincalFilename[i].c_str());
 	}
 
 	// Det up size and layout of the assembled data stack

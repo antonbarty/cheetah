@@ -78,9 +78,13 @@ int main(int argc, char* argv[]) {
 	cAgipdReader agipd;
 	agipd.verbose=1;
 
-	//for(long fnum=0; fnum<CheetahEuXFELparams.inputFiles.size(); fnum++) {
-	//	std::cout << "\t" << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
-	//}
+	//  Files for calibration stuff
+	//	Will pick up darkcal and gaincal filenames from cheetah.ini: maintains the same 'feel'as before
+	//	Specify file for AGIPD00 - files for other modules are guessed automatically
+	//	cheetahGlobal.detector[0] defaults to "No_file_specified" if nothing set in cheetah.ini
+	agipd.gaincalFile = cheetahGlobal.detector[0].darkcalFile;
+	agipd.darkcalFile = cheetahGlobal.detector[0].gaincalFile;
+	
 	
 	// Loop through all listed *AGIPD00*.h5 files
 	for(long fnum=0; fnum<CheetahEuXFELparams.inputFiles.size(); fnum++) {
@@ -93,6 +97,15 @@ int main(int argc, char* argv[]) {
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
 		
+		// Guess the run number
+		long	pos;
+		long	runNumber;
+		pos = moduleFilename[i].rfind("RAW_R");
+		runNumber = moduleFilename[i].substr(pos+5,4).stol();
+		//runNumber = atoi(moduleFilename[i].substr(pos+5,4).c_str());
+
+		
+		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
 		while (agipd.nextFrame()) {
@@ -102,7 +115,7 @@ int main(int argc, char* argv[]) {
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
 			strcpy(eventData->eventname,CheetahEuXFELparams.inputFiles[fnum].c_str());
-			eventData->runNumber = 0;
+			eventData->runNumber = runNumber;
 			eventData->nPeaks = 0;
 			eventData->pumpLaserCode = 0;
 			eventData->pumpLaserDelay = 0;
@@ -112,19 +125,18 @@ int main(int argc, char* argv[]) {
 			//eventData->detectorZ = 15e-3;
 			
 			// Add train and pulse ID to event data.
-			eventData->trainID = 0;
-			eventData->pulseID = 0;
-			eventData->cellID = 0;
+			eventData->trainID = agipd.currentTrain;
+			eventData->pulseID = agipd.currentPulse;
+			eventData->cellID = agipd.currentCell;
 			
 			//
 			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfel_pulseid") == 0) {
-				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
-					eventData->pumpLaserCode = agipd.currentPulse+1;
-					eventData->powderClass = agipd.currentPulse+1;
+				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses) {
+					eventData->pumpLaserCode = agipd.currentPulse;
+					eventData->powderClass = agipd.currentPulse;
 				}
 				else {
-					eventData->pumpLaserCode = 0;
-					eventData->powderClass = 0;
+					continue;
 				}
 			}
 
