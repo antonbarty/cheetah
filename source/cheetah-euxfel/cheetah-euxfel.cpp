@@ -107,8 +107,13 @@ int main(int argc, char* argv[]) {
 		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
-		while (agipd.nextFrame()) {
-			
+		while (agipd.nextFrame())
+		{
+			if (!agipd.goodFrame())
+			{
+				continue;
+			}
+
 			// Add more sensible event name
 			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);

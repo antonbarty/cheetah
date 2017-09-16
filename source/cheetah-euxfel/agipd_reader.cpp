@@ -351,7 +351,7 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 	}
 
 	int moduleCount = 0;
-	long lastModule = -1;
+	lastModule = -1;
 
 	// Loop through modules
 	for(long i=0; i<nAGIPDmodules; i++)
@@ -390,7 +390,7 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		memcpy(pdata[i], module[i].data, modulenn*sizeof(float));
 		memcpy(pgain[i], module[i].digitalGain, modulenn*sizeof(uint16_t));
 
-		lastModule = i;
+		lastModule = (int)i;
 		
 		// Set entire panel mask to whatever the status is.
 		memset(pmask[i], module[i].statusID, modulenn*sizeof(uint16_t));
