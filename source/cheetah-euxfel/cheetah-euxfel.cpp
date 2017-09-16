@@ -93,7 +93,7 @@ int main(int argc, char* argv[]) {
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
-		agipd.setSkip(1);
+		agipd.setSkip(4);
 
 		// Guess the run number
 		long	pos;
