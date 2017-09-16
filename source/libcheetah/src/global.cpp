@@ -333,7 +333,12 @@ void cGlobal::setup()
 			nPowderClasses = 5;
 		}
 		else if (strcmp(pumpLaserScheme, "xfel_pulseid") == 0) {
-			nPowderClasses = 30;
+			nPowderClasses = 15;
+			if(!(nPowderClasses < MAX_POWDER_CLASSES)) {
+				printf("Warning: Requested more powder classes than space allocated\n");
+				printf("Exiting\n");
+				exit(1);
+			}
 		}
         else {
             printf("Error: Unknown pump laser scheme\n");
