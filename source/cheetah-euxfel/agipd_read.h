@@ -27,6 +27,28 @@ inline std::string i_to_str(int val)
 	return temp;
 }
 
+inline std::string getFilename(std::string filename)
+{
+	size_t pos = filename.rfind("/");
+	if(pos == std::string::npos)  //No path.
+		return filename;
+
+	return filename.substr(pos + 1, filename.length());
+}
+
+inline std::string getBaseFilename(std::string filename)
+{
+	std::string fName = getFilename(filename);
+	size_t pos = fName.rfind(".");
+	if(pos == std::string::npos)  //No extension.
+		return fName;
+
+	if(pos == 0)    //. is at the front. Not an extension.
+		return fName;
+
+	return fName.substr(0, pos);
+}
+
 /*
  *	This class handles reading and writing for one AGIPD module file
  *	(each module is in a separate file)
@@ -119,11 +141,14 @@ public:
 	bool readFrame(long trainID, long pulseID);
 	bool nextFrame();
 	void resetCurrentFrame();
-	
+	bool goodFrame() { return (lastModule >= 0); }
+
 	void maxAllFrames();
 	float *getCellAverage(int i);
 	void writePNG(float *pngData, std::string filename);
-	
+
+	void setSkip(int skip) { _skip = skip; if (_skip <= 0) _skip = 1; }
+
 public:
 	// Data slab dimensions
 	long		nframes;
@@ -182,7 +207,7 @@ private:
 	std::string			darkcalFilename[nAGIPDmodules];
 	std::string			gaincalFilename[nAGIPDmodules];
 	
-	
+	int                 _skip;
 
 	/* Housekeeping for trains and pulses */
 	long                minTrain;
@@ -192,9 +217,14 @@ private:
 	long                minCell;
 	long                maxCell;
 
+	/* Stores last module added to image, or -1 if no modules available */
+	int                 lastModule;
+	/* Number of non-empty images in the current train */
+	int                 goodImages4ThisTrain;
 
 	TrainPulseMap       trainPulseMap;
 
+	bool nextFramePrivate();
 };
 
 
