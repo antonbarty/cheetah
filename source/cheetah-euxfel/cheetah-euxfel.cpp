@@ -140,7 +140,7 @@ int main(int argc, char* argv[]) {
 			eventData->pumpLaserCode = 0;
 			eventData->pumpLaserDelay = 0;
 			eventData->photonEnergyeV = cheetahGlobal.defaultPhotonEnergyeV;
-			eventData->wavelengthA = 0;
+			eventData->wavelengthA = 12400 / cheetahGlobal.defaultPhotonEnergyeV;
 			eventData->pGlobal = &cheetahGlobal;
 			//eventData->detectorZ = 15e-3;
 			
