@@ -7,7 +7,7 @@
 //#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
+#include <string.h>
 #include <vector>
 #include <math.h>
 #include "agipd_read.h"
