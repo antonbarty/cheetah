@@ -7,13 +7,11 @@
 //#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
+#include <string.h>
 #include <vector>
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include <sstream>
-#include "PNGFile.h"
-
 #include "agipd_read.h"
 
 /*
