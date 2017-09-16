@@ -27,7 +27,7 @@ inline std::string i_to_str(int val)
 	return temp;
 }
 
-std::string getFilename(std::string filename)
+inline std::string getFilename(std::string filename)
 {
 	size_t pos = filename.rfind("/");
 	if(pos == std::string::npos)  //No path.
@@ -36,7 +36,7 @@ std::string getFilename(std::string filename)
 	return filename.substr(pos + 1, filename.length());
 }
 
-std::string getBaseFilename(std::string filename)
+inline std::string getBaseFilename(std::string filename)
 {
 	std::string fName = getFilename(filename);
 	size_t pos = fName.rfind(".");
