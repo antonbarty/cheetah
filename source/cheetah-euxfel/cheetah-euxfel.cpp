@@ -14,7 +14,21 @@
 #include "agipd_read.h"
 #include "cheetah.h"
 
+#include <execinfo.h>
+#include <signal.h>
 
+void handler(int sig) {
+	void *array[10];
+	size_t size;
+
+	// get void*'s for all entries on the stack
+	size = backtrace(array, 10);
+
+	// print out all the frames to stderr
+	fprintf(stderr, "Error: signal %d:\n", sig);
+	backtrace_symbols_fd(array, (int)size, STDERR_FILENO);
+	exit(1);
+}
 
 // This is for parsing getopt_long()
 struct tCheetahEuXFELparams {
@@ -36,7 +50,9 @@ void waitForCheetahWorkers(cGlobal*);
 //
 int main(int argc, char* argv[]) {
 	
-	
+	signal(SIGSEGV, handler);
+	signal(SIGABRT, handler);
+
 	std::cout << "Cheetah interface for EuXFEL\n";
 	std::cout << "Anton Barty, September 2015-\n";
 
