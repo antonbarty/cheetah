@@ -10,7 +10,6 @@
 #include <string>
 #include <vector>
 #include <math.h>
-#include "PNGFile.h"
 #include "agipd_read.h"
 #include <algorithm>
 
@@ -408,113 +407,6 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 	return true;
 }
 
-void cAgipdReader::writePNG(float *pngData, std::string filename)
-{
-
-	double sum = 0;
-	double sumSq = 0;
-
-	for (int j = 0; j < nn; j++)
-	{
-		sum += pngData[j];
-		sumSq += pngData[j] * pngData[j];
-	}
-
-	double mean = sum / nn;
-	double stdev = sqrt(sumSq / nn - mean * mean);
-	double minBlack = mean - stdev * 1.5;
-	double maxBlack = mean + stdev * 1.5;
-
-	const int one = 128;
-	const int xBump = 0;
-	const int padding = 10;
-	const int xBigBump = 4;
-	const int xFarLeft = -(one + 4) * 4 - 34;
-	const int xBumpedLeft = xFarLeft + 21;
-	const int slant = one * 0.25 + 24;
-	const int gap = 16;
-
-	const int roughPos[16][2] =
-	{{xBump, (one + padding) * 3 + 23 + 21 + 21 + gap + slant},
-		{xBump, (one + padding) * 2 + 23 + 21 + gap + slant},
-		{xBump, (one + padding) * 1 + 23 + gap + slant},
-		{xBump, (one + padding) * 0 + gap + slant},
-		{xBigBump, -(one + padding) * 1 + slant},
-		{xBigBump, -(one + padding) * 2 - 29 + slant},
-		{xBigBump, -(one + padding) * 3 - 29 - 27 + slant},
-		{xBigBump, -(one + padding) * 4 - 29 - 27 - 27 + slant},
-		{xBumpedLeft, -(one + padding) * 1},
-		{xBumpedLeft, -(one + padding) * 2 - 29},
-		{xBumpedLeft, -(one + padding) * 3 - 29 - 27},
-		{xBumpedLeft, -(one + padding) * 4 - 29 - 27 - 27},
-		{xFarLeft, (one + padding) * 3 + 21 + 21 + 21 + gap},
-		{xFarLeft, (one + padding) * 2 + 21 + 21 + gap},
-		{xFarLeft, (one + padding) * 1 + 21 + gap},
-		{xFarLeft, (one + padding) * 0 + gap}};
-
-	const int axisDir[16][2] =
-	{{-1, -1},
-		{-1, -1},
-		{-1, -1},
-		{-1, -1},
-		{-1, -1},
-		{-1, -1},
-		{-1, -1},
-		{-1, -1},
-		{+1, +1},
-		{+1, +1},
-		{+1, +1},
-		{+1, +1},
-		{+1, +1},
-		{+1, +1},
-		{+1, +1},
-		{+1, +1}};
-
-	int width = 1400;
-	int height = 1400;
-
-	PNGFile png = PNGFile("max_agipd_file.png", (int)width, (int)height);
-	png.setCentre(width / 2 + slant, height / 2 - slant);
-	png.setPlain();
-
-	for (int n = 0; n < nAGIPDmodules; n++)
-	{
-		float *sumPointer = &pngData[0] + (pdata[n] - pdata[0]);
-		int cornerX = roughPos[n][0];
-		int cornerY = roughPos[n][1];
-		int xDir = axisDir[n][0];
-		int yDir = axisDir[n][1];
-
-		if (xDir == -1) cornerX += modulen[1];
-		if (yDir == -1) cornerY += modulen[0];
-
-		int rawCornerY = n * (int)modulen[1];
-
-		for (int i = 0; i < modulen[0]; i++)
-		{
-			for (int j = 0; j < modulen[1]; j++)
-			{
-				long index = j * modulen[0] + i;
-				double value = sumPointer[index];
-				double percentage = (value - minBlack) / (maxBlack - minBlack);
-				if (percentage > 1) percentage = 1;
-				if (percentage < 0) percentage = 0;
-				percentage = 1 - percentage;
-				png_byte greyness = percentage * 255;
-
-
-				png.setPixelColourRelative(cornerX + j * xDir, cornerY + i * yDir, greyness, greyness, greyness);
-			}
-		}
-		png.drawText("do not use for any real analysis", 0, 0);
-	}
-
-	png.writeImageOutput();
-
-	std::cout << "Pixel stdev: " << stdev << std::endl;
-	std::cout << "Mean pixel value: " << mean << std::endl;
-
-}
 
 void cAgipdReader::maxAllFrames(void)
 {
@@ -567,8 +459,6 @@ void cAgipdReader::maxAllFrames(void)
 		{
 			cellAveData[i][j] /= cellAveCounts[i][j];
 		}
-
-		writePNG(cellAveData[i], "ave_agipd_cell_" + i_to_str(i));
 	}
 }
 
