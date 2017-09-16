@@ -89,9 +89,6 @@ int main(int argc, char* argv[]) {
 	// Loop through all listed *AGIPD00*.h5 files
 	for(long fnum=0; fnum<CheetahEuXFELparams.inputFiles.size(); fnum++) {
 
-		// Add code to deduce run number from filename
-		int runNumber;
-		
 		
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
@@ -101,8 +98,9 @@ int main(int argc, char* argv[]) {
 		// Guess the run number
 		long	pos;
 		long	runNumber;
-		pos = moduleFilename[i].rfind("RAW_R");
-		runNumber = moduleFilename[i].substr(pos+5,4).stol();
+		pos = CheetahEuXFELparams.inputFiles[fnum].rfind("RAW-R");
+		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos+5,4).c_str());
+		std::cout << "This is run number " << runNumber << std::endl;
 		//runNumber = atoi(moduleFilename[i].substr(pos+5,4).c_str());
 
 		
@@ -132,7 +130,7 @@ int main(int argc, char* argv[]) {
 			
 			//
 			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfel_pulseid") == 0) {
-				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses) {
+				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
 					eventData->pumpLaserCode = agipd.currentPulse;
 					eventData->powderClass = agipd.currentPulse;
 				}
