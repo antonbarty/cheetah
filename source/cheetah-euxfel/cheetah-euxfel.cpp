@@ -10,7 +10,7 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <iostream>
-#include <string>
+#include <string.h>
 #include "agipd_read.h"
 #include "cheetah.h"
 
