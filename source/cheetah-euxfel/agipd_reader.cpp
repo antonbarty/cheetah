@@ -373,8 +373,6 @@ bool cAgipdReader::nextFramePrivate()
 		}
 	}
 
-	goodImages4ThisTrain++;
-
 	return success;
 }
 
