@@ -362,6 +362,7 @@ bool cAgipdReader::nextFramePrivate()
 		{
 			/* We had a good image in this train */
 			goodImages4ThisTrain++;
+			std::cout << "Good images in this train so far: " << goodImages4ThisTrain << std::endl;
 
 			/* But if it isn't a multiple of skip, we don't want it */
 			if (goodImages4ThisTrain % _skip > 0)
