@@ -352,6 +352,7 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 	}
 
 	int moduleCount = 0;
+	long lastModule = -1;
 
 	// Loop through modules
 	for(long i=0; i<nAGIPDmodules; i++)
@@ -374,8 +375,6 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 			continue;
 		}
 
-		moduleCount++;
-
 		// Read the requested frame number (and update metadata in structure)
 		module[i].readFrame(frameNum);
 
@@ -384,19 +383,22 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 			continue;
 		}
 
+		moduleCount++;
+
 		// Copy across
 		cellID[i] = module[i].cellID;
 		statusID[i] = module[i].statusID;
 		memcpy(pdata[i], module[i].data, modulenn*sizeof(float));
 		memcpy(pgain[i], module[i].digitalGain, modulenn*sizeof(uint16_t));
-		
+
+		lastModule = i;
 		
 		// Set entire panel mask to whatever the status is.
 		memset(pmask[i], module[i].statusID, modulenn*sizeof(uint16_t));
 	}
 
 	std::cout << "Read train " << trainID << ", pulse " << pulseID << " with "
-	<< moduleCount << " modules." << std::endl;
+	<< moduleCount << " modules (last module number " << lastModule << ")." << std::endl;
 
 	
 	currentTrain = trainID;
