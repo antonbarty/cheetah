@@ -100,6 +100,7 @@ int main(int argc, char* argv[]) {
 		pos = CheetahEuXFELparams.inputFiles[fnum].rfind("RAW-R");
 		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos+5,4).c_str());
 		std::cout << "This is run number " << runNumber << std::endl;
+		cheetahGlobal.runNumber = runNumber;
 		//runNumber = atoi(moduleFilename[i].substr(pos+5,4).c_str());
 
 		
