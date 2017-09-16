@@ -123,7 +123,9 @@ public:
 	void maxAllFrames();
 	float *getCellAverage(int i);
 	void writePNG(float *pngData, std::string filename);
-	
+
+	void setSkip(int skip) { _skip = skip; if (_skip <= 0) _skip = 1; }
+
 public:
 	// Data slab dimensions
 	long		nframes;
@@ -182,7 +184,7 @@ private:
 	std::string			darkcalFilename[nAGIPDmodules];
 	std::string			gaincalFilename[nAGIPDmodules];
 	
-	
+	int                 _skip;
 
 	/* Housekeeping for trains and pulses */
 	long                minTrain;
