@@ -27,7 +27,7 @@ cAgipdReader::cAgipdReader(void){
 	minCell = 0;
 	maxCell = 0;
 	verbose = 0;
-	goodImages4ThisTrain = 0;
+	goodImages4ThisTrain = -1;
 	_skip = 1;
 
 	gaincalFile = "No_file_specified";
@@ -354,7 +354,7 @@ bool cAgipdReader::nextFramePrivate()
 			currentPulse = minPulse;
 			currentPulse ++;
 			currentTrain++;
-			goodImages4ThisTrain = 0;
+			goodImages4ThisTrain = -1;
 		}
 
 		success = readFrame(currentTrain, currentPulse);
@@ -362,16 +362,18 @@ bool cAgipdReader::nextFramePrivate()
 		if (lastModule >= 0)
 		{
 			/* We had a good image in this train */
-			goodImages4ThisTrain++;
-			std::cout << "Good images in this train so far: " << goodImages4ThisTrain << std::endl;
-
 			/* But if it isn't a multiple of skip, we don't want it */
-			if ((goodImages4ThisTrain - 1) % _skip > 0)
+			if (goodImages4ThisTrain % _skip > 0)
 			{
 				lastModule = -1;
 			}
+
+			goodImages4ThisTrain++;
 		}
 	}
+
+	std::cout << "Dumping good image number: " << goodImages4ThisTrain << std::endl;
+
 
 	return success;
 }
@@ -440,8 +442,11 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		memset(pmask[i], module[i].statusID, modulenn*sizeof(uint16_t));
 	}
 
-	std::cout << "Read train " << trainID << ", pulse " << pulseID << " with "
-	<< moduleCount << " modules (last module number " << lastModule << ")." << std::endl;
+	if (lastModule >= 0)
+	{
+		std::cout << "Read train " << trainID << ", pulse " << pulseID << " with "
+		<< moduleCount << " modules." << std::endl;
+	}
 
 	
 	currentTrain = trainID;
