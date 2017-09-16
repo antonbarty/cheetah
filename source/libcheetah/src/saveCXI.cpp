@@ -2140,7 +2140,27 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         }
         
     }
-    
+
+	// European XFEL
+	if(!strcmp(global->facility, "EuXFEL") ) {
+		//Node *lcls = root->createGroup("LCLS");
+		Node &euxfel = root["instrument"];
+
+		euxfel["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
+		euxfel["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
+		euxfel["machineTime"].write(&eventData->seconds,stackSlice);
+
+		euxfel["trainID"].write(&eventData->trainID,stackSlice);
+		euxfel["pulseID"].write(&eventData->pulseID,stackSlice);
+		euxfel["cellID"].write(&eventData->cellID,stackSlice);
+		
+		DETECTOR_LOOP{
+			euxfel.cxichild("detector",detIndex+1)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
+			euxfel.cxichild("detector",detIndex+1)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
+		}
+	}
+	
+
     // APS
     if(!strcmp(global->facility, "APS")) {
         //Node &aps = root["APS"];
@@ -2522,7 +2542,27 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         lcls["eventTimeString"].write(timestr,stackSlice);
     }
 
-    
+	// European XFEL
+	if(!strcmp(global->facility, "EuXFEL") ) {
+		//Node *lcls = root->createGroup("LCLS");
+		Node &euxfel = root["instrument"];
+		
+		euxfel["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
+		euxfel["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
+		euxfel["machineTime"].write(&eventData->seconds,stackSlice);
+		
+		euxfel["trainID"].write(&eventData->trainID,stackSlice);
+		euxfel["pulseID"].write(&eventData->pulseID,stackSlice);
+		euxfel["cellID"].write(&eventData->cellID,stackSlice);
+		
+		
+		DETECTOR_LOOP{
+			euxfel.child("detector",detIndex)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
+			euxfel.child("detector",detIndex)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
+		}
+	}
+	
+
     
     
     // APS
