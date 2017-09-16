@@ -7,13 +7,11 @@
 //#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string>
+#include <string.h>
 #include <vector>
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include <sstream>
-#include "PNGFile.h"
-
 #include "agipd_read.h"
 
 /*
@@ -166,7 +164,7 @@ void cAgipdModuleReader::open(char filename[], int mNum){
 
 	h5_image_status_field = prefix + h5_image_status_suffix;
 
-	if (true)
+	if (false)
 	{
 		std::cout << h5_trainId_field << std::endl;
 		std::cout << h5_pulseId_field << std::endl;
@@ -604,6 +602,10 @@ void cAgipdModuleReader::readFrame(long frameNum){
  */
 void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 {
+	if (noData)
+	{
+		return;
+	}
 
 	// Define hyperslab in RAW data file
 	hsize_t     slab_start[4];
@@ -636,7 +638,7 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
-		if (noData)
+		if (noData || !tempdata)
 		{
 			return;
 		}
@@ -645,7 +647,7 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		for (int i = 0; i < n0 * n1; i++) {
 			data[i] = tempdata[i];
 		}
-		
+
 		free(tempdata);
 	}
 	else

@@ -10,11 +10,25 @@
 #include <getopt.h>
 #include <unistd.h>
 #include <iostream>
-#include <string>
+#include <string.h>
 #include "agipd_read.h"
 #include "cheetah.h"
 
+#include <execinfo.h>
+#include <signal.h>
 
+void handler(int sig) {
+	void *array[10];
+	size_t size;
+
+	// get void*'s for all entries on the stack
+	size = backtrace(array, 10);
+
+	// print out all the frames to stderr
+	fprintf(stderr, "Error: signal %d:\n", sig);
+	backtrace_symbols_fd(array, (int)size, STDERR_FILENO);
+	exit(1);
+}
 
 // This is for parsing getopt_long()
 struct tCheetahEuXFELparams {
@@ -36,7 +50,9 @@ void waitForCheetahWorkers(cGlobal*);
 //
 int main(int argc, char* argv[]) {
 	
-	
+	signal(SIGSEGV, handler);
+	signal(SIGABRT, handler);
+
 	std::cout << "Cheetah interface for EuXFEL\n";
 	std::cout << "Anton Barty, September 2015-\n";
 
@@ -93,7 +109,8 @@ int main(int argc, char* argv[]) {
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
-		
+		agipd.setSkip(4);
+
 		// Guess the run number
 		long	pos;
 		long	runNumber;
@@ -107,8 +124,13 @@ int main(int argc, char* argv[]) {
 		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
-		while (agipd.nextFrame()) {
-			
+		while (agipd.nextFrame())
+		{
+			if (!agipd.goodFrame())
+			{
+				continue;
+			}
+
 			// Add more sensible event name
 			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
@@ -119,7 +141,7 @@ int main(int argc, char* argv[]) {
 			eventData->pumpLaserCode = 0;
 			eventData->pumpLaserDelay = 0;
 			eventData->photonEnergyeV = cheetahGlobal.defaultPhotonEnergyeV;
-			eventData->wavelengthA = 0;
+			eventData->wavelengthA = 12400 / cheetahGlobal.defaultPhotonEnergyeV;
 			eventData->pGlobal = &cheetahGlobal;
 			//eventData->detectorZ = 15e-3;
 			
