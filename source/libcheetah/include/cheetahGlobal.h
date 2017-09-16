@@ -19,7 +19,7 @@
 #include "tofDetector.h"
 #include "peakDetect.h"
 #include "processRateMonitor.h"
-#define MAX_POWDER_CLASSES 32
+#define MAX_POWDER_CLASSES 16
 #define MAX_DETECTORS 2
 #define MAX_FILENAME_LENGTH 1024
 #define MAX_EPICS_PVS 100
