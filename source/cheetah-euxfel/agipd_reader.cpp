@@ -243,9 +243,9 @@ void cAgipdReader::open(char *baseFilename){
 
 	for(long i=0; i<nAGIPDmodules; i++)
 	{
-		for (long k = minTrain; k < maxTrain; k++)
+		for (long k = minTrain; k <= maxTrain; k++)
 		{
-			for (long j = minPulse; j < maxPulse; j++)
+			for (long j = minPulse; j <= maxPulse; j++)
 			{
 				TrainPulsePair train2Pulse = std::make_pair(k, j);
 
