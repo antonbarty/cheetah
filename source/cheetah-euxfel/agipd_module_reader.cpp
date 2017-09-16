@@ -602,6 +602,10 @@ void cAgipdModuleReader::readFrame(long frameNum){
  */
 void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 {
+	if (noData)
+	{
+		return;
+	}
 
 	// Define hyperslab in RAW data file
 	hsize_t     slab_start[4];
@@ -634,7 +638,7 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
-		if (noData)
+		if (noData || !tempdata)
 		{
 			return;
 		}
@@ -643,7 +647,7 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		for (int i = 0; i < n0 * n1; i++) {
 			data[i] = tempdata[i];
 		}
-		
+
 		free(tempdata);
 	}
 	else
