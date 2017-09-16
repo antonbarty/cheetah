@@ -337,21 +337,41 @@ void cAgipdReader::close(void){
 
 bool cAgipdReader::nextFrame()
 {
+	return nextFramePrivate();
+}
+
+bool cAgipdReader::nextFramePrivate()
+{
 	lastModule = -1;
 	bool success = true;
 
 	while (lastModule < 0 && success)
 	{
-		currentPulse += _skip;
+		currentPulse ++;
 		if (currentPulse >= maxPulse)
 		{
 			currentPulse = minPulse;
-			currentPulse += _skip;
+			currentPulse ++;
 			currentTrain++;
+			goodImages4ThisTrain = 0;
 		}
 
 		success = readFrame(currentTrain, currentPulse);
+
+		if (lastModule >= 0)
+		{
+			/* We had a good image in this train */
+			goodImages4ThisTrain++;
+
+			/* But if it isn't a multiple of skip, we don't want it */
+			if (goodImages4ThisTrain % _skip > 0)
+			{
+				lastModule = -1;
+			}
+		}
 	}
+
+	goodImages4ThisTrain++;
 
 	return success;
 }
