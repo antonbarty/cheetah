@@ -141,7 +141,8 @@ public:
 	bool readFrame(long trainID, long pulseID);
 	bool nextFrame();
 	void resetCurrentFrame();
-	
+	bool goodFrame() { return (lastModule >= 0); }
+
 	void maxAllFrames();
 	float *getCellAverage(int i);
 	void writePNG(float *pngData, std::string filename);
@@ -215,7 +216,7 @@ private:
 	long                maxPulse;
 	long                minCell;
 	long                maxCell;
-
+	int                lastModule;
 
 	TrainPulseMap       trainPulseMap;
 
