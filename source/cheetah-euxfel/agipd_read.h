@@ -179,8 +179,8 @@ private:
 	cAgipdModuleReader	module[nAGIPDmodules];
 	bool				moduleOK[nAGIPDmodules];
 
-	std::string			darkcalFilename[nAgipdModules];
-	std::string			gaincalFilename[nAgipdModules];
+	std::string			darkcalFilename[nAGIPDmodules];
+	std::string			gaincalFilename[nAGIPDmodules];
 	
 	
 
