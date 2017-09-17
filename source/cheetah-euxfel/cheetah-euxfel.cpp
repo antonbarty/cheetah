@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
-		agipd.setSkip(1);
+		agipd.setSkip(2);
 
 		// Guess the run number
 		long	pos;
@@ -126,10 +126,17 @@ int main(int argc, char* argv[]) {
 		std::cout << "Reading individual frames\n";
 		while (agipd.nextFrame())
 		{
-			if (!agipd.goodFrame())
-			{
+			
+			if (!agipd.goodFrame()) {
 				continue;
 			}
+
+			
+			// Looks like cell 0 is respinsible for all those digital output signals in hitfinding
+			if(agipd.currentPulse == 0) {
+				continue;
+			}
+			
 
 			// Add more sensible event name
 			
