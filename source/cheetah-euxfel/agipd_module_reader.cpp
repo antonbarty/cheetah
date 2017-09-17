@@ -464,6 +464,11 @@ void cAgipdModuleReader::applyCalibration(long frameNum)
 
 	int16_t *offsets = calibrator->gainAndCellPtr(thisGain, thisCell);
 
+	if (offsets == NULL)
+	{
+		return;
+	}
+
 	for (int i = 0; i < nn; i++)
 	{
 		data[i] -= offsets[i];

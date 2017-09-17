@@ -86,5 +86,8 @@ void cAgipdCalibrator::open()
 
 int16_t *cAgipdCalibrator::gainAndCellPtr(int gain, int cell)
 {
+	if (gain >= nGains) return NULL;
+	if (cell >= nCells) return NULL;
+
 	return _gainCellPtrs[gain][cell];
 }
