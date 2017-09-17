@@ -835,9 +835,8 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
             aps->createStack("threshold",H5T_NATIVE_DOUBLE);
         }
     }
-	
 
-		
+    
     //
     //  Detector images (main purpose of CXI file format)
     //
@@ -1462,10 +1461,7 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
     }
 
 	
-
-	
-    // Create top level entries
-    
+	// Create top level entries
     Node *event_data = root->createGroup("event_data");
     Node *run_data = root->createGroup("run_data");
     //Node *entry = root->addClass("entry");
@@ -2235,8 +2231,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         }
     }
 
-	
-	
+    
     /*
      *  Write detector frames (main purpose of CXI file format)
      */
@@ -2612,7 +2607,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
 	}
 	
 
-    
+	
     
     // APS
     if(!strcmp(global->facility, "APS")) {
