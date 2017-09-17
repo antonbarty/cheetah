@@ -471,10 +471,12 @@ void cAgipdModuleReader::applyCalibration(long frameNum)
 
 	for (int i = 0; i < nn; i++)
 	{
+		/*
 		if (i < 10)
 		{
 			std::cout << "Module pixel " << i << " subtracting " << offsets[i] << " from " << data[i] << std::endl;
 		}
+		 */
 
 		data[i] -= offsets[i];
 	}
