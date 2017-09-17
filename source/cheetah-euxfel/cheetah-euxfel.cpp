@@ -132,8 +132,17 @@ int main(int argc, char* argv[]) {
 			}
 
 			
-			// Looks like cell 0 is respinsible for all those digital output signals in hitfinding
+			// Looks like cell 0 is responsible for a lot of those digital output signals in hitfinding
 			if(agipd.currentPulse == 0) {
+				continue;
+			}
+			
+			
+			// Incrememnt the frame number
+			frameNumber++;
+
+			// First few frames in a run seem junk
+			if(frameNumber < 100) {
 				continue;
 			}
 			
