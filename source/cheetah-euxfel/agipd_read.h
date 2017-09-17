@@ -13,6 +13,8 @@
 #include <hdf5_hl.h>
 #include <map>
 #include <sstream>
+#include "hdf5_functions.h"
+#include "agipd_calibrator.h"
 
 typedef std::pair<long, int> TrainPulsePair; // pairs of trains and pulses
 typedef std::pair<TrainPulsePair, int> TrainPulseModulePair; // pairs of train-pulses and module numbers
@@ -49,11 +51,14 @@ inline std::string getBaseFilename(std::string filename)
 	return fName.substr(0, pos);
 }
 
+class cAgipdCalibrator;
+
 /*
  *	This class handles reading and writing for one AGIPD module file
  *	(each module is in a separate file)
  */
-class cAgipdModuleReader {
+class cAgipdModuleReader : public cHDF5Functions
+{
 	
 public:
 	cAgipdModuleReader();
@@ -89,14 +94,11 @@ public:
     uint16_t	*cellIDlist;
     uint16_t	*statusIDlist;
 
-	int			verbose;
 	bool		rawDetectorData;
-	bool        noData;
 	
 // Private variables
 private:
 	std::string	filename;
-	hid_t		h5_file_id;
 	long		currentFrame;
 
 	std::string h5_trainId_field;
@@ -108,16 +110,14 @@ private:
 	std::string	darkcalFilename;
 	std::string	gaincalFilename;
 
-	float		*calibDarkOffset;
+	cAgipdCalibrator *calibrator;
 	float		*calibGainFactor;
 	
 
 // Private functions
 private:
-	void*		checkAllocRead(char[], long, hid_t, size_t);
-	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
 	void		readFrameRawOrCalib(long frameNum, bool isRaw);
-	void		applyCalibration(void);
+	void		applyCalibration(long frameNum);
 };
 
 
