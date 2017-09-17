@@ -153,8 +153,8 @@ int main(int argc, char* argv[]) {
 			//
 			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfel_pulseid") == 0) {
 				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
-					eventData->pumpLaserCode = agipd.currentCell;
-					eventData->powderClass = agipd.currentCell;
+					eventData->pumpLaserCode = agipd.currentPulse;
+					eventData->powderClass = agipd.currentPulse;
 				}
 				else {
 					continue;
