@@ -2140,6 +2140,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         }
         
     }
+<<<<<<< HEAD
 
 	// European XFEL
 	if(!strcmp(global->facility, "EuXFEL") ) {
@@ -2161,6 +2162,9 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
 	}
 	
 
+=======
+    
+>>>>>>> euxfel-helen
     // APS
     if(!strcmp(global->facility, "APS")) {
         //Node &aps = root["APS"];
@@ -2542,6 +2546,7 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         lcls["eventTimeString"].write(timestr,stackSlice);
     }
 
+<<<<<<< HEAD
 	// European XFEL
 	if(!strcmp(global->facility, "EuXFEL") ) {
 		//Node *lcls = root->createGroup("LCLS");
@@ -2563,6 +2568,9 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
 	}
 	
 
+=======
+    
+>>>>>>> euxfel-helen
     
     
     // APS
