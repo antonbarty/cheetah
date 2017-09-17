@@ -142,7 +142,7 @@ void cAgipdReader::open(char *baseFilename){
 		module[i].verbose = 0;
 		module[i].open((char *) moduleFilename[i].data(), i);
 		module[i].readHeaders();
-		//module[i].readDarkcal(darkcalFilename[i].c_str());
+		module[i].readDarkcal((char *)darkcalFilename[i].c_str());
 		//module[i].readGaincal(gaincalFilename[i].c_str());
 	}
 
