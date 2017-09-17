@@ -73,9 +73,9 @@ void cAgipdCalibrator::open()
 		}
 	}
 
-	int16_t *offset = gainAndCellPtr(1, 0);
+	int16_t *offset = gainAndCellPtr(0, 0);
 
-	std::cout << "First few offsets of gain 1 / cell 0: ";
+	std::cout << "First few offsets of gain 0 / cell 0: ";
 	for (int i = 0; i < 5; i++)
 	{
 		std::cout << offset[i] << ", ";
