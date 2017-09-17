@@ -352,7 +352,6 @@ bool cAgipdReader::nextFramePrivate()
 		if (currentPulse >= maxPulse)
 		{
 			currentPulse = minPulse;
-			currentPulse ++;
 			currentTrain++;
 			goodImages4ThisTrain = -1;
 		}
