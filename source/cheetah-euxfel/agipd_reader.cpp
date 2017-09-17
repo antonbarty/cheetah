@@ -362,7 +362,7 @@ bool cAgipdReader::nextFramePrivate()
 		{
 			/* We had a good image in this train */
 			/* But if it isn't a multiple of skip, we don't want it */
-			if ((goodImages4ThisTrain - 1) % _skip > 0)
+			if ((goodImages4ThisTrain + 1) % _skip > 0)
 			{
 				lastModule = -1;
 			}
