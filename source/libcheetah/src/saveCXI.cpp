@@ -808,7 +808,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
 			detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
 		}
 	}
-
+	
 	
 	
     if(!strcmp(global->facility, "APS") ) {
@@ -1414,9 +1414,29 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
             Node* detector = lcls->createGroup("detector",detIndex);
             detector->createStack("position",H5T_NATIVE_DOUBLE);
             detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
-            //detector->createStack("SolidAngleConst",H5T_NATIVE_DOUBLE);
         }
     }
+	
+	// European XFEL
+	if(!strcmp(global->facility, "EuXFEL") ) {
+		//Node *lcls = root->createGroup("LCLS");
+		Node *euxfel = facility;
+		root->createLink("EuXFEL","instrument");
+		
+		euxfel->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
+		euxfel->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
+		euxfel->createStack("machineTime",H5T_NATIVE_INT32);
+		
+		euxfel->createStack("trainID",H5T_NATIVE_UINT64);
+		euxfel->createStack("pulseID",H5T_NATIVE_UINT64);
+		euxfel->createStack("cellID",H5T_NATIVE_UINT64);
+		
+		DETECTOR_LOOP{
+			Node* detector = euxfel->createGroup("detector",detIndex);
+			detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
+		}
+	}
+
 	
     // APS
     if(!strcmp(global->facility, "APS") ) {
@@ -1441,28 +1461,9 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         aps->createStack("threshold",H5T_NATIVE_DOUBLE);
     }
 
-	// European XFEL
-	if(!strcmp(global->facility, "EuXFEL") ) {
-		//Node *lcls = root->createGroup("LCLS");
-		Node *euxfel = facility;
-		root->createLink("EuXFEL","instrument");
-		
-		euxfel->createStack("photon_energy_eV",H5T_NATIVE_DOUBLE);
-		euxfel->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
-		euxfel->createStack("machineTime",H5T_NATIVE_INT32);
-		
-		euxfel->createStack("trainID",H5T_NATIVE_UINT64);
-		euxfel->createStack("pulseID",H5T_NATIVE_UINT64);
-		euxfel->createStack("cellID",H5T_NATIVE_UINT64);
-		
-		DETECTOR_LOOP{
-			Node* detector = euxfel->createCXIGroup("detector",detIndex+1);
-			detector->createStack("position",H5T_NATIVE_DOUBLE);
-			detector->createStack("EncoderValue",H5T_NATIVE_DOUBLE);
-		}
-	}
+	
 
-    
+	
     // Create top level entries
     
     Node *event_data = root->createGroup("event_data");
@@ -2604,10 +2605,10 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
 		euxfel["cellID"].write(&eventData->cellID,stackSlice);
 		
 		
-		DETECTOR_LOOP{
-			euxfel.child("detector",detIndex)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
-			euxfel.child("detector",detIndex)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
-		}
+		//DETECTOR_LOOP{
+		//	euxfel.child("detector",detIndex)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
+		//	euxfel.child("detector",detIndex)["EncoderValue"].write(&global->detector[detIndex].detectorEncoderValue,stackSlice);
+		//}
 	}
 	
 
