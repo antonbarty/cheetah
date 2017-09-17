@@ -361,7 +361,7 @@ void cGlobal::setup()
         detector[detIndex].configure(this);
         detector[detIndex].readDetectorGeometry(detector[detIndex].geometryFile);
         detector[detIndex].allocateMemory();
-        detector[detIndex].readDarkcal(detector[detIndex].darkcalFile);
+        //detector[detIndex].readDarkcal(detector[detIndex].darkcalFile);
         detector[detIndex].readGaincal(detector[detIndex].gaincalFile);
         detector[detIndex].readInitialPixelmask(detector[detIndex].initialPixelmaskFile);
         detector[detIndex].readBaddataMask(detector[detIndex].baddataFile);
