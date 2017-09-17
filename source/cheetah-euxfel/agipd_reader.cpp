@@ -90,8 +90,7 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 		int stackInt = atoi(stackNum.c_str());
 
 		firstModule = (stackInt == 0);
-		std::cout << "Stack number is first? - " << firstModule << std::endl;
-
+		
 		if(verbose) {
 			printf("\tModule %0.2li = %s\n",i, moduleFilename[i].c_str());
 		}
