@@ -151,7 +151,9 @@ int main(int argc, char* argv[]) {
 			
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
-			strcpy(eventData->eventname,CheetahEuXFELparams.inputFiles[fnum].c_str());
+			std::string eventName = inputFiles[fnum] + "_" + i_to_str(agipd.currentTrain)
+			+ "_" + i_to_str(agipd.currentPulse);
+			strcpy(eventData->eventname,eventName.c_str());
 			eventData->runNumber = runNumber;
 			eventData->nPeaks = 0;
 			eventData->pumpLaserCode = 0;
