@@ -109,7 +109,7 @@ int main(int argc, char* argv[]) {
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
-		agipd.setSkip(4);
+		agipd.setSkip(1);
 
 		// Guess the run number
 		long	pos;
@@ -118,6 +118,7 @@ int main(int argc, char* argv[]) {
 		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos+5,4).c_str());
 		std::cout << "This is run number " << runNumber << std::endl;
 		//runNumber = atoi(moduleFilename[i].substr(pos+5,4).c_str());
+		cheetahGlobal.runNumber = runNumber;
 
 		
 		
@@ -152,8 +153,8 @@ int main(int argc, char* argv[]) {
 			//
 			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfel_pulseid") == 0) {
 				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
-					eventData->pumpLaserCode = agipd.currentPulse;
-					eventData->powderClass = agipd.currentPulse;
+					eventData->pumpLaserCode = agipd.currentCell;
+					eventData->powderClass = agipd.currentCell;
 				}
 				else {
 					continue;

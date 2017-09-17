@@ -99,24 +99,28 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 	
 	// Filenames for all the other darkcal files
 	if(darkcalFile != "No_file_specified") {
+		std::cout << "\tDark calibration files " << std::endl;
 		for(long i=0; i<nAGIPDmodules; i++) {
 			// Replace the AGIPD00 number with 00-15
 			darkcalFilename[i] = darkcalFile;
 			pos = darkcalFilename[i].find("AGIPD");
 			sprintf(tempstr, "%0.2li", i);
 			darkcalFilename[i].replace(pos+5,2,tempstr);
+			std::cout << "\t\t" << darkcalFilename[i] << std::endl;
 		}
 	}
 
 	
 	// Filenames for all the other gaincal files
 	if(gaincalFile != "No_file_specified") {
+		std::cout << "\tGain calibration files " << std::endl;
 		for(long i=0; i<nAGIPDmodules; i++) {
 			// Replace the AGIPD00 number with 00-15
 			gaincalFilename[i] = gaincalFile;
 			pos = gaincalFilename[i].find("AGIPD");
 			sprintf(tempstr, "%0.2li", i);
 			gaincalFilename[i].replace(pos+5,2,tempstr);
+			std::cout << "\t\t" << gaincalFilename[i] << std::endl;
 		}
 	}
 }
