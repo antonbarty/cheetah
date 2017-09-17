@@ -96,19 +96,21 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 			printf("\tModule %0.2li = %s\n",i, moduleFilename[i].c_str());
 		}
 	}
-	
+
 	// Filenames for all the other darkcal files
-	if(darkcalFile != "No_file_specified") {
-		for(long i=0; i<nAGIPDmodules; i++) {
-			// Replace the AGIPD00 number with 00-15
-			darkcalFilename[i] = darkcalFile;
-			pos = darkcalFilename[i].find("AGIPD");
+	for(long i=0; i<nAGIPDmodules; i++) {
+		// Replace the AGIPD00 number with 00-15
+		darkcalFilename[i] = darkcalFile;
+		pos = darkcalFilename[i].find("AGIPD");
+
+		if (pos != std::string::npos)
+		{
 			sprintf(tempstr, "%0.2li", i);
 			darkcalFilename[i].replace(pos+5,2,tempstr);
 		}
 	}
 
-	
+
 	// Filenames for all the other gaincal files
 	if(gaincalFile != "No_file_specified") {
 		for(long i=0; i<nAGIPDmodules; i++) {

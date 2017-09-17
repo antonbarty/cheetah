@@ -176,8 +176,6 @@ void cAgipdModuleReader::open(char filename[], int mNum)
 	printf("\tNumber of frames: %li\n", nframes);
 	printf("\tImage block size: %lix%li\n", n0, n1);
 	printf("\tStack depth: %li\n", nstack);
-	printf("\tDarkcal file: %s\n", darkcalFilename.c_str());
-	printf("\tGaincal file: %s\n", gaincalFilename.c_str());
 
 };
 // cAgipdReader::open
@@ -278,10 +276,14 @@ void cAgipdModuleReader::readHeaders(void)
 
 
 void cAgipdModuleReader::readDarkcal(char *filename){
-	if(strcmp(filename, "No_file_specified")) {
+	if (strcmp(filename, "No_file_specified") == 0)
+	{
 		return;
 	}
 	darkcalFilename = filename;
+
+	printf("\tDarkcal file: %s\n", darkcalFilename.c_str());
+	printf("\tGaincal file: %s\n", gaincalFilename.c_str());
 
 	// checkAllocRead the dark setting field for this module into an array....
 	//	[max-exfl014:barty]user/kuhnm/dark> h5ls -r dark_AGIPD00_agipd_2017-09-16.h5

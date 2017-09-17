@@ -29,7 +29,7 @@ cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &rea
 
 void cAgipdCalibrator::open()
 {
-	std::cout << "Opening file..." << std::endl;
+	std::cout << "Opening darkcal file..." << std::endl;
 	bool check = fileCheck((char *)_filename.c_str());
 
 	if (check)
@@ -72,6 +72,16 @@ void cAgipdCalibrator::open()
 			_gainCellPtrs[i][j] = &_allData[offset1 + offset2];
 		}
 	}
+
+	int16_t *offset = gainAndCellPtr(1, 0);
+
+	std::cout << "First few offsets of gain 1 / cell 0: ";
+	for (int i = 0; i < 5; i++)
+	{
+		std::cout << offset[i] << ", ";
+	}
+
+	std::cout << std::endl;
 }
 
 int16_t *cAgipdCalibrator::gainAndCellPtr(int gain, int cell)

@@ -49,6 +49,12 @@ int main(int argc, char* argv[]) {
 
 	cAgipdReader agipd;
 	agipd.verbose=0;
+	if (argc > 2)
+	{
+		std::cout << "Setting dark file to " << argv[2] << std::endl;
+		agipd.darkcalFile = argv[2];
+	}
+
 	agipd.open(argv[1]);
 
 	std::cout << "Reading individual frames\n";
