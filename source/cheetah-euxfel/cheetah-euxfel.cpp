@@ -98,8 +98,8 @@ int main(int argc, char* argv[]) {
 	//	Will pick up darkcal and gaincal filenames from cheetah.ini: maintains the same 'feel'as before
 	//	Specify file for AGIPD00 - files for other modules are guessed automatically
 	//	cheetahGlobal.detector[0] defaults to "No_file_specified" if nothing set in cheetah.ini
-	agipd.gaincalFile = cheetahGlobal.detector[0].gaincalFile;
 	agipd.darkcalFile = cheetahGlobal.detector[0].darkcalFile;
+	agipd.gaincalFile = cheetahGlobal.detector[0].gaincalFile;
 	
 	
 	// Loop through all listed *AGIPD00*.h5 files
