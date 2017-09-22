@@ -1391,13 +1391,19 @@ void cPixelDetectorCommon::updateKspace(cGlobal *global, float wavelengthA)
  */
 void cPixelDetectorCommon::readDarkcal(char *filename)
 {
-
     // Pad with zeros
     for (long i = 0; i < pix_nn; i++)
         darkcal[i] = 0;
 
     // Do we need a darkcal file?	
     if (useDarkcalSubtraction == 0) {
+        return;
+    }
+    
+    
+    // Dark calibration for the AGIPD detector is handled by the file reading stage; pass through value
+    if(strcmp(detectorType, "agipd-1M") == 0) {
+        useDarkcalSubtraction=0;
         return;
     }
 
@@ -1452,6 +1458,13 @@ void cPixelDetectorCommon::readGaincal(char *filename)
         return;
     }
 
+    // Gain calibration for the AGIPD detector is handled by the file reading stage; pass through value
+    if(strcmp(detectorType, "agipd-1M") == 0) {
+        useGaincal=0;
+        return;
+    }
+
+    
     // Check if a gain calibration file has been specified
     if (strcmp(filename, "") == 0) {
         printf("Gain calibration file path was not specified.\n");
