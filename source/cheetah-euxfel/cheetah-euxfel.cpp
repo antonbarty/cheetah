@@ -34,6 +34,9 @@ void handler(int sig) {
 struct tCheetahEuXFELparams {
 	std::vector<std::string> inputFiles;
 	std::string iniFile;
+    std::string exptName;
+    int frameStride;
+    int frameSkip;
 	int verbose;
 } CheetahEuXFELparams;
 void parse_config(int, char *[], tCheetahEuXFELparams*);
@@ -55,6 +58,7 @@ int main(int argc, char* argv[]) {
 
 	std::cout << "Cheetah interface for EuXFEL\n";
 	std::cout << "Anton Barty, September 2015-\n";
+    std::cout << "Additional contributions from Helen Ginn, \n";
 
 	// Parse configurations
 	parse_config(argc, argv, &CheetahEuXFELparams);
@@ -79,10 +83,9 @@ int main(int argc, char* argv[]) {
 	static time_t startT;
 	time(&startT);
 
-	strcpy(cheetahGlobal.configFile, argv[2]);				// FIX ME
-	strcpy(cheetahGlobal.experimentID, "XFEL2012");			// FIX ME
-	cheetahGlobal.runNumber = 1;							// FIX ME
-	strcpy(cheetahGlobal.facility,"EuXFEL");				// FIX ME
+    strcpy(cheetahGlobal.facility,"EuXFEL");
+	strcpy(cheetahGlobal.configFile, CheetahEuXFELparams.iniFile.c_str());
+	strcpy(cheetahGlobal.experimentID, CheetahEuXFELparams.exptName.c_str());
 
 	cheetahInit(&cheetahGlobal);
 	
@@ -93,6 +96,10 @@ int main(int argc, char* argv[]) {
 	// Initialise AGIPD frame reading stuff
 	cAgipdReader agipd;
 	agipd.verbose=1;
+    agipd.setScheme((char*) CheetahEuXFELparams.exptName.c_str());
+    //agipd.setSkip(60);
+    //agipd.setStride(2);
+    
 
 	//  Files for calibration stuff
 	//	Will pick up darkcal and gaincal filenames from cheetah.ini: maintains the same 'feel'as before
@@ -109,7 +116,6 @@ int main(int argc, char* argv[]) {
 		// Open the file
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
-		agipd.setSkip(2);
 
 		// Guess the run number
 		long	pos;
@@ -117,7 +123,6 @@ int main(int argc, char* argv[]) {
 		pos = CheetahEuXFELparams.inputFiles[fnum].rfind("RAW-R");
 		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos+5,4).c_str());
 		std::cout << "This is run number " << runNumber << std::endl;
-		//runNumber = atoi(moduleFilename[i].substr(pos+5,4).c_str());
 		cheetahGlobal.runNumber = runNumber;
 
 		
@@ -275,13 +280,43 @@ void waitForCheetahWorkers(cGlobal *cheetahGlobal){
 
 
 /*
+ *  Print some useful information
+ */
+void print_help(void){
+    std::cout << "Cheetah interface for EuXFEL\n";
+    std::cout << "Anton Barty, September 2015-\n";
+    std::cout << "Additional contributions from Helen Ginn, \n";
+    std::cout << std::endl;
+    std::cout << "usage: cheetah-euxfel -i <INIFILE> *AGIPD00.s*.h5 \n";
+    std::cout << std::endl;
+    std::cout << "\t--inifile            Specifies cheetah.ini file to use\n";
+    std::cout << "\t--experiment         String specifying the experiment name (used for lableling and setting the file layout)\n";
+    std::cout << "\t--stride=<n>         Process only every <n>th frame\n";
+    std::cout << "\t--skip=<n>           Skip the first <n> frame of each .h5 file\n";
+    std::cout << std::endl;
+    std::cout << "End of help\n";
+}
+
+
+/*
  *	Configuration parser (getopt_long)
  */
 void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 	
+    // Defaults
+    global->iniFile = "cheetah.ini";
+    global->exptName = "XFEL2012";
+    global->frameStride = 1;
+    global->frameSkip = 0;
+
+    
 	// Add getopt-long options
+    // three legitimate values: no_argument, required_argument and optional_argument
 	const struct option longOpts[] = {
 		{ "inifile", required_argument, NULL, 'i' },
+        { "stride", required_argument, NULL, 0 },
+        { "skip", required_argument, NULL, 0 },
+        { "experiment", required_argument, NULL, 0 },
 		{ "verbose", no_argument, NULL, 'v' },
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, no_argument, NULL, 0 }
@@ -297,16 +332,23 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 				break;
 			case 'i':
 				global->iniFile = optarg;
+                std::cout << ".ini file set to " << global->iniFile << std::endl;
 				break;
 			case 'h':   /* fall-through is intentional */
 			case '?':
-				std::cout << "Provide help files later on" << std::endl;
+                print_help();
 				exit(1);
 				break;
+                
 			case 0:     /* long option without a short arg */
-				if( strcmp( "random", longOpts[longIndex].name ) == 0 ) {
-					//global->random = 1;
+				if( strcmp( "stride", longOpts[longIndex].name ) == 0 ) {
+                    global->frameStride = atoi(optarg);
+                    std::cout << "Stride set to " << global->frameStride << std::endl;
 				}
+                if( strcmp( "skip", longOpts[longIndex].name ) == 0 ) {
+                    global->frameSkip = atoi(optarg);
+                    std::cout << "Skip set to " << global->frameSkip << std::endl;
+                }
 				break;
 			default:
 				/* You won't actually get here. */
@@ -314,9 +356,10 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 		}
 	}
 	
+    
 	// This is where unprocessed arguments end up
 	std::cout << "optind: " << optind << std::endl;
-	std::cout << "Number of unprocessed arguments: " << argc << std::endl;
+	std::cout << "Number of unprocessed arguments: " << argc-optind << std::endl;
 	for(long i=optind; i<argc; i++) {
 		global->inputFiles.push_back(argv[i]);
 		std::cout << "\t" << global->inputFiles.back() << std::endl;

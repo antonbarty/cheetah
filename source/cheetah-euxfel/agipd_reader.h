@@ -34,6 +34,7 @@ public:
 	~cAgipdReader();
 	
 	void open(char[]);
+    void setScheme(char[]);
 	void close(void);
 	bool readFrame(long trainID, long pulseID);
 	bool nextFrame();
@@ -44,8 +45,11 @@ public:
 	float *getCellAverage(int i);
 	void writePNG(float *pngData, std::string filename);
 
-	void setSkip(int skip) { _skip = skip; if (_skip <= 0) _skip = 1; }
+	void setSkip(int skip) { _skip = skip; if (_skip < 0) _skip = 0; }
+    void setStride(int stride) { _stride = stride; if (_stride <= 0) _stride = 1; }
+    void setNewFileSkip(int skip) { _newFileSkip = skip; if (_newFileSkip < 0) _newFileSkip = 0; }
 
+    
 public:
 	// Data slab dimensions
 	long		nframes;
@@ -104,7 +108,11 @@ private:
 	std::string			darkcalFilename[nAGIPDmodules];
 	std::string			gaincalFilename[nAGIPDmodules];
 	
-	int                 _skip;
+    /* Things that change between experiments */
+    std::string         _scheme;
+	int                 _skip;              // Number of pulses to skip at start of pulse train
+    int                 _stride;            // Step over frames with this spacing
+    int                 _newFileSkip;       // Number of useless frames at the start of each file
 
 	/* Housekeeping for trains and pulses */
 	long                minTrain;

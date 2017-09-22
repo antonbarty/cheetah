@@ -28,7 +28,9 @@ cAgipdReader::cAgipdReader(void){
 	maxCell = 0;
 	verbose = 0;
 	goodImages4ThisTrain = -1;
-	_skip = 1;
+	_skip = 0;
+    _stride = 1;
+    _newFileSkip = 0;
 
 	gaincalFile = "No_file_specified";
 	darkcalFile = "No_file_specified";
@@ -46,6 +48,32 @@ cAgipdReader::~cAgipdReader()
 		return;
 	cAgipdReader::close();
 };
+
+
+/*
+ *  Data is laid out differently for different experiments
+ *  Here we set a few defaults, which can later be overridden if desired
+ */
+void cAgipdReader::setScheme(char *scheme) {
+    _scheme = scheme;
+   
+    // Barty, September 2017
+    if(_scheme == "XFEL2012") {
+        setSkip(1);
+        setStride(2);
+        setNewFileDuds(60);
+    }
+
+    // Ros, September 2017
+    if(_scheme == "XFEL2042") {
+        setSkip(1);
+        setStride(1);
+        setNewFileSkip(60);
+    }
+
+    // Defaults will be used if none of the above are found
+    return;
+}
 
 
 
@@ -364,8 +392,8 @@ bool cAgipdReader::nextFramePrivate()
 		if (lastModule >= 0)
 		{
 			/* We had a good image in this train */
-			/* But if it isn't a multiple of skip, we don't want it */
-			if ((goodImages4ThisTrain + 1) % _skip > 0)
+			/* But if it isn't a multiple of stride, we don't want it */
+			if ((goodImages4ThisTrain + 1) % _stride > 0)
 			{
 				lastModule = -1;
 			}
