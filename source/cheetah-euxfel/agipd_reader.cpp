@@ -10,7 +10,7 @@
 #include <string.h>
 #include <vector>
 #include <math.h>
-#include "agipd_read.h"
+#include "agipd_reader.h"
 #include <algorithm>
 
 cAgipdReader::cAgipdReader(void){

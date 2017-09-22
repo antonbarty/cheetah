@@ -12,7 +12,7 @@
 #include <hdf5.h>
 #include <hdf5_hl.h>
 #include <sstream>
-#include "agipd_read.h"
+#include "agipd_module_reader.h"
 
 
 /*

@@ -13,7 +13,7 @@
 #include "hdf5_functions.h"
 #include <string>
 #include <cstdlib>
-#include "agipd_read.h"
+#include "agipd_module_reader.h"
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
