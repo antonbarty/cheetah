@@ -97,8 +97,12 @@ int main(int argc, char* argv[]) {
 	cAgipdReader agipd;
 	agipd.verbose=1;
     agipd.setScheme((char*) CheetahEuXFELparams.exptName.c_str());
-    //agipd.setSkip(60);
-    //agipd.setStride(2);
+
+    // Set command line option overrides
+    if(CheetahEuXFELparams.frameSkip != -1)
+        agipd.setSkip(CheetahEuXFELparams.frameSkip);
+    if(CheetahEuXFELparams.frameStride != -1)
+        agipd.setStride(CheetahEuXFELparams.frameStride);
     
 
 	//  Files for calibration stuff
@@ -123,14 +127,13 @@ int main(int argc, char* argv[]) {
 		pos = CheetahEuXFELparams.inputFiles[fnum].rfind("RAW-R");
 		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos+5,4).c_str());
 		std::cout << "This is run number " << runNumber << std::endl;
-		cheetahGlobal.runNumber = runNumber;
+		cheetahGlobal.runNumber = (int) runNumber;
 
 		
 		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
-		while (agipd.nextFrame())
-		{
+		while (agipd.nextFrame()) {
 			
 			if (!agipd.goodFrame()) {
 				continue;
@@ -306,8 +309,8 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
     // Defaults
     global->iniFile = "cheetah.ini";
     global->exptName = "XFEL2012";
-    global->frameStride = 1;
-    global->frameSkip = 0;
+    global->frameStride = -1;
+    global->frameSkip = -1;
 
     
 	// Add getopt-long options

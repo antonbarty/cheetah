@@ -85,6 +85,14 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 	long	pos;
 	char	tempstr[10];
 
+    //  What is the number of the module passed on the command line (evidently it exists)
+    //  Will compare timestamps of all other modules to this one
+    std::string     referenceModuleName;
+    referenceModuleName = module0filename;
+    pos = referenceModuleName.find("AGIPD");
+    _referenceModule = atoi(referenceModuleName.substr(pos+5,2).c_str());
+    std::cout << "Using module number " << _referenceModule << " as a reference" << std::endl;
+    
 	// Filenames for all the other modules
 	for(long i=0; i<nAGIPDmodules; i++) {
 		moduleFilename[i] = module0filename;
@@ -97,7 +105,7 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 			std::cout << "Cannot generate AGIPD module filename as I can't find the string 'AGIPD'!" << std::endl;
 			continue;
 		}
-
+        
 		sprintf(tempstr, "%0.2li", i);
 		moduleFilename[i].replace(pos+5,2,tempstr);
 		
@@ -114,7 +122,7 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 		std::string stackNum = moduleFilename[i].substr(stackPos, 5);
 		int stackInt = atoi(stackNum.c_str());
 
-		firstModule = (stackInt == 0);
+		//firstModule = (stackInt == 0);
 		
 		if(verbose) {
 			printf("\tModule %0.2li = %s\n",i, moduleFilename[i].c_str());
@@ -177,9 +185,9 @@ void cAgipdReader::open(char *baseFilename){
 
 	// Det up size and layout of the assembled data stack
 	// Use module[0] as the reference and stack the modules one on top of another
-	nframes = module[0].nframes;
-	modulen[0] = module[0].n0;
-	modulen[1] = module[0].n1;
+	nframes = module[_referenceModule].nframes;
+	modulen[0] = module[_referenceModule].n0;
+	modulen[1] = module[_referenceModule].n1;
 	modulenn = modulen[0]*modulen[1];
 	nmodules[0] = 1;
 	nmodules[1] = nAGIPDmodules;
@@ -192,14 +200,13 @@ void cAgipdReader::open(char *baseFilename){
 	
 	// Check for inconsistencies
 	std::cout << "\tChecking number of events in each file" << std::endl;
-	moduleOK[0] = true;
-	for(long i=1; i<nAGIPDmodules; i++) {
+	for(long i=0; i<nAGIPDmodules; i++) {
 		if (module[i].noData)
 			continue;
 
-		if(module[i].nframes != module[0].nframes) {
-			std::cout << "\tInconsistent number of frames between modules 0 and " << i << std::endl;
-			std::cout << "\t" << module[i].nframes << " != " << module[0].nframes << std::endl;
+		if(module[i].nframes != module[_referenceModule].nframes) {
+			std::cout << "\tInconsistent number of frames between modules " << _referenceModule << " and " << i << std::endl;
+			std::cout << "\t" << module[i].nframes << " != " << module[_referenceModule].nframes << std::endl;
 			moduleOK[i] = false;
 		}
 		else {
@@ -208,8 +215,8 @@ void cAgipdReader::open(char *baseFilename){
 	}
 	
 	std::cout << "\tChecking all data is of the same type" << std::endl;
-	rawDetectorData = module[0].rawDetectorData;
-	for(long i=1; i<nAGIPDmodules; i++) {
+	rawDetectorData = module[_referenceModule].rawDetectorData;
+	for(long i=0; i<nAGIPDmodules; i++) {
 		if (module[i].noData)
 			continue;
 
@@ -221,16 +228,15 @@ void cAgipdReader::open(char *baseFilename){
 	
 	
 	std::cout << "\tChecking image size in each file" << std::endl;
-	moduleOK[0] = true;
-	for(long i=1; i<nAGIPDmodules; i++)
+	for(long i=0; i<nAGIPDmodules; i++)
 	{
 		if (module[i].noData)
 			continue;
 
-		if(module[i].n0 != module[0].n0 || module[i].n1 != module[0].n1) {
-			std::cout << "\tInconsistent image sizes between modules 0 and " << i << std::endl;
-			std::cout << "\t ( " << module[i].n0 << " != " << module[0].n0 << " )" << std::endl;
-			std::cout << "\t ( " << module[i].n1 << " != " << module[0].n1 << " )" << std::endl;
+		if(module[i].n0 != module[_referenceModule].n0 || module[i].n1 != module[_referenceModule].n1) {
+            std::cout << "\tInconsistent image sizes between modules " << _referenceModule << " and " << i << std::endl;
+			std::cout << "\t ( " << module[i].n0 << " != " << module[_referenceModule].n0 << " )" << std::endl;
+			std::cout << "\t ( " << module[i].n1 << " != " << module[_referenceModule].n1 << " )" << std::endl;
 			moduleOK[i] = false;
 		}
 		else {
@@ -258,14 +264,16 @@ void cAgipdReader::open(char *baseFilename){
 
 		long cellID = module[i].cellID;
 
-		int start = firstModule ? 200 : 0;
+		//int start = firstModule ? 200 : 0;
+        int start = 0;
 
 		std::cout << "Starting from " << start << std::endl;
 
-		for(long j=start; j<module[0].nframes; j++)
+		for(long j=start; j<module[_referenceModule].nframes; j++)
 		{
 			long trainID = module[i].trainIDlist[j];
 			long pulseID = module[i].pulseIDlist[j];
+            long cellID = module[i].cellIDlist[j];
 
 			if (trainID < minTrain) minTrain = trainID;
 			if (trainID > maxTrain) maxTrain = trainID;
@@ -365,35 +373,35 @@ void cAgipdReader::close(void){
 }
 // cAgipdReader::close()
 
-bool cAgipdReader::nextFrame()
-{
+
+// Why is there a separate private and public function for this?
+bool cAgipdReader::nextFrame() {
 	return nextFramePrivate();
 }
 
-bool cAgipdReader::nextFramePrivate()
-{
+
+bool cAgipdReader::nextFramePrivate() {
 	lastModule = -1;
 	bool success = true;
 
 	while (lastModule < 0 && success) {
         // Go to next pulse; if next pulse is off end of train then go to next train
         currentPulse++;
-		if (currentPulse >= maxPulse)
-		{
+		if (currentPulse >= maxPulse) {
 			currentPulse = minPulse;
 			currentTrain++;
 			goodImages4ThisTrain = -1;
 		}
         
         // Skip the first _skip pulses in a train (corrupted)
-        if(currentPulse < _skip) {
-            continue;
-        }
+        //if(currentPulse < _skip) {
+        //    continue;
+        //}
         
         // Skip first _newFileSkip trains in a file (corrupted)
-        if(currentTrain < _newFileSkip) {
-            continue;
-        }
+        //if(currentTrain < _newFileSkip) {
+        //    continue;
+        //}
 
 		success = readFrame(currentTrain, currentPulse);
 
@@ -413,19 +421,21 @@ bool cAgipdReader::nextFramePrivate()
 	return success;
 }
 
-void cAgipdReader::resetCurrentFrame()
-{
+// Go back to the start of the queue
+void cAgipdReader::resetCurrentFrame() {
 	currentPulse = minPulse;
 	currentTrain = minTrain;
 }
+
 
 // Set the frame to blank if there is an error
 void cAgipdReader::setModuleToBlank(int moduleID) {
     statusID[moduleID] = 1;
     memset(pdata[moduleID], 0, modulenn*sizeof(float));
     memset(pgain[moduleID], 0, modulenn*sizeof(uint16_t));
-
+    memset(pmask[moduleID], 1, modulenn*sizeof(uint16_t));
 }
+
 
 bool cAgipdReader::readFrame(long trainID, long pulseID)
 {
@@ -442,6 +452,7 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 	int moduleCount = 0;
 	lastModule = -1;
 
+    
 	// Loop through modules
 	for(long i=0; i<nAGIPDmodules; i++)
 	{
@@ -456,7 +467,6 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 			continue;
 		}
 
-
 		// Read the requested frame number (and update metadata in structure)
 		module[i].readFrame(frameNum);
 
@@ -464,7 +474,6 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
             setModuleToBlank(i);
 			continue;
 		}
-
 		moduleCount++;
 
 		// Copy across
