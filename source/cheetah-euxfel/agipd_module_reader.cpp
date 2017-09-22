@@ -88,34 +88,29 @@ cAgipdModuleReader::~cAgipdModuleReader(){
 /*
  *	Open HDF5 file and perfom some checks
  */
-void cAgipdModuleReader::open(char filename[], int mNum)
-{
-	
+void cAgipdModuleReader::open(char filename[], int mNum) {
 	std::cout << "Opening " << filename << std::endl;
 	cAgipdModuleReader::filename = filename;
 	
-	bool check = fileCheck(filename);
-
-	if (check)
-	{
-		std::cout << "\tFile check OK\n";
+	bool check = fileCheckAndOpen(filename);
+	if (check == false) {
+        std::cout << "\tWarning: Non-existent or dodgy file - will be skipped" << std::endl;
+        // This means:
+        // fileOK=false;
+        // noData=true;
+        return;
 	}
-	else
-	{
-		std::cout << "Dodgy file (never mind)" << std::endl;
+	else {
+        std::cout << "\tFile check OK\n";
 	}
 
+    
 	/* Now to make our new field names using the module number */
-
 	std::string prefix = h5_instrument_prefix + i_to_str(mNum) + h5_image_prefix;
 	h5_trainId_field = prefix + h5_trainId_suffix;
-
 	h5_pulseId_field = prefix + h5_pulseId_suffix;
-
 	h5_cellId_field = prefix + h5_cellId_suffix;
-
 	h5_image_data_field = prefix + h5_image_data_suffix;
-
 	h5_image_status_field = prefix + h5_image_status_suffix;
 
 	if (false)
@@ -152,9 +147,9 @@ void cAgipdModuleReader::open(char filename[], int mNum)
 	// Image data gives number of frames, logical block size, stack depth
 	int success = H5LTget_dataset_info(h5_file_id, h5_image_data_field.c_str(), dims, &dataclass, &datasize);
 
-	if (success < 0)
-	{
+	if (success < 0) {
 		std::cout << "Get dataset info for image - failed. Module set to blank.\n";
+        fileOK = false;
 		noData = true;
 		return;
 	}
@@ -164,13 +159,11 @@ void cAgipdModuleReader::open(char filename[], int mNum)
 	n0 = dims[3];
 	n1 = dims[2];
 
-	if (!rawDetectorData)
-	{
+	if (!rawDetectorData) {
 		n0 = dims[2];
 		n1 = dims[1];
 		nstack = 1;
 	}
-
 	nn = n0*n1;
 	
 	printf("\tNumber of frames: %li\n", nframes);
@@ -181,8 +174,9 @@ void cAgipdModuleReader::open(char filename[], int mNum)
 // cAgipdReader::open
 
 
-void cAgipdModuleReader::close(void){
-	if (noData) return;
+void cAgipdModuleReader::close(void) {
+	if (noData || !fileOK)
+        return;
 
 	if(data==NULL)
 		return;
@@ -250,7 +244,8 @@ void cAgipdModuleReader::close(void){
 
 void cAgipdModuleReader::readHeaders(void)
 {
-	if (noData) return;
+	if (noData)
+        return;
 
 	//std::cout << "Reading headers " << filename << "\n";
 	std::cout << "Reading vector fields from " << filename << "\n";
@@ -276,8 +271,12 @@ void cAgipdModuleReader::readHeaders(void)
 
 
 void cAgipdModuleReader::readDarkcal(char *filename){
-	if (strcmp(filename, "No_file_specified") == 0)
-	{
+    // If file is absent or not OK, no need to load gains as we will skip anyway
+    if(!fileOK)
+        return;
+    
+    // No dark specified?
+    if (strcmp(filename, "No_file_specified") == 0) {
 		return;
 	}
 	darkcalFilename = filename;
@@ -302,7 +301,12 @@ void cAgipdModuleReader::readDarkcal(char *filename){
 
 
 void cAgipdModuleReader::readGaincal(char *filename){
-	if(strcmp(filename, "No_file_specified")) {
+    // If file is absent or not OK, no need to load gains as we will skip anyway
+    if(!fileOK)
+        return;
+
+    // No gain specified?
+    if(strcmp(filename, "No_file_specified")) {
 		return;
 	}
 	gaincalFilename = filename;
@@ -318,8 +322,10 @@ void cAgipdModuleReader::readGaincal(char *filename){
 
 void cAgipdModuleReader::readImageStack(void){
 	
-	if (noData) return;
+	if (noData)
+        return;
 
+    
 	long mem_bytes = nframes*nn*sizeof(uint16_t);
 	
 	std::cout << "Reading entire image data array (all frames)\n" ;
@@ -375,10 +381,9 @@ void cAgipdModuleReader::readFrame(long frameNum){
  */
 void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 {
-	if (noData)
-	{
+    if (noData) {
 		return;
-	}
+    }
 
 	// Define hyperslab in RAW data file
 	hsize_t     slab_start[4];
@@ -411,8 +416,7 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
-		if (noData || !tempdata)
-		{
+		if (noData || !tempdata) {
 			return;
 		}
 
@@ -428,8 +432,7 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		// Read data from hyperslab
 		data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
-		if (noData)
-		{
+		if (noData) {
 			return;
 		}
 	}
@@ -448,9 +451,6 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 
 	//	Apply calibration constants (if known).
 	applyCalibration(frameNum);
-
-
-
 };
 
 // Apply calibration constants (if known) 

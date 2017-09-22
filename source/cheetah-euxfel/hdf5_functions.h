@@ -18,12 +18,13 @@ class cHDF5Functions
 public:
 	hid_t		h5_file_id;
 	int	        verbose;
-	bool        noData;
+    bool        fileOK=false;
+	bool        noData=true;
 
 protected:
 	void*		checkAllocRead(char[], long, hid_t, size_t);
 	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
-	bool        fileCheck(char *filename);
+	bool        fileCheckAndOpen(char *filename);
 	
 };
 

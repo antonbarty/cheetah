@@ -30,10 +30,10 @@ cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &rea
 void cAgipdCalibrator::open()
 {
 	std::cout << "Opening darkcal file..." << std::endl;
-	bool check = fileCheck((char *)_filename.c_str());
+    bool check;
+    check = fileCheckAndOpen((char *)_filename.c_str());
 
-	if (check)
-	{
+	if (check) {
 		std::cout << "\tFile check OK\n";
 	}
 
