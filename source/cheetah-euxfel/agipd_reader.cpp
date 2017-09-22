@@ -61,7 +61,7 @@ void cAgipdReader::setScheme(char *scheme) {
     if(_scheme == "XFEL2012") {
         setSkip(1);
         setStride(2);
-        setNewFileDuds(60);
+        setNewFileSkip(60);
     }
 
     // Ros, September 2017
@@ -90,13 +90,11 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 		moduleFilename[i] = module0filename;
 		
 
-		// Replace the AGIPD00 number with 00-15
+		// Replace the number in AGIPD00 with 00-15
 		pos = moduleFilename[i].find("AGIPD");
 
-		if (pos == std::string::npos)
-		{
-			std::cout << "Cannot generate AGIPD module filename"\
-			"as I can't find the string 'AGIPD'!" << std::endl;
+		if (pos == std::string::npos) {
+			std::cout << "Cannot generate AGIPD module filename as I can't find the string 'AGIPD'!" << std::endl;
 			continue;
 		}
 
@@ -105,8 +103,7 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 		
 		// Which chunk/sequence are we looking at?
 		pos = moduleFilename[i].find(".h5");
-		if (pos == std::string::npos || (pos + 5 < 0))
-		{
+		if (pos == std::string::npos || (pos + 5 < 0)) {
 			std::cout << "Cannot decide if first stack - never mind" << std::endl;
 			continue;
 		}
@@ -124,29 +121,30 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 		}
 	}
 
-	// Filenames for all the other darkcal files
+	// Filenames for all the darkcal files
 	for(long i=0; i<nAGIPDmodules; i++) {
 		// Replace the AGIPD00 number with 00-15
 		darkcalFilename[i] = darkcalFile;
 		pos = darkcalFilename[i].find("AGIPD");
-
-		if (pos != std::string::npos)
-		{
+		if (pos != std::string::npos) {
 			sprintf(tempstr, "%0.2li", i);
 			darkcalFilename[i].replace(pos+5,2,tempstr);
 		}
+        std::cout << "\t\t" << darkcalFilename[i] << std::endl;
 	}
 
 
-	// Filenames for all the other gaincal files
+	// Filenames for all the gaincal files
 	if(gaincalFile != "No_file_specified") {
 		std::cout << "\tGain calibration files " << std::endl;
 		for(long i=0; i<nAGIPDmodules; i++) {
 			// Replace the AGIPD00 number with 00-15
 			gaincalFilename[i] = gaincalFile;
 			pos = gaincalFilename[i].find("AGIPD");
-			sprintf(tempstr, "%0.2li", i);
-			gaincalFilename[i].replace(pos+5,2,tempstr);
+            if (pos != std::string::npos) {
+                sprintf(tempstr, "%0.2li", i);
+                gaincalFilename[i].replace(pos+5,2,tempstr);
+            }
 			std::cout << "\t\t" << gaincalFilename[i] << std::endl;
 		}
 	}
@@ -155,7 +153,7 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 
 
 /*
- *	Open all AGIPD module files relating to the 00 module
+ *	Open all AGIPD module files relating to the specified module
  */
 void cAgipdReader::open(char *baseFilename){
 	
@@ -377,24 +375,32 @@ bool cAgipdReader::nextFramePrivate()
 	lastModule = -1;
 	bool success = true;
 
-	while (lastModule < 0 && success)
-	{
-		currentPulse ++;
+	while (lastModule < 0 && success) {
+        // Go to next pulse; if next pulse is off end of train then go to next train
+        currentPulse++;
 		if (currentPulse >= maxPulse)
 		{
 			currentPulse = minPulse;
 			currentTrain++;
 			goodImages4ThisTrain = -1;
 		}
+        
+        // Skip the first _skip pulses in a train (corrupted)
+        if(currentPulse < _skip) {
+            continue;
+        }
+        
+        // Skip first _newFileSkip trains in a file (corrupted)
+        if(currentTrain < _newFileSkip) {
+            continue;
+        }
 
 		success = readFrame(currentTrain, currentPulse);
 
-		if (lastModule >= 0)
-		{
+		if (lastModule >= 0) {
 			/* We had a good image in this train */
 			/* But if it isn't a multiple of stride, we don't want it */
-			if ((goodImages4ThisTrain + 1) % _stride > 0)
-			{
+			if ((goodImages4ThisTrain + 1) % _stride > 0) {
 				lastModule = -1;
 			}
 
@@ -404,7 +410,6 @@ bool cAgipdReader::nextFramePrivate()
 
 	std::cout << "Dumping good image number: " << goodImages4ThisTrain << std::endl;
 
-
 	return success;
 }
 
@@ -412,6 +417,14 @@ void cAgipdReader::resetCurrentFrame()
 {
 	currentPulse = minPulse;
 	currentTrain = minTrain;
+}
+
+// Set the frame to blank if there is an error
+void cAgipdReader::setModuleToBlank(int moduleID) {
+    statusID[moduleID] = 1;
+    memset(pdata[moduleID], 0, modulenn*sizeof(float));
+    memset(pgain[moduleID], 0, modulenn*sizeof(uint16_t));
+
 }
 
 bool cAgipdReader::readFrame(long trainID, long pulseID)
@@ -436,25 +449,19 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		TrainPulseModulePair tp2mod = std::make_pair(tp, i);
 		long frameNum = trainPulseMap[tp2mod];
 
-		if (frameNum < 0)
+		if (module[i].noData==true || frameNum < 0)
 		{
+            setModuleToBlank(i);
 			cellID[i] = module[i].cellID;
-			statusID[i] = 1;
-			memset(pdata[i], 0, modulenn*sizeof(float));
-			memset(pgain[i], 0, modulenn*sizeof(uint16_t));
 			continue;
 		}
 
-		if (module[i].noData)
-		{
-			continue;
-		}
 
 		// Read the requested frame number (and update metadata in structure)
 		module[i].readFrame(frameNum);
 
-		if (module[i].noData)
-		{
+		if (module[i].noData) {
+            setModuleToBlank(i);
 			continue;
 		}
 
@@ -477,7 +484,6 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		std::cout << "Read train " << trainID << ", pulse " << pulseID << " with "
 		<< moduleCount << " modules." << std::endl;
 	}
-
 	
 	currentTrain = trainID;
 	currentPulse = pulseID;

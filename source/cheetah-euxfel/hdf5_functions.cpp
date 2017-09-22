@@ -189,7 +189,7 @@ void* cHDF5Functions::checkAllocReadHyperslab(char fieldName[], int ndims, hsize
 }
 // cAgipdReader::checkAllocReadHyperslab
 
-bool cHDF5Functions::fileCheck(char *filename)
+bool cHDF5Functions::fileCheckAndOpen(char *filename)
 {
 	// Does the file exist?
 	FILE *testfp;
@@ -197,6 +197,7 @@ bool cHDF5Functions::fileCheck(char *filename)
 	if (testfp == NULL) {
 		printf("cAgipdReader::open: File does not exist (%s)\n", filename);
 		printf("Module set to blank.\n");
+        fileOK = false;
 		noData = true;
 		return false;
 	}
@@ -211,7 +212,8 @@ bool cHDF5Functions::fileCheck(char *filename)
 	if(file_test == 0){
 		printf("cAgipdReader::open: Not an HDF5 file (%s)\n",filename);
 		printf("Module set to blank.\n");
-		noData = true;
+        fileOK = false;
+        noData = true;
 		return false;
 	}
 
@@ -224,6 +226,9 @@ bool cHDF5Functions::fileCheck(char *filename)
 		return false;
 	}
 	//std::cout << "\tFile found\n";
-
+    
+    // If we get this far without error...
+    fileOK = true;
+    noData = false;
 	return true;
 }

@@ -104,6 +104,8 @@ private:
 	std::string			moduleFilename[nAGIPDmodules];
 	cAgipdModuleReader	module[nAGIPDmodules];
 	bool				moduleOK[nAGIPDmodules];
+    void                setModuleToBlank(int);
+
 
 	std::string			darkcalFilename[nAGIPDmodules];
 	std::string			gaincalFilename[nAGIPDmodules];

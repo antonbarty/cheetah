@@ -90,7 +90,7 @@ int main(int argc, char* argv[]) {
 	cheetahInit(&cheetahGlobal);
 	
 
-	static char testfile[]="RAW-R0283-AGIPD00-S00000.h5";
+	//static char testfile[]="RAW-R0283-AGIPD00-S00000.h5";
 	
 	
 	// Initialise AGIPD frame reading stuff
