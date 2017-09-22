@@ -115,6 +115,7 @@ private:
 	int                 _skip;              // Number of pulses to skip at start of pulse train
     int                 _stride;            // Step over frames with this spacing
     int                 _newFileSkip;       // Number of useless frames at the start of each file
+    int                 _referenceModule;   // The module number passed on the command line (evidently it exists)
 
 	/* Housekeeping for trains and pulses */
 	long                minTrain;
