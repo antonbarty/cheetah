@@ -292,8 +292,8 @@ void print_help(void){
     std::cout << std::endl;
     std::cout << "usage: cheetah-euxfel -i <INIFILE> *AGIPD00.s*.h5 \n";
     std::cout << std::endl;
-    std::cout << "\t--inifile            Specifies cheetah.ini file to use\n";
-    std::cout << "\t--experiment         String specifying the experiment name (used for lableling and setting the file layout)\n";
+    std::cout << "\t--inifile=<file)     Specifies cheetah.ini file to use\n";
+    std::cout << "\t--experiment=<name>  String specifying the experiment name (used for lableling and setting the file layout)\n";
     std::cout << "\t--stride=<n>         Process only every <n>th frame\n";
     std::cout << "\t--skip=<n>           Skip the first <n> frame of each .h5 file\n";
     std::cout << std::endl;
@@ -308,7 +308,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 	
     // Defaults
     global->iniFile = "cheetah.ini";
-    global->exptName = "XFEL2012";
+    global->exptName = "XFEL";
     global->frameStride = -1;
     global->frameSkip = -1;
 
@@ -319,12 +319,12 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 		{ "inifile", required_argument, NULL, 'i' },
         { "stride", required_argument, NULL, 0 },
         { "skip", required_argument, NULL, 0 },
-        { "experiment", required_argument, NULL, 0 },
+        { "experiment", required_argument, NULL, 'e' },
 		{ "verbose", no_argument, NULL, 'v' },
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, no_argument, NULL, 0 }
 	};
-	const char optString[] = "i:vh?";
+	const char optString[] = "i:e:vh?";
 	
 	int opt;
 	int longIndex;
@@ -336,6 +336,10 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 			case 'i':
 				global->iniFile = optarg;
                 std::cout << ".ini file set to " << global->iniFile << std::endl;
+				break;
+			case 'e':
+				global->exptName = optarg;
+				std::cout << "Experiment name set to " << global->exptName << std::endl;
 				break;
 			case 'h':   /* fall-through is intentional */
 			case '?':
