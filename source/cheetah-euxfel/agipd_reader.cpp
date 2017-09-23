@@ -56,9 +56,16 @@ cAgipdReader::~cAgipdReader()
  */
 void cAgipdReader::setScheme(char *scheme) {
     _scheme = scheme;
-   
-    // Barty, September 2017
-    if(_scheme == "XFEL2012") {
+	
+	// Default (current) scheme
+	if(_scheme == "XFEL") {
+		setSkip(1);
+		setStride(2);
+		setNewFileSkip(60);
+	}
+
+	// Barty, September 2017
+	if(_scheme == "XFEL2012") {
         setSkip(1);
         setStride(2);
         setNewFileSkip(60);
