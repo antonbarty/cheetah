@@ -22,6 +22,7 @@ public:
 	bool        noData=true;
 
 protected:
+	void*		readAllocDataset(char[], hid_t, size_t);
 	void*		checkAllocRead(char[], long, hid_t, size_t);
 	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
 	bool        fileCheckAndOpen(char *filename);
