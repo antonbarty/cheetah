@@ -14,10 +14,63 @@
 
 /*
  *	Read dataset, whatever its dimensions may be
- *	Return ndims, dims[] and pointer to read data
+ * 	Must pass &ndims and pointer hsize_t *dims[ndims]
+ *	Returns void* pointer to read data.
+ *	Also updates &ndims, dims[ndims] and checks data size matches what you are expecting
+ *	Watch for memory leaks in the routines that call this function - we can not check whether the
+ *	variable to which the return value is assigned has already been allocated
  */
-void* cHDF5Functions::readAllocDataset(char fieldName[], hid_t h5_type_id, size_t targetsize){
+void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t *h5_dims, hid_t h5_type_id, size_t targetsize){
 	
+	int success1, success2;
+	size_t	datasize;
+	H5T_class_t dataclass;
+
+	// get dataset size, dimensions, datatype, etc...
+	success1 = H5LTget_dataset_ndims(h5_file_id, fieldName, h5_ndims);
+	success2 = H5LTget_dataset_info(h5_file_id, fieldName, h5_dims, &dataclass, &datasize);
+	if (success1 < 0 || success2 < 0) {
+		std::cout << "Error: could not determine data sizes of HDF5 field " << fieldName << std::endl;
+		std::cout << "Returning NULL pointer (which will cause something to fail upstream)" << std::endl;
+		return NULL;
+	}
+
+	
+	// local copy of h5_ndims 
+	int ndims = *(h5_ndims);
+	hsize_t *dims = h5_dims;
+
+	
+	// Check size of data (crude way to check data types match)
+	if(datasize != targetsize) {
+		printf("\tSize of data elements does not match desired size\n");
+		printf("\ttargetsize=%li, datasize=%li\n", targetsize, datasize);
+		printf("\tContinuing anyway, feel free to return NULL if you really want to fail\n");
+		//	return NULL;
+	}
+
+	
+	// Number of data points to allocate is product of all dimensions
+	long nelements=1;
+	for(int i = 0;i<ndims;i++) {
+		nelements *= dims[i];
+	}
+
+	// Allocate required memory
+	// You will have a memory leak if variable assigned to this function is already allocated
+	void *databuffer = malloc(nelements*targetsize);
+
+	
+	// Read data space
+	// herr_t H5LTread_dataset ( hid_t loc_id, const char *dset_name, hid_t type_id, void *buffer )
+	herr_t herr;
+	herr = H5LTread_dataset(h5_file_id, fieldName, h5_type_id, databuffer);
+	if(herr < 0) {
+		printf("\tError reading data set\n");
+		return NULL;
+	}
+	
+	return databuffer;
 }
 
 /*
@@ -25,19 +78,19 @@ void* cHDF5Functions::readAllocDataset(char fieldName[], hid_t h5_type_id, size_
  */
 void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t h5_type_id, size_t targetsize) {
 	int h5_ndims;
-	hsize_t dims[4];
+	hsize_t h5_dims[4];
 	size_t	datasize;
 	H5T_class_t dataclass;
-
+	int success;
+	
 	// Get size and type of this data set
-	int success = H5LTget_dataset_ndims(h5_file_id, fieldName, &h5_ndims);
+	success = H5LTget_dataset_ndims(h5_file_id, fieldName, &h5_ndims);
 	if (success < 0) {
 		noData = true;
 		return NULL;
 	}
 
-	H5LTget_dataset_info(h5_file_id, fieldName, dims, &dataclass, &datasize);
-
+	H5LTget_dataset_info(h5_file_id, fieldName, h5_dims, &dataclass, &datasize);
 	if (success < 0) {
 		noData = true;
 		return NULL;
@@ -47,14 +100,14 @@ void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t
 	if(verbose) {
 		std::cout << "\t" << fieldName << "\n";
 		printf("\tndims=%i  (",h5_ndims);
-		for(int i=0; i<h5_ndims; i++) printf("%llu,", dims[i]);
+		for(int i=0; i<h5_ndims; i++) printf("%llu,", h5_dims[i]);
 		printf(")    dataclass=%i    datasize=%zu    targetsize=%zu\n", dataclass, datasize, targetsize);
 	}
 
-	// Check number of events
-	if(dims[0] != targetnframes && verbose) {
+	// Check number of events, found in dims[0]
+	if(h5_dims[0] != targetnframes && verbose) {
 		printf("\tSize of this data set does not match desired number of frames\n");
-		printf("\tNumber of events in this dataset: %llu\n", dims[0]);
+		printf("\tNumber of events in this dataset: %llu\n", h5_dims[0]);
 		printf("\tContinuing anyway, feel free to return NULL if you really want to fail\n");
 
 		//	return NULL;
@@ -69,19 +122,19 @@ void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t
 	}
 
 	// Number of data points to allocate
-	long npoints=1;
+	long nelements=1;
 	for(int i = 0;i<h5_ndims;i++) {
-		npoints *= dims[i];
+		nelements *= h5_dims[i];
 	}
 
 	// Debug check of array size
-	if(false) {
-		for(int i = 0;i<ndims;i++) printf("%llu x ", dims[i]);
-		printf(" = %li\n", n);
+	if(/* DISABLES CODE */ (false)) {
+		for(int i = 0;i<h5_ndims;i++) printf("%llu x ", h5_dims[i]);
+		printf(" = %li\n", nelements);
 	}
 
 	// Allocate required memory
-	void *databuffer = malloc(npoints*targetsize);
+	void *databuffer = malloc(nelements*targetsize);
 
 
 	// Read data space
@@ -108,13 +161,10 @@ void* cHDF5Functions::checkAllocReadHyperslab(char fieldName[], int ndims, hsize
 	hid_t dataset_id;
 	hid_t dataspace_id;
 	dataset_id = H5Dopen(h5_file_id, fieldName, H5P_DEFAULT);
-
-	if (dataset_id < 0)
-	{
+	if (dataset_id < 0) {
 		noData = true;
 		return NULL;
 	}
-
 	dataspace_id = H5Dget_space(dataset_id);
 
 
