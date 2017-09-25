@@ -12,33 +12,42 @@
 #include <iostream>
 #include <sstream>
 
+/*
+ *	Read dataset, whatever its dimensions may be
+ *	Return ndims, dims[] and pointer to read data
+ */
+void* cHDF5Functions::readAllocDataset(char fieldName[], hid_t h5_type_id, size_t targetsize){
+	
+}
+
+/*
+ *	Read dataset, and check whether it has the required number of entries (which is found in h5_dims[0]
+ */
 void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t h5_type_id, size_t targetsize) {
-	int ndims;
+	int h5_ndims;
 	hsize_t dims[4];
 	size_t	datasize;
 	H5T_class_t dataclass;
 
 	// Get size and type of this data set
-	int success = H5LTget_dataset_ndims(h5_file_id, fieldName, &ndims);
-
-	if (success < 0)
-	{
+	int success = H5LTget_dataset_ndims(h5_file_id, fieldName, &h5_ndims);
+	if (success < 0) {
 		noData = true;
 		return NULL;
 	}
 
 	H5LTget_dataset_info(h5_file_id, fieldName, dims, &dataclass, &datasize);
 
-	if (success < 0)
-	{
+	if (success < 0) {
 		noData = true;
 		return NULL;
 	}
 
+	// Diagnostic: print dimensions and data class
 	if(verbose) {
 		std::cout << "\t" << fieldName << "\n";
-		printf("\tndims=%i  (",ndims);
-		for(int i=0; i<ndims; i++) printf("%llu,", dims[i]);
+		printf("\tndims=%i  (",h5_ndims);
+		for(int i=0; i<h5_ndims; i++) printf("%llu,", dims[i]);
 		printf(")    dataclass=%i    datasize=%zu    targetsize=%zu\n", dataclass, datasize, targetsize);
 	}
 
@@ -60,9 +69,9 @@ void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t
 	}
 
 	// Number of data points to allocate
-	long n=1;
-	for(int i = 0;i<ndims;i++) {
-		n *= dims[i];
+	long npoints=1;
+	for(int i = 0;i<h5_ndims;i++) {
+		npoints *= dims[i];
 	}
 
 	// Debug check of array size
@@ -72,7 +81,7 @@ void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t
 	}
 
 	// Allocate required memory
-	void *databuffer = malloc(n*targetsize);
+	void *databuffer = malloc(npoints*targetsize);
 
 
 	// Read data space
@@ -88,7 +97,10 @@ void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t
 }
 // cAgipdReader::checkAllocRead
 
-
+/*
+ *	Returns pointer to selected hyperslab of data
+ *	Does not (can not) free the return pointer so handle memory leaks in the routine that call this function
+ */
 void* cHDF5Functions::checkAllocReadHyperslab(char fieldName[], int ndims, hsize_t *slab_start, hsize_t *slab_size, hid_t h5_type_id, size_t targetsize) {
 
 
