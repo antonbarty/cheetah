@@ -27,7 +27,9 @@ public:
 	
 	void open();					// New version
 	void open_version1();			// Parked function, may remove later
-	int16_t *gainAndCellPtr(int gain, int cell);
+
+	int16_t *darkOffsetForGainAndCell(int gain, int cell);
+	int16_t *gainThresholdForGainAndCell(int gain, int cell);
 
 private:
 	std::string _filename;
@@ -35,9 +37,11 @@ private:
 	static int nCells;
 
 	cAgipdModuleReader *_myModule;
-	int16_t *_allData;
+	int16_t *_darkOffsetData;
+	int16_t *_gainThresholdData;
 
-	int16_t ***_gainCellPtrs;
+	int16_t ***_darkOffsetGainCellPtr;
+	int16_t ***_gainThresholdGainCellPtr;
 };
 
 #endif /* defined(__agipd__agipd_calibrator__) */
