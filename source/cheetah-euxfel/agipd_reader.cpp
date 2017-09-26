@@ -423,10 +423,11 @@ bool cAgipdReader::nextFramePrivate() {
 		}
 	}
 
-	std::cout << "Dumping good image number: " << goodImages4ThisTrain << std::endl;
+	std::cout << "Returning image number: " << goodImages4ThisTrain << std::endl;
 
 	return success;
 }
+
 
 // Go back to the start of the queue
 void cAgipdReader::resetCurrentFrame() {
