@@ -287,8 +287,7 @@ void waitForCheetahWorkers(cGlobal *cheetahGlobal){
  */
 void print_help(void){
     std::cout << "Cheetah interface for EuXFEL\n";
-    std::cout << "Anton Barty, September 2015-\n";
-    std::cout << "Additional contributions from Helen Ginn, \n";
+    std::cout << "Anton Barty, Helen Ginn, September 2015-\n";
     std::cout << std::endl;
     std::cout << "usage: cheetah-euxfel -i <INIFILE> *AGIPD00.s*.h5 \n";
     std::cout << std::endl;

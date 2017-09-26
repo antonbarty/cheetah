@@ -3,7 +3,6 @@
 //  agipd
 //
 //  Created by Helen Ginn on 17/09/2017.
-//  Copyright (c) 2017 Anton Barty. All rights reserved.
 //
 
 
@@ -19,6 +18,7 @@
  *	Also updates &ndims, dims[ndims] and checks data size matches what you are expecting
  *	Watch for memory leaks in the routines that call this function - we can not check whether the
  *	variable to which the return value is assigned has already been allocated
+ *	Also watch for reading huge datasets when you don't have enough memory (we don't check...)
  */
 void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t *h5_dims, hid_t h5_type_id, size_t targetsize){
 	
@@ -41,7 +41,7 @@ void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t 
 	hsize_t *dims = h5_dims;
 
 	
-	// Check size of data (crude way to check data types match)
+	// Check size of actual data and requested size (crude way to check data types match)
 	if(datasize != targetsize) {
 		printf("\tSize of data elements does not match desired size\n");
 		printf("\ttargetsize=%li, datasize=%li\n", targetsize, datasize);
@@ -55,6 +55,17 @@ void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t 
 	for(int i = 0;i<ndims;i++) {
 		nelements *= dims[i];
 	}
+	
+	// Throw an error if dataset is suspiciously large (>50GB)
+	long max_gb = 50;
+	long long gb = (1024L)^3;
+	long long max_mem = max_gb*gb;
+	if(nelements*targetsize > max_mem){
+		std::cout << "Error: Suspiciously large memory request:" << std::endl;
+		std::cout << nelements*targetsize << " bytes exceeds " << max_gb << "GB" << std::endl;
+		exit(1);
+	};
+	
 
 	// Allocate required memory
 	// You will have a memory leak if variable assigned to this function is already allocated
@@ -76,7 +87,7 @@ void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t 
 /*
  *	Read dataset, and check whether it has the required number of entries (which is found in h5_dims[0]
  */
-void* cHDF5Functions::checkAllocRead(char fieldName[], long targetnframes, hid_t h5_type_id, size_t targetsize) {
+void* cHDF5Functions::checkNeventsAllocRead(char fieldName[], long targetnframes, hid_t h5_type_id, size_t targetsize) {
 	int h5_ndims;
 	hsize_t h5_dims[4];
 	size_t	datasize;
