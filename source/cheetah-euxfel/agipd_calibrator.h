@@ -25,7 +25,7 @@ public:
 	cAgipdCalibrator(std::string filename, cAgipdModuleReader &reader);
 	~cAgipdCalibrator();
 	
-	void open();					// New version
+	void readCalibrationData();					
 
 	int16_t *darkOffsetForGainAndCell(int gain, int cell);
 	int16_t *gainThresholdForGainAndCell(int gain, int cell);

@@ -52,7 +52,7 @@ cAgipdCalibrator::~cAgipdCalibrator()
  *		Uses new checkAllocReadDataset(..) function, which is less cumbersome then checkAllocReadHyperslab(..)
  *		void* cHDF5Functions::checkAllocReadDataset(char fieldName[], int *h5_ndims, hsize_t *h5_dims, hid_t h5_type_id, size_t targetsize)
  */
-void cAgipdCalibrator::open()
+void cAgipdCalibrator::readCalibrationData()
 {
 	std::cout << "Opening darkcal file..." << std::endl;
 	
