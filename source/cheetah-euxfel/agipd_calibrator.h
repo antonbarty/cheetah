@@ -26,7 +26,6 @@ public:
 	~cAgipdCalibrator();
 	
 	void open();					// New version
-	void open_version1();			// Parked function, may remove later
 
 	int16_t *darkOffsetForGainAndCell(int gain, int cell);
 	int16_t *gainThresholdForGainAndCell(int gain, int cell);
