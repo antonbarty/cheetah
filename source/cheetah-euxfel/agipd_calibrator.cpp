@@ -16,25 +16,31 @@ int cAgipdCalibrator::nCells = 30;
 // Constructor
 cAgipdCalibrator::cAgipdCalibrator()
 {
-	_allData = NULL;
+	_darkOffsetData = NULL;
+	_gainThresholdData = NULL;
 	_myModule = NULL;
-	_gainCellPtrs = 0;
+	_darkOffsetGainCellPtr = NULL;
+	_gainThresholdGainCellPtr = NULL;
 }
 
 // Constructor with arguments
 cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &reader)
 {
 	_filename = filename;
-	_allData = NULL;
+	_darkOffsetData = NULL;
+	_gainThresholdData = NULL;
 	_myModule = &reader; // pointer should not jump
-	_gainCellPtrs = 0;
+	_darkOffsetGainCellPtr = NULL;
+	_gainThresholdGainCellPtr = NULL;
 }
 
 // Destructor
 cAgipdCalibrator::~cAgipdCalibrator()
 {
-	free(_allData);
-	_gainCellPtrs = 0;
+	free(_darkOffsetData);
+	free(_gainThresholdData);
+	_darkOffsetGainCellPtr = NULL;
+	_gainThresholdGainCellPtr = NULL;
 }
 
 
@@ -50,8 +56,12 @@ void cAgipdCalibrator::open()
 {
 	std::cout << "Opening darkcal file..." << std::endl;
 	
-	// Check opening of file
+	// 	Data field for calibration constants
+	std::string offset_field = "/offset";
+	std::string gainthresh_field = "/threshold";
 	
+
+	// Check opening of file
 	bool check;
 	check = fileCheckAndOpen((char *)_filename.c_str());
 	if (check) {
@@ -61,19 +71,15 @@ void cAgipdCalibrator::open()
 		std::cout << "\tFile check Bad - keep going and see what happens\n";
 	}
 	
-	// 	Data field for offsets
-	std::string offset_field = "/offset";
-	std::string gainthresh_field = "/threshold";
-	
 	
 	// 	New reading function
 	//	Offsets are currently:  3 x 30 x 512 x 128 of type int16_t
-	if(_allData != NULL)
-		free(_allData);		// Beware memory leaks
-	
 	int	ndims;
 	hsize_t		dims[4];
-	_allData = (int16_t*) checkAllocReadDataset((char*) offset_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
+
+	if(_darkOffsetData != NULL)		// Beware of memory leaks
+		free(_darkOffsetData);
+	_darkOffsetData = (int16_t*) checkAllocReadDataset((char*) offset_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
 	
 	
 	// Sanity checks (only do this for the offsets, as all other fields are likely to be identical)
@@ -93,29 +99,47 @@ void cAgipdCalibrator::open()
 	}
 
 	
+	// Do the same for reading gain threshold data
+	// Skip checks as it is very likely array dimensions are the same
+	if(_gainThresholdData != NULL)		// Beware of memory leaks
+		free(_gainThresholdData);
+	_gainThresholdData = (int16_t*) checkAllocReadDataset((char*) gainthresh_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
+
+	
+	
 	// Housekeeping
 	nCells = (int) dims[1];
 
 	
 	// Pointers to the gain cells (so that we can access them quickly)
-	_gainCellPtrs = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
+	_darkOffsetGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
+	_gainThresholdGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
 	for (int i = 0; i < nGains; i++) {
 		long offset1 = i * nCells * _myModule->nn;
 		
-		_gainCellPtrs[i] = (int16_t **)malloc(sizeof(int16_t **) * nCells);
-		
+		_darkOffsetGainCellPtr[i] = (int16_t **)malloc(nCells * sizeof(int16_t **));
+		_gainThresholdGainCellPtr[i] = (int16_t **)malloc(nCells * sizeof(int16_t **));
+
 		for (int j = 0; j < nCells; j++) {
 			long offset2 = j * _myModule->nn;
 			
-			_gainCellPtrs[i][j] = &_allData[offset1 + offset2];
+			_darkOffsetGainCellPtr[i][j] = &_darkOffsetData[offset1 + offset2];
+			_gainThresholdGainCellPtr[i][j] = &_gainThresholdData[offset1 + offset2];
 		}
 	}
 	
 	// This is to show the data makes sense
-	int16_t *offset = gainAndCellPtr(0, 0);
-	std::cout << "First few offsets of gain 0 / cell 0: ";
+	int16_t *offset = darkOffsetForGainAndCell(0, 0);
+	int16_t *gaint = gainThresholdForGainAndCell(0, 0);
+	std::cout << "First few dark offsets of gain 0 / cell 0: ";
 	for (int i = 0; i < 5; i++) {
 		std::cout << offset[i] << ", ";
+	}
+	std::cout << std::endl;
+
+	std::cout << "First few gain thresholds of gain 0 / cell 0: ";
+	for (int i = 0; i < 5; i++) {
+		std::cout << gaint[i] << ", ";
 	}
 	std::cout << std::endl;
 }
@@ -162,26 +186,26 @@ void cAgipdCalibrator::open_version1()
 	hid_t type = H5T_STD_I16LE;
 	hid_t size = sizeof(int16_t);
 
-	_allData = (int16_t*) checkAllocReadHyperslab((char *)field.c_str(), ndims,
+	_darkOffsetData = (int16_t*) checkAllocReadHyperslab((char *)field.c_str(), ndims,
 												  slab_start, slab_size, type, size);
 
-	_gainCellPtrs = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
+	_darkOffsetGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
 
 	for (int i = 0; i < nGains; i++)
 	{
 		long offset1 = i * nCells * _myModule->nn;
 
-		_gainCellPtrs[i] = (int16_t **)malloc(sizeof(int16_t **) * nCells);
+		_darkOffsetGainCellPtr[i] = (int16_t **)malloc(sizeof(int16_t **) * nCells);
 
 		for (int j = 0; j < nCells; j++)
 		{
 			long offset2 = j * _myModule->nn;
 
-			_gainCellPtrs[i][j] = &_allData[offset1 + offset2];
+			_darkOffsetGainCellPtr[i][j] = &_darkOffsetData[offset1 + offset2];
 		}
 	}
 
-	int16_t *offset = gainAndCellPtr(0, 0);
+	int16_t *offset = darkOffsetForGainAndCell(0, 0);
 
 	std::cout << "First few offsets of gain 0 / cell 0: ";
 	for (int i = 0; i < 5; i++)
@@ -192,10 +216,21 @@ void cAgipdCalibrator::open_version1()
 	std::cout << std::endl;
 }
 
-int16_t *cAgipdCalibrator::gainAndCellPtr(int gain, int cell)
+// Return pointer to dark offsets for specified gain and cellID
+int16_t *cAgipdCalibrator::darkOffsetForGainAndCell(int gain, int cell)
 {
 	if (gain >= nGains) return NULL;
 	if (cell >= nCells) return NULL;
 
-	return _gainCellPtrs[gain][cell];
+	return _darkOffsetGainCellPtr[gain][cell];
+}
+
+// Return pointer to gain thresholds for specified gain and cellID
+// Gain threshold array is nGains-1 in size
+int16_t *cAgipdCalibrator::gainThresholdForGainAndCell(int gain, int cell)
+{
+	if (gain >= nGains-1) return NULL;
+	if (cell >= nCells) return NULL;
+	
+	return _gainThresholdGainCellPtr[gain][cell];
 }
