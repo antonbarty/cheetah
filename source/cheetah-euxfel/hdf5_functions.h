@@ -22,11 +22,12 @@ public:
 	bool        noData=true;
 
 protected:
-	void*		allocReadDataset(char[], int*, hsize_t*, hid_t, size_t);
 	void*		checkNeventsAllocRead(char[], long, hid_t, size_t);
+	void*		checkAllocReadDataset(char[], int*, hsize_t*, hid_t, size_t);
 	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
-	bool        fileCheckAndOpen(char *filename);
-	
+	void 		getDatasetDims(char[], int*, hsize_t*);
+	void 		getDatasetDims(char[], int*, hsize_t*, H5T_class_t*, size_t*);
+	bool        fileCheckAndOpen(char *filename);	
 };
 
 #endif /* defined(__agipd__hdf5_functions__) */

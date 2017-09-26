@@ -23,13 +23,16 @@ class cAgipdCalibrator : public cHDF5Functions
 public:
 	cAgipdCalibrator();
 	cAgipdCalibrator(std::string filename, cAgipdModuleReader &reader);
-	void open();
+	~cAgipdCalibrator();
+	
+	void open();					// New version
+	void open_version1();			// Parked function, may remove later
 	int16_t *gainAndCellPtr(int gain, int cell);
 
 private:
 	std::string _filename;
 	const static int nGains;
-	const static int nCells;
+	static int nCells;
 
 	cAgipdModuleReader *_myModule;
 	int16_t *_allData;

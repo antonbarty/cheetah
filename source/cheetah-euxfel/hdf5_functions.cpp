@@ -11,6 +11,36 @@
 #include <iostream>
 #include <sstream>
 
+
+/*
+ *	Get dataset dimensions (but do not read the data)
+ */
+void cHDF5Functions::getDatasetDims(char fieldName[], int *h5_ndims, hsize_t *h5_dims){
+	// Need these to call the real function, then throw them away
+	size_t	datasize;
+	H5T_class_t dataclass;
+	
+	// Now read the data set dimensions
+	cHDF5Functions::getDatasetDims(fieldName, h5_ndims, h5_dims, &dataclass, &datasize);
+}
+	
+/*
+ *	Get dataset dimensions, dataclass and element size
+ */
+void cHDF5Functions::getDatasetDims(char fieldName[], int *h5_ndims, hsize_t *h5_dims, H5T_class_t *dataclass, size_t *datasize){
+
+	// Need these variables
+	int success1, success2;
+
+	// get dataset size, dimensions, datatype, etc...
+	success1 = H5LTget_dataset_ndims(h5_file_id, fieldName, h5_ndims);
+	success2 = H5LTget_dataset_info(h5_file_id, fieldName, h5_dims, dataclass, datasize);
+	if (success1 < 0 || success2 < 0) {
+		std::cout << "Error: could not determine data sizes of HDF5 field " << fieldName << std::endl;
+	}
+}
+
+
 /*
  *	Read dataset, whatever its dimensions may be
  * 	Must pass &ndims and pointer hsize_t *dims[ndims]
@@ -20,7 +50,7 @@
  *	variable to which the return value is assigned has already been allocated
  *	Also watch for reading huge datasets when you don't have enough memory (we don't check...)
  */
-void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t *h5_dims, hid_t h5_type_id, size_t targetsize){
+void* cHDF5Functions::checkAllocReadDataset(char fieldName[], int *h5_ndims, hsize_t *h5_dims, hid_t h5_type_id, size_t targetsize){
 	
 	int success1, success2;
 	size_t	datasize;
@@ -40,10 +70,22 @@ void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t 
 	int ndims = *(h5_ndims);
 	hsize_t *dims = h5_dims;
 
+	// Diagnostic
+	if(true) {
+		std::cout << "\tField name: " << fieldName << std::endl;
+		std::cout << "\tndims = " << ndims << ", size = [";
+		for(int i=0; i<ndims; i++) {
+			std::cout << dims[i];
+			if(i < ndims-1) std::cout << ", ";
+		}
+		std::cout << "]" << std::endl;
+	}
 	
-	// Check size of actual data and requested size (crude way to check data types match)
+	// 	Check size of actual data and requested size:
+	//	Quick way to avoid a segmentation fult, and crude way to check data types match
 	if(datasize != targetsize) {
 		printf("\tSize of data elements does not match desired size\n");
+		printf("\t%s\n", fieldName);
 		printf("\ttargetsize=%li, datasize=%li\n", targetsize, datasize);
 		printf("\tContinuing anyway, feel free to return NULL if you really want to fail\n");
 		//	return NULL;
@@ -58,11 +100,11 @@ void* cHDF5Functions::allocReadDataset(char fieldName[], int *h5_ndims, hsize_t 
 	
 	// Throw an error if dataset is suspiciously large (>50GB)
 	long max_gb = 50;
-	long long gb = (1024L)^3;
+	long long gb = (1024*1024*1024);
 	long long max_mem = max_gb*gb;
 	if(nelements*targetsize > max_mem){
 		std::cout << "Error: Suspiciously large memory request:" << std::endl;
-		std::cout << nelements*targetsize << " bytes exceeds " << max_gb << "GB" << std::endl;
+		std::cout << nelements << "x" << targetsize << " bytes exceeds " << max_gb << "GB" << std::endl;
 		exit(1);
 	};
 	
