@@ -251,16 +251,16 @@ void cAgipdModuleReader::readHeaders(void)
 	std::cout << "Reading vector fields from " << filename << "\n";
 	
 	// PulseID (H5T_STD_U64LE)
-	pulseIDlist = (uint64_t*) checkAllocRead((char *)h5_pulseId_field.c_str(), nframes, H5T_STD_U64LE, sizeof(uint64_t));
+	pulseIDlist = (uint64_t*) checkNeventsAllocRead((char *)h5_pulseId_field.c_str(), nframes, H5T_STD_U64LE, sizeof(uint64_t));
 
 	// TrainID (H5T_STD_U64LE)
-	trainIDlist = (uint64_t*) checkAllocRead((char *)h5_trainId_field.c_str(), nframes, H5T_STD_U64LE, sizeof(uint64_t));
+	trainIDlist = (uint64_t*) checkNeventsAllocRead((char *)h5_trainId_field.c_str(), nframes, H5T_STD_U64LE, sizeof(uint64_t));
 
 	// CellID (H5T_STD_U64LE)
-	cellIDlist = (uint16_t*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(uint16_t));
+	cellIDlist = (uint16_t*) checkNeventsAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(uint16_t));
 
 	// Status (H5T_STD_U16LE)
-	statusIDlist = (uint16_t*) checkAllocRead((char *)h5_image_status_field.c_str(), nframes, H5T_STD_U16LE, sizeof(uint16_t));
+	statusIDlist = (uint16_t*) checkNeventsAllocRead((char *)h5_image_status_field.c_str(), nframes, H5T_STD_U16LE, sizeof(uint16_t));
 	
 	if(verbose) {
 		std::cout << "\tDone reading vector fields in " << filename << "\n";

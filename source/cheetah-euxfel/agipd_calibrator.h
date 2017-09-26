@@ -3,7 +3,6 @@
 //  agipd
 //
 //  Created by Helen Ginn on 17/09/2017.
-//  Copyright (c) 2017 Anton Barty. All rights reserved.
 //
 
 #ifndef __agipd__agipd_calibrator__

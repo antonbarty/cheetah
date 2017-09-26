@@ -26,7 +26,6 @@
 		4D0A406B1A3B51F600FAC112 /* processRateMonitor.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40661A3B51F600FAC112 /* processRateMonitor.h */; };
 		4D0A406C1A3B51F600FAC112 /* tofDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40671A3B51F600FAC112 /* tofDetector.h */; };
 		4D941EFF1F79158300E2BC82 /* libcheetah.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */; };
-		4D941F0D1F7915FE00E2BC82 /* libcheetah.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */; };
 		4D99B1981E547E8800090239 /* peakfinder8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D99B1971E547E8800090239 /* peakfinder8.cpp */; };
 		4DA51BEB189ACD4100C97F32 /* assemble2DImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D929174F9F80004A0BB4 /* assemble2DImage.cpp */; };
 		4DA51BEC189ACD4400C97F32 /* backgroundCorrection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D92A174F9F80004A0BB4 /* backgroundCorrection.cpp */; };
@@ -161,7 +160,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D941F0D1F7915FE00E2BC82 /* libcheetah.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -191,7 +189,6 @@
 				4D99B19A1E5498F100090239 /* cheetah-sacla */,
 				4D99B1991E54981B00090239 /* cheetah_psana */,
 				4D93D919174F9F80004A0BB4 /* libcheetah */,
-				4D93D91D174F9F80004A0BB4 /* include */,
 				4D941EFE1F79158300E2BC82 /* Frameworks */,
 				4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */,
 				4DA51BE5189AC39500C97F32 /* cheetah-sacla */,
@@ -205,6 +202,7 @@
 				4D93D91A174F9F80004A0BB4 /* CMakeLists.txt */,
 				4D93D91B174F9F80004A0BB4 /* examples */,
 				4D93D928174F9F80004A0BB4 /* src */,
+				4D93D91D174F9F80004A0BB4 /* include */,
 			);
 			path = libcheetah;
 			sourceTree = "<group>";
@@ -237,8 +235,7 @@
 				4D0A40671A3B51F600FAC112 /* tofDetector.h */,
 				4DB277B41C8A25AE006B900B /* cheetah_extensions_yaroslav */,
 			);
-			name = include;
-			path = libcheetah/include;
+			path = include;
 			sourceTree = "<group>";
 		};
 		4D93D928174F9F80004A0BB4 /* src */ = {
