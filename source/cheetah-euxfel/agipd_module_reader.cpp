@@ -295,7 +295,7 @@ void cAgipdModuleReader::readDarkcal(char *filename){
 	//calibDarkOffset = (float*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(float*));
 
 	calibrator = new cAgipdCalibrator(darkcalFilename, *this);
-	calibrator->open();
+	calibrator->readCalibrationData();
 }
 // cAgipdModuleReader::readDarkcal
 
