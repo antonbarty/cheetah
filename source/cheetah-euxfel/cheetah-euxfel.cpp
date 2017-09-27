@@ -133,6 +133,7 @@ int main(int argc, char* argv[]) {
 		
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
+		agipd.resetCurrentFrame();
 		while (agipd.nextFrame()) {
 			
 			if (!agipd.goodFrame()) {
@@ -140,11 +141,17 @@ int main(int argc, char* argv[]) {
 			}
 
 			
-			// Looks like cell 0 is responsible for a lot of those digital output signals in hitfinding
+			// First pulse in a train is junk
 			if(agipd.currentPulse == 0) {
+				std::cout << "Skipping pulse 0 in train" << std::endl;
 				continue;
 			}
 			
+			if(agipd.currentPulse % 4 > 0) {
+				std::cout << "Skipping frame due to stride" << std::endl;
+				continue;
+			}
+
 			
 			// Incrememnt the frame number
 			frameNumber++;
