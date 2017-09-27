@@ -113,7 +113,7 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 	h5_image_data_field = prefix + h5_image_data_suffix;
 	h5_image_status_field = prefix + h5_image_status_suffix;
 
-	if (/* DISABLES CODE */ (false))
+	if (false)
 	{
 		std::cout << h5_trainId_field << std::endl;
 		std::cout << h5_pulseId_field << std::endl;
@@ -354,13 +354,18 @@ void cAgipdModuleReader::readFrame(long frameNum){
 	
 	currentFrame = frameNum;
 
+	// Update timestamp, status bits and other stuff
+	trainID = trainIDlist[frameNum];
+	pulseID = pulseIDlist[frameNum];
+	cellID = cellIDlist[frameNum];
+	statusID = statusIDlist[frameNum];
+	
+
 	// At the moment we only read RAW data files
-	if (rawDetectorData)
-	{
+	if (rawDetectorData) {
 		readFrameRawOrCalib(frameNum, true);
 	}
-	else
-	{
+	else {
 		readFrameRawOrCalib(frameNum, false);
 	}
 }
@@ -435,15 +440,17 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 	}
 
-	//	Apply calibration constants (if known).
-	applyCalibration(frameNum);
-
-	
 	// Update timestamp, status bits and other stuff
 	trainID = trainIDlist[frameNum];
 	pulseID = pulseIDlist[frameNum];
 	cellID = cellIDlist[frameNum];
 	statusID = statusIDlist[frameNum];
+
+	
+	//	Apply calibration constants (if known).
+	applyCalibration(frameNum);
+
+	
 
 };
 
@@ -454,6 +461,10 @@ void cAgipdModuleReader::applyCalibration(long frameNum) {
 	if(calibrator == NULL)
 		return;
 
+	// Cell ID for this frame number
+	cellID = cellIDlist[frameNum];
+	
+	// In this scheme, digital and analog are interleaved - the real calibration constant is in cellID/2
 	int thisCell = cellID / 2;
 
 	// New way

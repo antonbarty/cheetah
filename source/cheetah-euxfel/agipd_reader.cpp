@@ -306,10 +306,7 @@ void cAgipdReader::open(char *baseFilename){
 		for (long train = minTrain; train <= maxTrain; train++) {
 			for (long pulse = minPulse; pulse <= maxPulse; pulse++) {
 				TrainPulsePair train2Pulse = std::make_pair(train, pulse);
-
-				TrainPulseModulePair tp2Module;
-				tp2Module = std::make_pair(train2Pulse, module_num);
-
+				TrainPulseModulePair tp2Module = std::make_pair(train2Pulse, module_num);
 				trainPulseMap[tp2Module] = -1; // start with unassigned
 			}
 		}
@@ -405,16 +402,21 @@ bool cAgipdReader::nextFramePrivate() {
         //if(currentTrain < _newFileSkip) {
         //    continue;
         //}
+		
+		// In the current scheme, odd numbered pulses are the digital gain channel
+		//if(currentPulse % 2 != 0) {
+		//	continue;
+		//}
 
 		success = readFrame(currentTrain, currentPulse);
 
 		if (lastModule >= 0) {
 			/* We had a good image in this train */
 			/* But if it isn't a multiple of stride, we don't want it */
-			if ((goodImages4ThisTrain + 1) % _stride > 0) {
-				lastModule = -1;
-				std::cout << "Skipping frame due to stride" << std::endl;
-			}
+		//	if ((goodImages4ThisTrain + 1) % _stride > 0) {
+		//		lastModule = -1;
+		//		std::cout << "Skipping frame due to stride" << std::endl;
+		//	}
 
 			goodImages4ThisTrain++;
 		}
