@@ -284,15 +284,6 @@ void cAgipdModuleReader::readDarkcal(char *filename){
 	printf("\tDarkcal file: %s\n", darkcalFilename.c_str());
 	printf("\tGaincal file: %s\n", gaincalFilename.c_str());
 
-	// checkAllocRead the dark setting field for this module into an array....
-	//	[max-exfl014:barty]user/kuhnm/dark> h5ls -r dark_AGIPD00_agipd_2017-09-16.h5
-	//	/                        Group
-	//	/offset                  Dataset {3, 30, 128, 512}
-	//	/stddev                  Dataset {3, 30, 128, 512}
-	//	/threshold               Dataset {2, 30, 128, 512}
-	
-	// Check sanity of this line - it has not been edited for content!
-	//calibDarkOffset = (float*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(float*));
 
 	calibrator = new cAgipdCalibrator(darkcalFilename, *this);
 	calibrator->readCalibrationData();
@@ -411,8 +402,8 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	free(data); data = NULL;
 	free(digitalGain); digitalGain = NULL;
 
-	if (rawDetectorData)
-	{
+	if (rawDetectorData) {
+		// Read data from hyperslab in RAW data file (which is unit16_t, so convert it to float)
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
@@ -427,9 +418,8 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 
 		free(tempdata);
 	}
-	else
-	{
-		// Read data from hyperslab
+	else {
+		// Read data directly from hyperslab in corrected data file (which is already a float)
 		data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
 		if (noData) {
@@ -437,40 +427,49 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 		}
 	}
 	
-	// Digital gain is in the second dimension (at least in the current layout)
+	// Digital gain is in the second dimension (at least that's the way it was meant to be)
+	// For the first few experiments it's actually in the next analog memory location
 	if(rawDetectorData) {
-		slab_start[1] = 1;
-		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
-}
+		slab_start[1] = 1;		// This is what it's meant to be (gain in the 2nd array)
+		//slab_start[0] += 1;			// This is what it actually is (gain in the next frame)
+		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+	}
 
+	//	Apply calibration constants (if known).
+	applyCalibration(frameNum);
+
+	
 	// Update timestamp, status bits and other stuff
 	trainID = trainIDlist[frameNum];
 	pulseID = pulseIDlist[frameNum];
 	cellID = cellIDlist[frameNum];
 	statusID = statusIDlist[frameNum];
 
-	//	Apply calibration constants (if known).
-	applyCalibration(frameNum);
 };
 
-// Apply calibration constants (if known) 
-void cAgipdModuleReader::applyCalibration(long frameNum)
-{
+// Apply calibration constants (if known)
+// A wrapper for function moved to agipd_calibrator (maybe remove later)
+// void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData){...}
+void cAgipdModuleReader::applyCalibration(long frameNum) {
 	if(calibrator == NULL)
 		return;
 
 	int thisCell = cellID / 2;
-	int thisGain = 0;
 
-	int16_t *offsets = calibrator->darkOffsetForGainAndCell(thisGain, thisCell);
+	// New way
+	calibrator->applyCalibration(thisCell, data, digitalGain);
 
-	if (offsets == NULL)
-	{
-		return;
-	}
+	
+	// Old way
+	//int thisGain = 0;
 
-	for (int i = 0; i < nn; i++)
-	{
+	//int16_t *offsets = calibrator->darkOffsetForGainAndCell(thisGain, thisCell);
+
+	//if (offsets == NULL) {
+	//	return;
+	//}
+
+	//for (long i = 0; i < nn; i++) {
 		/*
 		if (i < 10)
 		{
@@ -478,8 +477,8 @@ void cAgipdModuleReader::applyCalibration(long frameNum)
 		}
 		 */
 
-		data[i] -= offsets[i];
-	}
+	//	data[i] -= offsets[i];
+	//}
 }
 //  cAgipdModuleReader::applyCalibration
 

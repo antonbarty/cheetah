@@ -127,6 +127,7 @@ private:
 
 	/* Stores last module added to image, or -1 if no modules available */
 	int                 lastModule;
+	
 	/* Number of non-empty images in the current train */
 	int                 goodImages4ThisTrain;
 

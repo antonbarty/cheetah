@@ -85,7 +85,7 @@ void cAgipdReader::setScheme(char *scheme) {
 
 
 /*
- *	Create a list of filenames for all 16 AGIPD modules based on the filename for module 00
+ *	Create a list of filenames for all 16 AGIPD modules based on the filename for one module
  *	Small function but isolated here so it's easy to swap conventions if needed
  */
 void cAgipdReader::generateModuleFilenames(char *module0filename){
@@ -252,7 +252,7 @@ void cAgipdReader::open(char *baseFilename){
 	}
 
 	std::cout << "\tChecking for mismatched timestamps" << std::endl;
-	std::vector<long> allTrainIDs;
+	//std::vector<long> allTrainIDs;
 
 	for(long i=0; i<nAGIPDmodules; i++)
 	{
@@ -269,14 +269,14 @@ void cAgipdReader::open(char *baseFilename){
 		minCell = INT_MAX;
 		maxCell = INT_MIN;
 
-		long cellID = module[i].cellID;
+		//long cellID = module[i].cellID;
 
 		//int start = firstModule ? 200 : 0;
         int start = 0;
 
 		std::cout << "Starting from " << start << std::endl;
 
-		for(long j=start; j<module[_referenceModule].nframes; j++)
+		for(long j=start; j<module[i].nframes; j++)
 		{
 			long trainID = module[i].trainIDlist[j];
 			long pulseID = module[i].pulseIDlist[j];
@@ -302,38 +302,34 @@ void cAgipdReader::open(char *baseFilename){
 	std::cout << "Current pulse set to minimum, " << minPulse << std::endl;
 	std::cout << "Cells of module readout extend from IDs " << minCell << " to " << maxCell << std::endl;
 
-	for(long i=0; i<nAGIPDmodules; i++)
-	{
-		for (long k = minTrain; k <= maxTrain; k++)
-		{
-			for (long j = minPulse; j <= maxPulse; j++)
-			{
-				TrainPulsePair train2Pulse = std::make_pair(k, j);
+	for(long module_num=0; module_num<nAGIPDmodules; module_num++) {
+		for (long train = minTrain; train <= maxTrain; train++) {
+			for (long pulse = minPulse; pulse <= maxPulse; pulse++) {
+				TrainPulsePair train2Pulse = std::make_pair(train, pulse);
 
 				TrainPulseModulePair tp2Module;
-				tp2Module = std::make_pair(train2Pulse, i);
+				tp2Module = std::make_pair(train2Pulse, module_num);
 
 				trainPulseMap[tp2Module] = -1; // start with unassigned
 			}
 		}
 	}
 
-	for(long i=0; i<nAGIPDmodules; i++)
-	{
-		if (module[i].noData) continue;
+	for(long module_num=0; module_num<nAGIPDmodules; module_num++) {
+		if (module[module_num].noData)
+			continue;
 
-		for(long j=0; j < module[i].nframes; j++)
-		{
-			long trainID = module[i].trainIDlist[j];
-			long pulseID = module[i].pulseIDlist[j];
+		for(long frame=0; frame < module[module_num].nframes; frame++) {
+			long trainID = module[module_num].trainIDlist[frame];
+			long pulseID = module[module_num].pulseIDlist[frame];
 
 			TrainPulsePair train2Pulse = std::make_pair(trainID, pulseID);
-			TrainPulseModulePair tp2Module = std::make_pair(train2Pulse, i);
-			trainPulseMap[tp2Module] = j;
+			TrainPulseModulePair tp2Module = std::make_pair(train2Pulse, module_num);
+			trainPulseMap[tp2Module] = frame;
 		}
-
 	}
 
+	
 	// Allocate memory for data and masks
 	data = (float*) malloc(nn*sizeof(float));
 	mask = (uint16_t*) malloc(nn*sizeof(uint16_t));
@@ -417,6 +413,7 @@ bool cAgipdReader::nextFramePrivate() {
 			/* But if it isn't a multiple of stride, we don't want it */
 			if ((goodImages4ThisTrain + 1) % _stride > 0) {
 				lastModule = -1;
+				std::cout << "Skipping frame due to stride" << std::endl;
 			}
 
 			goodImages4ThisTrain++;

@@ -5,6 +5,15 @@
 //  Created by Helen Ginn on 17/09/2017.
 //
 
+// checkAllocRead the dark setting field for this module into an array....
+//	[max-exfl014:barty]user/kuhnm/dark> h5ls -r dark_AGIPD00_agipd_2017-09-16.h5
+//	/                        Group
+//	/offset                  Dataset {3, 30, 128, 512}
+//	/stddev                  Dataset {3, 30, 128, 512}
+//	/threshold               Dataset {2, 30, 128, 512}
+
+
+
 #include "agipd_calibrator.h"
 #include <iostream>
 
@@ -42,6 +51,51 @@ cAgipdCalibrator::~cAgipdCalibrator()
 	_darkOffsetGainCellPtr = NULL;
 	_gainThresholdGainCellPtr = NULL;
 }
+
+
+/*
+ *	Apply AGIPD calibration
+ *	Will overwrite contents of aduData with calibrated data
+ *
+ */
+void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData) {
+
+	// Stupidity checks
+	if (cellID >= nCells || cellID < 0)
+		return;
+	if(_darkOffsetData==NULL)
+		return;
+	if(aduData==NULL || gainData==NULL)
+		return;
+	
+	
+	// Extract pointers to dark offsets for this cell
+	int16_t 	*cellDarkOffset[nGains];
+	for(int i=0; i<nGains; i++) {
+		cellDarkOffset[i] = darkOffsetForGainAndCell(i, cellID);
+	}
+	
+	// Extract pointers to gain thresholds for this cell
+	int16_t 	*cellGainThreshold[nGains-1];
+	for(int i=0; i<nGains-1; i++) {
+		cellGainThreshold[i] = gainThresholdForGainAndCell(i, cellID);
+	}
+
+	// Loop through pixels, determine gain and apply offsets
+	// For now do gain=0 (test if we get the same results as before)
+	int	pixGainLevel = 0;
+	//int16_t *offset = darkOffsetForGainAndCell(pixGainLevel, cellID);
+	//if(offset == NULL)
+	//	return;
+	
+	for (long i=0; i<_myModule->nn; i++) {
+		pixGainLevel = 0;
+		//aduData[i] -= offset[i];
+		aduData[i] -= cellDarkOffset[pixGainLevel][i];
+	}
+	
+}
+
 
 
 /*
