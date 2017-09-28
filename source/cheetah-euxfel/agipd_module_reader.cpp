@@ -467,34 +467,13 @@ void cAgipdModuleReader::applyCalibration(long frameNum) {
 		return;
 
 	// Cell ID for this frame number
-	cellID = cellIDlist[frameNum];
-	
 	// In this scheme, digital and analog are interleaved - the real calibration constant is in cellID/2
+	cellID = cellIDlist[frameNum];
 	int thisCell = cellID / 2;
 
 	// New way
 	calibrator->applyCalibration(thisCell, data, digitalGain);
 
-	
-	// Old way
-	//int thisGain = 0;
-
-	//int16_t *offsets = calibrator->darkOffsetForGainAndCell(thisGain, thisCell);
-
-	//if (offsets == NULL) {
-	//	return;
-	//}
-
-	//for (long i = 0; i < nn; i++) {
-		/*
-		if (i < 10)
-		{
-			std::cout << "Module pixel " << i << " subtracting " << offsets[i] << " from " << data[i] << std::endl;
-		}
-		 */
-
-	//	data[i] -= offsets[i];
-	//}
 }
 //  cAgipdModuleReader::applyCalibration
 
