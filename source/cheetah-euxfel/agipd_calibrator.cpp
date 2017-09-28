@@ -85,6 +85,16 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	//	int16_t *offset = darkOffsetForGainAndCell(pixGainLevel, cellID);
 	//	if(offset == NULL)
 	//		return;
+	
+
+	// Simple switch for using only the gain0 offset, bypassing multi-gain calibration
+	if(false) {
+		for (long p=0; p<_myModule->nn; p++) {
+			aduData[p] -= cellDarkOffset[0][p];
+		}
+		return;
+	}
+	
 
 	// Loop through pixels, determine gain and apply offsets
 	// 	calibrated_raw_data[g1] *= 45
