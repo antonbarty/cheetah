@@ -73,6 +73,10 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 	rawDetectorData = true;
 	noData = false;
 	verbose = 0;
+	
+	gainDataOffset[0] = 0;
+	gainDataOffset[1] = 1;
+
 
 	calibGainFactor = NULL;
 
@@ -434,9 +438,10 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	
 	// Digital gain is in the second dimension (at least that's the way it was meant to be)
 	// For the first few experiments it's actually in the next analog memory location
+	// Configured via the information in gainDataOffset;
 	if(rawDetectorData) {
-		slab_start[1] = 1;		// This is what it's meant to be (gain in the 2nd array)
-		//slab_start[0] += 1;			// This is what it actually is (gain in the next frame)
+		slab_start[0] += gainDataOffset[0];
+		slab_start[1] += gainDataOffset[1];
 		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 	}
 

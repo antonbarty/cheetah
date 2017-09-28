@@ -72,6 +72,9 @@ public:
 	void readImageStack(void);
 	void readFrame(long);
 
+	void setGainDataOffset(int d0, int d1) {gainDataOffset[0] = d0; gainDataOffset[1] = d1; }
+
+	
 // Pubic variables
 public:
 	long		nframes;
@@ -95,6 +98,8 @@ public:
     uint16_t	*statusIDlist;
 
 	bool		rawDetectorData;
+	int			gainDataOffset[2];	// Gain data hyperslab offset relative to image data frame
+
 	
 // Private variables
 private:

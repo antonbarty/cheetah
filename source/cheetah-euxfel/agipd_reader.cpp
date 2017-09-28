@@ -31,6 +31,10 @@ cAgipdReader::cAgipdReader(void){
 	_skip = 0;
     _stride = 1;
     _newFileSkip = 0;
+	
+	_gainDataOffset[0] = 0;
+	_gainDataOffset[1] = 1;
+
 
 	gaincalFile = "No_file_specified";
 	darkcalFile = "No_file_specified";
@@ -67,6 +71,7 @@ void cAgipdReader::setScheme(char *scheme) {
 	if(_scheme == "XFEL") {
 		setSkip(1);
 		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
 		//setNewFileSkip(60);
 	}
 
@@ -74,6 +79,7 @@ void cAgipdReader::setScheme(char *scheme) {
 	if(_scheme == "XFEL2012") {
         setSkip(1);
 		setPulseIDmodulo(8);
+		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
         //setNewFileSkip(60);
     }
 
@@ -81,6 +87,7 @@ void cAgipdReader::setScheme(char *scheme) {
     if(_scheme == "XFEL2042") {
         setSkip(1);
 		setPulseIDmodulo(8);
+		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
         //setNewFileSkip(60);
     }
 
@@ -194,6 +201,7 @@ void cAgipdReader::open(char *baseFilename){
 		module[i].readHeaders();
 		module[i].readDarkcal((char *)darkcalFilename[i].c_str());
 		//module[i].readGaincal(gaincalFilename[i].c_str());
+		module[i].setGainDataOffset(_gainDataOffset[0],_gainDataOffset[1]);
 	}
 
 	// Det up size and layout of the assembled data stack
