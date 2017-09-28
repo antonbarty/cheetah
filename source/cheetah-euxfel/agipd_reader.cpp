@@ -53,6 +53,12 @@ cAgipdReader::~cAgipdReader()
 /*
  *  Data is laid out differently for different experiments
  *  Here we set a few defaults, which can later be overridden if desired
+ *
+ * 	CellID reflects which AGIPD memory cell is used --> used for calibration
+ *	PulseID is taken from the AGIPD firmware --> used for determining which are good data frames
+ *	AGIPD running at 4MHz, XFEL at 1MHz means 4 AGIPD frames per XFEL pulse
+ *	Analogue and digital channels saved sequentiually [ADADAD] means 2x count array elements between images
+ *	Thus one image per 8 AGIPD PulseID counters; works for XFEL2012, XFEL2042 and XFEL2017
  */
 void cAgipdReader::setScheme(char *scheme) {
     _scheme = scheme;
@@ -60,22 +66,22 @@ void cAgipdReader::setScheme(char *scheme) {
 	// Default (current) scheme
 	if(_scheme == "XFEL") {
 		setSkip(1);
-		setStride(2);
-		setNewFileSkip(60);
+		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		//setNewFileSkip(60);
 	}
 
 	// Barty, September 2017
 	if(_scheme == "XFEL2012") {
         setSkip(1);
-        setStride(2);
-        setNewFileSkip(60);
+		setPulseIDmodulo(8);
+        //setNewFileSkip(60);
     }
 
     // Ros, September 2017
     if(_scheme == "XFEL2042") {
         setSkip(1);
-        setStride(1);
-        setNewFileSkip(60);
+		setPulseIDmodulo(8);
+        //setNewFileSkip(60);
     }
 
     // Defaults will be used if none of the above are found
@@ -392,21 +398,24 @@ bool cAgipdReader::nextFramePrivate() {
 			currentTrain++;
 			goodImages4ThisTrain = -1;
 		}
-        
-        // Skip the first _skip pulses in a train (corrupted)
-        //if(currentPulse < _skip) {
-        //    continue;
-        //}
-        
+		
+		// Skip the first _skip pulses in a train (corrupted)
+		if(currentPulse < _skip) {
+			std::cout << "Skipping pulse 0 in train" << std::endl;
+		    continue;
+		}
+
+		//	PulseID is taken from the AGIPD firmware --> used for determining which are good data frames
+		//  Good frames occur when pulseID % _pulseIDmodulo == 0
+		if(currentPulse % _pulseIDmodulo > 0)
+			continue;
+		
+		
         // Skip first _newFileSkip trains in a file (corrupted)
         //if(currentTrain < _newFileSkip) {
         //    continue;
         //}
 		
-		// In the current scheme, odd numbered pulses are the digital gain channel
-		//if(currentPulse % 2 != 0) {
-		//	continue;
-		//}
 
 		success = readFrame(currentTrain, currentPulse);
 
@@ -497,7 +506,7 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 
 	if (lastModule >= 0)
 	{
-		std::cout << "Read train " << trainID << ", pulse " << pulseID << " with "
+		std::cout << "Read train " << trainID << ", pulseID " << pulseID << " with "
 		<< moduleCount << " modules." << std::endl;
 	}
 	

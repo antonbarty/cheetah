@@ -55,8 +55,8 @@ cAgipdCalibrator::~cAgipdCalibrator()
 
 /*
  *	Apply AGIPD calibration
- *	Will overwrite contents of aduData with calibrated data
- *
+ *	Overwrites contents of aduData with calibrated value
+ *	Overwrites contents of gainData with determined gain stage
  */
 void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData) {
 
@@ -69,13 +69,13 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		return;
 	
 	
-	// Extract pointers to dark offsets for this cell
+	// Extract pointer to dark offsets for this cell
 	int16_t 	*cellDarkOffset[nGains];
 	for(int i=0; i<nGains; i++) {
 		cellDarkOffset[i] = darkOffsetForGainAndCell(i, cellID);
 	}
 	
-	// Extract pointers to gain thresholds for this cell
+	// Extract pointer to gain thresholds for this cell
 	int16_t 	*cellGainThreshold[nGains-1];
 	for(int i=0; i<nGains-1; i++) {
 		cellGainThreshold[i] = gainThresholdForGainAndCell(i, cellID);
