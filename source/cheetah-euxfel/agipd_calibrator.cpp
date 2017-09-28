@@ -92,6 +92,7 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
 		}
+		// Bypass the gain calibration stage
 		return;
 	}
 	
@@ -127,6 +128,8 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	}
 	pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
 
+	// 	This is verbose but useful
+	//	Perhaps pass back to agipd_reader and print once per frame rather than once per module
 	if(true) {
 		std::cout << "nPixels in gain mode (0,1,2) = (";
 		std::cout << pixelsInGainLevel[0] << ", ";
