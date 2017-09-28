@@ -81,19 +81,48 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		cellGainThreshold[i] = gainThresholdForGainAndCell(i, cellID);
 	}
 
-	// Loop through pixels, determine gain and apply offsets
 	// For now do gain=0 (test if we get the same results as before)
-	int	pixGainLevel = 0;
-	//int16_t *offset = darkOffsetForGainAndCell(pixGainLevel, cellID);
-	//if(offset == NULL)
-	//	return;
+	//	int16_t *offset = darkOffsetForGainAndCell(pixGainLevel, cellID);
+	//	if(offset == NULL)
+	//		return;
+
+	// Loop through pixels, determine gain and apply offsets
+	// 	calibrated_raw_data[g1] *= 45
+	//	calibrated_raw_data[g2] *= 454.2
+	int		pixGain = 0;
+	long	pixelsInGainLevel[3] = {0,0,0};
+	float	gainFactor[] = {1, 45, 454.2};
 	
-	for (long i=0; i<_myModule->nn; i++) {
-		pixGainLevel = 0;
-		//aduData[i] -= offset[i];
-		aduData[i] -= cellDarkOffset[pixGainLevel][i];
+	for (long p=0; p<_myModule->nn; p++) {
+		
+		// Determine which gain stage by thresholding
+		pixGain = 0;
+		if(gainData[p] > cellGainThreshold[0][p]) {
+			pixGain = 1;
+			pixelsInGainLevel[1] += 1;
+		}
+		if(gainData[p] > cellGainThreshold[1][p]) {
+			pixGain = 2;
+			pixelsInGainLevel[2] += 1;
+		}
+		
+		// Subtract the appropriate offset
+		aduData[p] -= cellDarkOffset[pixGain][p];
+
+		// Multiplication factor
+		aduData[p] *= gainFactor[pixGain];
+		
+		// Remember the gain level setting
+		gainData[p] = pixGain;
 	}
-	
+	pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
+
+	if(true) {
+		std::cout << "nPixels in gain mode (0,1,2) = (";
+		std::cout << pixelsInGainLevel[0] << ", ";
+		std::cout << pixelsInGainLevel[1] << ", ";
+		std::cout << pixelsInGainLevel[2] << ")" << std::endl;
+	}
 }
 
 
