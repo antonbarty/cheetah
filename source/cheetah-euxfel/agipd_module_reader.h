@@ -73,6 +73,7 @@ public:
 	void readFrame(long);
 
 	void setGainDataOffset(int d0, int d1) {gainDataOffset[0] = d0; gainDataOffset[1] = d1; }
+	void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
 
 	
 // Pubic variables
@@ -100,7 +101,8 @@ public:
 	bool		rawDetectorData;
 	int			gainDataOffset[2];	// Gain data hyperslab offset relative to image data frame
 
-	
+	bool		_doNotApplyGainSwitch;		// Bypass gain switching
+
 // Private variables
 private:
 	std::string	filename;
@@ -118,6 +120,7 @@ private:
 	cAgipdCalibrator *calibrator;
 	float		*calibGainFactor;
 	
+
 
 // Private functions
 private:

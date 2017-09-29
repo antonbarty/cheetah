@@ -38,6 +38,7 @@ struct tCheetahEuXFELparams {
     int frameStride;
     int frameSkip;
 	int verbose;
+	bool nogainswitch;
 } CheetahEuXFELparams;
 void parse_config(int, char *[], tCheetahEuXFELparams*);
 void waitForCheetahWorkers(cGlobal*);
@@ -103,7 +104,8 @@ int main(int argc, char* argv[]) {
         agipd.setSkip(CheetahEuXFELparams.frameSkip);
     if(CheetahEuXFELparams.frameStride != -1)
         agipd.setStride(CheetahEuXFELparams.frameStride);
-    
+	if(CheetahEuXFELparams.nogainswitch)
+		agipd.setDoNotApplyGainSwitch(CheetahEuXFELparams.nogainswitch);
 
 	//  Files for calibration stuff
 	//	Will pick up darkcal and gaincal filenames from cheetah.ini: maintains the same 'feel'as before
@@ -302,6 +304,7 @@ void print_help(void){
     std::cout << "\t--experiment=<name>  String specifying the experiment name (used for lableling and setting the file layout)\n";
     std::cout << "\t--stride=<n>         Process only every <n>th frame\n";
     std::cout << "\t--skip=<n>           Skip the first <n> frame of each .h5 file\n";
+	std::cout << "\t--nogainswitch       Disable gain switching calibration (assume all high gain)\n";
     std::cout << std::endl;
     std::cout << "End of help\n";
 }
@@ -317,6 +320,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
     global->exptName = "XFEL";
     global->frameStride = -1;
     global->frameSkip = -1;
+	global->nogainswitch = false;
 
     
 	// Add getopt-long options
@@ -327,6 +331,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
         { "skip", required_argument, NULL, 0 },
         { "experiment", required_argument, NULL, 'e' },
 		{ "verbose", no_argument, NULL, 'v' },
+		{ "nogainswitch", no_argument, NULL, 'g' },
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, no_argument, NULL, 0 }
 	};
@@ -347,6 +352,10 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 				global->exptName = optarg;
 				std::cout << "Experiment name set to " << global->exptName << std::endl;
 				break;
+			case 'g':
+				global->nogainswitch = true;
+				std::cout << "No gain switching " << global->nogainswitch << std::endl;
+				break;
 			case 'h':   /* fall-through is intentional */
 			case '?':
                 print_help();
@@ -362,6 +371,10 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
                     global->frameSkip = atoi(optarg);
                     std::cout << "Skip set to " << global->frameSkip << std::endl;
                 }
+				if( strcmp( "nogainswitch", longOpts[longIndex].name ) == 0 ) {
+					global->nogainswitch = true;
+					std::cout << "No gain switching " << global->nogainswitch << std::endl;
+				}
 				break;
 			default:
 				/* You won't actually get here. */

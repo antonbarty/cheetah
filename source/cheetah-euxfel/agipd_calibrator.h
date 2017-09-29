@@ -31,12 +31,17 @@ public:
 
 	int16_t *darkOffsetForGainAndCell(int gain, int cell);
 	int16_t *gainThresholdForGainAndCell(int gain, int cell);
+	
+	//void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
+
 
 private:
 	std::string _filename;
 	const static int nGains;
 	static int nCells;
 
+	//bool		_doNotApplyGainSwitch;		// Bypass gain switching
+	
 	cAgipdModuleReader *_myModule;
 	int16_t *_darkOffsetData;
 	int16_t *_gainThresholdData;

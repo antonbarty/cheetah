@@ -31,6 +31,7 @@ cAgipdReader::cAgipdReader(void){
 	_skip = 0;
     _stride = 1;
     _newFileSkip = 0;
+	_doNotApplyGainSwitch = false;
 	
 	_gainDataOffset[0] = 0;
 	_gainDataOffset[1] = 1;
@@ -202,6 +203,7 @@ void cAgipdReader::open(char *baseFilename){
 		module[i].readDarkcal((char *)darkcalFilename[i].c_str());
 		//module[i].readGaincal(gaincalFilename[i].c_str());
 		module[i].setGainDataOffset(_gainDataOffset[0],_gainDataOffset[1]);
+		module[i].setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
 	}
 
 	// Det up size and layout of the assembled data stack

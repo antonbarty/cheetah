@@ -50,7 +50,9 @@ public:
 	void setPulseIDmodulo(int mod) { _pulseIDmodulo = mod; if (_pulseIDmodulo <= 0) _pulseIDmodulo = 1; }
     void setNewFileSkip(int skip) { _newFileSkip = skip; if (_newFileSkip < 0) _newFileSkip = 0; }
 	void setGainDataOffset(int d0, int d1) {_gainDataOffset[0] = d0; _gainDataOffset[1] = d1; }
+	void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
 
+	
 
     
 public:
@@ -121,6 +123,8 @@ private:
     int                 _newFileSkip;       // Number of useless frames at the start of each file
     int                 _referenceModule;   // The module number passed on the command line (evidently it exists)
 	int					_gainDataOffset[2];	// Gain data hyperslab offset relative to image data frame
+	bool				_doNotApplyGainSwitch;		// Bypass gain switching
+
 
 	/* Housekeeping for trains and pulses */
 	long                minTrain;
