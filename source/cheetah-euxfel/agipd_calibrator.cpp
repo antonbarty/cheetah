@@ -65,21 +65,24 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	// Stupidity checks
 	if (cellID >= nCells || cellID < 0)
 		return;
-	if(_darkOffsetData==NULL)
+
+	if (_darkOffsetData == NULL)
 		return;
-	if(aduData==NULL || gainData==NULL)
+
+	if (aduData == NULL || gainData == NULL)
 		return;
-	
-	
+
 	// Extract pointer to dark offsets for this cell
 	int16_t 	*cellDarkOffset[nGains];
-	for(int i=0; i<nGains; i++) {
+	for (int i = 0; i < nGains; i++)
+	{
 		cellDarkOffset[i] = darkOffsetForGainAndCell(i, cellID);
 	}
 	
 	// Extract pointer to gain thresholds for this cell
 	int16_t 	*cellGainThreshold[nGains-1];
-	for(int i=0; i<nGains-1; i++) {
+	for(int i=0; i < nGains - 1; i++)
+	{
 		cellGainThreshold[i] = gainThresholdForGainAndCell(i, cellID);
 	}
 
@@ -94,6 +97,7 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
 		}
+
 		// Bypass the gain calibration stage
 		return;
 	}
@@ -110,15 +114,27 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		
 		// Determine which gain stage by thresholding
 		pixGain = 0;
-		if(gainData[p] > cellGainThreshold[0][p]) {
+
+		if(gainData[p] > cellGainThreshold[0][p])
+		{
 			pixGain = 1;
 			pixelsInGainLevel[1] += 1;
 		}
-		if(gainData[p] > cellGainThreshold[1][p]) {
+		if(gainData[p] > cellGainThreshold[1][p])
+		{
 			pixGain = 2;
 			pixelsInGainLevel[2] += 1;
 		}
-		
+
+		// For scientific discovery purposes...
+		if (true)
+		{
+			if (p == (int)(_myModule->nn / 2))
+			{
+				std::cout << "GREPPY:\t" << gainData[p] << "\t" << aduData[p] << std::endl;
+			}
+		}
+
 		// Subtract the appropriate offset
 		aduData[p] -= cellDarkOffset[pixGain][p];
 
@@ -127,7 +143,9 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		
 		// Remember the gain level setting
 		gainData[p] = pixGain;
+
 	}
+
 	pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
 
 	// 	This is verbose but useful
