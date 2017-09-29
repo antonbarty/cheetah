@@ -30,6 +30,7 @@ cAgipdCalibrator::cAgipdCalibrator()
 	_myModule = NULL;
 	_darkOffsetGainCellPtr = NULL;
 	_gainThresholdGainCellPtr = NULL;
+	//_doNotApplyGainSwitch = false;
 }
 
 // Constructor with arguments
@@ -41,6 +42,7 @@ cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &rea
 	_myModule = &reader; // pointer should not jump
 	_darkOffsetGainCellPtr = NULL;
 	_gainThresholdGainCellPtr = NULL;
+	//_doNotApplyGainSwitch = false;
 }
 
 // Destructor
@@ -88,7 +90,7 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	
 
 	// Simple switch for using only the gain0 offset, bypassing multi-gain calibration
-	if(false) {
+	if(_myModule->_doNotApplyGainSwitch) {
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
 		}

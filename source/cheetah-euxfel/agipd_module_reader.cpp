@@ -77,6 +77,7 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 	gainDataOffset[0] = 0;
 	gainDataOffset[1] = 1;
 
+	_doNotApplyGainSwitch = false;
 
 	calibGainFactor = NULL;
 
@@ -290,6 +291,7 @@ void cAgipdModuleReader::readDarkcal(char *filename){
 
 
 	calibrator = new cAgipdCalibrator(darkcalFilename, *this);
+	//calibrator->setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
 	calibrator->readCalibrationData();
 }
 // cAgipdModuleReader::readDarkcal
