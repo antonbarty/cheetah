@@ -136,7 +136,9 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		}
 
 		// Subtract the appropriate offset
-		aduData[p] -= cellDarkOffset[pixGain][p];
+		// No - subtract an inappropriate offset to see what happens
+		aduData[p] -= cellDarkOffset[pixGain][p];		//<-- Correct way
+		//aduData[p] -= cellDarkOffset[0][p];		// <-- For testing
 
 		// Multiplication factor
 		aduData[p] *= gainFactor[pixGain];
