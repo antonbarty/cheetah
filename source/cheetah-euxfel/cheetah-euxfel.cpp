@@ -11,6 +11,7 @@
 #include <unistd.h>
 #include <iostream>
 #include <string.h>
+#include <cxxabi.h>
 #include "agipd_reader.h"
 #include "cheetah.h"
 
@@ -18,15 +19,27 @@
 #include <signal.h>
 
 void handler(int sig) {
-	void *array[10];
+	void *array[100];
 	size_t size;
 
 	// get void*'s for all entries on the stack
-	size = backtrace(array, 10);
+	size = backtrace(array, 100);
 
 	// print out all the frames to stderr
-	fprintf(stderr, "Error: signal %d:\n", sig);
+	fprintf(stderr, "Error: signal %d: %s\n", sig, strsignal(sig));
 	backtrace_symbols_fd(array, (int)size, STDERR_FILENO);
+    
+    // Try to de-mangle the strings
+    char **strings;
+    strings = backtrace_symbols(array, size);
+    if(strings != NULL) {
+        fprintf(stderr, "More readable version:\n", sig, strsignal(sig));
+        fprintf(stderr, "Error: signal %d: %s\n", sig, strsignal(sig));
+        for (long j = 0; j < size; j++) {
+            printf("%s\n", strings[j]);
+        }
+    }
+    
 	exit(1);
 }
 

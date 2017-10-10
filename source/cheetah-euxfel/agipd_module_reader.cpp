@@ -62,6 +62,16 @@ static char h5_cellId_suffix[] = "cellId";
 static char h5_image_data_suffix[] = "data";
 static char h5_image_status_suffix[] = "status";
 
+// These two in processed data only
+static char h5_image_gain_suffix[] = "gain";
+static char h5_image_mask_suffix[] = "mask";
+
+
+static char h5_image_gain_field[] = "gain";
+static char h5_image_mask_field[] = "mask";
+
+
+
 cAgipdModuleReader::cAgipdModuleReader(void){
 	h5_file_id = 0;
 	pulseIDlist = NULL;
@@ -117,6 +127,8 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 	h5_cellId_field = prefix + h5_cellId_suffix;
 	h5_image_data_field = prefix + h5_image_data_suffix;
 	h5_image_status_field = prefix + h5_image_status_suffix;
+    h5_image_gain_field = prefix + h5_image_gain_suffix;
+    h5_image_mask_field = prefix + h5_image_mask_suffix;
 
 	if (false)
 	{
@@ -125,6 +137,8 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 		std::cout << h5_cellId_field << std::endl;
 		std::cout << h5_image_data_field << std::endl;
 		std::cout << h5_image_status_field << std::endl;
+        std::cout << h5_image_gain_field << std::endl;
+        std::cout << h5_image_mask_field << std::endl;
 	}
 
 	std::string baseName = getBaseFilename(cAgipdModuleReader::filename);
@@ -413,8 +427,8 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	free(data); data = NULL;
 	free(digitalGain); digitalGain = NULL;
 
+    // Read data from hyperslab in RAW data file (which is unit16_t, so convert it to float)
 	if (rawDetectorData) {
-		// Read data from hyperslab in RAW data file (which is unit16_t, so convert it to float)
 		uint16_t *tempdata = NULL;
 		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
@@ -439,13 +453,15 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	}
 	
 	// Digital gain is in the second dimension (at least that's the way it was meant to be)
-	// For the first few experiments it's actually in the next analog memory location
-	// Configured via the information in gainDataOffset;
 	if(rawDetectorData) {
+        // For the first few experiments digital gain is actually in the next analog memory location: location configured via gainDataOffset
 		slab_start[0] += gainDataOffset[0];
 		slab_start[1] += gainDataOffset[1];
 		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 	}
+    else {
+        digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+    }
 
 	// Update timestamp, status bits and other stuff
 	trainID = trainIDlist[frameNum];
@@ -465,6 +481,12 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 // A wrapper for function moved to agipd_calibrator (maybe remove later)
 // void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData){...}
 void cAgipdModuleReader::applyCalibration(long frameNum) {
+    
+    // Apply calibrations to raw data, not pre-calibrated data
+    if(rawDetectorData == false)
+        return;
+    
+    // No calibrator = no calibration
 	if(calibrator == NULL)
 		return;
 

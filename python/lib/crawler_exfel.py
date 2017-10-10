@@ -14,12 +14,13 @@ import lib.cfel_filetools as cfel_file
 def scan_data(data_dir):
     #print("Crawler data: ", data_dir)
 
-    pattern = data_dir + 'r*'
+    pattern = data_dir + '/r*'
     debug = False
 
     # Create sorted file list (glob seems to return files in random order)
     rundirs = glob.glob(pattern)
     if debug:
+        print(pattern)
         print(rundirs)
 
     # Strip the preceeding stuff
