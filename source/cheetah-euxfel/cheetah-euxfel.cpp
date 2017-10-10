@@ -19,25 +19,30 @@
 #include <signal.h>
 
 void handler(int sig) {
-	void *array[100];
-	size_t size;
+	void *buffer[100];
+	int size;
 
 	// get void*'s for all entries on the stack
-	size = backtrace(array, 100);
+	size = backtrace(buffer, 100);
 
 	// print out all the frames to stderr
 	fprintf(stderr, "Error: signal %d: %s\n", sig, strsignal(sig));
-	backtrace_symbols_fd(array, (int)size, STDERR_FILENO);
+	backtrace_symbols_fd(buffer, size, STDERR_FILENO);
     
     // Try to de-mangle the strings
-    char **strings;
-    strings = backtrace_symbols(array, size);
-    if(strings != NULL) {
-        fprintf(stderr, "More readable version:\n", sig, strsignal(sig));
+	int status = -1;
+    char **string;
+    string = backtrace_symbols(buffer, size);
+    if(string != NULL) {
+        fprintf(stderr, "-----------------More readable version-----------------\n");
         fprintf(stderr, "Error: signal %d: %s\n", sig, strsignal(sig));
         for (long j = 0; j < size; j++) {
-            printf("%s\n", strings[j]);
+            //printf("%s\n", strings[j]);
+			char *demangledName = abi::__cxa_demangle(string[j], NULL, NULL, &status );
+			std::cout << demangledName << std::endl;
+			free(demangledName);
         }
+		fprintf(stderr, "-------------------------------------------------------\n");
     }
     
 	exit(1);
@@ -162,19 +167,19 @@ int main(int argc, char* argv[]) {
 				continue;
 			}
 			
-			if(agipd.currentPulse % 4 > 0) {
-				std::cout << "Skipping frame due to stride" << std::endl;
-				continue;
-			}
+			//if(agipd.currentPulse % 4 > 0) {
+			//	std::cout << "Skipping frame due to stride" << std::endl;
+			//	continue;
+			//}
 
 			
 			// Incrememnt the frame number
 			frameNumber++;
 
 			// First few frames in a run seem junk
-			if(frameNumber < 100) {
-				continue;
-			}
+			//if(frameNumber < 100) {
+			//	continue;
+			//}
 			
 
 			// Add more sensible event name

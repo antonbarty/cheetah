@@ -87,6 +87,7 @@ public:
 	// data and ID for the last read event.  Only updated after readFrame is called! 
 	float   	*data;
 	uint16_t	*digitalGain;
+	uint16_t	*badpixMask;
     uint64_t	trainID;
     uint64_t	pulseID;
     uint16_t	cellID;
@@ -126,7 +127,8 @@ private:
 
 // Private functions
 private:
-	void		readFrameRawOrCalib(long frameNum, bool isRaw);
+	void		readFrameRaw(long frameNum);
+	void		readFrameXFELCalib(long frameNum);
 	void		applyCalibration(long frameNum);
 };
 

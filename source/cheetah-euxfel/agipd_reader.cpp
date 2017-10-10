@@ -15,7 +15,7 @@
 
 cAgipdReader::cAgipdReader(void){
 	data = NULL;
-	mask = NULL;
+	badpixMask = NULL;
 	digitalGain = NULL;
 	rawDetectorData = true;
 	currentTrain = 0;
@@ -223,12 +223,13 @@ void cAgipdReader::open(char *baseFilename){
 
 	
 	// Check for inconsistencies
-	std::cout << "\tChecking number of events in each file" << std::endl;
+	std::cout << "\tChecking number of events in each file ";
 	for(long i=0; i<nAGIPDmodules; i++) {
 		if (module[i].noData)
 			continue;
 
 		if(module[i].nframes != module[_referenceModule].nframes) {
+			std::cout << std::endl;
 			std::cout << "\tInconsistent number of frames between modules " << _referenceModule << " and " << i << std::endl;
 			std::cout << "\t" << module[i].nframes << " != " << module[_referenceModule].nframes << std::endl;
 			moduleOK[i] = false;
@@ -237,27 +238,31 @@ void cAgipdReader::open(char *baseFilename){
 			moduleOK[i] = true;
 		}
 	}
+	std::cout << " [OK]" <<  std::endl;
 	
-	std::cout << "\tChecking all data is of the same type" << std::endl;
+	std::cout << "\tChecking all data is of the same type";
 	rawDetectorData = module[_referenceModule].rawDetectorData;
 	for(long i=0; i<nAGIPDmodules; i++) {
 		if (module[i].noData)
 			continue;
 
 		if(module[i].rawDetectorData != rawDetectorData) {
+			std::cout << std::endl;
 			std::cout << "\tInconsistent data, some is RAW and some is not: " << i << std::endl;
 			exit(1);
 		}
 	}
+	std::cout << " [OK]" <<  std::endl;
+
 	
-	
-	std::cout << "\tChecking image size in each file" << std::endl;
+	std::cout << "\tChecking image size in each file";
 	for(long i=0; i<nAGIPDmodules; i++)
 	{
 		if (module[i].noData)
 			continue;
 
 		if(module[i].n0 != module[_referenceModule].n0 || module[i].n1 != module[_referenceModule].n1) {
+			std::cout << std::endl;
             std::cout << "\tInconsistent image sizes between modules " << _referenceModule << " and " << i << std::endl;
 			std::cout << "\t ( " << module[i].n0 << " != " << module[_referenceModule].n0 << " )" << std::endl;
 			std::cout << "\t ( " << module[i].n1 << " != " << module[_referenceModule].n1 << " )" << std::endl;
@@ -267,7 +272,9 @@ void cAgipdReader::open(char *baseFilename){
 			moduleOK[i] = true;
 		}
 	}
+	std::cout << " [OK]" <<  std::endl;
 
+	
 	std::cout << "\tChecking for mismatched timestamps" << std::endl;
 	//std::vector<long> allTrainIDs;
 
@@ -309,6 +316,7 @@ void cAgipdReader::open(char *baseFilename){
 			if (cellID > maxCell) maxCell = cellID;
 		}
 	}
+\
 
 	currentTrain = minTrain;
 	currentPulse = minPulse;
@@ -346,7 +354,7 @@ void cAgipdReader::open(char *baseFilename){
 	
 	// Allocate memory for data and masks
 	data = (float*) malloc(nn*sizeof(float));
-	mask = (uint16_t*) malloc(nn*sizeof(uint16_t));
+	badpixMask = (uint16_t*) malloc(nn*sizeof(uint16_t));
 	digitalGain = (uint16_t*) malloc(nn*sizeof(uint16_t));
 	
 	
@@ -357,7 +365,7 @@ void cAgipdReader::open(char *baseFilename){
 		offset = modulenn;
 		pdata[i] = data + i * offset;
 		pgain[i] = digitalGain + i*offset;
-		pmask[i] = mask + i*offset;
+		pmask[i] = badpixMask + i*offset;
 	}
 
 	// Bye bye
@@ -380,10 +388,10 @@ void cAgipdReader::close(void){
 	// Clean up memory
 	if(data != NULL) {
 		free(data);
-		free(mask);
+		free(badpixMask);
 		free(digitalGain);
 		data = NULL;
-		mask = NULL;
+		badpixMask = NULL;
 		digitalGain = NULL;
 	}
 	std::cout << "\tAGIPD reader closed " << std::endl;
@@ -444,6 +452,18 @@ bool cAgipdReader::nextFramePrivate() {
 
 	std::cout << "Returning image number: " << goodImages4ThisTrain << std::endl;
 
+	// Statistics on bad pixels, etc...
+	long nhigh=0;
+	long nbad=0;
+	for(long p=0; p<nn; p++) {
+		if(digitalGain[p] != 0)
+			nhigh++;
+		if(badpixMask[p] != 0)
+			nbad++;
+	}
+	printf("%li gain switched pixels (%f%%); ", nhigh, (100.*nhigh)/nn);
+	printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
+
 	return success;
 }
 
@@ -460,7 +480,9 @@ void cAgipdReader::setModuleToBlank(int moduleID) {
     statusID[moduleID] = 1;
     memset(pdata[moduleID], 0, modulenn*sizeof(float));
     memset(pgain[moduleID], 0, modulenn*sizeof(uint16_t));
-    memset(pmask[moduleID], 1, modulenn*sizeof(uint16_t));
+	for(long p=0; p<modulenn; p++) {
+		pmask[moduleID][p] = 1;
+	}
 }
 
 
@@ -481,46 +503,52 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 
     
 	// Loop through modules
-	for(long i=0; i<nAGIPDmodules; i++)
+	for(int moduleID=0; moduleID<nAGIPDmodules; moduleID++)
 	{
-        if(false) {
-            std::cout << "Reading module " << i << " of " << nAGIPDmodules << std::endl;
-        }
+		//std::cout << "Reading module " << i << " of " << nAGIPDmodules << std::endl;
 		TrainPulsePair tp = std::make_pair(trainID, pulseID);
-		TrainPulseModulePair tp2mod = std::make_pair(tp, i);
+		TrainPulseModulePair tp2mod = std::make_pair(tp, moduleID);
 		long frameNum = trainPulseMap[tp2mod];
 
-		if (module[i].noData==true || frameNum < 0)
+		if (module[moduleID].noData==true || frameNum < 0)
 		{
-            setModuleToBlank(i);
-			cellID[i] = module[i].cellID;
+            setModuleToBlank(moduleID);
+			cellID[moduleID] = module[moduleID].cellID;
 			continue;
 		}
 
 		// Read the requested frame number (and update metadata in structure)
         //std::cout << "Reading train " << trainID << " pulse " << pulseID << " module " << i << std::endl;
-        module[i].readFrame(frameNum);
+        module[moduleID].readFrame(frameNum);
         // std::cout << "Reading frame done" << std::endl;
 
-		if (module[i].noData) {
-            setModuleToBlank(i);
+		if (module[moduleID].noData) {
+            setModuleToBlank(moduleID);
 			continue;
 		}
 		moduleCount++;
 
 		// Copy across
-		cellID[i] = module[i].cellID;
-		statusID[i] = module[i].statusID;
+		cellID[moduleID] = module[moduleID].cellID;
+		statusID[moduleID] = module[moduleID].statusID;
         //std::cout << "memcpy data" << std::endl;
-		memcpy(pdata[i], module[i].data, modulenn*sizeof(float));
+		memcpy(pdata[moduleID], module[moduleID].data, modulenn*sizeof(float));
+		
         //std::cout << "memcpy gain" << std::endl;
-		memcpy(pgain[i], module[i].digitalGain, modulenn*sizeof(uint16_t));
+		memcpy(pgain[moduleID], module[moduleID].digitalGain, modulenn*sizeof(uint16_t));
 
-		lastModule = (int)i;
+		lastModule = (int)moduleID;
 		
 		// Set entire panel mask to whatever the status is.
         //std::cout << "Memset mask" << std::endl;
-		memset(pmask[i], module[i].statusID, modulenn*sizeof(uint16_t));
+		if(module[moduleID].statusID != 0) {
+			for(long p=0; p<modulenn; p++) {
+				pmask[moduleID][p] = module[moduleID].statusID;
+			}
+		}
+		else {
+			memcpy(pmask[moduleID], module[moduleID].badpixMask, modulenn*sizeof(uint16_t));
+		}
 	}
 
 	if (lastModule >= 0)

@@ -76,7 +76,7 @@ public:
 	long		nn;
 	float    	*data;
 	uint16_t	*digitalGain;
-	uint16_t	*mask;
+	uint16_t	*badpixMask;
 	
 	// Metadata for this event
 	uint16_t	cellID[nAGIPDmodules];
