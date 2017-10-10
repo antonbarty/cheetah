@@ -102,7 +102,7 @@ public:
 	int			gainDataOffset[2];	// Gain data hyperslab offset relative to image data frame
 
 	bool		_doNotApplyGainSwitch;		// Bypass gain switching
-
+	
 // Private variables
 private:
 	std::string	filename;
