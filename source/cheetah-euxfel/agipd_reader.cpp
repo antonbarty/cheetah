@@ -151,17 +151,18 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 	}
 
 	// Filenames for all the darkcal files
-	for(long i=0; i<nAGIPDmodules; i++) {
-		// Replace the AGIPD00 number with 00-15
-		darkcalFilename[i] = darkcalFile;
-		pos = darkcalFilename[i].find("AGIPD");
-		if (pos != std::string::npos) {
-			sprintf(tempstr, "%0.2li", i);
-			darkcalFilename[i].replace(pos+5,2,tempstr);
-		}
-        std::cout << "\t\t" << darkcalFilename[i] << std::endl;
-	}
-
+    if(darkcalFile != "No_file_specified") {
+        for(long i=0; i<nAGIPDmodules; i++) {
+            // Replace the AGIPD00 number with 00-15
+            darkcalFilename[i] = darkcalFile;
+            pos = darkcalFilename[i].find("AGIPD");
+            if (pos != std::string::npos) {
+                sprintf(tempstr, "%0.2li", i);
+                darkcalFilename[i].replace(pos+5,2,tempstr);
+            }
+            std::cout << "\t\t" << darkcalFilename[i] << std::endl;
+        }
+    }
 
 	// Filenames for all the gaincal files
 	if(gaincalFile != "No_file_specified") {
@@ -411,7 +412,7 @@ bool cAgipdReader::nextFramePrivate() {
 		
 		// Skip the first _skip pulses in a train (corrupted)
 		if(currentPulse < _skip) {
-			std::cout << "Skipping pulse 0 in train" << std::endl;
+			std::cout << "Skipping pulse 0 in train " << currentTrain << std::endl;
 		    continue;
 		}
 
@@ -482,6 +483,9 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 	// Loop through modules
 	for(long i=0; i<nAGIPDmodules; i++)
 	{
+        if(false) {
+            std::cout << "Reading module " << i << " of " << nAGIPDmodules << std::endl;
+        }
 		TrainPulsePair tp = std::make_pair(trainID, pulseID);
 		TrainPulseModulePair tp2mod = std::make_pair(tp, i);
 		long frameNum = trainPulseMap[tp2mod];
@@ -494,7 +498,9 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		}
 
 		// Read the requested frame number (and update metadata in structure)
-		module[i].readFrame(frameNum);
+        //std::cout << "Reading train " << trainID << " pulse " << pulseID << " module " << i << std::endl;
+        module[i].readFrame(frameNum);
+        // std::cout << "Reading frame done" << std::endl;
 
 		if (module[i].noData) {
             setModuleToBlank(i);
@@ -505,12 +511,15 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		// Copy across
 		cellID[i] = module[i].cellID;
 		statusID[i] = module[i].statusID;
+        //std::cout << "memcpy data" << std::endl;
 		memcpy(pdata[i], module[i].data, modulenn*sizeof(float));
+        //std::cout << "memcpy gain" << std::endl;
 		memcpy(pgain[i], module[i].digitalGain, modulenn*sizeof(uint16_t));
 
 		lastModule = (int)i;
 		
 		// Set entire panel mask to whatever the status is.
+        //std::cout << "Memset mask" << std::endl;
 		memset(pmask[i], module[i].statusID, modulenn*sizeof(uint16_t));
 	}
 

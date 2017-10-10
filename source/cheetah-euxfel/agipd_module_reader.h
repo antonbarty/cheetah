@@ -113,7 +113,9 @@ private:
 	std::string h5_cellId_field;
 	std::string h5_image_data_field;
 	std::string h5_image_status_field;
-	
+    std::string h5_image_gain_field;
+    std::string h5_image_mask_field;
+
 	std::string	darkcalFilename;
 	std::string	gaincalFilename;
 

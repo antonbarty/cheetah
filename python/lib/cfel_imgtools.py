@@ -24,9 +24,10 @@ def histogram_clip_levels(data, value):
     #print('Unclipped range = ',d_min, d_max)
 
     
-    h_max = d_max + 1
+    h_max = max(1, d_max + 1)
     h_min = min(0,d_min-1)
-    h_nbins = max(200, h_max)
+    h_nbins = max(200, h_max-h_min)
+    h_nbins = min(2000, h_nbins)
     h_range = (h_min, h_max)
     #print('nbins=', h_nbins, 'range=',h_range)
     
@@ -36,8 +37,8 @@ def histogram_clip_levels(data, value):
     c = h.cumsum()/h.sum()
 
     # Top and bottom <value> percentile
-    w_top = numpy.where(c <= (1-value))
-    w_bottom = numpy.where(c >= value)
+    w_top = numpy.where(c < (1-value))
+    w_bottom = numpy.where(c > value)
 
     try:
         i_top = numpy.amax(w_top)
