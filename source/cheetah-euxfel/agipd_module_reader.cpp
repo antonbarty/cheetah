@@ -67,11 +67,6 @@ static char h5_image_gain_suffix[] = "gain";
 static char h5_image_mask_suffix[] = "mask";
 
 
-static char h5_image_gain_field[] = "gain";
-static char h5_image_mask_field[] = "mask";
-
-
-
 cAgipdModuleReader::cAgipdModuleReader(void){
 	h5_file_id = 0;
 	pulseIDlist = NULL;
@@ -80,6 +75,7 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 	statusIDlist = NULL;
 	data = NULL;
 	digitalGain = NULL;
+	badpixMask = NULL;
 	rawDetectorData = true;
 	noData = false;
 	verbose = 0;
@@ -91,6 +87,7 @@ cAgipdModuleReader::cAgipdModuleReader(void){
 
 	calibGainFactor = NULL;
 
+	calibrator = NULL;
 	darkcalFilename = "No_file_specified";
 	gaincalFilename = "No_file_specified";
 };
@@ -149,7 +146,7 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 		rawDetectorData = true;
 	}
 	else {
-		std::cout << "\tData might have been calibrated" << std::endl;
+		std::cout << "\tData is NOT RAW (presuming it is calibrated)" << std::endl;
 		rawDetectorData = false;
 	}
 	
@@ -202,8 +199,7 @@ void cAgipdModuleReader::close(void) {
 	if(h5_file_id==NULL)
 		return;
 
-	if (calibrator != NULL)
-	{
+	if (calibrator != NULL) {
 		delete calibrator;
 		calibrator = NULL;
 	}
@@ -221,6 +217,7 @@ void cAgipdModuleReader::close(void) {
 		free(statusIDlist);
 		free(data);
 		free(digitalGain);
+		free(badpixMask);
 		
 		// Pointers to NULL
 		pulseIDlist = NULL;
@@ -229,6 +226,7 @@ void cAgipdModuleReader::close(void) {
 		statusIDlist = NULL;
 		data = NULL;
 		digitalGain = NULL;
+		badpixMask = NULL;
 	}
 	
 	
@@ -320,13 +318,11 @@ void cAgipdModuleReader::readGaincal(char *filename){
     if(strcmp(filename, "No_file_specified")) {
 		return;
 	}
+
 	gaincalFilename = filename;
-	
-	// checkAllocRead the gain setting field for this module into an array....
 
-	// Check sanity of this line - it has not been edited for content!  THink we may need hyperslab instead
-	//calibDarkOffset = (float*) checkAllocRead((char *)h5_cellId_field.c_str(), nframes, H5T_STD_U16LE, sizeof(float*));
-
+	std::cout << "Oops... Nothing implemented for reading gain.." << std::endl;
+	exit(1);
 }
 // cAgipdModuleReader::readDarkcal
 
@@ -381,12 +377,12 @@ void cAgipdModuleReader::readFrame(long frameNum){
 	statusID = statusIDlist[frameNum];
 	
 
-	// At the moment we only read RAW data files
+	// Read the data frame
 	if (rawDetectorData) {
-		readFrameRawOrCalib(frameNum, true);
+		readFrameRaw(frameNum);
 	}
 	else {
-		readFrameRawOrCalib(frameNum, false);
+		readFrameXFELCalib(frameNum);
 	}
 }
 // cAgipdModuleReader::readFrame
@@ -395,8 +391,7 @@ void cAgipdModuleReader::readFrame(long frameNum){
 /*
  *	Read one frame of data from RAW files
  */
-void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
-{
+void cAgipdModuleReader::readFrameRaw(long frameNum) {
     if (noData) {
 		return;
     }
@@ -412,70 +407,125 @@ void cAgipdModuleReader::readFrameRawOrCalib(long frameNum, bool isRaw)
 	slab_size[1] = 1;
 	slab_size[2] = n1;
 	slab_size[3] = n0;
-
-	if (!isRaw)
-	{
-		slab_size[1] = n1;
-		slab_size[2] = n0;
-	}
-
-	int ndims = isRaw ? 4 : 3;
-	hid_t type = isRaw ? H5T_STD_U16LE : H5T_IEEE_F32LE;
-	hid_t size = isRaw ? sizeof(uint16_t) : sizeof(float);
-
+	int ndims = 4;
+	
 	// Free existing memory
 	free(data); data = NULL;
 	free(digitalGain); digitalGain = NULL;
+	free(badpixMask); badpixMask = NULL;
+
 
     // Read data from hyperslab in RAW data file (which is unit16_t, so convert it to float)
-	if (rawDetectorData) {
-		uint16_t *tempdata = NULL;
-		tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
+	uint16_t *tempdata = NULL;
+	tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 
-		if (noData || !tempdata) {
-			return;
-		}
-
-		data = (float *)malloc(n0 * n1 * sizeof(float));
-		for (int i = 0; i < n0 * n1; i++) {
-			data[i] = tempdata[i];
-		}
-
-		free(tempdata);
+	if (!tempdata) {
+		return;
 	}
-	else {
-		// Read data directly from hyperslab in corrected data file (which is already a float)
-		data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, type, size);
 
-		if (noData) {
-			return;
-		}
+	data = (float *)malloc(n0 * n1 * sizeof(float));
+	for (int i = 0; i < n0 * n1; i++) {
+		data[i] = tempdata[i];
 	}
+	free(tempdata);
 	
 	// Digital gain is in the second dimension (at least that's the way it was meant to be)
-	if(rawDetectorData) {
-        // For the first few experiments digital gain is actually in the next analog memory location: location configured via gainDataOffset
-		slab_start[0] += gainDataOffset[0];
-		slab_start[1] += gainDataOffset[1];
-		digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
-	}
-    else {
-        digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
-    }
+	// For the first few experiments digital gain is actually in the next analog memory location: location configured via gainDataOffset
+	slab_start[0] += gainDataOffset[0];
+	slab_start[1] += gainDataOffset[1];
+	digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 
+	// Bad pixel mask doesn't really exist for raw data, allocate anyway to avoid crashes later
+	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
+
+	
 	// Update timestamp, status bits and other stuff
 	trainID = trainIDlist[frameNum];
 	pulseID = pulseIDlist[frameNum];
 	cellID = cellIDlist[frameNum];
 	statusID = statusIDlist[frameNum];
-
+	
 	
 	//	Apply calibration constants (if known).
 	applyCalibration(frameNum);
+};
+// cAgipdModuleReader::readFrameRaw
+
+
+/*
+ *	Read a single frame of XFEL calibrated data
+ *	usually found in {$EXPT}/proc
+ */
+void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
+	if (noData) {
+		return;
+	}
+	
+	// Define hyperslab in RAW data file
+	hsize_t     slab_start[4];
+	hsize_t		slab_size[4];
+	slab_start[0] = frameNum;
+	slab_start[1] = 0;
+	slab_start[2] = 0;
+	slab_size[0] = 1;
+	slab_size[1] = n1;
+	slab_size[2] = n0;
+	int ndims = 3;
+	
+	// Free existing memory
+	free(data); data = NULL;
+	free(digitalGain); digitalGain = NULL;
+	free(badpixMask); badpixMask = NULL;
+
+	// Read data directly from hyperslab in corrected data file (which is already a float)
+	data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_IEEE_F32LE, sizeof(float));
+	
+	// Digital gain is in a different field and is H5T_STD_U8LE Dataset {7500, 512, 128}
+	// Default format is uint16_t so we must convert
+	uint8_t *tempdata = NULL;
+	tempdata = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+	digitalGain = (uint16_t *)malloc(nn * sizeof(uint16_t));
+	long nhigh = 0;
+	for (int i = 0; i < nn; i++) {
+		digitalGain[i] = tempdata[i];
+		if(digitalGain[i])
+			nhigh++;
+	}
+	free(tempdata);
 
 	
+	// Bad pixel mask is a H5T_STD_U8LE Dataset {7500, 512, 128, 3}
+	slab_start[3] = 0;
+	slab_size[3] = 3;
+	ndims = 4;
+	uint8_t *tempdata2 = NULL;
+	tempdata2 = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+	badpixMask = (uint16_t *)malloc(nn * sizeof(uint16_t));
+	long	p;
+	long nbad = 0;
+	for (long i = 0; i < nn; i++) {
+		p = 3*i + digitalGain[i];
+		badpixMask[i] = tempdata2[p];
+		if(badpixMask[i] != 0) {
+			data[i] = 0;
+			nbad++;
+		}
+	}
+	free(tempdata2);
 
+	//printf("%li gain switched pixels (%f%%); ", nhigh, (100.*nhigh)/nn);
+	//printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
+
+	
+	// Update timestamp, status bits and other stuff
+	trainID = trainIDlist[frameNum];
+	pulseID = pulseIDlist[frameNum];
+	cellID = cellIDlist[frameNum];
+	statusID = statusIDlist[frameNum];
 };
+// cAgipdModuleReader::readFrameXFELCalib
+
+
 
 // Apply calibration constants (if known)
 // A wrapper for function moved to agipd_calibrator (maybe remove later)
