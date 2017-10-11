@@ -482,37 +482,49 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	
 	// Digital gain is in a different field and is H5T_STD_U8LE Dataset {7500, 512, 128}
 	// Default format is uint16_t so we must convert
-	uint8_t *tempdata = NULL;
-	tempdata = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+	uint8_t *tempgain = NULL;
+	tempgain = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
 	digitalGain = (uint16_t *)malloc(nn * sizeof(uint16_t));
 	long nhigh = 0;
 	for (int i = 0; i < nn; i++) {
-		digitalGain[i] = tempdata[i];
+		digitalGain[i] = tempgain[i];
 		if(digitalGain[i])
 			nhigh++;
 	}
-	free(tempdata);
+	free(tempgain);
 
 	
 	// Bad pixel mask is a H5T_STD_U8LE Dataset {7500, 512, 128, 3}
 	slab_start[3] = 0;
 	slab_size[3] = 3;
 	ndims = 4;
-	uint8_t *tempdata2 = NULL;
-	tempdata2 = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+	uint8_t *tempmask = NULL;
+	tempmask = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
 	badpixMask = (uint16_t *)malloc(nn * sizeof(uint16_t));
 	long	p;
 	long nbad = 0;
 	for (long i = 0; i < nn; i++) {
 		p = 3*i + digitalGain[i];
-		badpixMask[i] = tempdata2[p];
+		badpixMask[i] = tempmask[p];
 		if(badpixMask[i] != 0) {
 			data[i] = 0;
+            badpixMask[i] = 1;
 			nbad++;
 		}
 	}
-	free(tempdata2);
+	free(tempmask);
 
+    
+    // Check for screwy intensity values: Sometimes we get +/- 1e9 appearing
+    // Bad form to hard code this, but for now it's just a test case
+    for (long i = 0; i < nn; i++) {
+        if(data[i] > 5e7 || data[i] < -1e5) {
+            data[i] = 0;
+            badpixMask[i] = 1;
+        }
+    }
+    
+    
 	//printf("%li gain switched pixels (%f%%); ", nhigh, (100.*nhigh)/nn);
 	//printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
 

@@ -76,8 +76,7 @@ int main(int argc, char* argv[]) {
 	signal(SIGABRT, handler);
 
 	std::cout << "Cheetah interface for EuXFEL\n";
-	std::cout << "Anton Barty, September 2015-\n";
-    std::cout << "Additional contributions from Helen Ginn, \n";
+	std::cout << "Anton Barty and Helen Ginn, September 2015-\n";
 
 	// Parse configurations
 	parse_config(argc, argv, &CheetahEuXFELparams);
@@ -144,8 +143,8 @@ int main(int argc, char* argv[]) {
 		// Guess the run number
 		long	pos;
 		long	runNumber;
-		pos = CheetahEuXFELparams.inputFiles[fnum].rfind("RAW-R");
-		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos+5,4).c_str());
+		pos = CheetahEuXFELparams.inputFiles[fnum].rfind("-AGIPD");
+		runNumber = atoi(CheetahEuXFELparams.inputFiles[fnum].substr(pos-4,4).c_str());
 		std::cout << "This is run number " << runNumber << std::endl;
 		cheetahGlobal.runNumber = (int) runNumber;
 
@@ -226,6 +225,15 @@ int main(int argc, char* argv[]) {
 			memcpy(eventData->detector[detId].data_raw, agipd.data, agipd.nn*sizeof(float));
 			eventData->detector[detId].data_raw_is_float = true;
 					   
+            
+            // Copy over mask from read data
+            for (long i = 0; i < cheetahGlobal.detector[detId].pix_nn; i++) {
+                if(agipd.badpixMask[i] != 0) {
+                    eventData->detector[detId].pixelmask[i] = PIXEL_IS_BAD;
+                }
+            }
+            
+
 			
 			// Process event
 			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);

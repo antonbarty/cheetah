@@ -62,6 +62,7 @@ void subtractLocalBackground(cEventData*, cGlobal*);
 void subtractRadialBackground(cEventData*, cGlobal*);
 void checkSaturatedPixels(cEventData*, cGlobal*);
 void checkSaturatedPixels(uint16_t*, uint16_t*, long, long);
+void checkSaturatedPixels(float*, uint16_t*, long, long);
 void checkSaturatedPixelsPnccd(uint16_t*, uint16_t*);
 void updateBackgroundBuffer(cEventData*, cGlobal*, int);
 void subtractPersistentBackground(cEventData*, cGlobal*);
