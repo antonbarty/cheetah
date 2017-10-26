@@ -26,11 +26,14 @@ public:
 	~cAgipdCalibrator();
 	
 	void readCalibrationData();
+    void readDESYCalibrationData();
 	void applyCalibration(int, float*, uint16_t*);
 
 
 	int16_t *darkOffsetForGainAndCell(int gain, int cell);
-	int16_t *gainThresholdForGainAndCell(int gain, int cell);
+	int16_t *gainLevelForGainAndCell(int gain, int cell);
+    uint8_t *badpixelForGainAndCell(int gain, int cell);
+    float   *relativeGainForGainAndCell(int gain, int cell);
 	
 	//void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
 
@@ -44,10 +47,15 @@ private:
 	
 	cAgipdModuleReader *_myModule;
 	int16_t *_darkOffsetData;
-	int16_t *_gainThresholdData;
+	int16_t *_gainLevelData;
+    uint8_t *_badpixelData;
+    float   *_relativeGainData;
+    
 
 	int16_t ***_darkOffsetGainCellPtr;
-	int16_t ***_gainThresholdGainCellPtr;
+	int16_t ***_gainLevelGainCellPtr;
+    uint8_t ***_badpixelGainCellPtr;
+    float ***_relativeGainGainCellPtr;
 };
 
 #endif /* defined(__agipd__agipd_calibrator__) */
