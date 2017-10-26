@@ -26,11 +26,14 @@ int cAgipdCalibrator::nCells = 30;
 cAgipdCalibrator::cAgipdCalibrator()
 {
 	_darkOffsetData = NULL;
-	_gainThresholdData = NULL;
+	_gainLevelData = NULL;
+    _badpixelData = NULL;
+    _relativeGainData = NULL;
 	_myModule = NULL;
 	_darkOffsetGainCellPtr = NULL;
-	_gainThresholdGainCellPtr = NULL;
-	//_doNotApplyGainSwitch = false;
+	_gainLevelGainCellPtr = NULL;
+    _badpixelGainCellPtr = NULL;
+    _relativeGainGainCellPtr = NULL;
 }
 
 // Constructor with arguments
@@ -38,20 +41,36 @@ cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &rea
 {
 	_filename = filename;
 	_darkOffsetData = NULL;
-	_gainThresholdData = NULL;
+	_gainLevelData = NULL;
+    _badpixelData = NULL;
+    _relativeGainData = NULL;
 	_myModule = &reader; // pointer should not jump
 	_darkOffsetGainCellPtr = NULL;
-	_gainThresholdGainCellPtr = NULL;
-	//_doNotApplyGainSwitch = false;
+	_gainLevelGainCellPtr = NULL;
+    _badpixelGainCellPtr = NULL;
+    _relativeGainGainCellPtr = NULL;
 }
 
 // Destructor
 cAgipdCalibrator::~cAgipdCalibrator()
 {
 	free(_darkOffsetData);
-	free(_gainThresholdData);
+	free(_gainLevelData);
+    free(_badpixelData);
+    free(_relativeGainData);
+    _darkOffsetData = NULL;
+    _gainLevelData = NULL;
+    _badpixelData = NULL;
+    _relativeGainData = NULL;
+    
+    free(_darkOffsetGainCellPtr);
+    free(_gainLevelGainCellPtr);
+    free(_badpixelGainCellPtr);
+    free(_badpixelGainCellPtr);
 	_darkOffsetGainCellPtr = NULL;
-	_gainThresholdGainCellPtr = NULL;
+	_gainLevelGainCellPtr = NULL;
+    _badpixelGainCellPtr = NULL;
+    _relativeGainGainCellPtr = NULL;
 }
 
 
@@ -83,7 +102,7 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	int16_t 	*cellGainThreshold[nGains-1];
 	for(int i=0; i < nGains - 1; i++)
 	{
-		cellGainThreshold[i] = gainThresholdForGainAndCell(i, cellID);
+		cellGainThreshold[i] = gainLevelForGainAndCell(i, cellID);
 	}
 
 	// For now do gain=0 (test if we get the same results as before)
@@ -92,7 +111,7 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	//		return;
 	
 
-	// Simple switch for using only the gain0 offset, bypassing multi-gain calibration
+	// Bypass multi-gain calibration using only the gain0 offset,
 	if(_myModule->_doNotApplyGainSwitch) {
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
@@ -137,8 +156,8 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 
 		// Subtract the appropriate offset
 		// No - subtract an inappropriate offset to see what happens
-		aduData[p] -= cellDarkOffset[pixGain][p];		//<-- Correct way
-		//aduData[p] -= cellDarkOffset[0][p];		// <-- For testing
+		aduData[p] -= cellDarkOffset[pixGain][p];		// Correct way
+		//aduData[p] -= cellDarkOffset[0][p];		    // For testing
 
 		// Multiplication factor
 		aduData[p] *= gainFactor[pixGain];
@@ -162,22 +181,152 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 
 
 
+
 /*
- *	New version of the open calibrations function
- *	Changed:
- *		Reads gain threshold and other info from calibration file (in addition to offsets)
- *		Determines nCells from the size of the array (rather than hard coded)
- *		Uses new checkAllocReadDataset(..) function, which is less cumbersome then checkAllocReadHyperslab(..)
- *		void* cHDF5Functions::checkAllocReadDataset(char fieldName[], int *h5_ndims, hsize_t *h5_dims, hid_t h5_type_id, size_t targetsize)
- */
+ *    Read in calibration constants needed by Cheetah
+ *      h5_putdata, outfile, 'Offset', offset_out
+ *      h5_putdata, outfile, 'RelativeGain', gain_out
+ *      h5_putdata, outfile, 'DigitalGainLevel', thresh_out
+ *      h5_putdata, outfile, 'Badpixel', badpix_out
+*/
 void cAgipdCalibrator::readCalibrationData()
 {
-	std::cout << "Opening darkcal file..." << std::endl;
+    std::cout << "Opening AGIPD Cheetah calibration file..." << std::endl;
+    
+    // Anton's AGIPD calibration format
+    //> h5ls calib/agipd/Cheetah-AGIPD00-calib.h5
+    //AnalogOffset             Dataset {3, 32, 512, 128} H5T_STD_I16LE
+    //Badpixel                 Dataset {3, 32, 512, 128} H5T_STD_U8LE
+    //DigitalGainLevel         Dataset {3, 32, 512, 128} H5T_STD_U16LE
+    //RelativeGain             Dataset {3, 32, 512, 128} H5T_IEEE_F32LE
+    std::string badpix_field = "/Badpixel";
+    std::string offset_field = "/AnalogOffset";
+    std::string gainlevel_field = "/DigitalGainLevel";
+    std::string relativegain_field = "/RelativeGain";
+    
+    
+    // Check opening of file
+    bool check;
+    check = fileCheckAndOpen((char *)_filename.c_str());
+    if (check) {
+        std::cout << "\tFile check OK\n";
+    }
+    else {
+        std::cout << "\tFile check Bad - keep going and see what happens\n";
+    }
+    
+    int    ndims;
+    hsize_t dims[4];
+
+    
+    // Read offsets
+    // Currently:  3 x 30 x 512 x 128 of type int16_t
+    if(_darkOffsetData != NULL)        // Beware of memory leaks
+        free(_darkOffsetData);
+    _darkOffsetData = (int16_t*) checkAllocReadDataset((char*) offset_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
+    
+    // Housekeeping
+    nCells = (int) dims[1];
+    
+    // Sanity checks
+    // All other fields are likely to be identical so only do this for the offsets
+    if(ndims != 4) {
+        std::cout << "Error in shape: expect ndims=4; but ndims=" << ndims << std::endl;
+    }
+    if(dims[0] != nGains) {
+        std::cout << "Error in number of gain stages: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
+    }
+    if(dims[1] < 0 || dims[1] > 128) {
+        std::cout << "Odd: Suspiciouly large number of memory cells: " << dims[1] << std::endl;
+    }
+    if(dims[2] != _myModule->n1 || dims[3] != _myModule->n0) {
+        std::cout << "Error: Offset array does not match module size: " << std::endl;
+        std::cout << "dims[2,3] = " << dims[2] << "," << dims[3] << ";  ";
+        std::cout << "module = " << _myModule->n1 << "," << _myModule->n0 << std::endl;
+    }
+    // Skip dimension checks from now on as all other array dimensions are very likely the same
+
+    
+    // Read digital channel gain level data
+    if(_gainLevelData != NULL)        // Beware of memory leaks
+        free(_gainLevelData);
+    _gainLevelData = (int16_t*) checkAllocReadDataset((char*) gainlevel_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
+
+    
+    // Read relative gain data
+    if(_relativeGainData != NULL)        // Beware of memory leaks
+        free(_relativeGainData);
+    _relativeGainData = (float*) checkAllocReadDataset((char*) gainlevel_field.c_str(), &ndims, dims, H5T_IEEE_F32LE, sizeof(float));
+
+    
+    // Read bad pixel map
+    if(_badpixelData != NULL)        // Beware of memory leaks
+        free(_badpixelData);
+    _badpixelData = (uint8_t*) checkAllocReadDataset((char*) badpix_field.c_str(), &ndims, dims, H5T_STD_U8LE, sizeof(uint8_t));
+
+    
+    
+    // Create pointers to the gain cells (so that we can access them quickly)
+    _darkOffsetGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
+    _gainLevelGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
+    _badpixelGainCellPtr = (uint8_t ***)malloc(sizeof(uint8_t **) * nGains);
+    _relativeGainGainCellPtr = (float ***)malloc(sizeof(float **) * nGains);
+    
+    for (int g = 0; g < nGains; g++) {
+        long offset1 = g * nCells * _myModule->nn;
+        _darkOffsetGainCellPtr[g] = (int16_t **)malloc(nCells * sizeof(int16_t **));
+        _gainLevelGainCellPtr[g] = (int16_t **)malloc(nCells * sizeof(int16_t **));
+        _badpixelGainCellPtr[g] = (uint8_t **)malloc(nCells * sizeof(uint8_t **));
+        _relativeGainGainCellPtr[g] = (float **)malloc(nCells * sizeof(float **));
+        
+        for (int c = 0; c < nCells; c++) {
+            long offset2 = c * _myModule->nn;
+            _darkOffsetGainCellPtr[g][c] = &_darkOffsetData[offset1 + offset2];
+            _gainLevelGainCellPtr[g][c] = &_gainLevelData[offset1 + offset2];
+            _badpixelGainCellPtr[g][c] = &_badpixelData[offset1 + offset2];
+            _relativeGainGainCellPtr[g][c] = &_relativeGainData[offset1 + offset2];
+        }
+    }
+    
+    
+    // This is to show the data makes sense
+    std::cout << "First few dark offsets of gain 0 / cell 0: ";
+    int16_t *offset = darkOffsetForGainAndCell(0, 0);
+    for (int i = 0; i < 5; i++) {
+        std::cout << offset[i] << ", ";
+    }
+    std::cout << std::endl;
+    
+    std::cout << "First few digital gain levels for gain 1 / cell 0: ";
+    int16_t *gaint = gainLevelForGainAndCell(1, 0);
+    for (int i = 0; i < 5; i++) {
+        std::cout << gaint[i] << ", ";
+    }
+    std::cout << std::endl;
+}
+
+
+
+/*
+ *	Read in calibration data from files provided by Manuela
+ *  This function is currently not called but parked here in case needed again in the future.
+ */
+void cAgipdCalibrator::readDESYCalibrationData()
+{
+	std::cout << "Opening DESY-style calibration file..." << std::endl;
 	
 	// 	Data field for calibration constants
 	std::string offset_field = "/offset";
 	std::string gainthresh_field = "/threshold";
 	
+    
+    // Anton's format
+    //> h5ls calib/agipd/Cheetah-AGIPD00-calib.h5
+    //Badpixel                 Dataset {3, 32, 512, 128}
+    //DigitalGainThreshold     Dataset {2, 32, 512, 128}
+    //Offset                   Dataset {3, 32, 512, 128}
+    //RelativeGain             Dataset {3, 32, 512, 128}
+    
 
 	// Check opening of file
 	bool check;
@@ -207,7 +356,7 @@ void cAgipdCalibrator::readCalibrationData()
 	if(dims[0] != nGains) {
 		std::cout << "Error in number of gain stages: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
 	}
-	if(dims[1] < 0 || dims[1] > 128) {
+	if(dims[1] > 128) {
 		std::cout << "Odd: Suspiciouly large number of memory cells: " << dims[1] << std::endl;
 	}
 	if(dims[2] != _myModule->n1 || dims[3] != _myModule->n0) {
@@ -219,9 +368,9 @@ void cAgipdCalibrator::readCalibrationData()
 	
 	// Do the same for reading gain threshold data
 	// Skip checks as it is very likely array dimensions are the same
-	if(_gainThresholdData != NULL)		// Beware of memory leaks
-		free(_gainThresholdData);
-	_gainThresholdData = (int16_t*) checkAllocReadDataset((char*) gainthresh_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
+	if(_gainLevelData != NULL)		// Beware of memory leaks
+		free(_gainLevelData);
+	_gainLevelData = (int16_t*) checkAllocReadDataset((char*) gainthresh_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
 
 	
 	
@@ -231,24 +380,24 @@ void cAgipdCalibrator::readCalibrationData()
 	
 	// Pointers to the gain cells (so that we can access them quickly)
 	_darkOffsetGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
-	_gainThresholdGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
+	_gainLevelGainCellPtr = (int16_t ***)malloc(sizeof(int16_t **) * nGains);
 	for (int i = 0; i < nGains; i++) {
 		long offset1 = i * nCells * _myModule->nn;
 		
 		_darkOffsetGainCellPtr[i] = (int16_t **)malloc(nCells * sizeof(int16_t **));
-		_gainThresholdGainCellPtr[i] = (int16_t **)malloc(nCells * sizeof(int16_t **));
+		_gainLevelGainCellPtr[i] = (int16_t **)malloc(nCells * sizeof(int16_t **));
 
 		for (int j = 0; j < nCells; j++) {
 			long offset2 = j * _myModule->nn;
 			
 			_darkOffsetGainCellPtr[i][j] = &_darkOffsetData[offset1 + offset2];
-			_gainThresholdGainCellPtr[i][j] = &_gainThresholdData[offset1 + offset2];
+			_gainLevelGainCellPtr[i][j] = &_gainLevelData[offset1 + offset2];
 		}
 	}
 	
 	// This is to show the data makes sense
 	int16_t *offset = darkOffsetForGainAndCell(0, 0);
-	int16_t *gaint = gainThresholdForGainAndCell(0, 0);
+	int16_t *gaint = gainLevelForGainAndCell(0, 0);
 	std::cout << "First few dark offsets of gain 0 / cell 0: ";
 	for (int i = 0; i < 5; i++) {
 		std::cout << offset[i] << ", ";
@@ -277,10 +426,10 @@ int16_t *cAgipdCalibrator::darkOffsetForGainAndCell(int gain, int cell)
 
 // Return pointer to gain thresholds for specified gain and cellID
 // Gain threshold array is nGains-1 in size
-int16_t *cAgipdCalibrator::gainThresholdForGainAndCell(int gain, int cell)
+int16_t *cAgipdCalibrator::gainLevelForGainAndCell(int gain, int cell)
 {
 	if (gain >= nGains-1) return NULL;
 	if (cell >= nCells) return NULL;
 	
-	return _gainThresholdGainCellPtr[gain][cell];
+	return _gainLevelGainCellPtr[gain][cell];
 }
