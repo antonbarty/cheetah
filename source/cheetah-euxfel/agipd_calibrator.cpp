@@ -66,7 +66,7 @@ cAgipdCalibrator::~cAgipdCalibrator()
     free(_darkOffsetGainCellPtr);
     free(_gainLevelGainCellPtr);
     free(_badpixelGainCellPtr);
-    free(_badpixelGainCellPtr);
+    free(_relativeGainGainCellPtr);
 	_darkOffsetGainCellPtr = NULL;
 	_gainLevelGainCellPtr = NULL;
     _badpixelGainCellPtr = NULL;
@@ -78,8 +78,9 @@ cAgipdCalibrator::~cAgipdCalibrator()
  *	Apply AGIPD calibration
  *	Overwrites contents of aduData with calibrated value
  *	Overwrites contents of gainData with determined gain stage
+ *  Sets bad pixel mask to 1 if a bad pixel is encountered
  */
-void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData) {
+void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData, uint16_t *badpixMask) {
 
 	// Stupidity checks
 	if (cellID >= nCells || cellID < 0)
@@ -91,87 +92,82 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	if (aduData == NULL || gainData == NULL)
 		return;
 
-	// Extract pointer to dark offsets for this cell
+	// Extract pointers to data for this cell
 	int16_t 	*cellDarkOffset[nGains];
-	for (int i = 0; i < nGains; i++)
+    int16_t     *cellGainLevel[nGains];
+    float       *cellRelativeGain[nGains];
+    uint8_t     *cellBadpix[nGains];
+	for (int g = 0; g<nGains; g++)
 	{
-		cellDarkOffset[i] = darkOffsetForGainAndCell(i, cellID);
+		cellDarkOffset[g] = darkOffsetForGainAndCell(g, cellID);
+        cellGainLevel[g] = gainLevelForGainAndCell(g, cellID);
+        cellRelativeGain[g] = relativeGainForGainAndCell(g, cellID);
+        cellBadpix[g] = badpixelForGainAndCell(g, cellID);
 	}
 	
-	// Extract pointer to gain thresholds for this cell
-	int16_t 	*cellGainThreshold[nGains-1];
-	for(int i=0; i < nGains - 1; i++)
-	{
-		cellGainThreshold[i] = gainLevelForGainAndCell(i, cellID);
-	}
-
-	// For now do gain=0 (test if we get the same results as before)
-	//	int16_t *offset = darkOffsetForGainAndCell(pixGainLevel, cellID);
-	//	if(offset == NULL)
-	//		return;
-	
-
-	// Bypass multi-gain calibration using only the gain0 offset,
-	if(_myModule->_doNotApplyGainSwitch) {
+    
+	if(_myModule->_doNotApplyGainSwitch)
+    {
+        // Option: bypass multi-gain calibration
+        // In this case use only the gain0 offset
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
+            if(cellBadpix[0][p] != 0) {
+                aduData[p] = 0;
+                badpixMask[p] = 1;
+            }
 		}
-
 		// Bypass the gain calibration stage
 		return;
 	}
 	
 
-	// Loop through pixels, determine gain and apply offsets
-	// 	calibrated_raw_data[g1] *= 45
-	//	calibrated_raw_data[g2] *= 454.2
 	int		pixGain = 0;
 	long	pixelsInGainLevel[3] = {0,0,0};
-	float	gainFactor[] = {1, 45, 454.2};
 	
+    // Loop through pixels
 	for (long p=0; p<_myModule->nn; p++) {
-		
+        pixGain = 0;
+
 		// Determine which gain stage by thresholding
-		pixGain = 0;
+        if(true) {
+            if(gainData[p] > cellGainLevel[1][p])
+            {
+                pixGain = 1;
+                pixelsInGainLevel[1] += 1;
+            }
+            if(gainData[p] > cellGainLevel[2][p])
+            {
+                pixGain = 2;
+                pixelsInGainLevel[2] += 1;
+            }
+        }
 
-		if(gainData[p] > cellGainThreshold[0][p])
-		{
-			pixGain = 1;
-			pixelsInGainLevel[1] += 1;
-		}
-		if(gainData[p] > cellGainThreshold[1][p])
-		{
-			pixGain = 2;
-			pixelsInGainLevel[2] += 1;
-		}
+        // Remember the gain level setting
+        gainData[p] = pixGain;
 
-		// For scientific discovery purposes...
-		if (true)
-		{
-			if (p == (int)(_myModule->nn / 2))
-			{
-				std::cout << "GREPPY:\t" << gainData[p] << "\t" << aduData[p] << std::endl;
-			}
-		}
+        
+        // Check whether this ia a bad pixel
+        if(cellBadpix[pixGain][p] != 0) {
+            badpixMask[p]= 1;
+            aduData[p] = 0;
+            continue;
+        }
+        
 
-		// Subtract the appropriate offset
-		// No - subtract an inappropriate offset to see what happens
+        // Subtract the appropriate offset
 		aduData[p] -= cellDarkOffset[pixGain][p];		// Correct way
 		//aduData[p] -= cellDarkOffset[0][p];		    // For testing
 
-		// Multiplication factor
-		aduData[p] *= gainFactor[pixGain];
-		
-		// Remember the gain level setting
-		gainData[p] = pixGain;
-
+        
+		// Apply gain factor
+		aduData[p] *= cellRelativeGain[pixGain][p];
 	}
 
-	pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
+    pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
 
-	// 	This is verbose but useful
-	//	Perhaps pass back to agipd_reader and print once per frame rather than once per module
-	if(true) {
+	// 	This is verbose but sometimes useful
+	if(false) {
 		std::cout << "nPixels in gain mode (0,1,2) = (";
 		std::cout << pixelsInGainLevel[0] << ", ";
 		std::cout << pixelsInGainLevel[1] << ", ";
@@ -256,7 +252,7 @@ void cAgipdCalibrator::readCalibrationData()
     // Read relative gain data
     if(_relativeGainData != NULL)        // Beware of memory leaks
         free(_relativeGainData);
-    _relativeGainData = (float*) checkAllocReadDataset((char*) gainlevel_field.c_str(), &ndims, dims, H5T_IEEE_F32LE, sizeof(float));
+    _relativeGainData = (float*) checkAllocReadDataset((char*) relativegain_field.c_str(), &ndims, dims, H5T_IEEE_F32LE, sizeof(float));
 
     
     // Read bad pixel map
@@ -413,8 +409,10 @@ void cAgipdCalibrator::readDESYCalibrationData()
 
 
 
-
-
+/*
+ *  Set of funcitons for returning shortcut pointer to location of calibration data
+ *  Does some simple error checking
+ */
 // Return pointer to dark offsets for specified gain and cellID
 int16_t *cAgipdCalibrator::darkOffsetForGainAndCell(int gain, int cell)
 {
@@ -425,11 +423,31 @@ int16_t *cAgipdCalibrator::darkOffsetForGainAndCell(int gain, int cell)
 }
 
 // Return pointer to gain thresholds for specified gain and cellID
-// Gain threshold array is nGains-1 in size
 int16_t *cAgipdCalibrator::gainLevelForGainAndCell(int gain, int cell)
 {
-	if (gain >= nGains-1) return NULL;
+	if (gain >= nGains) return NULL;
 	if (cell >= nCells) return NULL;
 	
 	return _gainLevelGainCellPtr[gain][cell];
 }
+
+
+// Return pointer to relative gain for specified gain and cellID
+float *cAgipdCalibrator::relativeGainForGainAndCell(int gain, int cell)
+{
+    if (gain >= nGains) return NULL;
+    if (cell >= nCells) return NULL;
+    
+    return _relativeGainGainCellPtr[gain][cell];
+}
+
+// Return pointer to relative gain for specified gain and cellID
+uint8_t *cAgipdCalibrator::badpixelForGainAndCell(int gain, int cell)
+{
+    if (gain >= nGains) return NULL;
+    if (cell >= nCells) return NULL;
+    
+    return _badpixelGainCellPtr[gain][cell];
+}
+
+
