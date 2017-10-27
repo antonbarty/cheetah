@@ -175,10 +175,13 @@ void cheetahUpdateGlobal(cGlobal *global, cEventData *eventData){
 		if ( !isnan(detposnew) ) {
 
 			// New detector position = 0 could be an error
-            if ( detposnew == 0 ) {
-                detposnew = global->detector[detIndex].detposprev;
-                printf("WARNING: detector position is zero, which could be an error\n"
-                       "         will use previous position (%s=%f) instead...\n",global->detector[detIndex].detectorZpvname, detposnew);
+            // Turn off for XFEL code as there is no detector encoder
+            if(false) {
+                if ( detposnew == 0 ) {
+                    detposnew = global->detector[detIndex].detposprev;
+                    printf("WARNING: detector position is zero, which could be an error\n"
+                           "         will use previous position (%s=%f) instead...\n",global->detector[detIndex].detectorZpvname, detposnew);
+                }
             }
 			
             //	Apply offsets
