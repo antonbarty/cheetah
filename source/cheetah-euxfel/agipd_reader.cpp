@@ -419,10 +419,12 @@ bool cAgipdReader::nextFramePrivate() {
 		}
 		
 		// Skip the first _skip pulses in a train (corrupted)
-		if(currentPulse < _skip) {
-			std::cout << "Skipping pulse 0 in train " << currentTrain << std::endl;
-		    continue;
-		}
+        if(false) {
+            if(currentPulse < _skip) {
+                std::cout << "Skipping pulse 0 in train " << currentTrain << std::endl;
+                continue;
+            }
+        }
 
 		//	PulseID is taken from the AGIPD firmware --> used for determining which are good data frames
 		//  Good frames occur when pulseID % _pulseIDmodulo == 0

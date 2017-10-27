@@ -170,13 +170,15 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
     float *rsigma = (float*) calloc(lmaxr, sizeof(float));
     float *roffset = (float*) calloc(lmaxr, sizeof(float));
     long *rcount = (long*) calloc(lmaxr, sizeof(long));
-    float *rthreshold = (float*) calloc(lmaxr, sizeof(float));
-    
+    float *rthreshold_hi = (float*) malloc(lmaxr*sizeof(float));
+    float *rthreshold_lo = (float*) malloc(lmaxr*sizeof(float));
+
     long *peakpixels = (long *) calloc(hitfinderMaxPixCount, sizeof(long));
     char *peakpixel = (char *) calloc(pix_nn, sizeof(char));
     
     for (long i = 0; i < lmaxr; i++) {
-        rthreshold[i] = 1e9;
+        rthreshold_hi[i] = 1e9;
+        rthreshold_lo[i] = 0;
     }
     
     // Compute sigma and average of data values at each radius
@@ -193,7 +195,7 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
         for (long i = 0; i < pix_nn; i++) {
             if (mask[i] != 0) {
                 thisr = lrint(pix_r[i]);
-                if (temp[i] < rthreshold[thisr]) {
+                if (temp[i] > rthreshold_lo[thisr] && temp[i] < rthreshold_hi[thisr]) {
                     roffset[thisr] += temp[i];
                     rsigma[thisr] += (temp[i] * temp[i]);
                     rcount[thisr] += 1;
@@ -204,7 +206,8 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
             if (rcount[i] == 0) {
                 roffset[i] = 0;
                 rsigma[i] = 0;
-                rthreshold[i] = 1e9;
+                rthreshold_hi[i] = 1e9;
+                //rthreshold_lo[i] = -1e9;
                 //rthreshold[i] = ADCthresh;		// For testing
             }
             else {
@@ -212,9 +215,10 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
                 thissigma = sqrt(rsigma[i] / rcount[i] - ((roffset[i] / rcount[i]) * (roffset[i] / rcount[i])));
                 roffset[i] = thisoffset;
                 rsigma[i] = thissigma;
-                rthreshold[i] = roffset[i] + hitfinderMinSNR * rsigma[i];
-                if (rthreshold[i] < ADCthresh)
-                    rthreshold[i] = ADCthresh;
+                rthreshold_hi[i] = roffset[i] + hitfinderMinSNR * rsigma[i];
+                //rthreshold_lo[i] = roffset[i] - hitfinderMinSNR * rsigma[i];
+                if (rthreshold_hi[i] < ADCthresh)
+                    rthreshold_hi[i] = ADCthresh;
                 //rthreshold[i] = ADCthresh;		// For testing
             }
         }
@@ -243,7 +247,7 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
                     }
                     
                     thisr = lrint(pix_r[e]);
-                    thisADCthresh = rthreshold[thisr];
+                    thisADCthresh = rthreshold_hi[thisr];
                     
                     if (temp[e] > thisADCthresh && peakpixel[e] == 0) {
                         // This might be the start of a new peak - start searching
@@ -287,7 +291,7 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
                                     //}
                                     
                                     thisr = lrint(pix_r[e]);
-                                    thisADCthresh = rthreshold[thisr];
+                                    thisADCthresh = rthreshold_hi[thisr];
                                     
                                     // Above threshold?
                                     if (temp[e] > thisADCthresh && peakpixel[e] == 0 && mask[e] != 0) {
@@ -372,7 +376,7 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
                                 e = thisx + thisy * pix_nx;
                                 
                                 thisr = lrint(pix_r[e]);
-                                thisADCthresh = rthreshold[thisr];
+                                thisADCthresh = rthreshold_hi[thisr];
                                 
                                 // Intensity above background
                                 thisI = temp[e];
@@ -509,8 +513,9 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r, long
     free(roffset);
     free(rsigma);
     free(rcount);
-    free(rthreshold);
-    
+    free(rthreshold_hi);
+    free(rthreshold_lo);
+
     peaklist->nPeaks = peakCounter;
     return (peaklist->nPeaks);
     /*************************************************/

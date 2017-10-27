@@ -223,12 +223,12 @@ int main(int argc, char* argv[]) {
 				continue;
 			}
 
-			// Allocate memory for image data
+			// Copy AGIPD image into Cheetah event
 			memcpy(eventData->detector[detId].data_raw, agipd.data, agipd.nn*sizeof(float));
 			eventData->detector[detId].data_raw_is_float = true;
 					   
             
-            // Copy over mask from read data
+            // Copy AGIPD bad pixel mask into Cheetah event
             for (long i = 0; i < cheetahGlobal.detector[detId].pix_nn; i++) {
                 if(agipd.badpixMask[i] != 0) {
                     eventData->detector[detId].pixelmask[i] = PIXEL_IS_BAD;

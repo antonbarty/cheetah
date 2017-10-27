@@ -505,24 +505,29 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
 	long	p;
 	long nbad = 0;
-	for (long i = 0; i < nn; i++) {
-		p = 3*i + digitalGain[i];
-		badpixMask[i] = tempmask[p];
-		if(badpixMask[i] != 0) {
-			data[i] = 0;
-            badpixMask[i] = 1;
-			nbad++;
-		}
-	}
+    // Optionally skip this for debugging
+    if(false) {
+        for (long i = 0; i < nn; i++) {
+            p = 3*i + digitalGain[i];
+            badpixMask[i] = tempmask[p];
+            if(badpixMask[i] != 0) {
+                data[i] = 0;
+                badpixMask[i] = 1;
+                nbad++;
+            }
+        }
+    }
 	free(tempmask);
 
     
     // Check for screwy intensity values: Sometimes we get +/- 1e9 appearing
     // Bad form to hard code this, but for now it's just a test case
-    for (long i = 0; i < nn; i++) {
-        if(data[i] > 5e7 || data[i] < -1e5) {
-            data[i] = 0;
-            badpixMask[i] = 1;
+    if(true) {
+        for (long i = 0; i < nn; i++) {
+            if(data[i] > 5e7 || data[i] < -1e6) {
+                data[i] = 0;
+                badpixMask[i] = 1;
+            }
         }
     }
     
