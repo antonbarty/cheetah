@@ -27,7 +27,7 @@ public:
 	
 	void readCalibrationData();
     void readDESYCalibrationData();
-	void applyCalibration(int, float*, uint16_t*);
+	void applyCalibration(int, float*, uint16_t*, uint16_t*);
 
 
 	int16_t *darkOffsetForGainAndCell(int gain, int cell);

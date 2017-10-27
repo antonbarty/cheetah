@@ -70,7 +70,7 @@ void cAgipdReader::setScheme(char *scheme) {
 	
 	// Default (current) scheme
 	if(_scheme == "XFEL") {
-		setSkip(1);
+		setSkip(0);
 		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
 		//setNewFileSkip(60);
@@ -78,7 +78,7 @@ void cAgipdReader::setScheme(char *scheme) {
 
 	// Barty, September 2017
 	if(_scheme == "XFEL2012") {
-        setSkip(1);
+        setSkip(0);
 		setPulseIDmodulo(8);
 		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
         //setNewFileSkip(60);
@@ -86,7 +86,7 @@ void cAgipdReader::setScheme(char *scheme) {
 
     // Ros, September 2017
     if(_scheme == "XFEL2042") {
-        setSkip(1);
+        setSkip(0);
 		setPulseIDmodulo(8);
 		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
         //setNewFileSkip(60);
@@ -452,19 +452,25 @@ bool cAgipdReader::nextFramePrivate() {
 
 	std::cout << "Returning image number: " << goodImages4ThisTrain << std::endl;
 
+    
 	// Statistics on bad pixels, etc...
-	long nhigh=0;
-	long nbad=0;
-	for(long p=0; p<nn; p++) {
-		if(digitalGain[p] != 0)
-			nhigh++;
-		if(badpixMask[p] != 0)
-			nbad++;
-	}
-	printf("%li gain switched pixels (%f%%); ", nhigh, (100.*nhigh)/nn);
-	printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
+    if(true) {
+        long    pixelsInGainLevel[3] = {0,0,0};
+        long    nbad=0;
 
-	return success;
+        for(long p=0; p<nn; p++) {
+            pixelsInGainLevel[digitalGain[p]] += 1;
+            if(badpixMask[p] != 0)
+                nbad++;
+        }
+        std::cout << "nPixels in gain mode (0,1,2) = (";
+        std::cout << pixelsInGainLevel[0] << ", ";
+        std::cout << pixelsInGainLevel[1] << ", ";
+        std::cout << pixelsInGainLevel[2] << "),   ";
+        printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
+    }
+
+    return success;
 }
 
 
@@ -478,9 +484,9 @@ void cAgipdReader::resetCurrentFrame() {
 // Set the frame to blank if there is an error
 void cAgipdReader::setModuleToBlank(int moduleID) {
     statusID[moduleID] = 1;
-    memset(pdata[moduleID], 0, modulenn*sizeof(float));
-    memset(pgain[moduleID], 0, modulenn*sizeof(uint16_t));
 	for(long p=0; p<modulenn; p++) {
+        pdata[moduleID][p] = 0;
+        pgain[moduleID][p] = 0;
 		pmask[moduleID][p] = 1;
 	}
 }
@@ -556,7 +562,23 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		std::cout << "Read train " << trainID << ", pulseID " << pulseID << " with "
 		<< moduleCount << " modules." << std::endl;
 	}
-	
+
+    
+    // Check number of pixels in each gain stage
+    if(false) {
+        long    pixelsInGainLevel[3] = {0,0,0};
+
+        for(long p=0; p<nn; p++) {
+            pixelsInGainLevel[digitalGain[p]] += 1;
+        }
+        
+        std::cout << "nPixels in gain mode (0,1,2) = (";
+        std::cout << pixelsInGainLevel[0] << ", ";
+        std::cout << pixelsInGainLevel[1] << ", ";
+        std::cout << pixelsInGainLevel[2] << ")" << std::endl;
+    }
+    
+    
 	currentTrain = trainID;
 	currentPulse = pulseID;
 	currentCell = module[0].cellID;

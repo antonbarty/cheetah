@@ -155,7 +155,11 @@ int main(int argc, char* argv[]) {
 		agipd.resetCurrentFrame();
 		while (agipd.nextFrame()) {
 			
-			if (!agipd.goodFrame()) {
+            // Incrememnt the frame number
+            frameNumber++;
+
+            
+            if (!agipd.goodFrame()) {
 				continue;
 			}
 
@@ -172,8 +176,6 @@ int main(int argc, char* argv[]) {
 			//}
 
 			
-			// Incrememnt the frame number
-			frameNumber++;
 
 			// First few frames in a run seem junk
 			//if(frameNumber < 100) {

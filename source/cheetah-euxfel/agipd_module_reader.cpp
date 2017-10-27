@@ -435,7 +435,8 @@ void cAgipdModuleReader::readFrameRaw(long frameNum) {
 	slab_start[1] += gainDataOffset[1];
 	digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 
-	// Bad pixel mask doesn't really exist for raw data, allocate anyway to avoid crashes later
+	// Bad pixel mask added by raw data calibration, or left alone if uncalibrated
+    // Pixel good = 0, pixel bad = anything else
 	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
 
 	
@@ -455,6 +456,7 @@ void cAgipdModuleReader::readFrameRaw(long frameNum) {
 /*
  *	Read a single frame of XFEL calibrated data
  *	usually found in {$EXPT}/proc
+ *  as provided by Steffen Hauf's calibration routines
  */
 void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	if (noData) {
@@ -500,7 +502,7 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	ndims = 4;
 	uint8_t *tempmask = NULL;
 	tempmask = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
-	badpixMask = (uint16_t *)malloc(nn * sizeof(uint16_t));
+	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
 	long	p;
 	long nbad = 0;
 	for (long i = 0; i < nn; i++) {
@@ -558,7 +560,7 @@ void cAgipdModuleReader::applyCalibration(long frameNum) {
 	int thisCell = cellID / 2;
 
 	// New way
-	calibrator->applyCalibration(thisCell, data, digitalGain);
+	calibrator->applyCalibration(thisCell, data, digitalGain, badpixMask);
 
 }
 //  cAgipdModuleReader::applyCalibration
