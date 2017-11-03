@@ -29,14 +29,24 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cxiview.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="114" column="13" lean-forward="true" selection-start-line="114" selection-start-column="13" selection-end-line="114" selection-end-column="13" />
+            <state relative-caret-position="1362">
+              <caret line="283" column="41" lean-forward="false" selection-start-line="283" selection-start-column="41" selection-end-line="283" selection-end-column="41" />
               <folding>
                 <element signature="e#274#289#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="peakogram.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/peakogram.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="540">
+              <caret line="40" column="56" lean-forward="true" selection-start-line="40" selection-start-column="56" selection-end-line="40" selection-end-column="56" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -137,6 +147,7 @@
         <option value="$PROJECT_DIR$/lib/crawler_exfel.py" />
         <option value="$PROJECT_DIR$/lib/cfel_imgtools.py" />
         <option value="$PROJECT_DIR$/cxiview.py" />
+        <option value="$PROJECT_DIR$/peakogram.py" />
       </list>
     </option>
   </component>
@@ -652,13 +663,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/peakogram.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="41" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_locations.py" />
     <entry file="file://$PROJECT_DIR$/gui_configuration.py" />
     <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
@@ -766,11 +770,19 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/cxiview.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="114" column="13" lean-forward="true" selection-start-line="114" selection-start-column="13" selection-end-line="114" selection-end-column="13" />
+        <state relative-caret-position="1362">
+          <caret line="283" column="41" lean-forward="false" selection-start-line="283" selection-start-column="41" selection-end-line="283" selection-end-column="41" />
           <folding>
             <element signature="e#274#289#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/peakogram.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="40" column="56" lean-forward="true" selection-start-line="40" selection-start-column="56" selection-end-line="40" selection-end-column="56" />
+          <folding />
         </state>
       </provider>
     </entry>
