@@ -241,7 +241,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
 
             ring_pen = pyqtgraph.mkPen('b', width=2)
-            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
+            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.found_peak_canvas.setData([])
@@ -282,9 +282,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_y = []
 
             ring_pen = pyqtgraph.mkPen('g', width=2)
-            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', 
-                size = 2*self.predicted_peak_circle_radius, pen = ring_pen, 
-                brush = (0,0,0,0), pxMode = False)
+            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 2*self.predicted_peak_circle_radius, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
         else:
             self.predicted_peak_canvas.setData([])
             self.resolution_limit_ring_canvas.setData([])

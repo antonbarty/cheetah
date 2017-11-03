@@ -167,7 +167,7 @@ int main(int argc, char* argv[]) {
 			
 			// First pulse in a train is junk
 			if(agipd.currentPulse == 0) {
-				std::cout << "Skipping pulse 0 in train" << std::endl;
+				std::cout << "Skipping pulse 0 in train (in cheetah-euxfel.cpp)" << std::endl;
 				continue;
 			}
 			
