@@ -106,12 +106,15 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	}
 	
     
-	if(_myModule->_doNotApplyGainSwitch)
+    if(_myModule->_doNotApplyGainSwitch)
+    //if(true)
     {
         // Option: bypass multi-gain calibration
         // In this case use only the gain0 offset
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
+            gainData[p] = 0;
+            badpixMask[p] = 0;
             if(cellBadpix[0][p] != 0) {
                 aduData[p] = 0;
                 badpixMask[p] = 1;
@@ -136,11 +139,14 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
                 pixGain = 1;
                 pixelsInGainLevel[1] += 1;
             }
-            if(gainData[p] > cellGainLevel[2][p])
-            {
-                pixGain = 2;
-                pixelsInGainLevel[2] += 1;
-            }
+            
+            // Thresholding for gain level 3 is dodgy - thresholds merge
+            // Ignore gain level 3 for now and work on levels 0,1
+            //if(gainData[p] > cellGainLevel[2][p])
+            //{
+            //    pixGain = 2;
+            //    pixelsInGainLevel[2] += 1;
+            //}
         }
 
         // Remember the gain level setting
@@ -164,10 +170,9 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 		aduData[p] *= cellRelativeGain[pixGain][p];
 	}
 
-    pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
-
 	// 	This is verbose but sometimes useful
 	if(false) {
+        pixelsInGainLevel[0] = _myModule->nn - pixelsInGainLevel[1] - pixelsInGainLevel[2];
 		std::cout << "nPixels in gain mode (0,1,2) = (";
 		std::cout << pixelsInGainLevel[0] << ", ";
 		std::cout << pixelsInGainLevel[1] << ", ";

@@ -419,7 +419,7 @@ bool cAgipdReader::nextFramePrivate() {
 		}
 		
 		// Skip the first _skip pulses in a train (corrupted)
-        if(false) {
+        if(true) {
             if(currentPulse < _skip) {
                 std::cout << "Skipping pulse 0 in train " << currentTrain << std::endl;
                 continue;

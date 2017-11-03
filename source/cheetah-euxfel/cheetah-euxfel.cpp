@@ -131,7 +131,8 @@ int main(int argc, char* argv[]) {
 	agipd.darkcalFile = cheetahGlobal.detector[0].darkcalFile;
 	agipd.gaincalFile = cheetahGlobal.detector[0].gaincalFile;
 	
-	
+    
+    
 	// Loop through all listed *AGIPD00*.h5 files
 	for(long fnum=0; fnum<CheetahEuXFELparams.inputFiles.size(); fnum++) {
 
