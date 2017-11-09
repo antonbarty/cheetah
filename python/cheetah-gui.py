@@ -335,10 +335,14 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
             # Format output directory string
+            # This clumsily selects between using run numbers and using directory names
+            # We need to fix this up sometime
             print("Location: ", self.compute_location['location'])
             if 'LCLS' in self.compute_location['location']:
                 dir = 'r{:04d}'.format(int(run))
             elif 'max-exfl' in self.compute_location['location']:
+                dir = 'r{:04d}'.format(int(run))
+            elif 'max-cfel' in self.compute_location['location']:
                 dir = 'r{:04d}'.format(int(run))
             else:
                 dir = run
