@@ -35,12 +35,16 @@ def determine_location():
         print("Looks like we are on the EuXFEL Maxwell nodes.")
         location = 'max-exfl'
 
+    elif hostname.startswith('max-cfel') and hostname.endswith("desy.de"):
+        print("Looks like we are on a CFEL maxwell node.")
+        location = 'max-cfel'
+
     elif hostname.startswith('max') and hostname.endswith("desy.de"):
         print("Looks like we are on a maxwell node.")
         location = 'max-cfel'
 
     elif hostname.endswith("desy.de"):
-        print("Looks like we are at CFEL/DESY.")
+        print("Looks like we are somewhere at DESY.")
         location = 'DESY'
 
     elif hostname.endswith("xfel.eu"):
@@ -80,6 +84,12 @@ def set_location_configuration(location="Default"):
         }
         result.update(config)
 
+    elif location == 'max-cfel':
+        config = {
+            'qcommand': 'slurm'
+        }
+        result.update(config)
+
     elif  location=='CFEL':
         config = {
             'qcommand' : 'slurm'
@@ -89,7 +99,7 @@ def set_location_configuration(location="Default"):
 
     elif  location=='euXFEL':
         config = {
-            'qcommand' : 'bsub'
+            'qcommand' : 'slurm'
         }
         result.update(config)
 
