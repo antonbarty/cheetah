@@ -33,26 +33,46 @@ void initPixelmask(cEventData *eventData, cGlobal *global){
 	}
 }
 
-void checkSaturatedPixels(uint16_t *data_raw16, uint16_t *mask, long pix_nn, long pixelSaturationADC) {
-	for(long i=0; i<pix_nn; i++) { 
-        if ( data_raw16[i] >= pixelSaturationADC) {
+void checkSaturatedPixels(uint16_t *data_raw16, uint16_t *mask, long pix_nn, long pixelSaturationADC, long pixelMinimumAllowedADC) {
+	for(long i=0; i<pix_nn; i++)
+    {
+        if ( data_raw16[i] >= pixelSaturationADC)
+        {
 			mask[i] |= PIXEL_IS_SATURATED;
             data_raw16[i] = 0;
         }
 		else
+        {
 			mask[i] &= ~PIXEL_IS_SATURATED;
-	}
+        }
+        
+        if ( data_raw16[i] <= pixelMinimumAllowedADC)
+        {
+            mask[i] |= PIXEL_IS_BAD;
+            data_raw16[i] = 0;
+        }
+
+    }
 }
 
 
-void checkSaturatedPixels(float *raw_data_float, uint16_t *mask, long pix_nn, long pixelSaturationADC) {
+void checkSaturatedPixels(float *raw_data_float, uint16_t *mask, long pix_nn, long pixelSaturationADC, long pixelMinimumAllowedADC) {
     for(long i=0; i<pix_nn; i++) {
-        if ( raw_data_float[i] >= pixelSaturationADC) {
+        if ( raw_data_float[i] >= pixelSaturationADC)
+        {
             mask[i] |= PIXEL_IS_SATURATED;
             raw_data_float[i] = 0;
         }
         else
+        {
             mask[i] &= ~PIXEL_IS_SATURATED;
+        }
+
+        if ( raw_data_float[i] <= pixelMinimumAllowedADC)
+        {
+            mask[i] |= PIXEL_IS_BAD;
+            raw_data_float[i] = 0;
+        }
     }
 }
 
@@ -85,15 +105,19 @@ void checkSaturatedPixels(cEventData *eventData, cGlobal *global){
 			uint16_t	*raw_data = eventData->detector[detIndex].data_raw16;
             float       *raw_data_float = eventData->detector[detIndex].data_raw;
 			uint16_t	*mask = eventData->detector[detIndex].pixelmask;
-			if ((strcmp(global->detector[detIndex].detectorType, "pnccd") == 0) && (global->detector[detIndex].maskPnccdSaturatedPixels)) {
+			if ((strcmp(global->detector[detIndex].detectorType, "pnccd") == 0) && (global->detector[detIndex].maskPnccdSaturatedPixels))
+            {
 				DEBUG3("Check for saturated pixels (PNCCD). (detectorID=%ld)",global->detector[detIndex].detectorID);										
 				checkSaturatedPixelsPnccd(raw_data,mask);
-			} else {
+			}
+            else
+            {
 				DEBUG3("Check for saturated pixels (other than PNCCD). (detectorID=%ld)",global->detector[detIndex].detectorID);										
 				long		nn = global->detector[detIndex].pix_nn;
-				long		pixelSaturationADC = global->detector[detIndex].pixelSaturationADC;			
-				//checkSaturatedPixels(raw_data, mask, nn, pixelSaturationADC);
-                checkSaturatedPixels(raw_data_float, mask, nn, pixelSaturationADC);
+				long		pixelSaturationADC = global->detector[detIndex].pixelSaturationADC;
+                long        pixelMinimumAllowedADC = global->detector[detIndex].pixelMinimumAllowedADC;
+				//checkSaturatedPixels(raw_data, mask, nn, pixelSaturationADC, pixelMinimumAllowedADC);
+                checkSaturatedPixels(raw_data_float, mask, nn, pixelSaturationADC, pixelMinimumAllowedADC);
 			}
 		}
 	}
