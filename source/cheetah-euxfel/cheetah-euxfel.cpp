@@ -117,10 +117,10 @@ int main(int argc, char* argv[]) {
     agipd.setScheme((char*) CheetahEuXFELparams.exptName.c_str());
 
     // Set command line option overrides
-    if(CheetahEuXFELparams.frameSkip != -1)
-        agipd.setSkip(CheetahEuXFELparams.frameSkip);
-    if(CheetahEuXFELparams.frameStride != -1)
-        agipd.setStride(CheetahEuXFELparams.frameStride);
+    //if(CheetahEuXFELparams.frameSkip != -1)
+    //    agipd.setSkip(CheetahEuXFELparams.frameSkip);
+    //if(CheetahEuXFELparams.frameStride != -1)
+    //    agipd.setStride(CheetahEuXFELparams.frameStride);
 	if(CheetahEuXFELparams.nogainswitch)
 		agipd.setDoNotApplyGainSwitch(CheetahEuXFELparams.nogainswitch);
 

@@ -83,14 +83,20 @@ cAgipdCalibrator::~cAgipdCalibrator()
 void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData, uint16_t *badpixMask) {
 
 	// Stupidity checks
-	if (cellID >= nCells || cellID < 0)
+    if (cellID >= nCells || cellID < 0) {
+        std::cout << "WARNING: Out of bounds cellID in cAgipdCalibrator::applyCalibration: " << cellID << std::endl;
 		return;
+    }
 
-	if (_darkOffsetData == NULL)
+    if (_darkOffsetData == NULL) {
+        std::cout << "WARNING: No _darkOffsetData in cAgipdCalibrator::applyCalibration for module " << std::endl;
 		return;
-
-	if (aduData == NULL || gainData == NULL)
-		return;
+    }
+    
+    if (aduData == NULL || gainData == NULL) {
+        std::cout << "WARNING: No aduData or no gainData in cAgipdCalibrator::applyCalibration" << std::endl;
+        return;
+    }
 
 	// Extract pointers to data for this cell
 	int16_t 	*cellDarkOffset[nGains];
@@ -106,8 +112,8 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	}
 	
     
-    if(_myModule->_doNotApplyGainSwitch)
     //if(true)
+    if(_myModule->_doNotApplyGainSwitch)
     {
         // Option: bypass multi-gain calibration
         // In this case use only the gain0 offset
@@ -139,7 +145,6 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
                 pixGain = 1;
                 pixelsInGainLevel[1] += 1;
             }
-            
             // Thresholding for gain level 3 is dodgy - thresholds merge
             // Ignore gain level 3 for now and work on levels 0,1
             //if(gainData[p] > cellGainLevel[2][p])
@@ -147,10 +152,14 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
             //    pixGain = 2;
             //    pixelsInGainLevel[2] += 1;
             //}
+            else {
+                pixGain = 0;
+                pixelsInGainLevel[0] += 1;
+            }
         }
+        gainData[p] = pixGain;
 
         // Remember the gain level setting
-        gainData[p] = pixGain;
 
         
         // Check whether this ia a bad pixel

@@ -357,7 +357,9 @@ void cAgipdModuleReader::readFrame(long frameNum){
 	// Read a single image at position frameNum
 	// Will have both fs and ss, and stack...
 
-	if (noData) return;
+    if (noData) {
+        return;
+    }
 
 	if(frameNum < 0 || frameNum >= nframes) {
 		std::cout << "\treadFrame::frameNum out of bounds " << frameNum << std::endl;
@@ -556,8 +558,10 @@ void cAgipdModuleReader::applyCalibration(long frameNum) {
         return;
     
     // No calibrator = no calibration
-	if(calibrator == NULL)
+    if(calibrator == NULL) {
+        memset(digitalGain, 0, nn*sizeof(uint16_t));
 		return;
+    }
 
 	// Cell ID for this frame number
 	// In this scheme, digital and analog are interleaved - the real calibration constant is in cellID/2
