@@ -461,6 +461,11 @@ bool cAgipdReader::nextFramePrivate() {
         long    nbad=0;
 
         for(long p=0; p<nn; p++) {
+            if(true) {
+                if(digitalGain[p]<0 || digitalGain[p] > 2 ){
+                    std::cout << "Bad digital gain value: " << digitalGain[p] << std::endl;
+                }
+            }
             pixelsInGainLevel[digitalGain[p]] += 1;
             if(badpixMask[p] != 0)
                 nbad++;
