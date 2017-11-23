@@ -68,30 +68,43 @@ cAgipdReader::~cAgipdReader()
 void cAgipdReader::setScheme(char *scheme) {
     _scheme = scheme;
 	
+	std::cout << "Configuring for XFEL data layout\n";
+
+	// Barty, September 2017
+	if(_scheme == "XFEL2012") {
+		std::cout << "\tSetting AGIPD data scheme to XFEL2012\n";
+        setSkip(0);
+		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		setCellIDcorrection(2);		// For interleaved data we need to correct the cellID by 2, else not
+		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
+        //setNewFileSkip(60);
+    }
+	
+    // Fromme, November 2017
+    else if(_scheme == "XFEL2066") {
+		std::cout << "\tSetting AGIPD data scheme to XFEL2066\n";
+        setSkip(0);
+		setPulseIDmodulo(4);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		setCellIDcorrection(1);		// Data is not interleaved
+		setGainDataOffset(0,1);		// Gain data hyperslab offset relative to image data
+        //setNewFileSkip(60);
+    }
+
 	// Default (current) scheme
-	if(_scheme == "XFEL") {
+	else {
+		std::cout << "\tSetting AGIPD data scheme to Default\n";
 		setSkip(0);
 		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		setCellIDcorrection(2);		// For interleaved data we need to correct the cellID by 2, else not
 		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
 		//setNewFileSkip(60);
 	}
 
-	// Barty, September 2017
-	if(_scheme == "XFEL2012") {
-        setSkip(0);
-		setPulseIDmodulo(8);
-		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
-        //setNewFileSkip(60);
-    }
+	std::cout << "\tData frames on PulseId modulo: " << _pulseIDmodulo << std::endl;
+	std::cout << "\tCellId correction: " << _cellIDcorrection << std::endl;
+	std::cout << "\tGain data offset: (" << _gainDataOffset[0] << ", " << _gainDataOffset[1] << ")" << std::endl;
 
-    // Ros, September 2017
-    if(_scheme == "XFEL2042") {
-        setSkip(0);
-		setPulseIDmodulo(8);
-		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
-        //setNewFileSkip(60);
-    }
-
+	
     // Defaults will be used if none of the above are found
     return;
 }
@@ -141,7 +154,7 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 
 
 		std::string stackNum = moduleFilename[i].substr(stackPos, 5);
-		int stackInt = atoi(stackNum.c_str());
+		//int stackInt = atoi(stackNum.c_str());
 
 		//firstModule = (stackInt == 0);
 		
@@ -202,8 +215,8 @@ void cAgipdReader::open(char *baseFilename){
 		module[i].open((char *) moduleFilename[i].data(), i);
 		module[i].readHeaders();
 		module[i].readDarkcal((char *)darkcalFilename[i].c_str());
-		//module[i].readGaincal(gaincalFilename[i].c_str());
 		module[i].setGainDataOffset(_gainDataOffset[0],_gainDataOffset[1]);
+		module[i].setCellIDcorrection(_cellIDcorrection);
 		module[i].setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
 	}
 

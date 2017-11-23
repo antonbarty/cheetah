@@ -48,8 +48,11 @@ public:
 	void setSkip(int skip) { _skip = skip; if (_skip < 0) _skip = 0; }
     void setStride(int stride) { _stride = stride; if (_stride <= 0) _stride = 1; }
 	void setPulseIDmodulo(int mod) { _pulseIDmodulo = mod; if (_pulseIDmodulo <= 0) _pulseIDmodulo = 1; }
+	void setCellIDcorrection(int mod) { _cellIDcorrection = mod; if (_cellIDcorrection <= 0) _cellIDcorrection = 1; }
     void setNewFileSkip(int skip) { _newFileSkip = skip; if (_newFileSkip < 0) _newFileSkip = 0; }
 	void setGainDataOffset(int d0, int d1) {_gainDataOffset[0] = d0; _gainDataOffset[1] = d1; }
+	
+	
 	void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
 
 	
@@ -119,6 +122,7 @@ private:
     std::string         _scheme;
 	int                 _skip;              // Number of pulses to skip at start of pulse train
 	int					_pulseIDmodulo;		// Good frames occur when pulseID % _pulseIDmodulo == 0
+	int					_cellIDcorrection; 	// For interleaved data we need to divide cellID by 2, otherwise not
     int                 _stride;            // Step over frames with this spacing
     int                 _newFileSkip;       // Number of useless frames at the start of each file
     int                 _referenceModule;   // The module number passed on the command line (evidently it exists)
