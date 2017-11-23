@@ -53,6 +53,7 @@ struct tCheetahEuXFELparams {
 	std::vector<std::string> inputFiles;
 	std::string iniFile;
     std::string exptName;
+	std::string dataFormat;
     int frameStride;
     int frameSkip;
 	int verbose;
@@ -114,7 +115,7 @@ int main(int argc, char* argv[]) {
 	// Initialise AGIPD frame reading stuff
 	cAgipdReader agipd;
 	agipd.verbose=1;
-    agipd.setScheme((char*) CheetahEuXFELparams.exptName.c_str());
+    agipd.setScheme((char*) CheetahEuXFELparams.dataFormat.c_str());
 
     // Set command line option overrides
     //if(CheetahEuXFELparams.frameSkip != -1)
@@ -334,6 +335,7 @@ void print_help(void){
     std::cout << "\t--stride=<n>         Process only every <n>th frame\n";
     std::cout << "\t--skip=<n>           Skip the first <n> frame of each .h5 file\n";
 	std::cout << "\t--nogainswitch       Disable gain switching calibration (assume all high gain)\n";
+	std::cout << "\t--dataformat         Data layout {XFEL2012, XFEL2066}\n";
     std::cout << std::endl;
     std::cout << "End of help\n";
 }
@@ -347,6 +349,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
     // Defaults
     global->iniFile = "cheetah.ini";
     global->exptName = "XFEL";
+	global->dataFormat = "XFEL2012";
     global->frameStride = -1;
     global->frameSkip = -1;
 	global->nogainswitch = false;
@@ -359,12 +362,13 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
         { "stride", required_argument, NULL, 0 },
         { "skip", required_argument, NULL, 0 },
         { "experiment", required_argument, NULL, 'e' },
+		{ "dataformat", required_argument, NULL, 'f' },
 		{ "verbose", no_argument, NULL, 'v' },
 		{ "nogainswitch", no_argument, NULL, 'g' },
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, no_argument, NULL, 0 }
 	};
-	const char optString[] = "i:e:vh?";
+	const char optString[] = "i:e:f:vh?";
 	
 	int opt;
 	int longIndex;
@@ -380,6 +384,10 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 			case 'e':
 				global->exptName = optarg;
 				std::cout << "Experiment name set to " << global->exptName << std::endl;
+				break;
+			case 'f':
+				global->dataFormat = optarg;
+				std::cout << "Data format will be " << global->dataFormat << std::endl;
 				break;
 			case 'g':
 				global->nogainswitch = true;
@@ -404,6 +412,11 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 					global->nogainswitch = true;
 					std::cout << "No gain switching " << global->nogainswitch << std::endl;
 				}
+				if( strcmp( "dataformat", longOpts[longIndex].name ) == 0 ) {
+					global->dataFormat = true;
+					std::cout << "Data format will be " << global->dataFormat << std::endl;
+				}
+
 				break;
 			default:
 				/* You won't actually get here. */

@@ -566,7 +566,11 @@ void cAgipdModuleReader::applyCalibration(long frameNum) {
 	// Cell ID for this frame number
 	// In this scheme, digital and analog are interleaved - the real calibration constant is in cellID/2
 	cellID = cellIDlist[frameNum];
-	int thisCell = cellID / 2;
+	
+	int thisCell = cellID;
+	if(cellIDcorrection	!= 1 && cellIDcorrection != 0) {
+		thisCell = cellID / cellIDcorrection;		// For interleaved gain data we need to apply this correciton
+	};
 
 	// New way
 	calibrator->applyCalibration(thisCell, data, digitalGain, badpixMask);

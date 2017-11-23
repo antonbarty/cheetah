@@ -241,10 +241,10 @@ void cAgipdCalibrator::readCalibrationData()
     // Sanity checks
     // All other fields are likely to be identical so only do this for the offsets
     if(ndims != 4) {
-        std::cout << "Error in shape: expect ndims=4; but ndims=" << ndims << std::endl;
+        std::cout << "Error in shape of AnalogOffset: expect ndims=4; but ndims=" << ndims << std::endl;
     }
     if(dims[0] != nGains) {
-        std::cout << "Error in number of gain stages: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
+        std::cout << "Error in AnalogOffset number of gain stages: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
     }
     if(dims[1] < 0 || dims[1] > 128) {
         std::cout << "Odd: Suspiciouly large number of memory cells: " << dims[1] << std::endl;
@@ -261,6 +261,14 @@ void cAgipdCalibrator::readCalibrationData()
     if(_gainLevelData != NULL)        // Beware of memory leaks
         free(_gainLevelData);
     _gainLevelData = (int16_t*) checkAllocReadDataset((char*) gainlevel_field.c_str(), &ndims, dims, H5T_STD_I16LE, sizeof(int16_t));
+	if(ndims != 4) {
+		std::cout << "Error in shape of DigitalGainLevel: expect ndims=4; but ndims=" << ndims << std::endl;
+		exit(1);
+	}
+	if(dims[0] != nGains) {
+		std::cout << "Error in number of gain stages for DigitalGainLevel: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
+		exit(1);
+	}
 
     
     // Read relative gain data
