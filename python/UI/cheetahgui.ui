@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>776</width>
+    <width>785</width>
     <height>855</height>
    </rect>
   </property>
@@ -34,14 +34,14 @@
         <item>
          <widget class="QPushButton" name="button_refresh">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>25</height>
            </size>
           </property>
@@ -51,29 +51,16 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="button_runDetCorr">
-          <property name="maximumSize">
-           <size>
-            <width>100</width>
-            <height>25</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>Run DetCorr</string>
-          </property>
-         </widget>
-        </item>
-        <item>
          <widget class="QPushButton" name="button_runCheetah">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>25</height>
            </size>
           </property>
@@ -88,14 +75,14 @@
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>25</height>
            </size>
           </property>
@@ -107,14 +94,14 @@
         <item>
          <widget class="QPushButton" name="button_viewhits">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>25</height>
            </size>
           </property>
@@ -124,24 +111,43 @@
          </widget>
         </item>
         <item>
-         <widget class="QPushButton" name="button_virtualpowder">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
+         <widget class="QPushButton" name="button_blanksum">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>25</height>
            </size>
           </property>
           <property name="text">
-           <string>Powder</string>
+           <string>Sum of blanks</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QPushButton" name="button_virtualpowder">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>120</width>
+            <height>25</height>
+           </size>
+          </property>
+          <property name="text">
+           <string>Peak powder</string>
           </property>
          </widget>
         </item>
@@ -151,14 +157,14 @@
            <bool>true</bool>
           </property>
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
           </property>
           <property name="maximumSize">
            <size>
-            <width>100</width>
+            <width>120</width>
             <height>25</height>
            </size>
           </property>
@@ -282,7 +288,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>776</width>
+     <width>785</width>
      <height>22</height>
     </rect>
    </property>

@@ -410,9 +410,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #end view_hits()
 
 
-    def view_powder(self):
-        self.show_powder_hits_det()
-    #end view_powder()
 
     def view_peakogram(self):
         self.show_peakogram()
@@ -425,7 +422,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     def enableCommands(self):
         self.ui.button_runCheetah.setEnabled(True)
         self.ui.button_index.setEnabled(True)
-        self.ui.button_runDetCorr.setEnabled(True)
         self.ui.menu_file_startcrawler.setEnabled(True)
         self.ui.menu_cheetah_processselected.setEnabled(True)
         self.ui.menu_cheetah_autorun.setEnabled(True)
@@ -920,8 +916,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.button_runCheetah.clicked.connect(self.run_cheetah)
         self.ui.button_index.clicked.connect(self.crystfel_indexpdb)
         self.ui.button_viewhits.clicked.connect(self.view_hits)
-        self.ui.button_runDetCorr.clicked.connect(self.run_XFEL_detectorcalibration)
-        self.ui.button_virtualpowder.clicked.connect(self.view_powder)
+        self.ui.button_blanksum.clicked.connect(self.show_powder_blanks_det)
+        self.ui.button_virtualpowder.clicked.connect(self.show_powder_peaks_hits)
         self.ui.button_peakogram.clicked.connect(self.view_peakogram)
 
         # File menu actions
@@ -995,7 +991,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         # Disable action commands until enabled
         self.ui.button_runCheetah.setEnabled(False)
         self.ui.button_index.setEnabled(False)
-        self.ui.button_runDetCorr.setEnabled(False)
         self.ui.menu_file_startcrawler.setEnabled(False)
         self.ui.menu_cheetah_processselected.setEnabled(False)
         self.ui.menu_cheetah_autorun.setEnabled(False)
