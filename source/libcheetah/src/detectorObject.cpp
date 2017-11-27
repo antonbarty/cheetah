@@ -1178,8 +1178,8 @@ void cPixelDetectorCommon::readDetectorGeometry(char* filename)
         detector_x.readHDF5(filename, (char *) "x");
         detector_y.readHDF5(filename, (char *) "y");
         detector_z.readHDF5(filename, (char *) "z");
-    } else {		// file doesn't exist
-        printf("Detector geometry file does not exist: %s, make standard geometry.\n", filename);
+    }
+    else if (strcmp(filename, "No_file_specified")==0) {
         detector_x.create(pix_nx, pix_ny);
         detector_y.create(pix_nx, pix_ny);
         detector_z.create(pix_nx, pix_ny);
@@ -1190,6 +1190,11 @@ void cPixelDetectorCommon::readDetectorGeometry(char* filename)
                 detector_z.data[j + i * pix_nx] = 0.;
             }
         }
+    }
+    else {		// file doesn't exist
+        printf("Detector geometry file does not exist: %s\n", filename);
+        printf("Aborting\n", filename);
+        exit(1);
     }
 
     // Sanity check that all detector arrays are the same size (!)
