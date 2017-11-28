@@ -6,12 +6,12 @@
 //
 
 // checkAllocRead the dark setting field for this module into an array....
-//	[max-exfl014:barty]user/kuhnm/dark> h5ls -r dark_AGIPD00_agipd_2017-09-16.h5
-//	/                        Group
-//	/offset                  Dataset {3, 30, 128, 512}
-//	/stddev                  Dataset {3, 30, 128, 512}
-//	/threshold               Dataset {2, 30, 128, 512}
-
+//  [max-exfl001:barty]barty-sep-p2012/scratch/cheetah-calib> h5ls -r calib/agipd/Cheetah-AGIPD00-calib.h5
+//  /                        Group
+//  /AnalogOffset            Dataset {3, 30, 512, 128}
+//  /Badpixel                Dataset {3, 30, 512, 128}
+//  /DigitalGainLevel        Dataset {3, 30, 512, 128}
+//  /RelativeGain            Dataset {3, 30, 512, 128}
 
 
 #include "agipd_calibrator.h"
