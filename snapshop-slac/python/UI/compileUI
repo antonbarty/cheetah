@@ -1,3 +1,0 @@
-
-pyuic4 cxiview.ui > cxiview_ui.py
-
