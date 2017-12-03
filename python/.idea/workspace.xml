@@ -1,11 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/cxiview.py" afterPath="$PROJECT_DIR$/cxiview.py" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/lib/gui_dialogs.py" afterPath="$PROJECT_DIR$/lib/gui_dialogs.py" />
-    </list>
+    <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="" />
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -18,65 +14,101 @@
   <component name="CreatePatchCommitExecutor">
     <option name="PATCH_PATH" value="" />
   </component>
-  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
   <component name="FavoritesManager">
     <favorites_list name="python" />
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
+      <file leaf-file-name="GeometryFileParser.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/lib/geometry_parser/GeometryFileParser.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="3315">
-              <caret line="234" column="0" lean-forward="false" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="0" />
-              <folding>
-                <element signature="e#96#105#0" expanded="true" />
-                <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-                <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cfel_filetools.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="270">
-              <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
+            <state relative-caret-position="0">
+              <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="gui_dialogs.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
+      <file leaf-file-name="cfel_geometry.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/cfel_geometry.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2730">
-              <caret line="280" column="0" lean-forward="true" selection-start-line="280" selection-start-column="0" selection-end-line="280" selection-end-column="0" />
+            <state relative-caret-position="422">
+              <caret line="37" column="15" lean-forward="false" selection-start-line="37" selection-start-column="15" selection-end-line="37" selection-end-column="15" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cheetah-crawler.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cheetah-crawler.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="540">
+              <caret line="49" column="5" lean-forward="false" selection-start-line="49" selection-start-column="5" selection-end-line="49" selection-end-column="5" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/cxiview.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="4245">
+              <caret line="283" column="41" lean-forward="false" selection-start-line="283" selection-start-column="41" selection-end-line="283" selection-end-column="41" />
               <folding>
-                <element signature="e#1#10#0" expanded="true" />
-                <marker date="1503167093000" expanded="true" signature="237:708" ph="..." />
-                <marker date="1503167093000" expanded="true" signature="283:708" ph="..." />
+                <element signature="e#274#289#0" expanded="true" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <file leaf-file-name="peakogram.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/peakogram.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="54">
-              <caret line="445" column="42" lean-forward="true" selection-start-line="445" selection-start-column="42" selection-end-line="445" selection-end-column="42" />
+            <state relative-caret-position="840">
+              <caret line="60" column="25" lean-forward="false" selection-start-line="60" selection-start-column="25" selection-end-line="60" selection-end-column="25" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gui_locations.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="1380">
+              <caret line="92" column="21" lean-forward="false" selection-start-line="92" selection-start-column="21" selection-end-line="92" selection-end-column="21" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gui_configuration.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="2685">
+              <caret line="186" column="38" lean-forward="false" selection-start-line="186" selection-start-column="38" selection-end-line="186" selection-end-column="38" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="crawler_exfel.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/crawler_exfel.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="300">
+              <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
               <folding>
-                <element signature="e#274#289#0" expanded="true" />
+                <element signature="e#76#86#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cfel_imgtools.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/cfel_imgtools.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="735">
+              <caret line="50" column="12" lean-forward="false" selection-start-line="50" selection-start-column="12" selection-end-line="50" selection-end-column="12" />
+              <folding />
             </state>
           </provider>
         </entry>
@@ -86,7 +118,12 @@
   <component name="FindInProjectRecents">
     <findStrings>
       <find>cfel_locations</find>
-      <find>refresh_timer</find>
+      <find>location</find>
+      <find>crawler</find>
+      <find>runCheetah</find>
+      <find>r{:04d</find>
+      <find>numpy.isnan(self.photon_energy)</find>
+      <find>read_cxi</find>
     </findStrings>
     <replaceStrings>
       <replace>gui_locations</replace>
@@ -98,23 +135,28 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/lib/cfel_imgtools.py" />
         <option value="$PROJECT_DIR$/lib/crawler_slac.py" />
-        <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
         <option value="$PROJECT_DIR$/lib/streamfile_parser/Streamfile.py" />
-        <option value="$PROJECT_DIR$/lib/gui_locations.py" />
-        <option value="$PROJECT_DIR$/cheetah-gui.py" />
-        <option value="$PROJECT_DIR$/lib/gui_configuration.py" />
         <option value="$PROJECT_DIR$/lib/gui_dialogs.py" />
+        <option value="$PROJECT_DIR$/lib/gui_configuration.py" />
+        <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
+        <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
+        <option value="$PROJECT_DIR$/lib/crawler_exfel.py" />
+        <option value="$PROJECT_DIR$/lib/cfel_imgtools.py" />
         <option value="$PROJECT_DIR$/cxiview.py" />
+        <option value="$PROJECT_DIR$/peakogram.py" />
+        <option value="$PROJECT_DIR$/lib/gui_locations.py" />
+        <option value="$PROJECT_DIR$/cheetah-crawler.py" />
+        <option value="$PROJECT_DIR$/lib/cfel_geometry.py" />
+        <option value="$PROJECT_DIR$/cheetah-gui.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="876" />
+    <option name="x" value="790" />
     <option name="y" value="23" />
-    <option name="width" value="1488" />
-    <option name="height" value="1614" />
+    <option name="width" value="2034" />
+    <option name="height" value="2004" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -132,8 +174,34 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="ProjectPane" />
       <pane id="Scope" />
+      <pane id="ProjectPane">
+        <subPane>
+          <expand>
+            <path>
+              <item name="python" type="b2602c69:ProjectViewProjectNode" />
+              <item name="python" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="python" type="b2602c69:ProjectViewProjectNode" />
+              <item name="python" type="462c0819:PsiDirectoryNode" />
+              <item name="lib" type="462c0819:PsiDirectoryNode" />
+            </path>
+            <path>
+              <item name="python" type="b2602c69:ProjectViewProjectNode" />
+              <item name="python" type="462c0819:PsiDirectoryNode" />
+              <item name="cheetah-gui.py" type="8704e2dd:PyFileNode" />
+            </path>
+            <path>
+              <item name="python" type="b2602c69:ProjectViewProjectNode" />
+              <item name="python" type="462c0819:PsiDirectoryNode" />
+              <item name="cheetah-gui.py" type="8704e2dd:PyFileNode" />
+              <item name="cheetah_gui" type="dd8bbb05:PyElementNode" />
+            </path>
+          </expand>
+          <select />
+        </subPane>
+      </pane>
       <pane id="Scratches" />
     </panes>
   </component>
@@ -287,16 +355,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="876" y="23" width="1488" height="1614" extended-state="0" />
+    <frame x="790" y="23" width="2034" height="2004" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18145162" sideWeight="0.4776699" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32645035" sideWeight="0.570911" order="0" side_tool="false" content_ui="combo" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3287841" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Python Console" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18145162" sideWeight="0.5223301" order="2" side_tool="true" content_ui="tabs" x="567" y="69" width="301" height="783" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.32645035" sideWeight="0.42908904" order="2" side_tool="true" content_ui="tabs" x="567" y="69" width="301" height="783" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="true" content_ui="tabs" />
@@ -334,138 +402,173 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/lib/crawler_exfel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="31" lean-forward="true" selection-start-line="1" selection-start-column="31" selection-end-line="1" selection-end-column="31" />
+          <folding>
+            <element signature="e#76#86#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="16" column="56" lean-forward="false" selection-start-line="16" selection-start-column="51" selection-end-line="16" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_cspad.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="0" lean-forward="true" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_slac.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="25" column="0" lean-forward="true" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheetah-crawler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="390">
+          <caret line="39" column="0" lean-forward="false" selection-start-line="35" selection-start-column="0" selection-end-line="39" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_p11.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3885">
-          <caret line="259" column="0" lean-forward="false" selection-start-line="258" selection-start-column="0" selection-end-line="259" selection-end-column="0" />
+        <state relative-caret-position="14790">
+          <caret line="1000" column="0" lean-forward="true" selection-start-line="1000" selection-start-column="0" selection-end-line="1000" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="885">
+          <caret line="59" column="38" lean-forward="false" selection-start-line="59" selection-start-column="28" selection-end-line="59" selection-end-column="38" />
           <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
+            <element signature="e#274#289#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="525">
+          <caret line="35" column="20" lean-forward="true" selection-start-line="35" selection-start-column="20" selection-end-line="35" selection-end-column="28" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_exfel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="1" column="31" lean-forward="true" selection-start-line="1" selection-start-column="31" selection-end-line="1" selection-end-column="31" />
+          <folding>
+            <element signature="e#76#86#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="16" column="56" lean-forward="false" selection-start-line="16" selection-start-column="51" selection-end-line="16" selection-end-column="56" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4785">
+          <caret line="331" column="25" lean-forward="true" selection-start-line="331" selection-start-column="25" selection-end-line="331" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_slac.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#274#289#0" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
+        <state relative-caret-position="435">
+          <caret line="41" column="0" lean-forward="false" selection-start-line="41" selection-start-column="0" selection-end-line="41" selection-end-column="0" />
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
+    <entry file="file://$PROJECT_DIR$/lib/cfel_imgtools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2730">
-          <caret line="186" column="0" lean-forward="true" selection-start-line="186" selection-start-column="0" selection-end-line="186" selection-end-column="0" />
-          <folding>
-            <element signature="e#1#10#0" expanded="true" />
-            <marker date="1503167093000" expanded="true" signature="237:708" ph="..." />
-            <marker date="1503167093000" expanded="true" signature="283:708" ph="..." />
-          </folding>
+        <state relative-caret-position="870">
+          <caret line="59" column="26" lean-forward="true" selection-start-line="59" selection-start-column="26" selection-end-line="59" selection-end-column="26" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1162">
+          <caret line="389" column="27" lean-forward="false" selection-start-line="389" selection-start-column="27" selection-end-line="389" selection-end-column="27" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cxiview.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6675">
-          <caret line="445" column="42" lean-forward="true" selection-start-line="445" selection-start-column="42" selection-end-line="445" selection-end-column="42" />
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding>
             <element signature="e#274#289#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_hdf5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="825">
+          <caret line="59" column="0" lean-forward="true" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
-          </folding>
+        <state relative-caret-position="28">
+          <caret line="48" column="37" lean-forward="true" selection-start-line="48" selection-start-column="37" selection-end-line="48" selection-end-column="37" />
+          <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py" />
-    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py" />
-    <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
+    <entry file="file://$PROJECT_DIR$/lib/crawler_slac.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2730">
-          <caret line="186" column="47" lean-forward="true" selection-start-line="186" selection-start-column="47" selection-end-line="186" selection-end-column="47" />
-          <folding>
-            <element signature="e#1#10#0" expanded="true" />
-            <marker date="1503167093000" expanded="true" signature="237:708" ph="..." />
-            <marker date="1503167093000" expanded="true" signature="283:708" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cxiview.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6900">
-          <caret line="460" column="0" lean-forward="false" selection-start-line="460" selection-start-column="0" selection-end-line="460" selection-end-column="0" />
-          <folding>
-            <element signature="e#274#289#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="0">
-          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py" />
-    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py" />
-    <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2730">
-          <caret line="186" column="47" lean-forward="true" selection-start-line="186" selection-start-column="47" selection-end-line="186" selection-end-column="47" />
-          <folding>
-            <element signature="e#1#10#0" expanded="true" />
-            <marker date="1503167093000" expanded="true" signature="237:708" ph="..." />
-            <marker date="1503167093000" expanded="true" signature="283:708" ph="..." />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cxiview.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6900">
-          <caret line="460" column="0" lean-forward="false" selection-start-line="460" selection-start-column="0" selection-end-line="460" selection-end-column="0" />
-          <folding>
-            <element signature="e#274#289#0" expanded="true" />
-          </folding>
+        <state relative-caret-position="703">
+          <caret line="60" column="45" lean-forward="false" selection-start-line="60" selection-start-column="45" selection-end-line="60" selection-end-column="45" />
         </state>
       </provider>
     </entry>
@@ -481,18 +584,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="720">
           <caret line="48" column="37" lean-forward="false" selection-start-line="48" selection-start-column="37" selection-end-line="48" selection-end-column="37" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -508,18 +600,7 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="525">
           <caret line="48" column="37" lean-forward="true" selection-start-line="48" selection-start-column="37" selection-end-line="48" selection-end-column="37" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
-          </folding>
+          <folding />
         </state>
       </provider>
     </entry>
@@ -553,27 +634,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/cfel_imgtools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="870">
-          <caret line="59" column="26" lean-forward="true" selection-start-line="59" selection-start-column="26" selection-end-line="59" selection-end-column="26" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/crawler_hdf5.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="825">
-          <caret line="59" column="0" lean-forward="true" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/crawler_slac.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="819">
-          <caret line="60" column="45" lean-forward="false" selection-start-line="60" selection-start-column="45" selection-end-line="60" selection-end-column="45" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_detcorr.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="315">
@@ -595,63 +655,140 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/peakogram.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="39" column="0" lean-forward="false" selection-start-line="39" selection-start-column="0" selection-end-line="41" selection-end-column="34" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_locations.py" />
     <entry file="file://$PROJECT_DIR$/gui_configuration.py" />
-    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py" />
-    <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
+    <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="3315">
-          <caret line="234" column="0" lean-forward="false" selection-start-line="234" selection-start-column="0" selection-end-line="234" selection-end-column="0" />
-          <folding>
-            <element signature="e#96#105#0" expanded="true" />
-            <marker date="1503078556000" expanded="true" signature="29305:33601" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33512:33552" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33603:33691" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33718:34663" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33728:33792" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="33866:34101" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34263:34295" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34418:34451" ph="..." />
-            <marker date="1503078556000" expanded="true" signature="34476:34627" ph="..." />
-          </folding>
+        <state relative-caret-position="-386">
+          <caret line="224" column="34" lean-forward="true" selection-start-line="224" selection-start-column="34" selection-end-line="224" selection-end-column="34" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py" />
-    <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
+    <entry file="file://$PROJECT_DIR$/lib/crawler_p11.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2730">
-          <caret line="280" column="0" lean-forward="true" selection-start-line="280" selection-start-column="0" selection-end-line="280" selection-end-column="0" />
-          <folding>
-            <element signature="e#1#10#0" expanded="true" />
-            <marker date="1503167093000" expanded="true" signature="237:708" ph="..." />
-            <marker date="1503167093000" expanded="true" signature="283:708" ph="..." />
-          </folding>
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_slac.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="315">
+          <caret line="25" column="0" lean-forward="false" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_hdf5.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="171">
+          <caret line="59" column="0" lean-forward="true" selection-start-line="59" selection-start-column="0" selection-end-line="59" selection-end-column="0" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="180">
+          <caret line="16" column="56" lean-forward="false" selection-start-line="16" selection-start-column="51" selection-end-line="16" selection-end-column="56" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="270">
-          <caret line="30" column="4" lean-forward="false" selection-start-line="30" selection-start-column="4" selection-end-line="30" selection-end-column="4" />
+        <state relative-caret-position="4875">
+          <caret line="337" column="38" lean-forward="false" selection-start-line="337" selection-start-column="38" selection-end-line="337" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_cspad.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="75">
+          <caret line="5" column="0" lean-forward="false" selection-start-line="5" selection-start-column="0" selection-end-line="5" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_exfel.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="300">
+          <caret line="24" column="0" lean-forward="false" selection-start-line="24" selection-start-column="0" selection-end-line="24" selection-end-column="0" />
+          <folding>
+            <element signature="e#76#86#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_imgtools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="735">
+          <caret line="50" column="12" lean-forward="false" selection-start-line="50" selection-start-column="12" selection-end-line="50" selection-end-column="12" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/peakogram.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="840">
+          <caret line="60" column="25" lean-forward="false" selection-start-line="60" selection-start-column="25" selection-end-line="60" selection-end-column="25" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2685">
+          <caret line="186" column="38" lean-forward="false" selection-start-line="186" selection-start-column="38" selection-end-line="186" selection-end-column="38" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1380">
+          <caret line="92" column="21" lean-forward="false" selection-start-line="92" selection-start-column="21" selection-end-line="92" selection-end-column="21" />
           <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cxiview.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="54">
-          <caret line="445" column="42" lean-forward="true" selection-start-line="445" selection-start-column="42" selection-end-line="445" selection-end-column="42" />
+        <state relative-caret-position="4245">
+          <caret line="283" column="41" lean-forward="false" selection-start-line="283" selection-start-column="41" selection-end-line="283" selection-end-column="41" />
           <folding>
             <element signature="e#274#289#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheetah-crawler.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="540">
+          <caret line="49" column="5" lean-forward="false" selection-start-line="49" selection-start-column="5" selection-end-line="49" selection-end-column="5" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_geometry.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="422">
+          <caret line="37" column="15" lean-forward="false" selection-start-line="37" selection-start-column="15" selection-end-line="37" selection-end-column="15" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1032">
+          <caret line="451" column="0" lean-forward="true" selection-start-line="451" selection-start-column="0" selection-end-line="451" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/geometry_parser/GeometryFileParser.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding />
         </state>
       </provider>
     </entry>

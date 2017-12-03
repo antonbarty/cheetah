@@ -368,7 +368,7 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
     # Photon energy
     if photon_energy == True:
         try:
-            photon_energy_eV = hdf5_fh['/LCLS/photon_energy_eV'][frameID]
+            photon_energy_eV = hdf5_fh['/instrument/photon_energy_eV'][frameID]
         except:
             photon_energy_eV = 'nan'
     else:
@@ -378,7 +378,7 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
     # Camera length
     if camera_length == True:
         try:
-            EncoderValue = hdf5_fh['/LCLS/detector_1/EncoderValue'][frameID]
+            EncoderValue = hdf5_fh['/instrument/detector_1/EncoderValue'][frameID]
         except:
             EncoderValue = 'nan'
     else:

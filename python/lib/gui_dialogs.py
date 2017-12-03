@@ -177,7 +177,7 @@ class configure_cheetah_lcls_gui(PyQt5.QtWidgets.QDialog):
         detectorNames = ['CxiDs1.0:Cspad.0','CxiDs2.0:Cspad.0','CxiDsd.0:Cspad.0','DscCsPad','MfxEndstation.0:Cspad.0','XppGon.0:Cspad.0',
                          'CxiEndstation.0:Rayonix.0','MfxEndstation.0:Rayonix.0','XppGon.0:Rayonix.0',
                          'Camp.0:pnCCD.0','Camp.0:pnCCD.1']
-        detectorZEncoder = ['CXI:DS1:MMS:06.RBV','CXI:DS2:MMS:06.RBV','MFX:DET:MMS:04.RBV']
+        detectorZEncoder = ['CXI:DS2:MMS:06.RBV','CXI:DS2:MMS:06.RBV','MFX:DET:MMS:04.RBV']
 
 
         layout = PyQt5.QtWidgets.QVBoxLayout(self)
