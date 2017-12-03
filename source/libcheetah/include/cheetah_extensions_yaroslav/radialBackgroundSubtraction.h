@@ -12,8 +12,8 @@
 #include <stdint.h>
 #include <vector>
 #include "detectorGeometry.h"
-#include <Eigen/Dense>
-#include <Eigen/StdVector>
+#include "Eigen/Dense"
+#include "Eigen/StdVector"
 
 typedef struct {
     uint_fast32_t minValuesPerBin;

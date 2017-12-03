@@ -51,8 +51,9 @@ cEventData* cheetahNewEvent(cGlobal	*global) {
 		long	imageXxX_nn = global->detector[detIndex].imageXxX_nn;
 		long	radial_nn = global->detector[detIndex].radial_nn;
 
-		eventData->detector[detIndex].data_raw16 = (uint16_t*) calloc(pix_nn,sizeof(uint16_t));
-		eventData->detector[detIndex].data_raw = (float*) calloc(pix_nn,sizeof(float));
+		eventData->detector[detIndex].data_raw_is_float = false;
+		eventData->detector[detIndex].data_raw16 = (uint16_t*) malloc(pix_nn*sizeof(uint16_t));
+		eventData->detector[detIndex].data_raw = (float*) malloc(pix_nn*sizeof(float));
 		eventData->detector[detIndex].data_detCorr = (float*) calloc(pix_nn,sizeof(float));
 		eventData->detector[detIndex].data_detPhotCorr = (float*) calloc(pix_nn,sizeof(float));
 		eventData->detector[detIndex].data_forPersistentBackgroundBuffer = (float*) calloc(pix_nn,sizeof(float));

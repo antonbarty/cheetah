@@ -41,22 +41,24 @@ void* pythonWorker(void*);
 int cheetahInit(cGlobal *global) {
     
 	// Check if we're using psana of the same git commit
-	if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
-		fprintf(stderr,    "*******************************************************************************************\n");
-		fprintf(stderr,"*** WARNING %s:%d ***\n",__FILE__,__LINE__);
-		
-		if(getenv("PSANA_GIT_SHA")){
-			fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
-			fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
+	if(strcmp(global->facility, "EuXFEL")) {
+		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
+			fprintf(stderr,    "*******************************************************************************************\n");
+			fprintf(stderr,"*** WARNING %s:%d ***\n",__FILE__,__LINE__);
+			
+			if(getenv("PSANA_GIT_SHA")){
+				fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
+				fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
+			}
+			else{
+				fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
+			}
+			fprintf(stderr,    "*******************************************************************************************\n");
+			sleep(10);
 		}
-		else{
-			fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
-		}
-		fprintf(stderr,    "*******************************************************************************************\n");
-		sleep(10);
+		setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 	}
-	setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
-
+	
 	global->self = global;
 	//global->defaultConfiguration();
 	global->parseConfigFile(global->configFile);
@@ -173,10 +175,13 @@ void cheetahUpdateGlobal(cGlobal *global, cEventData *eventData){
 		if ( !isnan(detposnew) ) {
 
 			// New detector position = 0 could be an error
-            if ( detposnew == 0 ) {
-                detposnew = global->detector[detIndex].detposprev;
-                printf("WARNING: detector position is zero, which could be an error\n"
-                       "         will use previous position (%s=%f) instead...\n",global->detector[detIndex].detectorZpvname, detposnew);
+            // Turn off for XFEL code as there is no detector encoder
+            if(false) {
+                if ( detposnew == 0 ) {
+                    detposnew = global->detector[detIndex].detposprev;
+                    printf("WARNING: detector position is zero, which could be an error\n"
+                           "         will use previous position (%s=%f) instead...\n",global->detector[detIndex].detectorZpvname, detposnew);
+                }
             }
 			
             //	Apply offsets
