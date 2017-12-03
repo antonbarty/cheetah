@@ -459,7 +459,6 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.play_mode == False:
             self.play_mode = True
             self.ui.playPushButton.setText("Stop")
-            self.refresh_timer.timeout.connect(self.next_pattern)   
             self.next_pattern()
             self.refresh_timer.start(1000)
 
@@ -826,12 +825,11 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.ui.actionLoad_geometry.setEnabled(False)
         self.ui.menuColours.setEnabled(False)
 
-
         # Flags needed for play and shuffle (can probably do this better)
         self.shuffle_mode = False
         self.play_mode = False 
         self.refresh_timer = PyQt5.QtCore.QTimer()
-
+        self.refresh_timer.timeout.connect(self.next_pattern)
 
         # Put menu inside the window on Macintosh and elsewhere
         self.ui.menuBar.setNativeMenuBar(False)
