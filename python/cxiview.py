@@ -240,8 +240,8 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_x.append(self.geometry['x'][peak_in_slab] + self.img_shape[0] / 2)
                 peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
 
-            ring_pen = pyqtgraph.mkPen('r', width=2)
-            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
+            ring_pen = pyqtgraph.mkPen('b', width=2)
+            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.found_peak_canvas.setData([])
@@ -281,10 +281,8 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_x = []
                 peak_y = []
 
-            ring_pen = pyqtgraph.mkPen('b', width=2)
-            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', 
-                size = 2*self.predicted_peak_circle_radius, pen = ring_pen, 
-                brush = (0,0,0,0), pxMode = False)
+            ring_pen = pyqtgraph.mkPen('g', width=2)
+            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 2*self.predicted_peak_circle_radius, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
         else:
             self.predicted_peak_canvas.setData([])
             self.resolution_limit_ring_canvas.setData([])
@@ -459,6 +457,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.play_mode == False:
             self.play_mode = True
             self.ui.playPushButton.setText("Stop")
+            self.refresh_timer.timeout.connect(self.next_pattern)   
             self.next_pattern()
             self.refresh_timer.start(1000)
 
@@ -825,11 +824,12 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.ui.actionLoad_geometry.setEnabled(False)
         self.ui.menuColours.setEnabled(False)
 
+
         # Flags needed for play and shuffle (can probably do this better)
         self.shuffle_mode = False
         self.play_mode = False 
         self.refresh_timer = PyQt5.QtCore.QTimer()
-        self.refresh_timer.timeout.connect(self.next_pattern)
+
 
         # Put menu inside the window on Macintosh and elsewhere
         self.ui.menuBar.setNativeMenuBar(False)
