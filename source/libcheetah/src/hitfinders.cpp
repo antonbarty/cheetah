@@ -201,6 +201,15 @@ void sortPowderClass(cEventData *eventData, cGlobal *global)
             else if (strcmp(global->pumpLaserScheme, "LK27") == 0) {
                 eventData->powderClass = 2 * pumpLaserCode + hit;
             }
+			else if (strcmp(global->pumpLaserScheme, "LP41") == 0) {
+				if (hit == 0) {
+					eventData->powderClass = 0;
+				}
+				else {
+					eventData->powderClass = 1 + pumpLaserCode;
+					printf("pumpLaserCode=%li\n",pumpLaserCode);
+				}
+			}
         }
     }
 }

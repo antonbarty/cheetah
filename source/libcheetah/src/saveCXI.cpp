@@ -1377,7 +1377,14 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
             lcls->createStack(&global->epicsPvFloatAddresses[i][0], H5T_NATIVE_FLOAT);
         }
-        
+
+		// EVR codes
+		for (int i=0; i < global->nEvrValuesToSave; i++ ) {
+			char evrStr[100];
+			sprintf(evrStr, "evr%i", global->evrValuesToSave[i]);
+			lcls->createStack(&evrStr[0], H5T_NATIVE_FLOAT);
+		}
+
         DETECTOR_LOOP{
             Node* detector = lcls->createGroup("detector",detIndex);
             detector->createStack("position",H5T_NATIVE_DOUBLE);
@@ -1704,7 +1711,8 @@ static CXI::Node *getCXIFileByName(cGlobal *global, cEventData *eventData, int p
 	
 	if(global->saveByPowderClass){
 		// Powder class chunks according to number of frames in each powder class
-		chunk = global->detector[0].nPowderFrames[powderClass];
+		//chunk = global->detector[0].nPowderFrames[powderClass];
+		chunk = global->nFramesSavedPerClass[powderClass];
 		chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
 		sprintf(filename,"%s-r%04d-class%d-c%02ld.cxi", global->experimentID, global->runNumber, powderClass, chunk);
 	}
@@ -1746,7 +1754,8 @@ static CXI::Node *getResultsFileByName(cGlobal *global, cEventData *eventData, i
     
     if(global->saveByPowderClass){
         // Powder class chunks according to number of frames in each powder class
-        chunk = global->detector[0].nPowderFrames[powderClass];
+        //chunk = global->detector[0].nPowderFrames[powderClass];
+		chunk = global->nFramesSavedPerClass[powderClass];
         chunk = (long) floorf(chunk / (float) global->cxiChunkSize);
         sprintf(filename,"%s-r%04d-class%d-c%02ld.h5", global->experimentID, global->runNumber, powderClass, chunk);
     }
@@ -1795,11 +1804,12 @@ void writeAccumulatedCXI(cGlobal * global){
 
 	DETECTOR_LOOP{
 		POWDER_LOOP {
+			
             CXI::Node *cxi = getResultsFileByName(global, NULL, powderClass);
 			//CXI::Node *cxi = getCXIFileByName(global, NULL, powderClass);
 
-			if( cxi->stackCounter == 0)
-				continue;
+			//if( cxi->stackCounter == 0)
+			//	continue;
 			
 			pthread_mutex_lock(&global->saveCXI_mutex);
 			Node & det_node = (*cxi)["run_data"].child("detector",detIndex);
@@ -1932,6 +1942,7 @@ void closeCXIFiles(cGlobal * global){
 	openCXIFiles.clear();
 	openCXIFilenames.clear();
 
+	
     /* Results: Go through each file and resize them to their right size */
     for(uint i=0; i<openResultsFilenames.size(); i++){
         printf("Closing %s\n",openResultsFilenames[i].c_str());
@@ -2015,6 +2026,7 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
      *	Lock writing to one thread at a time to ensure stack synchronisation
      */
     pthread_mutex_lock(&global->saveCXI_mutex);
+	global->nFramesSavedPerClass[eventData->powderClass] += 1;
     global->nCXIHits += 1;
     pthread_mutex_unlock(&global->saveCXI_mutex);       // Moved up here on 23 May, should work.... revert if problems
 
@@ -2491,7 +2503,14 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         for (int i=0; i < global->nEpicsPvFloatValues; i++ ) {
             lcls[&global->epicsPvFloatAddresses[i][0]].write(&(eventData->epicsPvFloatValues[i]), stackSlice);
         }
-        
+		
+		for (int i=0; i < global->nEvrValuesToSave; i++ ) {
+			char evrStr[100];
+			sprintf(evrStr, "evr%i", global->evrValuesToSave[i]);
+			int	evrVal = eventData->evrValue[i];
+			lcls[evrStr].write(&(eventData->evrValue[i]), stackSlice);
+		}
+		
         // LaserEventCode
         int LaserOnVal = (eventData->pumpLaserCode)?1:0;
         lcls["evr41"].write(&LaserOnVal,stackSlice);

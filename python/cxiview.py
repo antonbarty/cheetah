@@ -490,6 +490,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
             out += u"\u0305"
             
         return out
+    #end _overline_string()
 
     def mouse_in_predicted_peak(self, mouse_x, mouse_y, text):
         """
@@ -672,6 +673,12 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.setWindowTitle(title)
     #end action_update_files
 
+
+    def circle_cheetah_peaks(self):
+        value = not self.ui.foundPeaksCheckBox.isChecked()
+        self.ui.foundPeaksCheckBox.setChecked(value)
+    #end circle_cheetah_peaks
+
     """
     def mousePressEvent(self, event):
         p = PyQt5.QtWidgets.QCursor.pos()
@@ -810,6 +817,9 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # File menu
         self.ui.actionSave_image.triggered.connect(self.action_save_png)
         self.ui.actionRefresh_file_list.triggered.connect(self.action_update_files)
+
+        # Crystals menu
+        self.ui.actionCircle_Cheetah_peaks.triggered.connect(self.circle_cheetah_peaks)
 
         # Disabled stuff
         self.ui.actionSave_data.setEnabled(False)
