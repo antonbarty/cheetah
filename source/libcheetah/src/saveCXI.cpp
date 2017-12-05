@@ -740,6 +740,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         lcls->createStack("photon_wavelength_A",H5T_NATIVE_DOUBLE);
         lcls->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
         lcls->createStack("machineTime",H5T_NATIVE_INT32);
+		lcls->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
         lcls->createStack("fiducial",H5T_NATIVE_INT32);
         DETECTOR_LOOP{
             Node* detector = lcls->createCXIGroup("detector",detIndex+1);
@@ -749,7 +750,6 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
         instrument->createLink("experiment_identifier","/entry_1/experiment_identifier");
         
         if(global->cxiLegacyFileFormat == 2015) {
-            lcls->createStack("machineTimeNanoSeconds",H5T_NATIVE_INT32);
             lcls->createStack("ebeamCharge",H5T_NATIVE_DOUBLE);
             lcls->createStack("ebeamL3Energy",H5T_NATIVE_DOUBLE);
             lcls->createStack("ebeamPkCurrBC2",H5T_NATIVE_DOUBLE);
@@ -765,7 +765,7 @@ static CXI::Node *createCXISkeleton(const char *filename, cGlobal *global){
             lcls->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
             lcls->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
             lcls->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
-            lcls->createStack("evr41",H5T_NATIVE_DOUBLE);
+            lcls->createStack("evr41",H5T_NATIVE_INT32);
             lcls->createLink("eventTime","eventTimeString");
 
             // TimeTool
@@ -1380,7 +1380,6 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         lcls->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
         lcls->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
         lcls->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
-        //lcls->createStack("evr41",H5T_NATIVE_DOUBLE);
         lcls->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
         //lcls->createLink("eventTime","eventTimeString");
         
@@ -1408,7 +1407,12 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
 			sprintf(evrStr, "evr%i", global->evrValuesToSave[i]);
 			lcls->createStack(&evrStr[0], H5T_NATIVE_INT32);
 		}
+		
+		// Laser stuff
+		lcls->createStack("pumpLaserOn",H5T_NATIVE_INT32);
+		lcls->createStack("pumpLaserCode",H5T_NATIVE_INT32);
 
+		
         DETECTOR_LOOP{
             Node* detector = lcls->createGroup("detector",detIndex);
             detector->createStack("position",H5T_NATIVE_DOUBLE);
@@ -1936,14 +1940,14 @@ void flushCXIFiles(cGlobal * global){
 	for(uint i=0; i<openCXIFilenames.size(); i++){
 		printf("Flushing %s\n",openCXIFilenames[i].c_str());
 		flushCXI(openCXIFiles[i]);
-		usleep(1000);
+		//usleep(100);
 	}
 
     // Results files
     for(uint i=0; i<openResultsFilenames.size(); i++){
         printf("Flushing %s\n",openResultsFilenames[i].c_str());
         flushCXI(openResultsFiles[i]);
-        usleep(1000);
+        //usleep(100);
     }
     pthread_mutex_unlock(&global->saveCXI_mutex);
 
@@ -2061,9 +2065,15 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	CXI::Node *cxi = getCXIFileByName(global, eventData, eventData->powderClass);
     CXI::Node *results = getResultsFileByName(global, eventData, eventData->powderClass);
 
-    uint stackSlice = cxi->getStackSlice();
+	/*
+	 *	Get position in CXI stack
+	 *	And set same stack slice for results file to ensure synchronisation
+	 */
+	uint stackSlice;
+	stackSlice = cxi->getStackSlice();
     eventData->stackSlice = stackSlice;
-    results->setStackSlice(stackSlice);
+    //results->setStackSlice(stackSlice);
+	results->stackCounter = cxi->stackCounter;
 
 
     /*
@@ -2129,6 +2139,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         lcls["photon_energy_eV"].write(&eventData->photonEnergyeV,stackSlice);
         lcls["photon_wavelength_A"].write(&eventData->wavelengthA,stackSlice);
         lcls["machineTime"].write(&eventData->seconds,stackSlice);
+		lcls["machineTimeNanoSeconds"].write(&eventData->nanoSeconds, stackSlice);
         lcls["fiducial"].write(&eventData->fiducial,stackSlice);
         DETECTOR_LOOP{
             lcls.cxichild("detector",detIndex+1)["position"].write(&global->detector[detIndex].detectorZ,stackSlice);
@@ -2136,7 +2147,6 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
         }
         
         if(global->cxiLegacyFileFormat == 2015) {
-            lcls["machineTimeNanoSeconds"].write(&eventData->nanoSeconds, stackSlice);
             lcls["ebeamCharge"].write(&eventData->fEbeamCharge,stackSlice);
             lcls["ebeamL3Energy"].write(&eventData->fEbeamL3Energy,stackSlice);
             lcls["ebeamLTUAngX"].write(&eventData->fEbeamLTUAngX,stackSlice);
@@ -2576,8 +2586,10 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
 		}
 		
         // LaserEventCode
-        int LaserOnVal = (eventData->pumpLaserCode)?1:0;
-        lcls["evr41"].write(&LaserOnVal,stackSlice);
+        //int LaserOnVal = (eventData->pumpLaserCode)?1:0;
+		lcls["pumpLaserOn"].write(&eventData->pumpLaserOn,stackSlice);
+        lcls["pumpLaserCode"].write(&eventData->pumpLaserCode,stackSlice);
+		
         
         // Time string
         char timestr[26];
