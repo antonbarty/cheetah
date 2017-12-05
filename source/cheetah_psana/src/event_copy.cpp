@@ -49,6 +49,18 @@ namespace cheetah_ana_pkg {
 		Env& env = *envp;
 		
 		
+		// Cross-check whether we are accidentally moving to a new event mid-copy
+		//	Compare time_nsec of the event
+		time_t copy_event_start_nsec = 0;
+		time_t copy_event_finish_nsec = 0;
+		if(true) {
+			PSTime::Time evtTime;
+			boost::shared_ptr<PSEvt::EventId> eventId = evt.get();
+			evtTime = eventId->time();
+			copy_event_start_nsec = evtTime.nsec();
+		}
+
+		
 		
 		if (cheetahGlobal.skipFract > random_float && frameNumberIncludingSkipped > cheetahGlobal.nInitFrames && cheetahGlobal.calibrated) {
 			printf("Skipping a frame (%ld)\n",frameNumberIncludingSkipped);
@@ -136,7 +148,10 @@ namespace cheetah_ana_pkg {
 		// EvrData v4
         if (data4.get()) {
             numEvrData = data4->numFifoEvents();
-            
+
+			//printf("Psana::EvrData::DataV4.get() successful\n");
+
+			
             // Timestamps
             const ndarray<const Psana::EvrData::FIFOEvent, 1> array = data4->fifoEvents();
             fiducial = array[0].timestampHigh();
@@ -148,7 +163,8 @@ namespace cheetah_ana_pkg {
                 }
                 cout << endl;
             }
-            
+
+			
             // Beam on
             beamOn = eventCodePresent(data4->fifoEvents(), beamCode);
             if (verbose) {
@@ -168,6 +184,7 @@ namespace cheetah_ana_pkg {
                 int evr41 = eventCodePresent(data4->fifoEvents(), 41);
                 pumpLaserOn = evr41;
                 pumpLaserCode = evr41;
+				//printf("evr41 = %i\n", evr41);
             }
 			// Simple trigger on any arbitrary evr code (which one determined using strncmp).
 			else if (strncmp(cheetahGlobal.pumpLaserScheme, "evr", 3) == 0) {
@@ -175,6 +192,7 @@ namespace cheetah_ana_pkg {
 				int evrState = eventCodePresent(data4->fifoEvents(), evrCode);
 				pumpLaserOn = evrState;
 				pumpLaserCode = evrState;
+				//printf("evr %i = %i\n", evrCode, evrState);
 			}
 			// Neutze, April 2015 LH95
 			else if(strcmp(cheetahGlobal.pumpLaserScheme, "LH95") == 0) {
@@ -305,7 +323,9 @@ namespace cheetah_ana_pkg {
 			fiducial = frameNumber;
 		}
         
-        
+		//printf("pumpLaserScheme: %s, pumpLaserCode: %li\n", cheetahGlobal.pumpLaserScheme, pumpLaserCode);
+
+		
 		/*
 		 *  Get Electron beam data
 		 *  Psana::Bld::BldDataEBeamV3.get()
@@ -1055,9 +1075,9 @@ namespace cheetah_ana_pkg {
 		}	// end loop over detectors
 
 		
-			//	Copy TOF (aqiris) channel into Cheetah event for processing
-			//  SLAC libraries are not thread safe: must copy data into event structure for processing
-			//eventData->TOFPresent = 0; // DO NOT READ TOF
+		//	Copy aqiris channel into Cheetah event for processing
+		//  SLAC libraries are not thread safe: must copy data into event structure for processing
+		//eventData->TOFPresent = 0; // DO NOT READ TOF
 		eventData->TOFPresent = readTOF(evt, env, eventData);
 
 		
@@ -1285,6 +1305,25 @@ namespace cheetah_ana_pkg {
 			eventData->detector[detIndex].detectorZ = detectorPosition[detIndex];
 		}
 
+		/*
+		 *	Cross-check whether we are accidentally moving to a new event mid-copy
+		 *	Compare time_nsec of the event
+		 *	time_t copy_event_start_nsec = 0;
+		 *	time_t copy_event_finish_nsec = 0;
+		 */
+		if(true) {
+			PSTime::Time evtTime;
+			boost::shared_ptr<PSEvt::EventId> eventId = evt.get();
+			evtTime = eventId->time();
+			copy_event_finish_nsec = evtTime.nsec();
+			
+			if(copy_event_finish_nsec != copy_event_start_nsec) {
+				printf("copy_event skip: event_nsec[start,finish] = [%ld, %ld], data may be mismatched\n", copy_event_start_nsec, copy_event_finish_nsec );
+			}
+		}
+
+		
+		
 		pthread_exit(eventData);
 	}
 

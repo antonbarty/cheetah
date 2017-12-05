@@ -49,6 +49,7 @@
 		4DD8EE951F791682002FB12D /* agipd_calibrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8B1F791682002FB12D /* agipd_calibrator.cpp */; };
 		4DD8EE971F791682002FB12D /* agipd_module_reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8E1F791682002FB12D /* agipd_module_reader.cpp */; };
 		4DD8EE981F791682002FB12D /* cheetah-euxfel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8F1F791682002FB12D /* cheetah-euxfel.cpp */; };
+		4DD8F60F1FD513BF00589BA2 /* peakfinder8.hh in Headers */ = {isa = PBXBuildFile; fileRef = 4DD8F60E1FD513BF00589BA2 /* peakfinder8.hh */; };
 		4DF8E8631ACF8991003F9F0B /* timetool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8E8621ACF8991003F9F0B /* timetool.cpp */; };
 /* End PBXBuildFile section */
 
@@ -152,6 +153,7 @@
 		4DD8EE901F791682002FB12D /* font.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = font.h; sourceTree = "<group>"; };
 		4DD8EE911F791682002FB12D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
 		4DD8EE921F791682002FB12D /* hdf5_functions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hdf5_functions.h; sourceTree = "<group>"; };
+		4DD8F60E1FD513BF00589BA2 /* peakfinder8.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = peakfinder8.hh; sourceTree = "<group>"; };
 		4DF8E8621ACF8991003F9F0B /* timetool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timetool.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -228,6 +230,7 @@
 				4D0A40641A3B51F600FAC112 /* frameBuffer.h */,
 				4D93D924174F9F80004A0BB4 /* hitfinders.h */,
 				4D93D925174F9F80004A0BB4 /* median.h */,
+				4DD8F60E1FD513BF00589BA2 /* peakfinder8.hh */,
 				4D0A40651A3B51F600FAC112 /* peakDetect.h */,
 				4D93D926174F9F80004A0BB4 /* peakfinders.h */,
 				4D0A40661A3B51F600FAC112 /* processRateMonitor.h */,
@@ -312,6 +315,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D0A40691A3B51F600FAC112 /* frameBuffer.h in Headers */,
+				4DD8F60F1FD513BF00589BA2 /* peakfinder8.hh in Headers */,
 				4D0A406C1A3B51F600FAC112 /* tofDetector.h in Headers */,
 				4D0A406B1A3B51F600FAC112 /* processRateMonitor.h in Headers */,
 				4D0A406A1A3B51F600FAC112 /* peakDetect.h in Headers */,

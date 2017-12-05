@@ -21,32 +21,44 @@ int cTOFDetectorCommon::parseConfigTag(char *tag, char *value) {
 	if (!strcmp(tag, "detectorname")) {
 		strcpy(detectorName, value);
 		configFromName();
-	}else if (!strcmp(tag, "detectortype")) {
+	}
+	else if (!strcmp(tag, "detectortype")) {
 		if(strcasecmp(value,"tof") != 0){
             fprintf(stderr,"Error: detectortype is not tof in a cTOFDetectorCommon\n");            
 			fprintf(stderr,"Quitting...\n");
 			exit(1);
 		}
 		strcpy(detectorType, value);
-	}else if (!strcmp(tag, "channel")) {
+	}
+	else if (!strcmp(tag, "channel")) {
 		channel = atoi(value);
-	}else if (!strcmp(tag, "numsamples")) {
+	}
+	else if (!strcmp(tag, "numsamples")) {
 		numSamples = atoi(value);
-	}else if (!strcmp(tag, "hitfinderminsample")) {
+	}
+	else if (!strcmp(tag, "hitfinderminsample")) {
 		hitfinderMinSample = atoi(value);
-	}else if (!strcmp(tag, "hitfindermaxsample")) {
+	}
+	else if (!strcmp(tag, "hitfindermaxsample")) {
 	    hitfinderMaxSample = atoi(value);
-	}else if (!strcmp(tag, "hitfinderthreshold")) {
+	}
+	else if (!strcmp(tag, "hitfinderthreshold")) {
 	    hitfinderThreshold = atof(value);
-	}else if (!strcmp(tag, "hitfindermeanbackground")) {
+	
+	}
+	else if (!strcmp(tag, "hitfindermeanbackground")) {
 	    hitfinderMeanBackground = atof(value);
-	}else if (!strcmp(tag, "numsamples")) {
+	}
+	else if (!strcmp(tag, "numsamples")) {
 		numSamples = atoi(value);
-	}else if (!strcmp(tag, "description")) {
+	}
+	else if (!strcmp(tag, "description")) {
 		strcpy(description, value);
-	}else if (!strcmp(tag, "sourcename")) {
+	}
+	else if (!strcmp(tag, "sourcename")) {
 		strcpy(sourceName, value);
-	}else{
+	}
+	else{
 		// Unknown tags
 		fail = 1;
 	}
@@ -57,8 +69,16 @@ void cTOFDetectorCommon::configFromName(){
 	if(strcasecmp(detectorName,"acqiris0") == 0){
 		numSamples = 12288;
 		strcpy(sourceIdentifier,"DetInfo(:Acqiris.0)");
-	}else if(strcasecmp(detectorName,"acqiris1") == 0){
+	}
+	else if(strcasecmp(detectorName,"acqiris1") == 0){
 		numSamples = 12288;
 		strcpy(sourceIdentifier,"DetInfo(:Acqiris.1)");
+	}
+	else if(strcasecmp(detectorName,"acqiris") == 0){
+		numSamples = 12288;
+		strcpy(sourceIdentifier,"DetInfo(Acqiris)");
+	}
+	else {
+		strcpy(sourceIdentifier,detectorName);
 	}
 }

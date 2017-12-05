@@ -1380,7 +1380,7 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
         lcls->createStack("f_12_ENRC",H5T_NATIVE_DOUBLE);
         lcls->createStack("f_21_ENRC",H5T_NATIVE_DOUBLE);
         lcls->createStack("f_22_ENRC",H5T_NATIVE_DOUBLE);
-        lcls->createStack("evr41",H5T_NATIVE_DOUBLE);
+        //lcls->createStack("evr41",H5T_NATIVE_DOUBLE);
         lcls->createStack("eventTimeString",H5T_NATIVE_CHAR,26);
         //lcls->createLink("eventTime","eventTimeString");
         
@@ -1406,7 +1406,7 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
 		for (int i=0; i < global->nEvrValuesToSave; i++ ) {
 			char evrStr[100];
 			sprintf(evrStr, "evr%i", global->evrValuesToSave[i]);
-			lcls->createStack(&evrStr[0], H5T_NATIVE_FLOAT);
+			lcls->createStack(&evrStr[0], H5T_NATIVE_INT32);
 		}
 
         DETECTOR_LOOP{

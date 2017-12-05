@@ -928,7 +928,7 @@ if __name__ == '__main__':
     print(args)
     print("----------")    
     """
-    
+
     # Perform consistency checking on the command line arguments.
     if (args.i == "" and args.s == ""):
         print("No input or stream file given")
