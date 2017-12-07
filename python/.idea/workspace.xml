@@ -2,9 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../source/libcheetah/src/peakfinder8-new.cpp" afterPath="$PROJECT_DIR$/../source/libcheetah/src/peakfinder8.cpp" />
-      <change type="MOVED" beforePath="$PROJECT_DIR$/../source/libcheetah/src/peakfinder8.cpp" afterPath="$PROJECT_DIR$/../source/libcheetah/src/peakfinder8-2016.cpp" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../source/libcheetah/src/peakfinder8.cpp" afterPath="$PROJECT_DIR$/../source/libcheetah/src/peakfinder8.cpp" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />

@@ -994,15 +994,13 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r,
 	free_radial_stats(rstats);
 	free_peak_data(pkdata);
 	
-	// Valerio's return statement
-	//return 0;
-	
-	// My return statement
-	return (peaklist->nPeaks);
+	// Valerio returns 0, old code used to return peaklist->nPeaks.  Be warned.
+	return 0;
 }
 
+
 //
-//	Version without outlier mask
+//	Version without outlier mask - drop in replacement in Cheetah.
 //
 int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r,
 				long asic_nx, long asic_ny, long nasics_x, long nasics_y,
@@ -1013,6 +1011,6 @@ int peakfinder8(tPeakList *peaklist, float *data, char *mask, float *pix_r,
 	int result = peakfinder8(peaklist, data, mask, pix_r, asic_nx, asic_ny, nasics_x, nasics_y,
 					ADCthresh, hitfinderMinSNR, hitfinderMinPixCount, hitfinderMaxPixCount, hitfinderLocalBGRadius, NULL);
 
-	return result;
+	return (peaklist->nPeaks);
 }
 
