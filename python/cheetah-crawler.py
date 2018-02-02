@@ -39,7 +39,7 @@ class cheetah_crawler(PyQt5.QtWidgets.QMainWindow):
             self.datatype = 'exfel'
         if '/gpfs/cfel/' in self.data_dir:
             self.datatype = 'exfel'
-        if 'p11' in self.data_dir:
+        if 'p11' in self.data_dir and 'asap3' in self.data_dir:
             self.datatype = 'P11'
 
         # What have we decided?
