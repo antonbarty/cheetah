@@ -217,7 +217,7 @@ void cAgipdReader::open(char *baseFilename){
 		module[i].readDarkcal((char *)darkcalFilename[i].c_str());
 		module[i].setGainDataOffset(_gainDataOffset[0],_gainDataOffset[1]);
 		module[i].setCellIDcorrection(_cellIDcorrection);
-		module[i].setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
+		//module[i].setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
 	}
 
 	// Det up size and layout of the assembled data stack

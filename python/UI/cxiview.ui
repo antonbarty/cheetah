@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1400</width>
-    <height>1200</height>
+    <height>1005</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -330,6 +330,7 @@
     <addaction name="actionLoad_geometry"/>
     <addaction name="actionSave_image"/>
     <addaction name="actionSave_data"/>
+    <addaction name="actionSave_data_assembled"/>
     <addaction name="separator"/>
     <addaction name="actionQuit"/>
    </widget>
@@ -373,8 +374,11 @@
    <addaction name="menuView"/>
   </widget>
   <action name="actionSave_data">
+   <property name="enabled">
+    <bool>true</bool>
+   </property>
    <property name="text">
-    <string>Save data</string>
+    <string>Save data (raw)</string>
    </property>
   </action>
   <action name="actionSave_image">
@@ -448,6 +452,11 @@
   <action name="menu_view_photonconversion">
    <property name="text">
     <string>Photon count conversion</string>
+   </property>
+  </action>
+  <action name="actionSave_data_assembled">
+   <property name="text">
+    <string>Save data (assembled)</string>
    </property>
   </action>
  </widget>

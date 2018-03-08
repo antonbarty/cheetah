@@ -62,6 +62,8 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
             print('Error encountered reading data from file (image data, peaks, energy or masks).  Skipping frame.')
             return
 
+        self.raw_data = cxi
+
         # Photon energy - use command line eV if provided
         self.photon_energy_ok = False
         if self.default_eV != 'None':
@@ -648,6 +650,49 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
     #end action_save_png()
 
 
+    #
+    # Save data to file (raw layout)
+    #
+    def action_save_data(self):
+        file_hint = os.path.basename(self.event_list['filename'][self.img_index])
+        file_hint = os.path.splitext(file_hint)[0]
+        file_hint += '-#'
+        file_hint += str(self.event_list['event'][self.img_index])
+        file_hint += '.h5'
+        file_hint = os.path.join(self.exportdir, file_hint)
+
+        filename = cfel_file.dialog_pickfile(write=True, path=file_hint, qtmainwin=self)
+        if filename=='':
+            return
+
+        print('Saving image data to: ', filename)
+        self.exportdir = os.path.dirname(filename)
+        data_to_save = self.raw_data['data']
+        cfel_file.write_h5(data_to_save, filename=filename)
+    #end action_save_data
+
+    #
+    # Save data to file (assembled layout)
+    #
+    def action_save_assembled_data(self):
+        file_hint = os.path.basename(self.event_list['filename'][self.img_index])
+        file_hint = os.path.splitext(file_hint)[0]
+        file_hint += '-#'
+        file_hint += str(self.event_list['event'][self.img_index])
+        file_hint += '.h5'
+        file_hint = os.path.join(self.exportdir, file_hint)
+
+        filename = cfel_file.dialog_pickfile(write=True, path=file_hint, qtmainwin=self)
+        if filename=='':
+            return
+
+        print('Saving assembled image data to: ', filename)
+        self.exportdir = os.path.dirname(filename)
+        data_to_save = self.img_to_draw
+        cfel_file.write_h5(data_to_save, filename=filename)
+    #end action_save_data
+
+
     def action_update_files(self):
         # read files from streamfile if streamfile is there
         if self.streamfile is not None:
@@ -740,6 +785,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
         self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
         self.predicted_peak_circle_radius = 5
+        #self.exportdir = '.'
 
         #
         # Set up the UI
@@ -781,7 +827,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
         
-        # Buttons on front pannel
+        # Buttons on front panel
         self.ui.refreshfilesPushButton.clicked.connect(self.action_update_files)
         self.ui.previousPushButton.clicked.connect(self.previous_pattern)
         self.ui.nextPushButton.clicked.connect(self.next_pattern)
@@ -814,13 +860,16 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
 
         # File menu
         self.ui.actionSave_image.triggered.connect(self.action_save_png)
+        self.ui.actionSave_data.triggered.connect(self.action_save_data)
+        self.ui.actionSave_data_assembled.triggered.connect(self.action_save_assembled_data)
         self.ui.actionRefresh_file_list.triggered.connect(self.action_update_files)
+
+
 
         # Crystals menu
         self.ui.actionCircle_Cheetah_peaks.triggered.connect(self.circle_cheetah_peaks)
 
         # Disabled stuff
-        self.ui.actionSave_data.setEnabled(False)
         self.ui.actionLoad_geometry.setEnabled(False)
         self.ui.menuColours.setEnabled(False)
 

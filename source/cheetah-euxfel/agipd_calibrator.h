@@ -35,7 +35,6 @@ public:
     uint8_t *badpixelForGainAndCell(int gain, int cell);
     float   *relativeGainForGainAndCell(int gain, int cell);
 	
-	//void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
 
 
 private:
@@ -43,7 +42,6 @@ private:
 	const static int nGains;
 	static int nCells;
 
-	//bool		_doNotApplyGainSwitch;		// Bypass gain switching
 	
 	cAgipdModuleReader *_myModule;
 	int16_t *_darkOffsetData;
