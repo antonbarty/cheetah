@@ -39,6 +39,7 @@ public:
 
 private:
 	std::string _filename;
+    bool _calibrationLoaded;
 	const static int nGains;
 	static int nCells;
 

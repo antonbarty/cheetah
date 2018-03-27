@@ -25,6 +25,7 @@ int cAgipdCalibrator::nCells = 30;
 // Constructor
 cAgipdCalibrator::cAgipdCalibrator()
 {
+    _calibrationLoaded = false;
 	_darkOffsetData = NULL;
 	_gainLevelData = NULL;
     _badpixelData = NULL;
@@ -40,6 +41,7 @@ cAgipdCalibrator::cAgipdCalibrator()
 cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &reader)
 {
 	_filename = filename;
+    _calibrationLoaded = false;
 	_darkOffsetData = NULL;
 	_gainLevelData = NULL;
     _badpixelData = NULL;
@@ -54,6 +56,7 @@ cAgipdCalibrator::cAgipdCalibrator(std::string filename, cAgipdModuleReader &rea
 // Destructor
 cAgipdCalibrator::~cAgipdCalibrator()
 {
+    _calibrationLoaded = false;
 	free(_darkOffsetData);
 	free(_gainLevelData);
     free(_badpixelData);
@@ -112,8 +115,8 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 	}
 	
     
-    //if(true)
-    if(_myModule->_doNotApplyGainSwitch)
+    //if(_myModule->_doNotApplyGainSwitch)
+    if(false)
     {
 		for (long p=0; p<_myModule->nn; p++) {
 			aduData[p] -= cellDarkOffset[0][p];
@@ -138,24 +141,24 @@ void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *ga
 
 		// Determine which gain stage by thresholding
         if(true) {
-            if(gainData[p] > cellGainLevel[1][p])
-            {
-                pixGain = 1;
-                pixelsInGainLevel[1] += 1;
-            }
             if(gainData[p] > cellGainLevel[2][p])
             {
                 pixGain = 2;
                 pixelsInGainLevel[2] += 1;
+            }
+            else if(gainData[p] > cellGainLevel[1][p])
+            {
+                pixGain = 1;
+                pixelsInGainLevel[1] += 1;
             }
             else {
                 pixGain = 0;
                 pixelsInGainLevel[0] += 1;
             }
         }
-        gainData[p] = pixGain;
 
         // Remember the gain level setting
+        gainData[p] = pixGain;
 
         
         // Check whether this ia a bad pixel
@@ -209,6 +212,15 @@ void cAgipdCalibrator::readCalibrationData()
     std::string offset_field = "/AnalogOffset";
     std::string gainlevel_field = "/DigitalGainLevel";
     std::string relativegain_field = "/RelativeGain";
+    
+    
+    // If calibration data is already loaded, use it
+    if(_calibrationLoaded == true) {
+        std::cout << "  Calibration data already loaded, using existing calibration data" << std::endl;
+        std::cout << "  Calibration file: " << _filename << std::endl;
+        std::cout << "  Returning from calibration loaded" << std::endl;
+        return;
+    }
     
     
     // Check opening of file
@@ -317,6 +329,10 @@ void cAgipdCalibrator::readCalibrationData()
         std::cout << gaint[i] << ", ";
     }
     std::cout << std::endl;
+    
+    // If we get this far, we have successfully loaded the calibration data
+    _calibrationLoaded = true;
+
 }
 
 

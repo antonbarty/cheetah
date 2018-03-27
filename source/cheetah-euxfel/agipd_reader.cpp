@@ -28,7 +28,7 @@ cAgipdReader::cAgipdReader(void){
 	maxCell = 0;
 	verbose = 0;
 	goodImages4ThisTrain = -1;
-	_skip = 0;
+	_firstPulseId = 0;
     _stride = 1;
     _newFileSkip = 0;
 	_doNotApplyGainSwitch = false;
@@ -73,27 +73,49 @@ void cAgipdReader::setScheme(char *scheme) {
 	// Barty, September 2017
 	if(_scheme == "XFEL2012") {
 		std::cout << "\tSetting AGIPD data scheme to XFEL2012\n";
-        setSkip(0);
+        setFirstPulse(0);
 		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setCellIDcorrection(2);		// For interleaved data we need to correct the cellID by 2, else not
 		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
         //setNewFileSkip(60);
     }
-	
+
+    // Orville, September 2017
+    if(_scheme == "XFEL2017") {
+        std::cout << "\tSetting AGIPD data scheme to XFEL2012\n";
+        setFirstPulse(0);
+        setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setCellIDcorrection(2);        // For interleaved data we need to correct the cellID by 2, else not
+        setGainDataOffset(1,0);        // Gain data hyperslab offset relative to image data = frameNum+1
+        //setNewFileSkip(60);
+    }
+
+    
     // Fromme, November 2017
     else if(_scheme == "XFEL2066") {
 		std::cout << "\tSetting AGIPD data scheme to XFEL2066\n";
-        setSkip(0);
+        setFirstPulse(0);
 		setPulseIDmodulo(4);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setCellIDcorrection(1);		// Data is not interleaved
 		setGainDataOffset(0,1);		// Gain data hyperslab offset relative to image data
         //setNewFileSkip(60);
     }
 
+    // March 2018
+    else if(_scheme == "XFEL2018a") {
+        std::cout << "\tSetting AGIPD data scheme to XFEL2018a\n";
+        setFirstPulse(4);
+        setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setCellIDcorrection(1);        // Data is not interleaved
+        setGainDataOffset(0,1);        // Gain data hyperslab offset relative to image data
+        setNewFileSkip(0);
+    }
+
+    
 	// Default (current) scheme
 	else {
 		std::cout << "\tSetting AGIPD data scheme to Default\n";
-		setSkip(0);
+		setFirstPulse(0);
 		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setCellIDcorrection(2);		// For interleaved data we need to correct the cellID by 2, else not
 		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
@@ -101,6 +123,7 @@ void cAgipdReader::setScheme(char *scheme) {
 	}
 
 	std::cout << "\tData frames on PulseId modulo: " << _pulseIDmodulo << std::endl;
+    std::cout << "\tSkip pulseIDs in train less than: " << _firstPulseId << std::endl;
 	std::cout << "\tCellId correction: " << _cellIDcorrection << std::endl;
 	std::cout << "\tGain data offset: (" << _gainDataOffset[0] << ", " << _gainDataOffset[1] << ")" << std::endl;
 
@@ -197,6 +220,8 @@ void cAgipdReader::generateModuleFilenames(char *module0filename){
 
 /*
  *	Open all AGIPD module files relating to the specified module
+ *  and perform a bunch of sanity checks.
+ *  XFEL files are not versioned so we have to make some gueses
  */
 void cAgipdReader::open(char *baseFilename){
 	
@@ -291,7 +316,16 @@ void cAgipdReader::open(char *baseFilename){
 	std::cout << "\tChecking for mismatched timestamps" << std::endl;
 	//std::vector<long> allTrainIDs;
 
-	for(long i=0; i<nAGIPDmodules; i++)
+    
+    // Check for start and end trainID and pulseID
+    minTrain = INT_MAX;
+    maxTrain = INT_MIN;
+    minPulse = INT_MAX;
+    maxPulse = INT_MIN;
+    minCell = INT_MAX;
+    maxCell = INT_MIN;
+
+    for(long i=0; i<nAGIPDmodules; i++)
 	{
 		if (module[i].noData)
 			continue;
@@ -299,25 +333,24 @@ void cAgipdReader::open(char *baseFilename){
 		if (moduleOK[i] == false)
 			continue;
 
-		minTrain = INT_MAX;
-		maxTrain = INT_MIN;
-		minPulse = INT_MAX;
-		maxPulse = INT_MIN;
-		minCell = INT_MAX;
-		maxCell = INT_MIN;
 
 		//long cellID = module[i].cellID;
 
 		//int start = firstModule ? 200 : 0;
         int start = 0;
 
-		std::cout << "Starting from " << start << std::endl;
+        std::cout << "\tModule " << i << " train/pulse scan from frame " << start;
+        std::cout << " to " << module[i].nframes << std::endl;
 
 		for(long j=start; j<module[i].nframes; j++)
 		{
 			long trainID = module[i].trainIDlist[j];
 			long pulseID = module[i].pulseIDlist[j];
             long cellID = module[i].cellIDlist[j];
+            
+            // Silly values to be ignored
+            if(trainID <= 0)
+                continue;
 
 			if (trainID < minTrain) minTrain = trainID;
 			if (trainID > maxTrain) maxTrain = trainID;
@@ -329,17 +362,29 @@ void cAgipdReader::open(char *baseFilename){
 			if (cellID > maxCell) maxCell = cellID;
 		}
 	}
-\
 
 	currentTrain = minTrain;
 	currentPulse = minPulse;
 
 	std::cout << "Trains extend from IDs " << minTrain << " to " << maxTrain << std::endl;
-	std::cout << "Current train set to minimum, " << minTrain << std::endl;
 	std::cout << "Pulses extend from IDs " << minPulse << " to " << maxPulse << std::endl;
+    std::cout << "Current train set to minimum, " << minTrain << std::endl;
 	std::cout << "Current pulse set to minimum, " << minPulse << std::endl;
 	std::cout << "Cells of module readout extend from IDs " << minCell << " to " << maxCell << std::endl;
 
+    
+    // This is what happens with a blank set of files
+    if(minTrain == INT_MAX && maxTrain==INT_MIN && minPulse==INT_MAX && maxPulse==INT_MIN) {
+        std::cout << "WARNING: all files appear to be empty of any data" << std::endl;
+        std::cout << "minTrain == INT_MAX && maxTrain==INT_MIN && minPulse==INT_MAX && maxPulse==INT_MIN" << std::endl;
+        std::cout << "Setting minTrain = 0; maxTrain = 0; minPulse = 0; maxPulse = 0;" << std::endl;
+        minTrain = 0;
+        maxTrain = 0;
+        minPulse = 0;
+        maxPulse = 0;
+    }
+
+    
 	for(long module_num=0; module_num<nAGIPDmodules; module_num++) {
 		for (long train = minTrain; train <= maxTrain; train++) {
 			for (long pulse = minPulse; pulse <= maxPulse; pulse++) {
@@ -431,10 +476,10 @@ bool cAgipdReader::nextFramePrivate() {
 			goodImages4ThisTrain = -1;
 		}
 		
-		// Skip the first _skip pulses in a train (corrupted)
-        if(false) {
-            if(currentPulse < _skip) {
-                std::cout << "Skipping pulse 0 in train " << currentTrain << std::endl;
+		// Skip to first useful pulse in a train (corrupted)
+        if(true) {
+            if(currentPulse < _firstPulseId) {
+                //std::cout << "Skipping pulse currentPulse in train " << currentTrain << std::endl;
                 continue;
             }
         }
@@ -454,19 +499,9 @@ bool cAgipdReader::nextFramePrivate() {
 		success = readFrame(currentTrain, currentPulse);
 
 		if (lastModule >= 0) {
-			/* We had a good image in this train */
-			/* But if it isn't a multiple of stride, we don't want it */
-		//	if ((goodImages4ThisTrain + 1) % _stride > 0) {
-		//		lastModule = -1;
-		//		std::cout << "Skipping frame due to stride" << std::endl;
-		//	}
-
 			goodImages4ThisTrain++;
 		}
 	}
-
-	std::cout << "Returning image number: " << goodImages4ThisTrain << std::endl;
-
     
 	// Statistics on bad pixels, etc...
     if(true) {
@@ -490,6 +525,7 @@ bool cAgipdReader::nextFramePrivate() {
         printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
     }
 
+    std::cout << "Returning image number " << goodImages4ThisTrain << " in train "  << currentTrain << std::endl;
     return success;
 }
 
@@ -580,24 +616,21 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 	if (lastModule >= 0)
 	{
 		std::cout << "Read train " << trainID << ", pulseID " << pulseID << " with "
-		<< moduleCount << " modules." << std::endl;
+        << moduleCount << " modules";
 	}
 
     
-    // Check number of pixels in each gain stage
-    if(false) {
-        long    pixelsInGainLevel[3] = {0,0,0};
-
-        for(long p=0; p<nn; p++) {
-            pixelsInGainLevel[digitalGain[p]] += 1;
+    // Print out the module IDs
+    if(true) {
+        std::cout << ", cellIDs=[";
+        for(int moduleID=0; moduleID<nAGIPDmodules; moduleID++) {
+            std::cout << cellID[moduleID] << ",";
         }
-        
-        std::cout << "nPixels in gain mode (0,1,2) = (";
-        std::cout << pixelsInGainLevel[0] << ", ";
-        std::cout << pixelsInGainLevel[1] << ", ";
-        std::cout << pixelsInGainLevel[2] << ")" << std::endl;
+        std::cout << "]"; // << std::endl;
+
     }
     
+    std::cout << std::endl;
     
 	currentTrain = trainID;
 	currentPulse = pulseID;

@@ -81,6 +81,7 @@ public:
 public:
 	long		nframes;
 	long		nstack;
+    long        nindex;
 	long		n0;
 	long		n1;
 	long		nn;
@@ -118,6 +119,9 @@ private:
 	std::string h5_image_status_field;
     std::string h5_image_gain_field;
     std::string h5_image_mask_field;
+    std::string h5_index_first_field;
+    std::string h5_index_count_field;
+
 
 	std::string	darkcalFilename;
 	std::string	gaincalFilename;

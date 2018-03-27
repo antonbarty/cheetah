@@ -142,6 +142,10 @@ int main(int argc, char* argv[]) {
 		std::cout << "Opening " << CheetahEuXFELparams.inputFiles[fnum] << std::endl;
 		agipd.open((char *)CheetahEuXFELparams.inputFiles[fnum].c_str());
 
+        // How big is this file?
+        std::cout << "Number of frames in this file: " << agipd.nframes << std::endl;
+        
+        
 		// Guess the run number
 		long	pos;
 		long	runNumber;

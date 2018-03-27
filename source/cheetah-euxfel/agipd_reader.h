@@ -45,7 +45,7 @@ public:
 	float *getCellAverage(int i);
 	void writePNG(float *pngData, std::string filename);
 
-	void setSkip(int skip) { _skip = skip; if (_skip < 0) _skip = 0; }
+	void setFirstPulse(int pulse) { _firstPulseId = pulse; if (_firstPulseId < 0) _firstPulseId = 0; }
     void setStride(int stride) { _stride = stride; if (_stride <= 0) _stride = 1; }
 	void setPulseIDmodulo(int mod) { _pulseIDmodulo = mod; if (_pulseIDmodulo <= 0) _pulseIDmodulo = 1; }
 	void setCellIDcorrection(int mod) { _cellIDcorrection = mod; if (_cellIDcorrection <= 0) _cellIDcorrection = 1; }
@@ -120,7 +120,7 @@ private:
 	
     /* Things that change between experiments */
     std::string         _scheme;
-	int                 _skip;              // Number of pulses to skip at start of pulse train
+	int                 _firstPulseId;              // Number of pulses to skip at start of pulse train
 	int					_pulseIDmodulo;		// Good frames occur when pulseID % _pulseIDmodulo == 0
 	int					_cellIDcorrection; 	// For interleaved data we need to divide cellID by 2, otherwise not
     int                 _stride;            // Step over frames with this spacing

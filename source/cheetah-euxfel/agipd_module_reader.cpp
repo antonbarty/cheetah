@@ -62,6 +62,11 @@ static char h5_cellId_suffix[] = "cellId";
 static char h5_image_data_suffix[] = "data";
 static char h5_image_status_suffix[] = "status";
 
+static char h5_index_prefix[] = "/INDEX/SPB_DET_AGIPD1M-1/DET/";
+static char h5_index_first_suffix[] = "CH0:xtdf/image/first";
+static char h5_index_count_suffix[] = "CH0:xtdf/image/count";
+
+
 // These two in processed data only
 static char h5_image_gain_suffix[] = "gain";
 static char h5_image_mask_suffix[] = "mask";
@@ -118,15 +123,20 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 
     
 	/* Now to make our new field names using the module number */
-	std::string prefix = h5_instrument_prefix + i_to_str(mNum) + h5_image_prefix;
-	h5_trainId_field = prefix + h5_trainId_suffix;
-	h5_pulseId_field = prefix + h5_pulseId_suffix;
-	h5_cellId_field = prefix + h5_cellId_suffix;
-	h5_image_data_field = prefix + h5_image_data_suffix;
-	h5_image_status_field = prefix + h5_image_status_suffix;
-    h5_image_gain_field = prefix + h5_image_gain_suffix;
-    h5_image_mask_field = prefix + h5_image_mask_suffix;
-
+	std::string imagePrefix = h5_instrument_prefix + i_to_str(mNum) + h5_image_prefix;
+	h5_trainId_field = imagePrefix + h5_trainId_suffix;
+	h5_pulseId_field = imagePrefix + h5_pulseId_suffix;
+	h5_cellId_field = imagePrefix + h5_cellId_suffix;
+	h5_image_data_field = imagePrefix + h5_image_data_suffix;
+	h5_image_status_field = imagePrefix + h5_image_status_suffix;
+    h5_image_gain_field = imagePrefix + h5_image_gain_suffix;
+    h5_image_mask_field = imagePrefix + h5_image_mask_suffix;
+    
+    std::string indexPrefix = h5_index_prefix + i_to_str(mNum);
+    h5_index_first_field = indexPrefix + h5_index_first_suffix;
+    h5_index_count_field = indexPrefix + h5_index_count_suffix;
+    
+    
 	if (false)
 	{
 		std::cout << h5_trainId_field << std::endl;
@@ -136,11 +146,14 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 		std::cout << h5_image_status_field << std::endl;
         std::cout << h5_image_gain_field << std::endl;
         std::cout << h5_image_mask_field << std::endl;
+        std::cout << h5_index_first_field << std::endl;
+        std::cout << h5_index_count_field << std::endl;
 	}
 
 	std::string baseName = getBaseFilename(cAgipdModuleReader::filename);
 
-	// filename starts with 'RAW_' we have raw data
+    // Is this raw data which needs calibrating, or data already calibrated by XFEL?
+	// If filename starts with 'RAW_' we have raw data
 	if(baseName.substr(0,3) == "RAW") {
 		std::cout << "\tData is RAW detector data" << std::endl;
 		rawDetectorData = true;
@@ -175,16 +188,32 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 	n0 = dims[3];
 	n1 = dims[2];
 
+    // Layout of calibrated data is different to raw data
 	if (!rawDetectorData) {
 		n0 = dims[2];
 		n1 = dims[1];
 		nstack = 1;
 	}
 	nn = n0*n1;
-	
+
+    
+    // Check the index length
+    int success2 = H5LTget_dataset_info(h5_file_id, h5_index_first_field.c_str(), dims, &dataclass, &datasize);
+    int success3 = H5LTget_dataset_info(h5_file_id, h5_index_count_field.c_str(), dims, &dataclass, &datasize);
+    if (success2 < 0 || success3 < 0) {
+        std::cout << "Get index info for image - failed. Module set to blank.\n";
+        fileOK = false;
+        noData = true;
+        return;
+    }
+    
+    nindex = dims[0];
+
+    
 	printf("\tNumber of frames: %li\n", nframes);
 	printf("\tImage block size: %lix%li\n", n0, n1);
 	printf("\tStack depth: %li\n", nstack);
+    printf("\tIndex depth: %li\n", nindex);
 
 };
 // cAgipdReader::open
