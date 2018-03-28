@@ -377,11 +377,11 @@ void cAgipdReader::open(char *baseFilename){
     if(minTrain == INT_MAX && maxTrain==INT_MIN && minPulse==INT_MAX && maxPulse==INT_MIN) {
         std::cout << "WARNING: all files appear to be empty of any data" << std::endl;
         std::cout << "minTrain == INT_MAX && maxTrain==INT_MIN && minPulse==INT_MAX && maxPulse==INT_MIN" << std::endl;
-        std::cout << "Setting minTrain = 0; maxTrain = 0; minPulse = 0; maxPulse = 0;" << std::endl;
+        std::cout << "Setting minTrain = 0; maxTrain = 1; minPulse = 0; maxPulse = 1;" << std::endl;
         minTrain = 0;
-        maxTrain = 0;
+        maxTrain = 1;
         minPulse = 0;
-        maxPulse = 0;
+        maxPulse = 1;
     }
 
     
