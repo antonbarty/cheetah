@@ -33,7 +33,7 @@ void initPixelmask(cEventData *eventData, cGlobal *global){
 	}
 }
 
-void checkSaturatedPixels(uint16_t *data_raw16, uint16_t *mask, long pix_nn, long pixelSaturationADC, long pixelMinimumAllowedADC) {
+void checkSaturatedPixels(uint16_t *data_raw16, uint16_t *mask, long pix_nn, long pixelSaturationADC, long pixelMinimumAllowedADC, long pixelMaximumAllowedADC) {
 	for(long i=0; i<pix_nn; i++)
     {
         if ( data_raw16[i] >= pixelSaturationADC)
@@ -51,12 +51,17 @@ void checkSaturatedPixels(uint16_t *data_raw16, uint16_t *mask, long pix_nn, lon
             mask[i] |= PIXEL_IS_BAD;
             data_raw16[i] = 0;
         }
+        if ( data_raw16[i] >= pixelMaximumAllowedADC)
+        {
+            mask[i] |= PIXEL_IS_BAD;
+            data_raw16[i] = 0;
+        }
 
     }
 }
 
 
-void checkSaturatedPixels(float *raw_data_float, uint16_t *mask, long pix_nn, long pixelSaturationADC, long pixelMinimumAllowedADC) {
+void checkSaturatedPixels(float *raw_data_float, uint16_t *mask, long pix_nn, long pixelSaturationADC, long pixelMinimumAllowedADC, long pixelMaximumAllowedADC) {
     for(long i=0; i<pix_nn; i++) {
         if ( raw_data_float[i] >= pixelSaturationADC)
         {
@@ -69,6 +74,11 @@ void checkSaturatedPixels(float *raw_data_float, uint16_t *mask, long pix_nn, lo
         }
 
         if ( raw_data_float[i] <= pixelMinimumAllowedADC)
+        {
+            mask[i] |= PIXEL_IS_BAD;
+            raw_data_float[i] = 0;
+        }
+        if ( raw_data_float[i] >= pixelMaximumAllowedADC)
         {
             mask[i] |= PIXEL_IS_BAD;
             raw_data_float[i] = 0;
@@ -116,8 +126,9 @@ void checkSaturatedPixels(cEventData *eventData, cGlobal *global){
 				long		nn = global->detector[detIndex].pix_nn;
 				long		pixelSaturationADC = global->detector[detIndex].pixelSaturationADC;
                 long        pixelMinimumAllowedADC = global->detector[detIndex].pixelMinimumAllowedADC;
+                long        pixelMaximumAllowedADC = global->detector[detIndex].pixelMaximumAllowedADC;
 				//checkSaturatedPixels(raw_data, mask, nn, pixelSaturationADC, pixelMinimumAllowedADC);
-                checkSaturatedPixels(raw_data_float, mask, nn, pixelSaturationADC, pixelMinimumAllowedADC);
+                checkSaturatedPixels(raw_data_float, mask, nn, pixelSaturationADC, pixelMinimumAllowedADC, pixelMaximumAllowedADC);
 			}
 		}
 	}

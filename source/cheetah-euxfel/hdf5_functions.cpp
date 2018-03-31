@@ -234,6 +234,8 @@ void* cHDF5Functions::checkAllocReadHyperslab(char fieldName[], int ndims, hsize
 	// Checks
 	if(h5_ndims != ndims) {
 		std::cout << "\tcheckAllocReadHyperslab error: dimensions of data sets do not match requested dimensions (oops)\n";
+        std::cout << "\tndims=" << ndims << ", h5_ndims=" << h5_ndims << std::endl;
+        std::cout << "\tIn field " << fieldName << std::endl;
 		H5Dclose(dataset_id);
 		H5Sclose (dataspace_id);
 		return NULL;

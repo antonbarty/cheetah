@@ -142,9 +142,14 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
             else:
                 # Scale from 0 to maximum intensity value
-                top = numpy.amax(img_data.ravel())
+                top = numpy.nanmax(img_data.ravel())
+                bottom = 0
 
-            self.ui.imageView.setLevels(0,top)
+            self.ui.imageView.setLevels(bottom,top)
+        else:
+            top = numpy.nanmax(img_data.ravel())
+            bottom = numpy.nanmin(img_data.ravel())
+
         #end autoscale
 
 
@@ -155,7 +160,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
             hist.setHistogramRange(-100, 16384, padding=0.05)
         else:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(numpy.amin(img_data.ravel()), numpy.amax(img_data.ravel()), padding=0.1)
+            hist.setHistogramRange(numpy.nanmin(img_data.ravel()), numpy.nanmax(img_data.ravel()), padding=0.1)
         #end histogramscale
 
 

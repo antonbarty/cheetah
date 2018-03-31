@@ -510,6 +510,8 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	free(digitalGain); digitalGain = NULL;
 	free(badpixMask); badpixMask = NULL;
 
+    //std::cout << "ndims=" << ndims << ", size=[" << slab_size[0] << ", " << slab_size[1] << ", " << slab_size[2] << std::endl;
+    
 	// Read data directly from hyperslab in corrected data file (which is already a float)
 	data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_IEEE_F32LE, sizeof(float));
 	
@@ -518,44 +520,36 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	uint8_t *tempgain = NULL;
 	tempgain = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
 	digitalGain = (uint16_t *)malloc(nn * sizeof(uint16_t));
-	long nhigh = 0;
 	for (int i = 0; i < nn; i++) {
 		digitalGain[i] = tempgain[i];
-		if(digitalGain[i])
-			nhigh++;
 	}
 	free(tempgain);
 
 	
-	// Bad pixel mask is a H5T_STD_U8LE Dataset {7500, 512, 128, 3}
-	slab_start[3] = 0;
-	slab_size[3] = 3;
-	ndims = 4;
+	// Bad pixel mask is a H5T_STD_U8LE Dataset {7500, 512, 128, 3}  <--- Not any more
+	//slab_start[3] = 0;
+	//slab_size[3] = 3;
+	//ndims = 4;
 	uint8_t *tempmask = NULL;
 	tempmask = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
 	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
-	long	p;
-	long nbad = 0;
-    // Optionally skip this for debugging
-    if(false) {
-        for (long i = 0; i < nn; i++) {
-            p = 3*i + digitalGain[i];
-            badpixMask[i] = tempmask[p];
-            if(badpixMask[i] != 0) {
-                data[i] = 0;
-                badpixMask[i] = 1;
-                nbad++;
-            }
+    // Copy across mask
+    long nbad = 0;
+    for (long i = 0; i < nn; i++) {
+        if(tempmask[i] != 0) {
+            data[i] = 0;
+            badpixMask[i] = 1;
+            nbad++;
         }
     }
-	free(tempmask);
+    free(tempmask);
 
     
     // Check for screwy intensity values: Sometimes we get +/- 1e9 appearing
     // Bad form to hard code this, but for now it's just a test case
     if(true) {
         for (long i = 0; i < nn; i++) {
-            if(data[i] > 5e7 || data[i] < -1e6) {
+            if(data[i] > 1e7 || data[i] < -1e6) {
                 data[i] = 0;
                 badpixMask[i] = 1;
             }

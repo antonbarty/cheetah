@@ -68,7 +68,8 @@ cAgipdReader::~cAgipdReader()
 void cAgipdReader::setScheme(char *scheme) {
     _scheme = scheme;
 	
-	std::cout << "Configuring for XFEL data layout\n";
+    std::cout << "****** Begin AGIPD configuration ******\n";
+	std::cout << "Configuring XFEL data layout\n";
 
 	// Barty, September 2017
 	if(_scheme == "XFEL2012") {
@@ -126,6 +127,7 @@ void cAgipdReader::setScheme(char *scheme) {
     std::cout << "\tSkip pulseIDs in train less than: " << _firstPulseId << std::endl;
 	std::cout << "\tCellId correction: " << _cellIDcorrection << std::endl;
 	std::cout << "\tGain data offset: (" << _gainDataOffset[0] << ", " << _gainDataOffset[1] << ")" << std::endl;
+    std::cout << "****** End AGIPD configuration ******\n";
 
 	
     // Defaults will be used if none of the above are found
@@ -267,9 +269,9 @@ void cAgipdReader::open(char *baseFilename){
 			continue;
 
 		if(module[i].nframes != module[_referenceModule].nframes) {
-			std::cout << std::endl;
 			std::cout << "\tInconsistent number of frames between modules " << _referenceModule << " and " << i << std::endl;
 			std::cout << "\t" << module[i].nframes << " != " << module[_referenceModule].nframes << std::endl;
+            std::cout << "\tsetting moduleOK[i] = false\n";
 			moduleOK[i] = false;
 		}
 		else {
@@ -366,6 +368,8 @@ void cAgipdReader::open(char *baseFilename){
 	currentTrain = minTrain;
 	currentPulse = minPulse;
 
+    std::cout << "****** Begin AGIPD configuration ******\n";
+
 	std::cout << "Trains extend from IDs " << minTrain << " to " << maxTrain << std::endl;
 	std::cout << "Pulses extend from IDs " << minPulse << " to " << maxPulse << std::endl;
     std::cout << "Current train set to minimum, " << minTrain << std::endl;
@@ -377,14 +381,17 @@ void cAgipdReader::open(char *baseFilename){
     if(minTrain == INT_MAX && maxTrain==INT_MIN && minPulse==INT_MAX && maxPulse==INT_MIN) {
         std::cout << "WARNING: all files appear to be empty of any data" << std::endl;
         std::cout << "minTrain == INT_MAX && maxTrain==INT_MIN && minPulse==INT_MAX && maxPulse==INT_MIN" << std::endl;
-        std::cout << "Setting minTrain = 0; maxTrain = 1; minPulse = 0; maxPulse = 1;" << std::endl;
-        minTrain = 0;
-        maxTrain = 1;
+        std::cout << "Setting minTrain = 1; maxTrain = 1; minPulse = 0; maxPulse = 30;" << std::endl;
+        minTrain = 1;
+        maxTrain = 10;
         minPulse = 0;
-        maxPulse = 1;
+        maxPulse = 30;
     }
 
+    std::cout << "****** End AGIPD configuration ******\n";
+
     
+    // Create trainID/pulseID pairs
 	for(long module_num=0; module_num<nAGIPDmodules; module_num++) {
 		for (long train = minTrain; train <= maxTrain; train++) {
 			for (long pulse = minPulse; pulse <= maxPulse; pulse++) {

@@ -145,6 +145,14 @@ int main(int argc, char* argv[]) {
         // How big is this file?
         std::cout << "Number of frames in this file: " << agipd.nframes << std::endl;
         
+        // Handle empty files, which now appear quite commonly
+        if(agipd.nframes == 0) {
+            std::cout << "Uh oh - we seem to have an empty file here, agipd.nframes == " << agipd.nframes << std::endl;
+            std::cout << "Skipping this file \n" ;
+            agipd.close();
+            continue;
+        }
+        
         
 		// Guess the run number
 		long	pos;

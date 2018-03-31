@@ -79,6 +79,7 @@ cPixelDetectorCommon::cPixelDetectorCommon()
     maskSaturatedPixels = 0;
     pixelSaturationADC = 65536;
     pixelMinimumAllowedADC = -65535;
+    pixelMaximumAllowedADC = 1000000;
     maskPnccdSaturatedPixels = 0;
 
     // Static dark calibration (electronic offsets)
@@ -795,6 +796,9 @@ int cPixelDetectorCommon::parseConfigTag(char *tag, char *value)
     }
     else if (!strcmp(tag, "pixelminimumallowedadc")) {
         pixelMinimumAllowedADC = atoi(value);
+    }
+    else if (!strcmp(tag, "pixelmaximumallowedadc")) {
+        pixelMaximumAllowedADC = atoi(value);
     }
     else if (!strcmp(tag, "useselfdarkcal")) {
         printf("The keyword useSelfDarkcal has been changed.  It is\n"
