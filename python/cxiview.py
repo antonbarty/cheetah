@@ -139,7 +139,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.ui.actionAutoscale.isChecked():
             if self.ui.actionHistogram_clip.isChecked() == True:
                 # Histogram equalisation (saturate top 0.1% of pixels)
-                bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
+                bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.0002)
             else:
                 # Scale from 0 to maximum intensity value
                 top = numpy.nanmax(img_data.ravel())
@@ -157,7 +157,10 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # Set the histogram widget scale bar to behave politely and not jump around
         if self.ui.actionAuto_scale_levels.isChecked() == True:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(-100, 16384, padding=0.05)
+            #hist.setHistogramRange(-100, 16384, padding=0.05)
+            htop = max(16384, top)
+            hbottom = min(-100, bottom)
+            hist.setHistogramRange(hbottom, htop, padding=0.05)
         else:
             hist = self.ui.imageView.getHistogramWidget()
             hist.setHistogramRange(numpy.nanmin(img_data.ravel()), numpy.nanmax(img_data.ravel()), padding=0.1)

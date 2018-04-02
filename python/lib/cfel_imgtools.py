@@ -21,7 +21,7 @@ def histogram_clip_levels(data, value):
     # Histogram bounds
     d_max = numpy.int64(numpy.nanmax(data.ravel()))
     d_min = numpy.int64(numpy.nanmin(data.ravel()))
-    print('Unclipped range = ',d_min, d_max)
+    #print('Unclipped range = ',d_min, d_max)
 
 
 
@@ -30,8 +30,8 @@ def histogram_clip_levels(data, value):
     #Try histogram levels.
     # Return min/max on any error
     try:
-        h_max = max(0, d_max) + 1
-        h_min = max(0,d_min)
+        h_max = max(1, d_max) + 1
+        h_min = min(0,d_min)
         h_nbins = max(100, h_max-h_min)
         h_nbins = min(1000000, h_nbins)
         h_range = (h_min, h_max)
@@ -68,7 +68,7 @@ def histogram_clip_levels(data, value):
 
 
     #print('Clipped range = ',bottom, top)
-    print("histogram_clip: ", bottom, top)
+    #print("histogram_clip: ", bottom, top)
 
     # Return suggested levels for image scaling
     return bottom, top
