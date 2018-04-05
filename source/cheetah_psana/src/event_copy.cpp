@@ -26,9 +26,10 @@
 #include "psddl_psana/acqiris.ddl.h"
 #include "psddl_psana/camera.ddl.h"
 #include "psddl_psana/pnccd.ddl.h"
-#include "ReleaseInfo/Release.h"
+//#include "ReleaseInfo/Release.h"
 
-#define PSANA_VERSION (RELEASEINFO_VERSION_MAJOR*10000+RELEASEINFO_VERSION_MIDDLE*100+RELEASEINFO_VERSION_MINOR)
+//#define PSANA_VERSION (RELEASEINFO_VERSION_MAJOR*10000+RELEASEINFO_VERSION_MIDDLE*100+RELEASEINFO_VERSION_MINOR)
+#define PSANA_VERSION (1*10000 + 3*100 + 47)
 using namespace cheetah_ana_pkg;
 using namespace std;
 
