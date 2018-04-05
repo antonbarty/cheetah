@@ -522,7 +522,22 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #
     def maskmaker(self):
         print("Mask maker selected")
-        print("Talk to Andrew Morgan to add his mask maker")
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+        file = runs['path'][0]
+        file += '*detector0-class0-sum.h5'
+        field = 'data/data'
+
+        if len(glob.glob(file)) != 0:
+            file = glob.glob(file)[0]
+            cmdarr = ['maskMakerGUI.py', '-g', self.config['geometry'], file, field]
+            cfel_file.spawn_subprocess(cmdarr)
+        else:
+            print("File does not seem to exist:")
+            print(file)
+
+
 
     def badpix_from_darkcal(self):
         runs = self.selected_runs()
