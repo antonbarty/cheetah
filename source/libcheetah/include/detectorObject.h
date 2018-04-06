@@ -20,10 +20,10 @@
 #include "dataVersion.h"
 #include "frameBuffer.h"
 
-#include "streakfinder_wrapper.h"
-#include "cheetahConversion.h"
-#include "pythonWrapperConversions.h"
-#include "mask.h"
+#include "cheetah_extensions_yaroslav/streakfinder_wrapper.h"
+#include "cheetah_extensions_yaroslav/cheetahConversion.h"
+#include "cheetah_extensions_yaroslav/pythonWrapperConversions.h"
+#include "cheetah_extensions_yaroslav/mask.h"
 
 #define MAX_DETECTORS 2
 #define MAX_FILENAME_LENGTH 1024
@@ -36,6 +36,12 @@ static const unsigned CSPAD_ASIC_NX = 194;  // ASIC nx = extent of one ASIC in x
 static const unsigned CSPAD_ASIC_NY = 185;  // ASIC ny = extent of one ASIC in y
 static const unsigned CSPAD_nASICS_X = 8;   // 8 ASICs across in raw data stream
 static const unsigned CSPAD_nASICS_Y = 8;   // 8 ASICs down in raw data stresm
+
+// AGIPD 1M //
+static const unsigned AGIPD1M_ASIC_NX = 128;  // ASIC nx = extent of one ASIC in x
+static const unsigned AGIPD1M_ASIC_NY = 512;  // ASIC ny = extent of one ASIC in y
+static const unsigned AGIPD1M_nASICS_X = 1;   // 8 ASICs across in raw data stream
+static const unsigned AGIPD1M_nASICS_Y = 16;   // 8 ASICs down in raw data stresm
 
 //  CSPAD 2x2 //
 static const unsigned CSPAD2x2_nASICS_X = 2;   // 2 ASICs across in raw data stream
@@ -267,6 +273,8 @@ public:
     // Saturated pixels
     int maskSaturatedPixels;
     long pixelSaturationADC;
+    long pixelMinimumAllowedADC;
+    long pixelMaximumAllowedADC;
     // Mask pnccd saturated pixels (thresholds hardcoded, for every quadrant different)
     int maskPnccdSaturatedPixels;
     // Local background subtraction
@@ -519,6 +527,7 @@ public:
     uint16_t *data_raw16;
     // Raw data as read from the XTC file but converted to float
     float *data_raw;
+	bool data_raw_is_float;
     // Data after detector corrections applied (common-mode, detector artefacts...)
     float *data_detCorr;
     // Data after both detector corrections and photon corrections (subtraction of persistent parasitic scattering, water ring removal,...)

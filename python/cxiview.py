@@ -62,6 +62,8 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
             print('Error encountered reading data from file (image data, peaks, energy or masks).  Skipping frame.')
             return
 
+        self.raw_data = cxi
+
         # Photon energy - use command line eV if provided
         self.photon_energy_ok = False
         if self.default_eV != 'None':
@@ -137,12 +139,17 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.ui.actionAutoscale.isChecked():
             if self.ui.actionHistogram_clip.isChecked() == True:
                 # Histogram equalisation (saturate top 0.1% of pixels)
-                bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.001)
+                bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.0002)
             else:
                 # Scale from 0 to maximum intensity value
-                top = numpy.amax(img_data.ravel())
+                top = numpy.nanmax(img_data.ravel())
+                bottom = 0
 
-            self.ui.imageView.setLevels(0,top)
+            self.ui.imageView.setLevels(bottom,top)
+        else:
+            top = numpy.nanmax(img_data.ravel())
+            bottom = numpy.nanmin(img_data.ravel())
+
         #end autoscale
 
 
@@ -150,10 +157,13 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # Set the histogram widget scale bar to behave politely and not jump around
         if self.ui.actionAuto_scale_levels.isChecked() == True:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(-100, 16384, padding=0.05)
+            #hist.setHistogramRange(-100, 16384, padding=0.05)
+            htop = max(16384, top)
+            hbottom = min(-100, bottom)
+            hist.setHistogramRange(hbottom, htop, padding=0.05)
         else:
             hist = self.ui.imageView.getHistogramWidget()
-            hist.setHistogramRange(numpy.amin(img_data.ravel()), numpy.amax(img_data.ravel()), padding=0.1)
+            hist.setHistogramRange(numpy.nanmin(img_data.ravel()), numpy.nanmax(img_data.ravel()), padding=0.1)
         #end histogramscale
 
 
@@ -240,8 +250,8 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_x.append(self.geometry['x'][peak_in_slab] + self.img_shape[0] / 2)
                 peak_y.append(self.geometry['y'][peak_in_slab] + self.img_shape[1] / 2)
 
-            ring_pen = pyqtgraph.mkPen('r', width=2)
-            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
+            ring_pen = pyqtgraph.mkPen('b', width=2)
+            self.found_peak_canvas.setData(peak_x, peak_y, symbol = 'o', size = 10, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
 
         else:
             self.found_peak_canvas.setData([])
@@ -281,10 +291,8 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
                 peak_x = []
                 peak_y = []
 
-            ring_pen = pyqtgraph.mkPen('b', width=2)
-            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 'o', 
-                size = 2*self.predicted_peak_circle_radius, pen = ring_pen, 
-                brush = (0,0,0,0), pxMode = False)
+            ring_pen = pyqtgraph.mkPen('g', width=2)
+            self.predicted_peak_canvas.setData(peak_x, peak_y, symbol = 's', size = 2*self.predicted_peak_circle_radius, pen = ring_pen, brush = (0,0,0,0), pxMode = False)
         else:
             self.predicted_peak_canvas.setData([])
             self.resolution_limit_ring_canvas.setData([])
@@ -650,6 +658,49 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
     #end action_save_png()
 
 
+    #
+    # Save data to file (raw layout)
+    #
+    def action_save_data(self):
+        file_hint = os.path.basename(self.event_list['filename'][self.img_index])
+        file_hint = os.path.splitext(file_hint)[0]
+        file_hint += '-#'
+        file_hint += str(self.event_list['event'][self.img_index])
+        file_hint += '.h5'
+        file_hint = os.path.join(self.exportdir, file_hint)
+
+        filename = cfel_file.dialog_pickfile(write=True, path=file_hint, qtmainwin=self)
+        if filename=='':
+            return
+
+        print('Saving image data to: ', filename)
+        self.exportdir = os.path.dirname(filename)
+        data_to_save = self.raw_data['data']
+        cfel_file.write_h5(data_to_save, filename=filename)
+    #end action_save_data
+
+    #
+    # Save data to file (assembled layout)
+    #
+    def action_save_assembled_data(self):
+        file_hint = os.path.basename(self.event_list['filename'][self.img_index])
+        file_hint = os.path.splitext(file_hint)[0]
+        file_hint += '-#'
+        file_hint += str(self.event_list['event'][self.img_index])
+        file_hint += '.h5'
+        file_hint = os.path.join(self.exportdir, file_hint)
+
+        filename = cfel_file.dialog_pickfile(write=True, path=file_hint, qtmainwin=self)
+        if filename=='':
+            return
+
+        print('Saving assembled image data to: ', filename)
+        self.exportdir = os.path.dirname(filename)
+        data_to_save = self.img_to_draw
+        cfel_file.write_h5(data_to_save, filename=filename)
+    #end action_save_data
+
+
     def action_update_files(self):
         # read files from streamfile if streamfile is there
         if self.streamfile is not None:
@@ -742,6 +793,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.img_to_draw = numpy.zeros(self.img_shape, dtype=numpy.float32)
         self.mask_to_draw = numpy.zeros(self.img_shape+(3,), dtype=numpy.uint8)
         self.predicted_peak_circle_radius = 5
+        #self.exportdir = '.'
 
         #
         # Set up the UI
@@ -783,7 +835,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.ui.imageView.ui.menuBtn.hide()
         self.ui.imageView.ui.roiBtn.hide()
         
-        # Buttons on front pannel
+        # Buttons on front panel
         self.ui.refreshfilesPushButton.clicked.connect(self.action_update_files)
         self.ui.previousPushButton.clicked.connect(self.previous_pattern)
         self.ui.nextPushButton.clicked.connect(self.next_pattern)
@@ -816,13 +868,16 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
 
         # File menu
         self.ui.actionSave_image.triggered.connect(self.action_save_png)
+        self.ui.actionSave_data.triggered.connect(self.action_save_data)
+        self.ui.actionSave_data_assembled.triggered.connect(self.action_save_assembled_data)
         self.ui.actionRefresh_file_list.triggered.connect(self.action_update_files)
+
+
 
         # Crystals menu
         self.ui.actionCircle_Cheetah_peaks.triggered.connect(self.circle_cheetah_peaks)
 
         # Disabled stuff
-        self.ui.actionSave_data.setEnabled(False)
         self.ui.actionLoad_geometry.setEnabled(False)
         self.ui.menuColours.setEnabled(False)
 
@@ -930,7 +985,7 @@ if __name__ == '__main__':
     print(args)
     print("----------")    
     """
-    
+
     # Perform consistency checking on the command line arguments.
     if (args.i == "" and args.s == ""):
         print("No input or stream file given")

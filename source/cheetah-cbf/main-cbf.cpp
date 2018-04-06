@@ -250,10 +250,9 @@ int loadImage(cbf_handle & cbfh, cEventData* eventData) {
 //        printf ("%i, ", arr[i]);
 //    }
 
-    // Prepare buffer for event data
-    eventData->detector[detId].data_raw16 = (uint16_t*) calloc(eventData->pGlobal->detector[detId].pix_nn, sizeof(uint16_t));
 
-    // copy, setting negative values to 0
+	// copy, setting negative values to 0
+	// (memory already allocated)
     for (size_t i = 0; i < elements_read; i++) {
         eventData->detector[detId].data_raw16[i] = arr[i] < 0? 0 : (uint16_t) arr[i];
     }

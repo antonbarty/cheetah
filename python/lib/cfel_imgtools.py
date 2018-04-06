@@ -19,43 +19,58 @@ def histogram_clip_levels(data, value):
     """
     
     # Histogram bounds
-    d_max = numpy.int_(data.max())
-    d_min = numpy.int_(data.min())
+    d_max = numpy.int64(numpy.nanmax(data.ravel()))
+    d_min = numpy.int64(numpy.nanmin(data.ravel()))
     #print('Unclipped range = ',d_min, d_max)
 
-    
-    h_max = d_max + 1
-    h_min = min(0,d_min-1)
-    h_nbins = max(200, h_max)
-    h_range = (h_min, h_max)
-    #print('nbins=', h_nbins, 'range=',h_range)
-    
-    
-    # Cumulative histogram
-    h, e = numpy.histogram(data, bins=h_nbins, range=h_range)
-    c = h.cumsum()/h.sum()
 
-    # Top and bottom <value> percentile
-    w_top = numpy.where(c <= (1-value))
-    w_bottom = numpy.where(c >= value)
 
+
+
+    #Try histogram levels.
+    # Return min/max on any error
     try:
-        i_top = numpy.amax(w_top)
+        h_max = max(1, d_max) + 1
+        h_min = min(0,d_min)
+        h_nbins = max(100, h_max-h_min)
+        h_nbins = min(1000000, h_nbins)
+        h_range = (h_min, h_max)
+        #print('nbins=', h_nbins, 'range=',h_range)
+
+
+        # Cumulative histogram
+        h, e = numpy.histogram(data, bins=h_nbins, range=h_range)
+        c = h.cumsum()/h.sum()
+
+        # Top and bottom <value> percentile
+        w_top = numpy.where(c < (1-value))
+        w_bottom = numpy.where(c > value)
+
+        try:
+            i_top = numpy.amax(w_top)
+        except:
+            i_top = h.size-1
+
+        try:
+            i_bottom = numpy.amin(w_bottom)
+        except:
+            i_bottom = 0
+
+
+        bottom = e[i_bottom]
+        top = max(e[i_top], bottom + 1)
+
     except:
-        i_top = c.size
-
-    try:
-        i_bottom = numpy.amin(w_bottom)
-    except:
-        i_bottom = 0
+        bottom = d_min
+        top = d_max
 
 
-    bottom = e[i_bottom]
-    top = max(e[i_top], bottom+1)
+
+
     #print('Clipped range = ',bottom, top)
-    
+    #print("histogram_clip: ", bottom, top)
+
     # Return suggested levels for image scaling
-    #print("histogram_clip: ", bottom, top)    
     return bottom, top
 #end histogram_clip_levels
 

@@ -13,6 +13,7 @@ import PyQt5.QtWidgets
 
 import UI.crawler_ui
 import lib.crawler_slac as crawler_slac
+import lib.crawler_exfel as crawler_exfel
 import lib.crawler_p11 as crawler_p11
 import lib.crawler_hdf5 as crawler_hdf5
 import lib.crawler_crystfel as crawler_crystfel
@@ -34,7 +35,11 @@ class cheetah_crawler(PyQt5.QtWidgets.QMainWindow):
         # Now some special cases
         if '/reg/d/' in self.data_dir:
             self.datatype = 'XTC'
-        if 'p11' in self.data_dir:
+        if '/gpfs/exfel/' in self.data_dir:
+            self.datatype = 'exfel'
+        if '/gpfs/cfel/' in self.data_dir:
+            self.datatype = 'exfel'
+        if 'p11' in self.data_dir and 'asap3' in self.data_dir:
             self.datatype = 'P11'
 
         # What have we decided?
@@ -54,6 +59,8 @@ class cheetah_crawler(PyQt5.QtWidgets.QMainWindow):
         self.ui.progressBar.setValue(0)
         if self.datatype is 'XTC':
             crawler_slac.scan_data(self.data_dir)
+        elif self.datatype is 'exfel':
+            crawler_exfel.scan_data(self.data_dir)
         elif self.datatype is 'P11':
             crawler_p11.scan_data(self.data_dir)
         elif self.datatype is 'directories':

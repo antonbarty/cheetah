@@ -544,8 +544,7 @@ namespace cheetah_ana_pkg {
 	//--------------
 	// Read in TOF data
 	//--------------
-	int cheetah_ana_mod::readTOF(Event & evt, Env & env,
-								 cEventData* eventData){
+	int cheetah_ana_mod::readTOF(Event & evt, Env & env, cEventData* eventData){
 		int tofPresent = 0;
 		for(int i = 0;i<cheetahGlobal.nTOFDetectors;i++){
 			cTOFDetectorEvent & tofEvent = eventData->tofDetector[i];
@@ -587,7 +586,8 @@ namespace cheetah_ana_pkg {
 				}
 				tofPresent = 1;
 				
-			}else{
+			}
+			else{
 				printf("Warning: TOF data for detector %d is missing. Filling with zeros\n", i);
 				for (int j = 0; j < tofDetector.numSamples; ++j) {
 					tofEvent.time.push_back(0);

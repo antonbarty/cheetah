@@ -335,11 +335,19 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
             # Format output directory string
-            if self.location['location'] is 'LCLS':
+            # This clumsily selects between using run numbers and using directory names
+            # We need to fix this up sometime
+            print("Location: ", self.compute_location['location'])
+            if 'LCLS' in self.compute_location['location']:
+                dir = 'r{:04d}'.format(int(run))
+            elif 'max-exfl' in self.compute_location['location']:
+                dir = 'r{:04d}'.format(int(run))
+            elif 'max-cfel' in self.compute_location['location']:
                 dir = 'r{:04d}'.format(int(run))
             else:
                 dir = run
             dir += '-'+dataset
+            print('Output directory: ', dir)
 
 
             #Update Dataset and Cheetah status in table
@@ -371,6 +379,24 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #end run_cheetah()
 
 
+    #
+    #   Action button items
+    #
+    def run_XFEL_detectorcalibration(self):
+        runs = self.selected_runs()
+        if len(runs) is 0:
+            print('No runs selected')
+            return
+
+        for i, run in enumerate(runs['run']):
+            print('------------ Start XFEL detector calibration script ------------')
+
+            #cmdarr = [self.config['process'], run]
+            cmdarr = ["../process/calibrate_euxfel.sh", run]
+            cfel_file.spawn_subprocess(cmdarr, shell=True)
+
+
+
 
     def view_hits(self):
         file = '*.cxi'
@@ -384,9 +410,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #end view_hits()
 
 
-    def view_powder(self):
-        self.show_powder_hits_det()
-    #end view_powder()
 
     def view_peakogram(self):
         self.show_peakogram()
@@ -406,8 +429,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #end enableCommands()
 
     def start_crawler(self):
-        cmdarr = ['cheetah-crawler.py', '-l', self.location['location'], '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
-        cfel_file.spawn_subprocess(cmdarr)
+        cmdarr = ['cheetah-crawler.py', '-l', self.compute_location['location'], '-d', self.config['xtcdir'], '-c', self.config['hdf5dir'], '-i', '../indexing/']
+        cfel_file.spawn_subprocess(cmdarr) #, shell=True)
 
     def modify_beamline_config(self):
         gui_configuration.modify_cheetah_config_files(self)
@@ -432,7 +455,9 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             newdir = '---'
 
             if olddir != '---':
-                if self.location['location'] is 'LCLS':
+                if 'LCLS' in self.compute_location['location']:
+                    newdir = 'r{:04d}'.format(int(run))
+                elif 'max-exfl' in self.compute_location['location']:
                     newdir = 'r{:04d}'.format(int(run))
                 else:
                     newdir = run
@@ -497,7 +522,22 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #
     def maskmaker(self):
         print("Mask maker selected")
-        print("Talk to Andrew Morgan to add his mask maker")
+        runs = self.selected_runs()
+        if len(runs['run']) == 0:
+            return;
+        file = runs['path'][0]
+        file += '*detector0-class0-sum.h5'
+        field = 'data/data'
+
+        if len(glob.glob(file)) != 0:
+            file = glob.glob(file)[0]
+            cmdarr = ['maskMakerGUI.py', '-g', self.config['geometry'], file, field]
+            cfel_file.spawn_subprocess(cmdarr)
+        else:
+            print("File does not seem to exist:")
+            print(file)
+
+
 
     def badpix_from_darkcal(self):
         runs = self.selected_runs()
@@ -577,6 +617,11 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     def show_powder_peaks_blanks(self):
         file = '*detector0-class0-sum.h5'
         field = 'data/peakpowder'
+        self.show_selected_images(file, field)
+
+    def show_powder_all_det(self):
+        file = '*detector0-class*-sum.h5'
+        field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
 
@@ -833,8 +878,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         #
         #   Where are we?
         #
-        location = gui_locations.determine_location()
-        self.location = gui_locations.set_location_configuration(location)
+        compute_location = gui_locations.determine_location()
+        self.compute_location = gui_locations.set_location_configuration(compute_location )
 
 
         #
@@ -886,7 +931,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.button_runCheetah.clicked.connect(self.run_cheetah)
         self.ui.button_index.clicked.connect(self.crystfel_indexpdb)
         self.ui.button_viewhits.clicked.connect(self.view_hits)
-        self.ui.button_virtualpowder.clicked.connect(self.view_powder)
+        self.ui.button_blanksum.clicked.connect(self.show_powder_blanks_det)
+        self.ui.button_virtualpowder.clicked.connect(self.show_powder_peaks_hits)
         self.ui.button_peakogram.clicked.connect(self.view_peakogram)
 
         # File menu actions
@@ -910,6 +956,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_calib_currentgeom.triggered.connect(self.set_current_geometry)
         self.ui.menu_calib_cxiviewgeom.triggered.connect(self.set_cxiview_geom)
         self.ui.menu_calib_geomtopixmap.triggered.connect(self.geom_to_pixelmap)
+        self.ui.menu_calib_XFELdetcorr.triggered.connect(self.run_XFEL_detectorcalibration)
 
         # CrystFEL actions
         self.ui.menu_crystfel_mosflmnolatt.triggered.connect(self.crystfel_mosflmnolatt)
@@ -945,6 +992,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_powder_blank_det.triggered.connect(self.show_powder_blanks_det)
         self.ui.menu_powder_peaks_hits.triggered.connect(self.show_powder_peaks_hits)
         self.ui.menu_powder_peaks_blank.triggered.connect(self.show_powder_peaks_blanks)
+        self.ui.menu_powder_all.triggered.connect(self.show_powder_all_det)
+        self.ui.menu_powder_all_det.triggered.connect(self.show_powder_all_det)
 
         # Log menu actions
         self.ui.menu_log_batch.triggered.connect(self.view_batch_log)

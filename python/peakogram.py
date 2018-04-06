@@ -75,8 +75,12 @@ if args.l:
 	ymin = np.log10(ymin)
 	ymax = np.log10(ymax)
 
-bins=300
-H,xedges,yedges = np.histogram2d(y,x,bins=bins)
+#bins=300
+#H,xedges,yedges = np.histogram2d(y,x,bins=bins)
+
+xbins=np.max([200,xmax/10])
+ybins=np.max([300, ymax/100])
+H,xedges,yedges = np.histogram2d(y,x,bins=[ybins,xbins])
 
 fig = plt.figure()
 ax1 = plt.subplot(111)

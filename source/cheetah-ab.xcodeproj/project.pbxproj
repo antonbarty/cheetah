@@ -25,8 +25,8 @@
 		4D0A406A1A3B51F600FAC112 /* peakDetect.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40651A3B51F600FAC112 /* peakDetect.h */; };
 		4D0A406B1A3B51F600FAC112 /* processRateMonitor.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40661A3B51F600FAC112 /* processRateMonitor.h */; };
 		4D0A406C1A3B51F600FAC112 /* tofDetector.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D0A40671A3B51F600FAC112 /* tofDetector.h */; };
+		4D941EFF1F79158300E2BC82 /* libcheetah.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */; };
 		4D99B1981E547E8800090239 /* peakfinder8.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D99B1971E547E8800090239 /* peakfinder8.cpp */; };
-		4DA51BE8189ACCA600C97F32 /* libcheetah.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */; };
 		4DA51BEB189ACD4100C97F32 /* assemble2DImage.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D929174F9F80004A0BB4 /* assemble2DImage.cpp */; };
 		4DA51BEC189ACD4400C97F32 /* backgroundCorrection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D92A174F9F80004A0BB4 /* backgroundCorrection.cpp */; };
 		4DA51BED189ACD4600C97F32 /* data2d.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D92B174F9F80004A0BB4 /* data2d.cpp */; };
@@ -44,6 +44,12 @@
 		4DA51BFA189ACD7000C97F32 /* spectrum.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D938174F9F80004A0BB4 /* spectrum.cpp */; };
 		4DA51BFB189ACD7400C97F32 /* worker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4D93D939174F9F80004A0BB4 /* worker.cpp */; };
 		4DB277B61C8A74BD006B900B /* streakFinderWrapperWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */; };
+		4DD8EE931F791682002FB12D /* agipd_reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE881F791681002FB12D /* agipd_reader.cpp */; };
+		4DD8EE941F791682002FB12D /* hdf5_functions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8A1F791681002FB12D /* hdf5_functions.cpp */; };
+		4DD8EE951F791682002FB12D /* agipd_calibrator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8B1F791682002FB12D /* agipd_calibrator.cpp */; };
+		4DD8EE971F791682002FB12D /* agipd_module_reader.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8E1F791682002FB12D /* agipd_module_reader.cpp */; };
+		4DD8EE981F791682002FB12D /* cheetah-euxfel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DD8EE8F1F791682002FB12D /* cheetah-euxfel.cpp */; };
+		4DD8F60F1FD513BF00589BA2 /* peakfinder8.hh in Headers */ = {isa = PBXBuildFile; fileRef = 4DD8F60E1FD513BF00589BA2 /* peakfinder8.hh */; };
 		4DF8E8631ACF8991003F9F0B /* timetool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DF8E8621ACF8991003F9F0B /* timetool.cpp */; };
 /* End PBXBuildFile section */
 
@@ -58,6 +64,15 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		4D941F041F7915F300E2BC82 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		4DA51BCE189ABA3D00C97F32 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -116,6 +131,7 @@
 		4D93D936174F9F80004A0BB4 /* saveFrame.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = saveFrame.cpp; sourceTree = "<group>"; };
 		4D93D938174F9F80004A0BB4 /* spectrum.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = spectrum.cpp; sourceTree = "<group>"; };
 		4D93D939174F9F80004A0BB4 /* worker.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = worker.cpp; sourceTree = "<group>"; };
+		4D941F061F7915F300E2BC82 /* cheetah-euxfel */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "cheetah-euxfel"; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D99B1971E547E8800090239 /* peakfinder8.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = peakfinder8.cpp; sourceTree = "<group>"; };
 		4D99B1991E54981B00090239 /* cheetah_psana */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_psana; sourceTree = "<group>"; };
 		4D99B19A1E5498F100090239 /* cheetah-sacla */ = {isa = PBXFileReference; lastKnownFileType = folder; path = "cheetah-sacla"; sourceTree = "<group>"; };
@@ -125,15 +141,35 @@
 		4DB277B31C8A259B006B900B /* cheetah_extensions_yaroslav */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_extensions_yaroslav; sourceTree = "<group>"; };
 		4DB277B41C8A25AE006B900B /* cheetah_extensions_yaroslav */ = {isa = PBXFileReference; lastKnownFileType = folder; path = cheetah_extensions_yaroslav; sourceTree = "<group>"; };
 		4DB277B51C8A74BD006B900B /* streakFinderWrapperWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = streakFinderWrapperWrapper.cpp; sourceTree = "<group>"; };
+		4DD8EE861F791681002FB12D /* CMakeLists.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = "<group>"; };
+		4DD8EE871F791681002FB12D /* agipd_calibrator.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agipd_calibrator.h; sourceTree = "<group>"; };
+		4DD8EE881F791681002FB12D /* agipd_reader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agipd_reader.cpp; sourceTree = "<group>"; };
+		4DD8EE891F791681002FB12D /* agipd_module_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agipd_module_reader.h; sourceTree = "<group>"; };
+		4DD8EE8A1F791681002FB12D /* hdf5_functions.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = hdf5_functions.cpp; sourceTree = "<group>"; };
+		4DD8EE8B1F791682002FB12D /* agipd_calibrator.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agipd_calibrator.cpp; sourceTree = "<group>"; };
+		4DD8EE8C1F791682002FB12D /* agipd_reader.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = agipd_reader.h; sourceTree = "<group>"; };
+		4DD8EE8E1F791682002FB12D /* agipd_module_reader.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = agipd_module_reader.cpp; sourceTree = "<group>"; };
+		4DD8EE8F1F791682002FB12D /* cheetah-euxfel.cpp */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = "cheetah-euxfel.cpp"; sourceTree = "<group>"; };
+		4DD8EE901F791682002FB12D /* font.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = font.h; sourceTree = "<group>"; };
+		4DD8EE911F791682002FB12D /* Makefile */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.make; path = Makefile; sourceTree = "<group>"; };
+		4DD8EE921F791682002FB12D /* hdf5_functions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hdf5_functions.h; sourceTree = "<group>"; };
+		4DD8F60E1FD513BF00589BA2 /* peakfinder8.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = peakfinder8.hh; sourceTree = "<group>"; };
 		4DF8E8621ACF8991003F9F0B /* timetool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = timetool.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		4D941F031F7915F300E2BC82 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4DA51BCD189ABA3D00C97F32 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4DA51BE8189ACCA600C97F32 /* libcheetah.dylib in Frameworks */,
+				4D941EFF1F79158300E2BC82 /* libcheetah.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -150,13 +186,15 @@
 		4D93D904174F9F52004A0BB4 = {
 			isa = PBXGroup;
 			children = (
-				4DA51BE5189AC39500C97F32 /* cheetah-sacla */,
-				4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */,
+				4D941F071F7915F300E2BC82 /* cheetah-euxfel */,
 				4D99B19B1E68709F00090239 /* cheetah-cbf */,
 				4D99B19A1E5498F100090239 /* cheetah-sacla */,
 				4D99B1991E54981B00090239 /* cheetah_psana */,
 				4D93D919174F9F80004A0BB4 /* libcheetah */,
-				4D93D91D174F9F80004A0BB4 /* include */,
+				4D941EFE1F79158300E2BC82 /* Frameworks */,
+				4DA51BE1189AC1B200C97F32 /* libcheetah.dylib */,
+				4DA51BE5189AC39500C97F32 /* cheetah-sacla */,
+				4D941F061F7915F300E2BC82 /* cheetah-euxfel */,
 			);
 			sourceTree = "<group>";
 		};
@@ -166,6 +204,7 @@
 				4D93D91A174F9F80004A0BB4 /* CMakeLists.txt */,
 				4D93D91B174F9F80004A0BB4 /* examples */,
 				4D93D928174F9F80004A0BB4 /* src */,
+				4D93D91D174F9F80004A0BB4 /* include */,
 			);
 			path = libcheetah;
 			sourceTree = "<group>";
@@ -191,6 +230,7 @@
 				4D0A40641A3B51F600FAC112 /* frameBuffer.h */,
 				4D93D924174F9F80004A0BB4 /* hitfinders.h */,
 				4D93D925174F9F80004A0BB4 /* median.h */,
+				4DD8F60E1FD513BF00589BA2 /* peakfinder8.hh */,
 				4D0A40651A3B51F600FAC112 /* peakDetect.h */,
 				4D93D926174F9F80004A0BB4 /* peakfinders.h */,
 				4D0A40661A3B51F600FAC112 /* processRateMonitor.h */,
@@ -198,8 +238,7 @@
 				4D0A40671A3B51F600FAC112 /* tofDetector.h */,
 				4DB277B41C8A25AE006B900B /* cheetah_extensions_yaroslav */,
 			);
-			name = include;
-			path = libcheetah/include;
+			path = include;
 			sourceTree = "<group>";
 		};
 		4D93D928174F9F80004A0BB4 /* src */ = {
@@ -242,6 +281,32 @@
 			path = src;
 			sourceTree = "<group>";
 		};
+		4D941EFE1F79158300E2BC82 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		4D941F071F7915F300E2BC82 /* cheetah-euxfel */ = {
+			isa = PBXGroup;
+			children = (
+				4DD8EE8B1F791682002FB12D /* agipd_calibrator.cpp */,
+				4DD8EE871F791681002FB12D /* agipd_calibrator.h */,
+				4DD8EE8E1F791682002FB12D /* agipd_module_reader.cpp */,
+				4DD8EE891F791681002FB12D /* agipd_module_reader.h */,
+				4DD8EE881F791681002FB12D /* agipd_reader.cpp */,
+				4DD8EE8C1F791682002FB12D /* agipd_reader.h */,
+				4DD8EE8F1F791682002FB12D /* cheetah-euxfel.cpp */,
+				4DD8EE861F791681002FB12D /* CMakeLists.txt */,
+				4DD8EE901F791682002FB12D /* font.h */,
+				4DD8EE8A1F791681002FB12D /* hdf5_functions.cpp */,
+				4DD8EE921F791682002FB12D /* hdf5_functions.h */,
+				4DD8EE911F791682002FB12D /* Makefile */,
+			);
+			path = "cheetah-euxfel";
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXHeadersBuildPhase section */
@@ -250,6 +315,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				4D0A40691A3B51F600FAC112 /* frameBuffer.h in Headers */,
+				4DD8F60F1FD513BF00589BA2 /* peakfinder8.hh in Headers */,
 				4D0A406C1A3B51F600FAC112 /* tofDetector.h in Headers */,
 				4D0A406B1A3B51F600FAC112 /* processRateMonitor.h in Headers */,
 				4D0A406A1A3B51F600FAC112 /* peakDetect.h in Headers */,
@@ -260,6 +326,23 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
+		4D941F051F7915F300E2BC82 /* cheetah-euxfel */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 4D941F0A1F7915F300E2BC82 /* Build configuration list for PBXNativeTarget "cheetah-euxfel" */;
+			buildPhases = (
+				4D941F021F7915F300E2BC82 /* Sources */,
+				4D941F031F7915F300E2BC82 /* Frameworks */,
+				4D941F041F7915F300E2BC82 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "cheetah-euxfel";
+			productName = "cheetah-euxfel";
+			productReference = 4D941F061F7915F300E2BC82 /* cheetah-euxfel */;
+			productType = "com.apple.product-type.tool";
+		};
 		4DA51BCF189ABA3D00C97F32 /* cheetah-sacla */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 4DA51BD8189ABA3D00C97F32 /* Build configuration list for PBXNativeTarget "cheetah-sacla" */;
@@ -303,6 +386,12 @@
 			attributes = {
 				LastUpgradeCheck = 0700;
 				ORGANIZATIONNAME = "Anton Barty";
+				TargetAttributes = {
+					4D941F051F7915F300E2BC82 = {
+						CreatedOnToolsVersion = 9.0;
+						ProvisioningStyle = Automatic;
+					};
+				};
 			};
 			buildConfigurationList = 4D93D908174F9F52004A0BB4 /* Build configuration list for PBXProject "cheetah-ab" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -316,13 +405,26 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				4DA51BCF189ABA3D00C97F32 /* cheetah-sacla */,
 				4DA51BE0189AC1B200C97F32 /* libcheetah */,
+				4DA51BCF189ABA3D00C97F32 /* cheetah-sacla */,
+				4D941F051F7915F300E2BC82 /* cheetah-euxfel */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		4D941F021F7915F300E2BC82 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4DD8EE951F791682002FB12D /* agipd_calibrator.cpp in Sources */,
+				4DD8EE941F791682002FB12D /* hdf5_functions.cpp in Sources */,
+				4DD8EE931F791682002FB12D /* agipd_reader.cpp in Sources */,
+				4DD8EE981F791682002FB12D /* cheetah-euxfel.cpp in Sources */,
+				4DD8EE971F791682002FB12D /* agipd_module_reader.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		4DA51BCC189ABA3D00C97F32 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -414,7 +516,7 @@
 				);
 				INSTALL_PATH = /usr/local;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				ONLY_ACTIVE_ARCH = YES;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-lhdf5",
@@ -452,12 +554,87 @@
 				);
 				INSTALL_PATH = /usr/local;
 				LIBRARY_SEARCH_PATHS = /usr/local/lib;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-lhdf5",
 					"-lhdf5_hl",
 				);
 				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		4D941F0B1F7915F300E2BC82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		4D941F0C1F7915F300E2BC82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CODE_SIGN_IDENTITY = "-";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.12;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
 		};
@@ -483,7 +660,7 @@
 					../libcheetah/include,
 				);
 				LINK_WITH_STANDARD_LIBRARIES = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-lhdf5",
 					"-lhdf5_hl",
@@ -511,7 +688,7 @@
 					../libcheetah/include,
 				);
 				LINK_WITH_STANDARD_LIBRARIES = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				"OTHER_LDFLAGS[arch=*]" = (
 					"-lhdf5",
 					"-lhdf5_hl",
@@ -539,7 +716,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_LDFLAGS = (
 					"-lpthread",
 					"-lhdf5_hl",
@@ -565,7 +742,7 @@
 				GCC_WARN_UNDECLARED_SELECTOR = YES;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				LLVM_VECTORIZE_LOOPS = YES;
-				MACOSX_DEPLOYMENT_TARGET = 10.8;
+				MACOSX_DEPLOYMENT_TARGET = 10.11;
 				OTHER_LDFLAGS = (
 					"-lpthread",
 					"-lhdf5_hl",
@@ -583,6 +760,15 @@
 			buildConfigurations = (
 				4D93D914174F9F52004A0BB4 /* Debug */,
 				4D93D915174F9F52004A0BB4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		4D941F0A1F7915F300E2BC82 /* Build configuration list for PBXNativeTarget "cheetah-euxfel" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				4D941F0B1F7915F300E2BC82 /* Debug */,
+				4D941F0C1F7915F300E2BC82 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
