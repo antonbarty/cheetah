@@ -59,6 +59,21 @@ int cheetahInit(cGlobal *global) {
 		setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 	}
 	
+    // Check that HDF5 library is thread safe
+    hbool_t H5_is_ts;
+    H5is_library_threadsafe(&H5_is_ts);
+    if(H5_is_ts < 0) {
+        printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        printf("HDF5 library is not threadsafe\n");
+        printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+        printf("Exiting\n");
+        exit(1);
+    }
+    else {
+        printf("[OK] HDF5 threadsafe check passed\n");
+    }
+
+    
 	global->self = global;
 	//global->defaultConfiguration();
 	global->parseConfigFile(global->configFile);
