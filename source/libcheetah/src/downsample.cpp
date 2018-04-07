@@ -15,8 +15,8 @@
 #include <math.h>
 #include <hdf5.h>
 
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
+#include "cheetah/cheetahGlobal.h"
+#include "cheetah/cheetahEvent.h"
 
 void downsampleImageConservative(float *img,float *imgXxX,long img_nn, long img_nx, long imgXxX_nn, long imgXxX_nx, long downsampling, int debugLevel){
 	long x0,y0;

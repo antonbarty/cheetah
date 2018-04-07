@@ -16,9 +16,9 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <iostream>
-#include "detectorObject.h"
-#include "frameBuffer.h"
-#include "median.h"
+#include "cheetah/detectorObject.h"
+#include "cheetah/frameBuffer.h"
+#include "cheetah/median.h"
 
 cFrameBuffer::cFrameBuffer(long pix_nn0, long depth0, int threadSafetyLevel0) {
 	pix_nn = pix_nn0;

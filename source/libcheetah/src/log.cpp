@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "cheetah.h"
+#include "cheetah/cheetah.h"
 
 void writeLog(cEventData *eventData, cGlobal * global) {
 	// Write out information on each frame to a log file

@@ -19,12 +19,12 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "data2d.h"
-#include "detectorObject.h"
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
-#include "cheetahEvent.h"
-#include "cheetahmodules.h"
+#include "cheetah/data2d.h"
+#include "cheetah/detectorObject.h"
+#include "cheetah/cheetahGlobal.h"
+#include "cheetah/cheetahEvent.h"
+#include "cheetah/cheetahEvent.h"
+#include "cheetah/cheetahmodules.h"
 
 /*
  *	Set default values to something reasonable for CSPAD at CXI 
@@ -77,9 +77,7 @@ cPixelDetectorCommon::cPixelDetectorCommon()
 
     // Saturated pixels
     maskSaturatedPixels = 0;
-    pixelSaturationADC = 65536;
-    pixelMinimumAllowedADC = -65535;
-    pixelMaximumAllowedADC = 1000000;
+    pixelSaturationADC = 15564;  // 95% of 2^14 ??
     maskPnccdSaturatedPixels = 0;
 
     // Static dark calibration (electronic offsets)
@@ -240,8 +238,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = CSPAD_ASIC_NY*CSPAD_nASICS_Y;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	}
-	else if(strcmp(detectorType, "cspad2x2") == 0 || strcmp(detectorName, "cspad2x2") == 0 ||
+	} else if(strcmp(detectorType, "cspad2x2") == 0 || strcmp(detectorName, "cspad2x2") == 0 ||
 			  strcmp(detectorName, "CxiSc2") == 0 || strcmp(detectorName, "CxiDg2") == 0) {
 		strcpy(detectorType, "cspad2x2");
 		asic_nx = CSPAD_ASIC_NX;
@@ -253,20 +250,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_ny = nasics_y*asic_ny;
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
-	}
-	else if(strcmp(detectorType, "agipd-1M") == 0 || strcmp(detectorName, "agipd-1M") == 0 ) {
-		strcpy(detectorType, "agipd-1M");
-		asic_nx = AGIPD1M_ASIC_NX;
-		asic_ny = AGIPD1M_ASIC_NY;
-		nasics_x = AGIPD1M_nASICS_X;
-		nasics_y = AGIPD1M_nASICS_Y;
-		asic_nn = asic_nx*asic_ny;
-		pix_nx = asic_nx * nasics_x;
-		pix_ny = asic_ny * nasics_y;
-		pix_nn = pix_nx * pix_ny;
-		pixelSize = 200e-6;
-	}
-	else if(strcmp(detectorType, "pnccd") == 0 || strcmp(detectorName, "pnCCD") == 0 ) {
+	} else if(strcmp(detectorType, "pnccd") == 0 || strcmp(detectorName, "pnCCD") == 0 ) {
 		strcpy(detectorType, "pnccd");
 		asic_nx = PNCCD_ASIC_NX;
 		asic_ny = PNCCD_ASIC_NY;
@@ -794,12 +778,6 @@ int cPixelDetectorCommon::parseConfigTag(char *tag, char *value)
     else if (!strcmp(tag, "pixelsaturationadc")) {
         pixelSaturationADC = atoi(value);
     }
-    else if (!strcmp(tag, "pixelminimumallowedadc")) {
-        pixelMinimumAllowedADC = atoi(value);
-    }
-    else if (!strcmp(tag, "pixelmaximumallowedadc")) {
-        pixelMaximumAllowedADC = atoi(value);
-    }
     else if (!strcmp(tag, "useselfdarkcal")) {
         printf("The keyword useSelfDarkcal has been changed.  It is\n"
                 "now known as useSubtractPersistentBackground.\n"
@@ -1182,8 +1160,8 @@ void cPixelDetectorCommon::readDetectorGeometry(char* filename)
         detector_x.readHDF5(filename, (char *) "x");
         detector_y.readHDF5(filename, (char *) "y");
         detector_z.readHDF5(filename, (char *) "z");
-    }
-    else if (strcmp(filename, "No_file_specified")==0) {
+    } else {		// file doesn't exist
+        printf("Detector geometry file does not exist: %s, make standard geometry.\n", filename);
         detector_x.create(pix_nx, pix_ny);
         detector_y.create(pix_nx, pix_ny);
         detector_z.create(pix_nx, pix_ny);
@@ -1194,11 +1172,6 @@ void cPixelDetectorCommon::readDetectorGeometry(char* filename)
                 detector_z.data[j + i * pix_nx] = 0.;
             }
         }
-    }
-    else {		// file doesn't exist
-        printf("Detector geometry file does not exist: %s\n", filename);
-        printf("Aborting\n", filename);
-        exit(1);
     }
 
     // Sanity check that all detector arrays are the same size (!)
@@ -1404,19 +1377,13 @@ void cPixelDetectorCommon::updateKspace(cGlobal *global, float wavelengthA)
  */
 void cPixelDetectorCommon::readDarkcal(char *filename)
 {
+
     // Pad with zeros
     for (long i = 0; i < pix_nn; i++)
         darkcal[i] = 0;
 
     // Do we need a darkcal file?	
     if (useDarkcalSubtraction == 0) {
-        return;
-    }
-    
-    
-    // Dark calibration for the AGIPD detector is handled by the file reading stage; pass through value
-    if(strcmp(detectorType, "agipd-1M") == 0) {
-        useDarkcalSubtraction=0;
         return;
     }
 
@@ -1471,13 +1438,6 @@ void cPixelDetectorCommon::readGaincal(char *filename)
         return;
     }
 
-    // Gain calibration for the AGIPD detector is handled by the file reading stage; pass through value
-    if(strcmp(detectorType, "agipd-1M") == 0) {
-        useGaincal=0;
-        return;
-    }
-
-    
     // Check if a gain calibration file has been specified
     if (strcmp(filename, "") == 0) {
         printf("Gain calibration file path was not specified.\n");

@@ -1,4 +1,4 @@
-#include "cheetahmodules.h"
+#include "cheetah/cheetahmodules.h"
 
 #ifndef HITFINDERS_H
 #define HITFINDERS_H

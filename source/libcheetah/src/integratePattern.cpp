@@ -15,8 +15,8 @@
 #include <hdf5.h>
 #include <limits.h>
 
-#include "cheetah.h"
-#include "detectorObject.h"
+#include "cheetah/cheetah.h"
+#include "cheetah/detectorObject.h"
 
 void integratePattern(cEventData * eventData,cGlobal * global){
 	DETECTOR_LOOP{

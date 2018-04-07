@@ -15,9 +15,9 @@
 #include <stdlib.h>
 #include <limits.h>
 
-#include "cheetah.h"
-#include "cheetahmodules.h"
-#include "median.h"
+#include "cheetah/cheetah.h"
+#include "cheetah/cheetahmodules.h"
+#include "cheetah/median.h"
 
 
 /*

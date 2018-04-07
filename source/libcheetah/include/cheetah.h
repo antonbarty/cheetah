@@ -8,11 +8,11 @@
 
 #ifndef CHEETAH_H
 #define CHEETAH_H
-#include "peakfinders.h"
-#include "detectorObject.h"
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
-#include "cheetahmodules.h"
+#include "cheetah/peakfinders.h"
+#include "cheetah/detectorObject.h"
+#include "cheetah/cheetahGlobal.h"
+#include "cheetah/cheetahEvent.h"
+#include "cheetah/cheetahmodules.h"
 
 
 int cheetahInit(cGlobal *);

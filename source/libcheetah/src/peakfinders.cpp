@@ -13,14 +13,14 @@
 #include <hdf5.h>
 #include <stdlib.h>
 
-#include "detectorObject.h"
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
-#include "median.h"
-#include "hitfinders.h"
-#include "peakfinders.h"
-#include "peakfinder9.h"
-#include "cheetahmodules.h"
+#include "cheetah/detectorObject.h"
+#include "cheetah/cheetahGlobal.h"
+#include "cheetah/cheetahEvent.h"
+#include "cheetah/median.h"
+#include "cheetah/hitfinders.h"
+#include "cheetah/peakfinders.h"
+#include "cheetah/peakfinder9.h"
+#include "cheetah/cheetahmodules.h"
 
 int box_snr(float*, char*, int, int, int, int, float*, float*, float*);
 

@@ -1,0 +1,22 @@
+#--------------------------------------------------------------------------
+# File and Version Information:
+#  $Id$
+#
+# Description:
+#  ChangeLog file for package cheetah
+#------------------------------------------------------------------------
+
+Package author: Christopher Ogrady
+
+Please describe any modifications that you made to the package in the
+reverse time order.
+
+Tag: V00-00-02
+2015-07-27 Igor Gaponenko
+- fixed missing header required for RHEL7 (PSRT-64)
+
+Tag: V00-00-01
+2015-04-25 Christopher Ogrady
+- First version importing cheetah algorithms into psana
+
+

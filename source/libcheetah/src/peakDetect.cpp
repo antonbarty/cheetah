@@ -12,7 +12,7 @@
  *  from lecture notes of the course CS106B at Stanford University.
  */
 
-#include "peakDetect.h"
+#include "cheetah/peakDetect.h"
 
 #include <iostream>
 

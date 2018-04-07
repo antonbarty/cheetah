@@ -6,7 +6,7 @@
 #include <pthread.h>
 #include <stdlib.h>
 
-#include "cheetah.h"
+#include "cheetah/cheetah.h"
 
 
 void calculateGmd(cEventData *eventData){

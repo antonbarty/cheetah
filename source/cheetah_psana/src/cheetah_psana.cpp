@@ -17,8 +17,8 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include <cheetah_psana.h>
-#include <cheetah.h>
+#include <cheetah_psana/cheetah_psana.h>
+#include <cheetah/cheetah.h>
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -160,6 +160,7 @@ namespace cheetah_ana_pkg {
 
 		// get the values from configuration or use defaults
 		m_key = configStr("inputKey", "");
+		m_srcJungfrau = configStr("jungfrauSource","DetInfo(:JungFrau)");
 		m_srcCspad0 = configStr("cspadSource0","DetInfo(:Cspad)");
 		m_srcCspad1 = configStr("cspadSource1","DetInfo(:Cspad)");
 		m_srcRayonix0 = configStr("rayonixSource0","DetInfo(:Rayonix)");
@@ -216,7 +217,8 @@ namespace cheetah_ana_pkg {
 		}
 		
 		// Initialise signal handler when using .cxi file (so we can close it clenaly)
-		if(cheetahGlobal.saveCXI){
+		//if(cheetahGlobal.saveCXI){
+		if(false){
 			signal(SIGINT, sig_handler);
 			signal(SIGTERM, sig_handler);
 			signal(SIGABRT, sig_handler);
@@ -353,11 +355,26 @@ namespace cheetah_ana_pkg {
 	//	Start the threads which will copy across data into Cheetah structure and process
 	//--------------
 	void cheetah_ana_mod::event(PSEvt::Event& evt, PSEnv::Env& env) {
+            shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");
+            if (img.get()) printf("size %d\n",img->size());
 		
+            boost::shared_ptr<Event> evtp = evt.shared_from_this();
+            boost::shared_ptr<Env> envp = env.shared_from_this();
+
+            cEventData *eventData;
+	    eventData = cheetah_ana_mod::copy_event(evtp, envp);
+            if(eventData != NULL) {
+                cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+            }
+
+	    
+            return;
+
+
 		//printf("Event (cheetah_ana_mod::event)\n");
 		
-		boost::shared_ptr<Event> evtp = evt.shared_from_this();
-		boost::shared_ptr<Env> envp = env.shared_from_this();
+		//boost::shared_ptr<Event> evtp = evt.shared_from_this();
+		//boost::shared_ptr<Env> envp = env.shared_from_this();
 		pthread_t thread;
 		int returnStatus;
 		
@@ -415,7 +432,7 @@ namespace cheetah_ana_pkg {
 			sem_post(&availableAnaThreads);
 			
 			if (eventData != NULL) {
-				cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+                            //cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 			}
 		}
 		pthread_exit(NULL);

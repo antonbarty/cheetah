@@ -30,12 +30,12 @@
 #include <unistd.h>
 #include <vector>
 
-#include "data2d.h"
-#include "detectorObject.h"
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
-#include "cheetahmodules.h"
-#include "tofDetector.h"
+#include "cheetah/data2d.h"
+#include "cheetah/detectorObject.h"
+#include "cheetah/cheetahGlobal.h"
+#include "cheetah/cheetahEvent.h"
+#include "cheetah/cheetahmodules.h"
+#include "cheetah/tofDetector.h"
 
 /*
  *	Default settings/configuration
@@ -331,14 +331,6 @@ void cGlobal::setup()
         }
 		else if (strcmp(pumpLaserScheme, "LP41") == 0) {
 			nPowderClasses = 5;
-		}
-		else if (strcmp(pumpLaserScheme, "xfel_pulseid") == 0) {
-			nPowderClasses = 15;
-			if(!(nPowderClasses < MAX_POWDER_CLASSES)) {
-				printf("Warning: Requested more powder classes than space allocated\n");
-				printf("Exiting\n");
-				exit(1);
-			}
 		}
         else {
             printf("Error: Unknown pump laser scheme\n");

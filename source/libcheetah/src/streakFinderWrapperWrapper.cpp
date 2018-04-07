@@ -15,15 +15,15 @@
 #include <mmintrin.h>
 #include <emmintrin.h>
 
-#include "cheetah_extensions_yaroslav/streakFinder.h"
-#include "cheetah_extensions_yaroslav/streakfinder_wrapper.h"
-#include "cheetah_extensions_yaroslav/pythonWrapperConversions.h"
-#include "cheetah_extensions_yaroslav/cheetahConversion.h"
+#include "cheetah/streakFinder.h"
+#include "cheetah/streakfinder_wrapper.h"
+#include "cheetah/pythonWrapperConversions.h"
+#include "cheetah/cheetahConversion.h"
 
-#include "detectorObject.h"
-#include "cheetahGlobal.h"
-#include "cheetahEvent.h"
-#include "cheetahmodules.h"
+#include "cheetah/detectorObject.h"
+#include "cheetah/cheetahGlobal.h"
+#include "cheetah/cheetahEvent.h"
+#include "cheetah/cheetahmodules.h"
 
 #ifdef __CDT_PARSER__
 #undef DETECTOR_LOOP
