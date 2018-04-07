@@ -17,8 +17,8 @@ class jungfrau (object) :
         pass
 
     def event( self, evt, env ) :
-        img = self.det.image(evt) #assembled
-        # or calib = self.det.calib(evt) for 3D unassembled
+        #img = self.det.image(evt) #assembled
+        img = self.det.calib(evt) #for 3D unassembled
         if img is None:
             print 'jungfrau not found'
             return
