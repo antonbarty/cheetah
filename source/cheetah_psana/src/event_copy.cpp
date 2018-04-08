@@ -98,7 +98,8 @@ namespace cheetah_ana_pkg {
 		 */
 		if(cheetahGlobal.ioSpeedTest==1) {
 			printf("*** r%04u:%li (%3.1fHz): I/O Speed test #1 (psana event rate)\n", cheetahGlobal.runNumber, frameNumber, cheetahGlobal.datarate);		
-			pthread_exit(NULL);
+			//pthread_exit(NULL);
+            return NULL;
 		}
 
 		
@@ -940,7 +941,8 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: CSPAD frame data not available for detector ID %li, skipping event.\n", frameNumber, cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
 			/*
@@ -967,7 +969,8 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: Warning: CSPAD 2x2 frame data not available for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
 			
@@ -1016,10 +1019,51 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: Rayonix frame data not available for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
-			
+	
+            /*
+             *    Jungfrau1M, pre-processed by psana-python and returned to the event store
+             */
+            else if (strcmp(cheetahGlobal.detector[detIndex].detectorType, "jungfrau1M") == 0) {
+                long    pix_nx = cheetahGlobal.detector[detIndex].pix_nx;
+                long    pix_ny = cheetahGlobal.detector[detIndex].pix_ny;
+                long    pix_nn = cheetahGlobal.detector[detIndex].pix_nn;
+
+                //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");    // <-- for images
+                shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");    // <-- for calibrated data
+                
+                if (img.get()) {
+                    //const ndarray<float, 3> jungfrau_data = *img->data();
+
+                    printf("Jungfrau python size %d\n",img->size());
+                    long    np = img->shape()[0];
+                    long    ny = img->shape()[1];
+                    long    nx = img->shape()[2];
+                    cout << "Jungfrau shape: " << np << "x" << ny << "x" << nx << endl;
+
+                    //memcpy(&eventData->detector[detIndex].data_raw[0], &img->data()[0], pix_nn*sizeof(float));
+                    memcpy(&eventData->detector[detIndex].data_raw[0], img->data(), pix_nn*sizeof(float));
+                    eventData->detector[detIndex].data_raw_is_float = true;
+
+                    //for(int panel=0; panel<np; panel++) {
+                        // Data is of type Float
+                    //    long offset = panel * pix_nx*pix_ny*sizeof(float);
+                    //    memcpy(&eventData->detector[detIndex].data_raw[0]+offset, &img->data()[panel][0][0], pix_nx*pix_ny*sizeof(float));
+                    //}
+                }
+                else {
+                    printf("Jungfrau img.get() failed\n");
+                    cheetahDestroyEvent(eventData);
+                    //pthread_exit(NULL);
+                    return NULL;
+                }
+
+            }
+
+
 			
 			/*
 			 *
@@ -1059,7 +1103,8 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: Warning: pnCCD frame data not available (detectorID=%li), skipping event.\n", frameNumber, cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
 			
@@ -1069,7 +1114,8 @@ namespace cheetah_ana_pkg {
 			else {
 				printf("Detector type type %s not recognised\n", cheetahGlobal.detector[detIndex].detectorType);
 				cheetahDestroyEvent(eventData);
-				pthread_exit(NULL);
+				//pthread_exit(NULL);
+                return NULL;
 			}
 
 		}	// end loop over detectors

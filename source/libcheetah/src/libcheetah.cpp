@@ -57,6 +57,21 @@ int cheetahInit(cGlobal *global) {
 	}
 	setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 
+    
+    // Check HDF5 installation is thread safe
+    hbool_t H5_is_ts;
+    H5is_library_threadsafe(&H5_is_ts);
+    if(H5_is_ts < 0) {
+        printf("[Error] HDF5 library is not threadsafe\n");
+        printf("Exiting.\n");
+        exit(1);
+    }
+    else {
+        printf("[OK] HDF5 threadsafe check passed\n");
+    }
+    
+
+    
 	global->self = global;
 	//global->defaultConfiguration();
 	global->parseConfigFile(global->configFile);
@@ -175,8 +190,8 @@ void cheetahUpdateGlobal(cGlobal *global, cEventData *eventData){
 			// New detector position = 0 could be an error
             if ( detposnew == 0 ) {
                 detposnew = global->detector[detIndex].detposprev;
-                printf("WARNING: detector position is zero, which could be an error\n"
-                       "         will use previous position (%s=%f) instead...\n",global->detector[detIndex].detectorZpvname, detposnew);
+                //printf("WARNING: detector position is zero, which could be an error\n"
+                //       "         will use previous position (%s=%f) instead...\n",global->detector[detIndex].detectorZpvname, detposnew);
             }
 			
             //	Apply offsets

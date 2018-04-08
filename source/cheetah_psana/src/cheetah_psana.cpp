@@ -144,20 +144,6 @@ namespace cheetah_ana_pkg {
 
 
 
-		// Check HDF5 installation is thread safe
-		hbool_t H5_is_ts;
-		H5is_library_threadsafe(&H5_is_ts);
-		if(H5_is_ts < 0) {
-			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			printf("HDF5 library is not threadsafe\n");
-			printf("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
-			printf("Exiting\n");
-			exit(1);
-		}
-		else {
-			printf("HDF5 threadsafe check passed (whew!)\n");
-		}
-
 		
 		// Check if we're using psana of the same git commit
 		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
@@ -373,27 +359,25 @@ namespace cheetah_ana_pkg {
 	//--------------
 	void cheetah_ana_mod::event(PSEvt::Event& evt, PSEnv::Env& env) {
             //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for images
-            shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
-            if (img.get()) {
-		printf("Jungfrau python size %d\n",img->size());
-	    } else {
-		printf("Jungfrau img.get() failed\n");
-            }
+            //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
+            //if (img.get()) {
+            //    printf("Jungfrau python size %d\n",img->size());
+            //}
+            //else {
+            //    printf("Jungfrau img.get() failed\n");
+            //}
 	
             //shared_ptr<Psana::Jungfrau::ElementV2> imgRaw = evt.get(m_srcJungfrau);
             //if (imgRaw.get()) printf("Jungfrau Raw: size %d\n",img->size());
-
 	
             boost::shared_ptr<Event> evtp = evt.shared_from_this();
             boost::shared_ptr<Env> envp = env.shared_from_this();
 
             cEventData *eventData;
-	    eventData = cheetah_ana_mod::copy_event(evtp, envp);
+            eventData = cheetah_ana_mod::copy_event(evtp, envp);
             if(eventData != NULL) {
                 cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
             }
-
-	    
             return;
 
 
