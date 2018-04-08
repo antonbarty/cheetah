@@ -1038,11 +1038,13 @@ namespace cheetah_ana_pkg {
                 if (img.get()) {
                     //const ndarray<float, 3> jungfrau_data = *img->data();
 
-                    printf("Jungfrau python size %d\n",img->size());
                     long    np = img->shape()[0];
                     long    ny = img->shape()[1];
                     long    nx = img->shape()[2];
-                    cout << "Jungfrau shape: " << np << "x" << ny << "x" << nx << endl;
+
+                    // Make it a little less chatty
+                    //printf("Jungfrau python size %d\n",img->size());
+                    //cout << "Jungfrau shape: " << np << "x" << ny << "x" << nx << endl;
 
                     //memcpy(&eventData->detector[detIndex].data_raw[0], &img->data()[0], pix_nn*sizeof(float));
                     memcpy(&eventData->detector[detIndex].data_raw[0], img->data(), pix_nn*sizeof(float));
@@ -1055,7 +1057,7 @@ namespace cheetah_ana_pkg {
                     //}
                 }
                 else {
-                    printf("Jungfrau img.get() failed\n");
+                    printf("Event %li: Jungfrau img.get() failed for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
                     cheetahDestroyEvent(eventData);
                     //pthread_exit(NULL);
                     return NULL;
