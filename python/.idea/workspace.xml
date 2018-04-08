@@ -4,11 +4,10 @@
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/cxiview_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cxiview_ui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/cheetah_psana/src/cheetah_psana.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/cheetah_psana/src/cheetah_psana.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/cheetah_psana/src/event_copy.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/cheetah_psana/src/event_copy.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/libcheetah/include/detectorObject.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/include/detectorObject.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/detectorObject.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/detectorObject.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/libcheetah.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/libcheetah.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cheetah-gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/cheetah-gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cxiview.py" beforeDir="false" afterPath="$PROJECT_DIR$/cxiview.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/cfel_filetools.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/cfel_filetools.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/pspython/jungfrau/src/jungfrau.py" beforeDir="false" afterPath="$PROJECT_DIR$/../source/pspython/jungfrau/src/jungfrau.py" afterDir="false" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -30,8 +29,17 @@
       <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cxiview.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2205">
-              <caret line="162" column="48" selection-start-line="162" selection-start-column="48" selection-end-line="162" selection-end-column="48" />
+            <state relative-caret-position="-10422">
+              <caret line="140" lean-forward="true" selection-start-line="140" selection-end-line="140" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cfel_filetools.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="229">
+              <caret line="448" column="34" lean-forward="true" selection-start-line="448" selection-start-column="34" selection-end-line="448" selection-end-column="34" />
             </state>
           </provider>
         </entry>
@@ -48,8 +56,8 @@
       <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="66">
-              <caret line="629" column="22" lean-forward="true" selection-start-line="629" selection-start-column="6" selection-end-line="629" selection-end-column="22" />
+            <state relative-caret-position="761">
+              <caret line="627" lean-forward="true" selection-start-line="627" selection-end-line="627" />
             </state>
           </provider>
         </entry>
@@ -75,6 +83,7 @@
       <find>numpy.isnan(self.photon_energy)</find>
       <find>read_cxi</find>
       <find>darkcal</find>
+      <find>self.event_list</find>
     </findStrings>
     <replaceStrings>
       <replace>gui_locations</replace>
@@ -91,14 +100,14 @@
         <option value="$PROJECT_DIR$/lib/gui_dialogs.py" />
         <option value="$PROJECT_DIR$/lib/gui_configuration.py" />
         <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
-        <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
         <option value="$PROJECT_DIR$/lib/crawler_exfel.py" />
         <option value="$PROJECT_DIR$/peakogram.py" />
         <option value="$PROJECT_DIR$/lib/gui_locations.py" />
         <option value="$PROJECT_DIR$/lib/cfel_geometry.py" />
         <option value="$PROJECT_DIR$/cheetah-crawler.py" />
-        <option value="$PROJECT_DIR$/cxiview.py" />
         <option value="$PROJECT_DIR$/lib/cfel_imgtools.py" />
+        <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
+        <option value="$PROJECT_DIR$/cxiview.py" />
         <option value="$PROJECT_DIR$/cheetah-gui.py" />
       </list>
     </option>
@@ -287,16 +296,16 @@
     <frame x="50" y="23" width="1425" height="1027" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.54564536" visible="true" weight="0.3031579" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.544596" visible="true" weight="0.3031579" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.3287841" />
-      <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.45435467" side_tool="true" visible="true" weight="0.3031579" />
+      <window_info anchor="bottom" id="Run" order="2" />
+      <window_info active="true" x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.45540398" side_tool="true" visible="true" weight="0.3031579" />
       <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info id="Favorites" order="1" side_tool="true" />
+      <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -330,6 +339,13 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="9225">
+          <caret line="629" column="22" lean-forward="true" selection-start-line="629" selection-start-column="6" selection-end-line="629" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cxiview.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2205">
@@ -568,13 +584,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="4875">
-          <caret line="337" column="38" selection-start-line="337" selection-start-column="38" selection-end-line="337" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_cspad.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="75">
@@ -638,13 +647,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cxiview.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2205">
-          <caret line="162" column="48" selection-start-line="162" selection-start-column="48" selection-end-line="162" selection-end-column="48" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_imgtools.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="570">
@@ -659,10 +661,24 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="229">
+          <caret line="448" column="34" lean-forward="true" selection-start-line="448" selection-start-column="34" selection-end-line="448" selection-end-column="34" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="-10422">
+          <caret line="140" lean-forward="true" selection-start-line="140" selection-end-line="140" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="66">
-          <caret line="629" column="22" lean-forward="true" selection-start-line="629" selection-start-column="6" selection-end-line="629" selection-end-column="22" />
+        <state relative-caret-position="761">
+          <caret line="627" lean-forward="true" selection-start-line="627" selection-end-line="627" />
         </state>
       </provider>
     </entry>

@@ -128,8 +128,12 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
 
         # Apply geometry to image and display
         img_data = cxi['data']
+
         if self.geometry_ok:
-            self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
+            try:
+                self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
+            except:
+                self.img_to_draw = numpy.transpose(img_data)
         else:
             self.img_to_draw = numpy.transpose(img_data)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
@@ -821,7 +825,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # Sanity check: Do geometry and data shape match?
         if self.geometry_ok and (temp['data'].flatten().shape != self.geometry['x'].shape):
             print("Error: Shape of geometry and image data do not match")
-            print('Data size: ', temp.data.flatten().shape)
+            print('Data size: ', temp['data'].flatten().shape)
             print('Geometry size: ', self.geometry['x'].shape)
             print('Displaying images without geometry applied')
             self.geometry_ok = False

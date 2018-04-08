@@ -590,37 +590,37 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #   Powder menu items
     #
     def show_powder_hits(self):
-        file = '*detector0-class1-sum.h5'
+        file = '*detector?-class1-sum.h5'
         field = 'data/non_assembled_detector_and_photon_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_blanks(self):
-        file = '*detector0-class0-sum.h5'
+        file = '*detector?-class0-sum.h5'
         field = 'data/non_assembled_detector_and_photon_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_hits_det(self):
-        file = '*detector0-class1-sum.h5'
+        file = '*detector?-class1-sum.h5'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_blanks_det(self):
-        file = '*detector0-class0-sum.h5'
+        file = '*detector?-class0-sum.h5'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_peaks_hits(self):
-        file = '*detector0-class1-sum.h5'
+        file = '*detector?-class1-sum.h5'
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
 
     def show_powder_peaks_blanks(self):
-        file = '*detector0-class0-sum.h5'
+        file = '*detector?-class0-sum.h5'
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
 
     def show_powder_all_det(self):
-        file = '*detector0-class*-sum.h5'
+        file = '*detector?-class*-sum.h5'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
@@ -643,7 +643,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #   Calibration menu items
     #
     def show_darkcal(self):
-        file = '*detector0-darkcal.h5'
+        file = '*detector?-darkcal.h5'
         field = 'data/data'
         self.show_selected_images(file, field)
 

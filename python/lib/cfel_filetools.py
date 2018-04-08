@@ -458,7 +458,8 @@ def list_events(pattern='./*.cxi', field='data/data'):
     files = glob.glob(pattern, recursive=True)
     if len(files) == 0:
         print('No files found matching pattern: ', pattern)
-    list_of_files = glob.iglob(pattern, recursive=True)
+    list_of_files = glob.glob(pattern, recursive=True)
+    list_of_files.sort()
         
 
     # List the found files (sanity check)
