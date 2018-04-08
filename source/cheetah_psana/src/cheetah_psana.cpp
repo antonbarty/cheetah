@@ -234,8 +234,8 @@ namespace cheetah_ana_pkg {
 		}
 		
 		// Initialise signal handler when using .cxi file (so we can close it clenaly)
-		//if(cheetahGlobal.saveCXI){
-		if(false){
+		if(cheetahGlobal.saveCXI){
+		//if(false){
 			signal(SIGINT, sig_handler);
 			signal(SIGTERM, sig_handler);
 			signal(SIGABRT, sig_handler);
@@ -372,7 +372,8 @@ namespace cheetah_ana_pkg {
 	//	Start the threads which will copy across data into Cheetah structure and process
 	//--------------
 	void cheetah_ana_mod::event(PSEvt::Event& evt, PSEnv::Env& env) {
-            shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");
+            //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for images
+            shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
             if (img.get()) {
 		printf("Jungfrau python size %d\n",img->size());
 	    } else {
