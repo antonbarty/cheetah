@@ -1049,23 +1049,45 @@ namespace cheetah_ana_pkg {
                     //memcpy(&eventData->detector[detIndex].data_raw[0], &img->data()[0], pix_nn*sizeof(float));
                     memcpy(&eventData->detector[detIndex].data_raw[0], img->data(), pix_nn*sizeof(float));
                     eventData->detector[detIndex].data_raw_is_float = true;
-
-                    //for(int panel=0; panel<np; panel++) {
-                        // Data is of type Float
-                    //    long offset = panel * pix_nx*pix_ny*sizeof(float);
-                    //    memcpy(&eventData->detector[detIndex].data_raw[0]+offset, &img->data()[panel][0][0], pix_nx*pix_ny*sizeof(float));
-                    //}
                 }
                 else {
                     printf("Event %li: Jungfrau img.get() failed for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
                     cheetahDestroyEvent(eventData);
                     //pthread_exit(NULL);
-                    return NULL;
+                    //return NULL;
                 }
-
             }
 
-
+            /*
+             *    Epix 100, pre-processed by psana-python and returned to the event store
+             */
+            else if (strcmp(cheetahGlobal.detector[detIndex].detectorType, "epix100a") == 0) {
+                long    pix_nn = cheetahGlobal.detector[detIndex].pix_nn;
+                
+                shared_ptr< ndarray<float, 2> > img = evt.get(m_srcEpix, "epix_img");    // <-- for images
+                //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");    // <-- for calibrated data
+                
+                if (img.get()) {
+                    //const ndarray<float, 3> jungfrau_data = *img->data();
+                    
+                    long    ny = img->shape()[0];
+                    long    nx = img->shape()[1];
+                    
+                    // Make it a little less chatty
+                    //printf("Epix python size %d\n",img->size());
+                    //cout << "Epix shape: " << ny << "x" << nx << endl;
+                    
+                    //memcpy(&eventData->detector[detIndex].data_raw[0], &img->data()[0], pix_nn*sizeof(float));
+                    memcpy(&eventData->detector[detIndex].data_raw[0], img->data(), pix_nn*sizeof(float));
+                    eventData->detector[detIndex].data_raw_is_float = true;
+                }
+                else {
+                    printf("Event %li: Epix img.get() failed for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
+                    cheetahDestroyEvent(eventData);
+                    //pthread_exit(NULL);
+                    //return NULL;
+                }
+            }
 			
 			/*
 			 *

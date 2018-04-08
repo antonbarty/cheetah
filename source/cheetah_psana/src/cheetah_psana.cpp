@@ -162,7 +162,9 @@ namespace cheetah_ana_pkg {
 		setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
 
 		// get the values from configuration or use defaults
+        
 		m_key = configStr("inputKey", "");
+        m_srcEpix = configStr("epixSource","DetInfo(:Epix100a)");
 		m_srcJungfrau = configStr("jungfrauSource","DetInfo(:Jungfrau)");
 		m_srcCspad0 = configStr("cspadSource0","DetInfo(:Cspad)");
 		m_srcCspad1 = configStr("cspadSource1","DetInfo(:Cspad)");

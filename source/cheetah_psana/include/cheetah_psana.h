@@ -111,6 +111,7 @@ namespace cheetah_ana_pkg {
 
 		std::string m_key;
 		Source m_srcJungfrau;
+        Source m_srcEpix;
 		Source m_srcCspad0;
 		Source m_srcCspad1;
 		Source m_srcRayonix0;
