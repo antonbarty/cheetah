@@ -4,7 +4,7 @@ import psana
 class jungfrau (object) :
 
     def __init__ ( self ) :
-        self.m_src = self.configStr('source')
+        self.m_src = self.configSrc('source')
         self.key_out = self.configStr('key_out')
 
     def beginjob( self, evt, env ) :
