@@ -329,8 +329,8 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
     }
     else if(strcmp(detectorType, "epix100a") == 0) {
         strcpy(detectorType, "epix100a");
-        asic_nx = 704;
-        asic_ny = 768;
+        asic_nx = 768;
+        asic_ny = 704;
         nasics_x = 1;
         nasics_y = 1;
         asic_nn = asic_nx*asic_ny;
