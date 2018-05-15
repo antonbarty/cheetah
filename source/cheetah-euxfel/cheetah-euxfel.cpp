@@ -2,7 +2,15 @@
 //  cheetah-euxfel
 //
 //  Created by Anton Barty on 24/8/17.
-//	Distributed under the GPLv3 license
+//  Coded by Helen Ginn and Anton Barty
+//  Distributed under the GPLv3 license
+//
+//  Created and funded as a part of academic research; proper academic attribution expected.
+//  Feel free to reuse or modify this code under the GPLv3 license, but please ensure that users cite the following paper reference:
+//  Barty, A. et al. "Cheetah: software for high-throughput reduction and analysis of serial femtosecond X-ray diffraction data."
+//  J Appl Crystallogr 47, 1118–1131 (2014)
+//
+//  The above statement may not be modified except by permission of the original authors listed above
 //
 
 #include <stdio.h>
@@ -18,6 +26,8 @@
 #include <execinfo.h>
 #include <signal.h>
 
+
+// Error handler
 void handler(int sig) {
 	void *buffer[100];
 	int size;
@@ -47,6 +57,7 @@ void handler(int sig) {
     
 	exit(1);
 }
+
 
 // This is for parsing getopt_long()
 struct tCheetahEuXFELparams {
@@ -184,26 +195,16 @@ int main(int argc, char* argv[]) {
 				continue;
 			}
 			
-			//if(agipd.currentPulse % 4 > 0) {
-			//	std::cout << "Skipping frame due to stride" << std::endl;
-			//	continue;
-			//}
 
-			
-
-			// First few frames in a run seem junk
-			//if(frameNumber < 100) {
-			//	continue;
-			//}
-			
-
-			// Add more sensible event name
-			
+			// Set up new Cheetah event
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
-			std::string eventName = CheetahEuXFELparams.inputFiles[fnum] + "_" + i_to_str(agipd.currentTrain)
-			+ "_" + i_to_str(agipd.currentPulse);
+
+            // Add a sensible event name
+            std::string eventName = CheetahEuXFELparams.inputFiles[fnum] + "_" + i_to_str(agipd.currentTrain) + "_" + i_to_str(agipd.currentPulse);
 			strcpy(eventData->eventname,eventName.c_str());
+            
+            // Copy other information into event (extract from EuXFEL data once it's available)
 			eventData->runNumber = runNumber;
 			eventData->nPeaks = 0;
 			eventData->pumpLaserCode = 0;
@@ -218,8 +219,10 @@ int main(int argc, char* argv[]) {
 			eventData->pulseID = agipd.currentPulse;
 			eventData->cellID = agipd.currentCell;
 			
-			//
-			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfel_pulseid") == 0) {
+			
+            // Sort by XFEL pulse ID.
+            // This may not always be a good idea as the number of pulses is currently set to a maximum 15 elsewhere
+			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfelpulseid") == 0) {
 				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
 					eventData->pumpLaserCode = agipd.currentPulse;
 					eventData->powderClass = agipd.currentPulse;
@@ -249,11 +252,14 @@ int main(int argc, char* argv[]) {
                 }
             }
             
+            // We do nothing with the gain information beyond here
+            
 
-			
+
 			// Process event
 			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 		}
+        // end agipd.nextFrame()
 	
 		usleep(5000);
 		std::cout << "Closing AGIPD modules" << std::endl;
