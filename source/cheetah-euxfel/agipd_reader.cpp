@@ -90,7 +90,7 @@ void cAgipdReader::setScheme(char *scheme) {
 
     // Orville, September 2017
     if(_scheme == "XFEL2017") {
-        std::cout << "\tSetting AGIPD data scheme to XFEL2012\n";
+        std::cout << "\tSetting AGIPD data scheme to XFEL2017\n";
         setFirstPulse(0);
         setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(2);        // For interleaved data we need to correct the cellID by 2, else not

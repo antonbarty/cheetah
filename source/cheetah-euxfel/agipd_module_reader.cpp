@@ -207,13 +207,15 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 
     
     // Check the index length
-    int success2 = H5LTget_dataset_info(h5_file_id, h5_index_first_field.c_str(), dims, &dataclass, &datasize);
-    int success3 = H5LTget_dataset_info(h5_file_id, h5_index_count_field.c_str(), dims, &dataclass, &datasize);
-    if (success2 < 0 || success3 < 0) {
-        std::cout << "Get index info for image - failed. Module set to blank.\n";
-        fileOK = false;
-        noData = true;
-        return;
+    if(false) {
+        int success2 = H5LTget_dataset_info(h5_file_id, h5_index_first_field.c_str(), dims, &dataclass, &datasize);
+        int success3 = H5LTget_dataset_info(h5_file_id, h5_index_count_field.c_str(), dims, &dataclass, &datasize);
+        if (success2 < 0 || success3 < 0) {
+            std::cout << "Get index info for image - failed. Module set to blank.\n";
+            fileOK = false;
+            noData = true;
+            return;
+        }
     }
     
     nindex = dims[0];
@@ -503,7 +505,7 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 		return;
 	}
 	
-	// Define hyperslab in RAW data file
+	// Define hyperslab in CALIB data file
 	hsize_t     slab_start[4];
 	hsize_t		slab_size[4];
 	slab_start[0] = frameNum;
