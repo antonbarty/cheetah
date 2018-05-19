@@ -309,6 +309,7 @@ void savePowderPattern(cGlobal *global, int detIndex, int powderClass) {
 				memcpy(powderBuffer, powder, dataV.pix_nn*sizeof(double));
 				if (global->threadSafetyLevel > 0)
 					pthread_mutex_unlock(mutex);
+                
 				// Masked powders require a per-pixel correction
 				if(global->detector[detIndex].savePowderMasked != 0 && powder_counter != NULL) {
 					for (long i=0; i<dataV.pix_nn; i++) {
@@ -323,6 +324,17 @@ void savePowderPattern(cGlobal *global, int detIndex, int powderClass) {
 				if (dh < 0) ERROR("Could not create dataset.\n");
 				H5Dwrite(dh, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, powderBuffer);
 				H5Dclose(dh);
+                
+                // Also write the average
+                for (long i=0; i<dataV.pix_nn; i++) {
+                    powderBuffer[i] /= detector->nPowderFrames[powderClass];
+                }
+                sprintf(sBuffer,"%s_average",dataV.name);
+                dh = H5Dcreate(gh, sBuffer, H5T_NATIVE_DOUBLE, sh, H5P_DEFAULT, h5compression, H5P_DEFAULT);
+                if (dh < 0) ERROR("Could not create dataset.\n");
+                H5Dwrite(dh, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, powderBuffer);
+                H5Dclose(dh);
+
 				
 				// Fluctuations (sigma)
 				powderSquaredBuffer = (double*) calloc(dataV.pix_nn, sizeof(double));

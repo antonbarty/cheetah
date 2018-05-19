@@ -624,6 +624,15 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
+    def show_powder_all(self):
+        file = '*detector?-class*-sum.h5'
+        field = 'data/non_assembled_detector_and_photon_corrected'
+        self.show_selected_images(file, field)
+
+    def show_powder_all_avg(self):
+        file = '*detector?-class*-sum.h5'
+        field = 'data/non_assembled_detector_and_photon_corrected_average'
+        self.show_selected_images(file, field)
 
 
     #
@@ -992,8 +1001,9 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_powder_blank_det.triggered.connect(self.show_powder_blanks_det)
         self.ui.menu_powder_peaks_hits.triggered.connect(self.show_powder_peaks_hits)
         self.ui.menu_powder_peaks_blank.triggered.connect(self.show_powder_peaks_blanks)
-        self.ui.menu_powder_all.triggered.connect(self.show_powder_all_det)
+        self.ui.menu_powder_all.triggered.connect(self.show_powder_all)
         self.ui.menu_powder_all_det.triggered.connect(self.show_powder_all_det)
+        self.ui.menu_powder_all_avg.triggered.connect(self.show_powder_all_avg)
 
         # Log menu actions
         self.ui.menu_log_batch.triggered.connect(self.view_batch_log)
