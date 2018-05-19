@@ -118,6 +118,7 @@ def crawler_merge(info):
     nhits_out = []
     nindexed_out = []
     hitrate_out = []
+    inifile_out = []
 
 
     #
@@ -139,6 +140,7 @@ def crawler_merge(info):
         # Run, DatasetID, Directory
         dataset = '---'
         h5dir = '---'
+        inifile='---'
         if datasets != {}:
             if run in datasets['Run']:
                 i = datasets['Run'].index(run)
@@ -203,6 +205,7 @@ def crawler_merge(info):
         hitrate_out.append(hitrate)
         crystfel_out.append(crystfel_status)
         nindexed_out.append(indexrate)
+        inifile_out.append(inifile)
 
 
     #
@@ -219,11 +222,12 @@ def crawler_merge(info):
         'Nprocessed' : nprocessed_out,
         'Nhits' : nhits_out,
         'Nindex' : nindexed_out,
-        'Hitrate%' : hitrate_out
+        'Hitrate%' : hitrate_out,
+        'Recipe' : inifile_out
     }
 
 
     # Write dict to CSV file
-    keys_to_save = ['Run', 'Dataset','XTC','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%']
+    keys_to_save = ['Run', 'Dataset','XTC','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%','Recipe']
     cfel_file.dict_to_csv('crawler.txt', result, keys_to_save)
 
