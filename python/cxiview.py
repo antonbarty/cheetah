@@ -453,14 +453,13 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.shuffle_mode == False:
             self.shuffle_mode = True
             self.ui.shufflePushButton.setText("Stop")
-            self.refresh_timer.timeout.connect(self.random_pattern)   
             self.random_pattern()
-            self.refresh_timer.start(1000)
+            self.shuffle_timer.start(1000)
 
         else: 
             self.shuffle_mode = False
             self.ui.shufflePushButton.setText("Shuffle")
-            self.refresh_timer.stop()
+            self.shuffle_timer.stop()
     #end shuffle()
 
 
@@ -471,14 +470,13 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.play_mode == False:
             self.play_mode = True
             self.ui.playPushButton.setText("Stop")
-            self.refresh_timer.timeout.connect(self.next_pattern)   
             self.next_pattern()
-            self.refresh_timer.start(1000)
+            self.play_timer.start(1000)
 
         else: 
             self.play_mode = False
             self.ui.playPushButton.setText("Play")
-            self.refresh_timer.stop()
+            self.play_timer.stop()
     #end play()
 
 
@@ -889,7 +887,10 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # Flags needed for play and shuffle (can probably do this better)
         self.shuffle_mode = False
         self.play_mode = False 
-        self.refresh_timer = PyQt5.QtCore.QTimer()
+        self.shuffle_timer= PyQt5.QtCore.QTimer()
+        self.play_timer = PyQt5.QtCore.QTimer()
+        self.play_timer.timeout.connect(self.next_pattern)
+        self.shuffle_timer.timeout.connect(self.random_pattern)
 
 
         # Put menu inside the window on Macintosh and elsewhere
