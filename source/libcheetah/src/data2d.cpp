@@ -6,7 +6,7 @@
  *
  */
 
-#include "cheetah/data2d.h"
+#include "data2d.h"
 const char* const ATTR_NAME_DETECTOR_NAME = "detectorName";
 const char* const ATTR_NAME_DETECTOR_ID = "detectorID";
 #include <stdlib.h>

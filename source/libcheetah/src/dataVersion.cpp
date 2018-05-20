@@ -20,9 +20,9 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include "cheetah/cheetahGlobal.h"
-#include "cheetah/cheetahEvent.h"
-#include "cheetah/detectorObject.h"
+#include "cheetahGlobal.h"
+#include "cheetahEvent.h"
+#include "detectorObject.h"
 
 void initRaw(cEventData *eventData, cGlobal *global){
 	// Copy raw detector data into float array

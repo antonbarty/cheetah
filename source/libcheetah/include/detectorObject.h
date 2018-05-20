@@ -274,6 +274,7 @@ public:
     int maskSaturatedPixels;
     long pixelSaturationADC;
     long pixelMinimumAllowedADC;
+    long pixelMaximumAllowedADC;
     // Mask pnccd saturated pixels (thresholds hardcoded, for every quadrant different)
     int maskPnccdSaturatedPixels;
     // Local background subtraction

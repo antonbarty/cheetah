@@ -1,5 +1,5 @@
 #include <sys/time.h>
-#include "cheetah/processRateMonitor.h"
+#include <processRateMonitor.h>
 
 ProcessRateMonitor::ProcessRateMonitor(double avgTime, int ringSize){
 	averagingTime = avgTime;

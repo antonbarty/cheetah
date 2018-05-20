@@ -5,13 +5,13 @@
 #include <hdf5.h>
 #include <stdlib.h>
 
-#include "cheetah/detectorObject.h"
-#include "cheetah/cheetahGlobal.h"
-#include "cheetah/cheetahEvent.h"
-#include "cheetah/median.h"
-#include "cheetah/hitfinders.h"
-#include "cheetah/peakfinders.h"
-#include "cheetah/cheetahmodules.h"
+#include "detectorObject.h"
+#include "cheetahGlobal.h"
+#include "cheetahEvent.h"
+#include "median.h"
+#include "hitfinders.h"
+#include "peakfinders.h"
+#include "cheetahmodules.h"
 
 /*
  *	Various flavours of hitfinder
@@ -183,6 +183,9 @@ void sortPowderClass(cEventData *eventData, cGlobal *global)
             if (strcmp(global->pumpLaserScheme, "evr41") == 0) {
                 eventData->powderClass = hit + 2 * pumpLaserOn;
             }
+			else if(strcmp(global->pumpLaserScheme, "xfel_pulseid") == 0) {
+				eventData->powderClass = eventData->pumpLaserCode;
+			}
             else if (strncmp(global->pumpLaserScheme, "evr", 3) == 0) {
                 eventData->powderClass = hit + 2 * pumpLaserOn;
             }

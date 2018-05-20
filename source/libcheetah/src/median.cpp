@@ -23,7 +23,7 @@
   ---------------------------------------------------------------------------*/
 
 #include <stdint.h>
-#include "cheetah/median.h"
+#include "median.h"
 
 #define median(a,n) kth_smallest(a,n,(((n)&1)?((n)/2):(((n)/2)-1)))
 

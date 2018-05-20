@@ -2,8 +2,8 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include "cheetah_psana/cheetah_psana.h"
-#include <cheetah/cheetah.h>
+#include "cheetah_psana.h"
+#include <cheetah.h>
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -28,7 +28,8 @@
 #include "psddl_psana/pnccd.ddl.h"
 //#include "ReleaseInfo/Release.h"
 
-#define PSANA_VERSION (1*10000+3*100+47)
+//#define PSANA_VERSION (RELEASEINFO_VERSION_MAJOR*10000+RELEASEINFO_VERSION_MIDDLE*100+RELEASEINFO_VERSION_MINOR)
+#define PSANA_VERSION (1*10000 + 3*100 + 47)
 using namespace cheetah_ana_pkg;
 using namespace std;
 
@@ -42,7 +43,7 @@ namespace cheetah_ana_pkg {
 	volatile static long frameNumber = 0;
 
 	// Copy event data
-	cEventData *cheetah_ana_mod::copy_event(boost::shared_ptr<Event> evtp, boost::shared_ptr<Env> envp) {
+	void cheetah_ana_mod::copy_event(boost::shared_ptr<Event> evtp, boost::shared_ptr<Env> envp) {
 		frameNumberIncludingSkipped ++;
 		float random_float = (float)rand()/(float)RAND_MAX;
 		Event& evt = *evtp;
@@ -65,7 +66,7 @@ namespace cheetah_ana_pkg {
 		if (cheetahGlobal.skipFract > random_float && frameNumberIncludingSkipped > cheetahGlobal.nInitFrames && cheetahGlobal.calibrated) {
 			printf("Skipping a frame (%ld)\n",frameNumberIncludingSkipped);
 			skip();
-			return NULL;
+			return;
 		}
 	  
 	 
@@ -1394,8 +1395,7 @@ namespace cheetah_ana_pkg {
 
 		
 		
-		//pthread_exit(eventData);
-		return eventData;
+		pthread_exit(eventData);
 	}
 
 	

@@ -17,12 +17,12 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-#include "cheetah/data2d.h"
-#include "cheetah/detectorObject.h"
-#include "cheetah/cheetahGlobal.h"
-#include "cheetah/cheetahEvent.h"
-#include "cheetah/cheetahmodules.h"
-#include "cheetah/median.h"
+#include "data2d.h"
+#include "detectorObject.h"
+#include "cheetahGlobal.h"
+#include "cheetahEvent.h"
+#include "cheetahmodules.h"
+#include "median.h"
 
 
 

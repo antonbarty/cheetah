@@ -15,10 +15,10 @@
 #include <vector>
 #include <semaphore.h>
 
-#include "cheetah/detectorObject.h"
-#include "cheetah/tofDetector.h"
-#include "cheetah/peakDetect.h"
-#include "cheetah/processRateMonitor.h"
+#include "detectorObject.h"
+#include "tofDetector.h"
+#include "peakDetect.h"
+#include "processRateMonitor.h"
 #define MAX_POWDER_CLASSES 16
 #define MAX_DETECTORS 5
 #define MAX_FILENAME_LENGTH 1024

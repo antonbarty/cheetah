@@ -13,11 +13,11 @@
 #include <hdf5.h>
 #include <stdlib.h>
 
-#include "cheetah/detectorObject.h"
-#include "cheetah/cheetahGlobal.h"
-#include "cheetah/cheetahEvent.h"
-#include "cheetah/cheetahmodules.h"
-#include "cheetah/median.h"
+#include "detectorObject.h"
+#include "cheetahGlobal.h"
+#include "cheetahEvent.h"
+#include "cheetahmodules.h"
+#include "median.h"
 
 /*
  *	Maintain histogram buffer

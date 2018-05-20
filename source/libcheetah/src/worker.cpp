@@ -16,9 +16,9 @@
 #include <time.h>
 #include <sys/time.h>
 
-#include "cheetah/cheetah.h"
-#include "cheetah/cheetahmodules.h"
-#include "cheetah/median.h"
+#include "cheetah.h"
+#include "cheetahmodules.h"
+#include "median.h"
 
 #include <iostream>
 #include <vector>

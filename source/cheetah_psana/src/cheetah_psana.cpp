@@ -17,8 +17,8 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include <cheetah_psana/cheetah_psana.h>
-#include <cheetah/cheetah.h>
+#include <cheetah_psana.h>
+#include <cheetah.h>
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -382,11 +382,10 @@ namespace cheetah_ana_pkg {
             }
             return;
 
-
 		//printf("Event (cheetah_ana_mod::event)\n");
 		
-		//boost::shared_ptr<Event> evtp = evt.shared_from_this();
-		//boost::shared_ptr<Env> envp = env.shared_from_this();
+		boost::shared_ptr<Event> evtp = evt.shared_from_this();
+		boost::shared_ptr<Env> envp = env.shared_from_this();
 		pthread_t thread;
 		int returnStatus;
 		
@@ -444,7 +443,7 @@ namespace cheetah_ana_pkg {
 			sem_post(&availableAnaThreads);
 			
 			if (eventData != NULL) {
-                            //cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+				cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 			}
 		}
 		pthread_exit(NULL);
