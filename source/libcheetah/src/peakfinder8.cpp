@@ -19,7 +19,7 @@
 #include <stdio.h>
 
 #include "peakfinders.h"
-#include "peakfinder8.hh"
+#include "peakfinder8.h"
 //#include "cheetahmodules.h"
 
 

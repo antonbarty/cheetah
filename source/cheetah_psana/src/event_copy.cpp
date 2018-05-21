@@ -3,7 +3,8 @@
 // This Class's Header --
 //-----------------------
 #include "cheetah_psana.h"
-#include <cheetah.h>
+#include "cheetah.h"
+//#include <cheetah.h>
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -43,7 +44,7 @@ namespace cheetah_ana_pkg {
 	volatile static long frameNumber = 0;
 
 	// Copy event data
-	void cheetah_ana_mod::copy_event(boost::shared_ptr<Event> evtp, boost::shared_ptr<Env> envp) {
+	cEventData* cheetah_ana_mod::copy_event(boost::shared_ptr<Event> evtp, boost::shared_ptr<Env> envp) {
 		frameNumberIncludingSkipped ++;
 		float random_float = (float)rand()/(float)RAND_MAX;
 		Event& evt = *evtp;
@@ -66,7 +67,7 @@ namespace cheetah_ana_pkg {
 		if (cheetahGlobal.skipFract > random_float && frameNumberIncludingSkipped > cheetahGlobal.nInitFrames && cheetahGlobal.calibrated) {
 			printf("Skipping a frame (%ld)\n",frameNumberIncludingSkipped);
 			skip();
-			return;
+			return NULL;
 		}
 	  
 	 
@@ -1395,7 +1396,7 @@ namespace cheetah_ana_pkg {
 
 		
 		
-		pthread_exit(eventData);
+		return eventData;
 	}
 
 	

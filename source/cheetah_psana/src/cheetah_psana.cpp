@@ -17,8 +17,10 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include <cheetah_psana.h>
-#include <cheetah.h>
+//#include <cheetah_psana.h>
+//#include <cheetah.h>
+#include "cheetah_psana.h"
+#include "cheetah.h"
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -384,28 +386,28 @@ namespace cheetah_ana_pkg {
 
 		//printf("Event (cheetah_ana_mod::event)\n");
 		
-		boost::shared_ptr<Event> evtp = evt.shared_from_this();
-		boost::shared_ptr<Env> envp = env.shared_from_this();
-		pthread_t thread;
-		int returnStatus;
+		//boost::shared_ptr<Event> evtp = evt.shared_from_this();
+		//boost::shared_ptr<Env> envp = env.shared_from_this();
+		//pthread_t thread;
+		//int returnStatus;
 		
 		//	Wait until we have a spare thread in the thread pool
-		sem_wait(&availableAnaThreads);
+		//sem_wait(&availableAnaThreads);
 		
 
 		// Create a new thread for copying data from this psana event
-		returnStatus = pthread_create(&thread, NULL, threaded_event, (void*) new AnaModEventData(this, evtp, envp));		
+		//returnStatus = pthread_create(&thread, NULL, threaded_event, (void*) new AnaModEventData(this, evtp, envp));
 
 		
 		// Push thread to stack of thread creation was successful
-		if (returnStatus == 0) {
-			pthread_mutex_lock(&pthread_queue_mutex);
-			runningThreads.push(thread);
-			pthread_mutex_unlock(&pthread_queue_mutex);
-		}
-		else {
-			printf("Error: thread creation failed (frame skipped)\n");
-		}
+		//if (returnStatus == 0) {
+		//	pthread_mutex_lock(&pthread_queue_mutex);
+		//	runningThreads.push(thread);
+		//	pthread_mutex_unlock(&pthread_queue_mutex);
+		//}
+		//else {
+		//	printf("Error: thread creation failed (frame skipped)\n");
+		//}
 	}
 	// End of psana event method
 
