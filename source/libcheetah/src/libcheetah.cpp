@@ -40,26 +40,6 @@ void* pythonWorker(void*);
  */
 int cheetahInit(cGlobal *global) {
     
-	// Check if we're using psana of the same git commit
-	if(strcmp(global->facility, "EuXFEL")) {
-		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
-			fprintf(stderr,    "*******************************************************************************************\n");
-			fprintf(stderr,"*** WARNING %s:%d ***\n",__FILE__,__LINE__);
-			
-			if(getenv("PSANA_GIT_SHA")){
-				fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
-				fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
-			}
-			else{
-				fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
-			}
-			fprintf(stderr,    "*******************************************************************************************\n");
-			sleep(10);
-		}
-		setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
-	}
-	setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
-
     
     // Check HDF5 installation is thread safe
     hbool_t H5_is_ts;
@@ -101,6 +81,7 @@ int cheetahInit(cGlobal *global) {
 	initStreakFinder(global);
 
 	printf("Cheetah clean initialisation\n");
+    fflush (stdout);
 	return 0;
 }
 
@@ -151,6 +132,7 @@ void cheetahNewRun(cGlobal *global) {
 		}
     }
     pthread_mutex_unlock(&global->powderfp_mutex);
+    fflush (stdout);
 }
 
 

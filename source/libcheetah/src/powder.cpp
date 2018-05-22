@@ -465,7 +465,7 @@ void saveDarkcal(cGlobal *global, int detIndex) {
 #ifdef H5F_ACC_SWMR_WRITE
 	pthread_mutex_lock(&global->swmr_mutex);
 #endif
-	writeSimpleHDF5(filename, buffer, detector->pix_nx, detector->pix_ny, H5T_NATIVE_FLOAT,detector->detectorName,detector->detectorID);	
+	writeSimpleHDF5(filename, buffer, detector->pix_nx, detector->pix_ny, (hid_t) H5T_NATIVE_FLOAT,detector->detectorName,detector->detectorID);
 #ifdef H5F_ACC_SWMR_WRITE  
 	pthread_mutex_unlock(&global->swmr_mutex);
 #endif
@@ -528,7 +528,7 @@ void saveGaincal(cGlobal *global, int detIndex) {
 #ifdef H5F_ACC_SWMR_WRITE
 	pthread_mutex_lock(&global->swmr_mutex);
 #endif
-	writeSimpleHDF5(filename, buffer, detector->pix_nx, detector->pix_ny, H5T_NATIVE_FLOAT);
+	writeSimpleHDF5(filename, buffer, detector->pix_nx, detector->pix_ny, (hid_t) H5T_NATIVE_FLOAT);
 #ifdef H5F_ACC_SWMR_WRITE  
 	pthread_mutex_unlock(&global->swmr_mutex);
 #endif

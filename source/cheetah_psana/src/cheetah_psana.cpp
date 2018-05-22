@@ -155,14 +155,18 @@ namespace cheetah_ana_pkg {
 			if(getenv("PSANA_GIT_SHA")){
 				fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
 				fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
-			}else{
+			}
+            else{
 				fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
 			}
 			fprintf(stderr,    "*******************************************************************************************\n");
-			sleep(10);
+			//sleep(10);
 		}
-		setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
+		//setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
 
+        fprintf(stderr,"Test1\n");
+
+        
 		// get the values from configuration or use defaults
         
 		m_key = configStr("inputKey", "");
@@ -188,12 +192,17 @@ namespace cheetah_ana_pkg {
 
 		finishedAnaThreads = 0;
 
-		runCheetahCaller = true;
-		int returnStatus = pthread_create(&cheetahCallerThread, NULL, cheetah_caller, &pthread_queue_mutex);
+        runCheetahCaller = false;
+        //runCheetahCaller = true;
+        //int returnStatus = pthread_create(&cheetahCallerThread, NULL, cheetah_caller, &pthread_queue_mutex);
+		//if (returnStatus != 0) { // creation successful
+		//	printf("Error: thread creation failed\n");
+		//}
+        
+        fprintf(stderr,"cheetah_ana_mod::cheetah_ana_mod completed\n");
+        fflush (stdout);
 
-		if (returnStatus != 0) { // creation successful
-			printf("Error: thread creation failed\n");
-		}
+        
 	}
 
 	//--------------
@@ -241,6 +250,7 @@ namespace cheetah_ana_pkg {
 			m_srcAcq.push_back((Source)configStr(cheetahGlobal.tofDetector[i].sourceName, 
 												 cheetahGlobal.tofDetector[i].sourceIdentifier));
 		}
+        fflush (stdout);
 	}
 
 	
@@ -269,6 +279,7 @@ namespace cheetah_ana_pkg {
 		cheetahNewRun(&cheetahGlobal);
 		//printf("User analysis beginrun() routine called.\n");
 		printf("*** Processing r%04u ***\n",runNumber);
+        fflush (stdout);
 	}
 
 
@@ -354,6 +365,7 @@ namespace cheetah_ana_pkg {
 			}
 
 		}
+        fflush (stdout);
 	}
 
 	//--------------

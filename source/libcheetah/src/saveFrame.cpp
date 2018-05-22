@@ -790,15 +790,18 @@ void writePeakFile(cEventData *eventData, cGlobal *global){
 	
 }
 
+void writeSimpleHDF5(const char *filename, const void *data, long width, long height, hid_t type)  {
+writeSimpleHDF5(filename, data, width, height, type, NULL, -1);
+}
 
 void writeSimpleHDF5(const char *filename, const void *data, long width, long height, int type)  {
-	writeSimpleHDF5(filename, data, width, height, type, NULL, -1);
+    writeSimpleHDF5(filename, data, width, height, type, NULL, -1);
 }
 
 /*
  *	Write data to a simple HDF5 file
  */
-void writeSimpleHDF5(const char *filename, const void *data, long width, long height, int type, const char *detectorName, long detectorID)  {
+void writeSimpleHDF5(const char *filename, const void *data, long width, long height, hid_t type, const char *detectorName, long detectorID)  {
 	hid_t fh, gh, sh, dh;	/* File, group, dataspace and data handles */
 	herr_t r;
 	hsize_t size[2];

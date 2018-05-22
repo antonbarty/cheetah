@@ -253,7 +253,7 @@ void saveRadialAverageStack(cGlobal *global, int powderClass, int detIndex) {
     printf("Saving radial stack: %s\n", filename);
     
     
-    writeSimpleHDF5(filename, detector->radialAverageStack[powderClass], detector->radial_nn, nRows, H5T_NATIVE_FLOAT);
+    writeSimpleHDF5(filename, detector->radialAverageStack[powderClass], detector->radial_nn, nRows, (hid_t) H5T_NATIVE_FLOAT);
     for(long i=0; i<global->nPowderClasses; i++) {
         fflush(global->powderlogfp[i]);
 		fflush(global->framelist[i]);
