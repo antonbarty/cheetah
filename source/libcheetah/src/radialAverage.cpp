@@ -169,6 +169,14 @@ void addToRadialAverageStack(cEventData *eventData, cGlobal *global, int powderC
     pthread_mutex_t mutex = detector->radialStack_mutex[powderClass];
 	
     
+    cDataVersion dataV_r(&eventData->detector[detIndex], &global->detector[detIndex], global->detector[detIndex].saveVersion, cDataVersion::DATA_FORMAT_RADIAL_AVERAGE);
+    while(dataV_r.next()) {
+        float    *data_r = dataV_r.getData();
+        for(long i=0; i<radial_nn; i++) {
+            radialAverage[i] = (float) data_r[i];
+        }
+    }
+    
     // Data offsets
 	pthread_mutex_lock(&mutex);
 	stackCounter = detector->radialStackCounter[powderClass];
