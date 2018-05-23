@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/cxiview_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cxiview_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cxiview.py" beforeDir="false" afterPath="$PROJECT_DIR$/cxiview.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/radialAverage.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/radialAverage.cpp" afterDir="false" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -21,11 +24,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cxiview.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="351">
-              <caret line="893" selection-start-line="893" selection-end-line="893" />
+            <state relative-caret-position="381">
+              <caret line="852" selection-start-line="852" selection-end-line="852" />
             </state>
           </provider>
         </entry>
@@ -48,10 +51,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="106">
+            <state relative-caret-position="301">
               <caret line="148" column="8" selection-start-line="148" selection-start-column="8" selection-end-line="148" selection-end-column="8" />
             </state>
           </provider>
@@ -60,7 +63,7 @@
       <file leaf-file-name="crawler_merge.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="313">
+            <state relative-caret-position="2070">
               <caret line="142" column="20" selection-start-line="142" selection-start-column="20" selection-end-line="142" selection-end-column="20" />
             </state>
           </provider>
@@ -301,14 +304,15 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="50" y="23" width="1425" height="1027" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.5435467" visible="true" weight="0.3031579" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5424974" visible="true" weight="0.3031579" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.3287841" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info active="true" x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.4564533" side_tool="true" visible="true" weight="0.3031579" />
+      <window_info x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.45750263" side_tool="true" visible="true" weight="0.3031579" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -340,8 +344,13 @@
           <url>file://$PROJECT_DIR$/cxiview.py</url>
           <line>10</line>
         </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/cxiview.py</url>
+          <line>879</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
       </breakpoints>
-      <option name="time" value="1" />
+      <option name="time" value="2" />
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
@@ -669,22 +678,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="313">
+        <state relative-caret-position="2070">
           <caret line="142" column="20" selection-start-line="142" selection-start-column="20" selection-end-line="142" selection-end-column="20" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cxiview.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="351">
-          <caret line="893" selection-start-line="893" selection-end-line="893" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="106">
+        <state relative-caret-position="301">
           <caret line="148" column="8" selection-start-line="148" selection-start-column="8" selection-end-line="148" selection-end-column="8" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="381">
+          <caret line="852" selection-start-line="852" selection-end-line="852" />
         </state>
       </provider>
     </entry>

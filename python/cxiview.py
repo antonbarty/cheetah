@@ -850,6 +850,12 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.qtintvalidator.setRegExp(self.intregex)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
 
+        # Keyboard shortcuts
+        self.ui.nextPushButton.setShortcut(PyQt5.QtGui.QKeySequence(PyQt5.QtCore.Qt.Key_Right))
+        self.ui.previousPushButton.setShortcut(PyQt5.QtGui.QKeySequence(PyQt5.QtCore.Qt.Key_Left))
+        self.ui.randomPushButton.setShortcut(PyQt5.QtGui.QKeySequence(PyQt5.QtCore.Qt.Key_Space))
+
+
         # Check boxes on bottom line
         self.ui.foundPeaksCheckBox.setChecked(False)
         self.ui.predictedPeaksCheckBox.setChecked(False)
