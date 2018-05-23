@@ -17,8 +17,10 @@
 //-----------------------
 // This Class's Header --
 //-----------------------
-#include <cheetah_psana.h>
-#include <cheetah.h>
+//#include <cheetah_psana.h>
+//#include <cheetah.h>
+#include "cheetah_psana.h"
+#include "cheetah.h"
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -26,6 +28,7 @@
 #include <string>
 #include <time.h>
 #include <signal.h>
+#include <hdf5.h>
 //-------------------------------
 // Collaborating Class Headers --
 //-------------------------------
@@ -141,6 +144,8 @@ namespace cheetah_ana_pkg {
 
 		printf("Constructor (cheetah_ana_mod::cheetah_ana_mod)\n");
 
+
+
 		
 		// Check if we're using psana of the same git commit
 		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
@@ -150,16 +155,23 @@ namespace cheetah_ana_pkg {
 			if(getenv("PSANA_GIT_SHA")){
 				fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
 				fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
-			}else{
+			}
+            else{
 				fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
 			}
 			fprintf(stderr,    "*******************************************************************************************\n");
-			sleep(10);
+			//sleep(10);
 		}
-		setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
+		//setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
 
+        fprintf(stderr,"Test1\n");
+
+        
 		// get the values from configuration or use defaults
+        
 		m_key = configStr("inputKey", "");
+        m_srcEpix = configStr("epixSource","DetInfo(:Epix100a)");
+		m_srcJungfrau = configStr("jungfrauSource","DetInfo(:Jungfrau)");
 		m_srcCspad0 = configStr("cspadSource0","DetInfo(:Cspad)");
 		m_srcCspad1 = configStr("cspadSource1","DetInfo(:Cspad)");
 		m_srcRayonix0 = configStr("rayonixSource0","DetInfo(:Rayonix)");
@@ -180,12 +192,17 @@ namespace cheetah_ana_pkg {
 
 		finishedAnaThreads = 0;
 
-		runCheetahCaller = true;
-		int returnStatus = pthread_create(&cheetahCallerThread, NULL, cheetah_caller, &pthread_queue_mutex);
+        runCheetahCaller = false;
+        //runCheetahCaller = true;
+        //int returnStatus = pthread_create(&cheetahCallerThread, NULL, cheetah_caller, &pthread_queue_mutex);
+		//if (returnStatus != 0) { // creation successful
+		//	printf("Error: thread creation failed\n");
+		//}
+        
+        fprintf(stderr,"cheetah_ana_mod::cheetah_ana_mod completed\n");
+        fflush (stdout);
 
-		if (returnStatus != 0) { // creation successful
-			printf("Error: thread creation failed\n");
-		}
+        
 	}
 
 	//--------------
@@ -217,6 +234,7 @@ namespace cheetah_ana_pkg {
 		
 		// Initialise signal handler when using .cxi file (so we can close it clenaly)
 		if(cheetahGlobal.saveCXI){
+		//if(false){
 			signal(SIGINT, sig_handler);
 			signal(SIGTERM, sig_handler);
 			signal(SIGABRT, sig_handler);
@@ -232,6 +250,7 @@ namespace cheetah_ana_pkg {
 			m_srcAcq.push_back((Source)configStr(cheetahGlobal.tofDetector[i].sourceName, 
 												 cheetahGlobal.tofDetector[i].sourceIdentifier));
 		}
+        fflush (stdout);
 	}
 
 	
@@ -260,6 +279,7 @@ namespace cheetah_ana_pkg {
 		cheetahNewRun(&cheetahGlobal);
 		//printf("User analysis beginrun() routine called.\n");
 		printf("*** Processing r%04u ***\n",runNumber);
+        fflush (stdout);
 	}
 
 
@@ -345,6 +365,7 @@ namespace cheetah_ana_pkg {
 			}
 
 		}
+        fflush (stdout);
 	}
 
 	//--------------
@@ -353,31 +374,52 @@ namespace cheetah_ana_pkg {
 	//	Start the threads which will copy across data into Cheetah structure and process
 	//--------------
 	void cheetah_ana_mod::event(PSEvt::Event& evt, PSEnv::Env& env) {
-		
+            //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for images
+            //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
+            //if (img.get()) {
+            //    printf("Jungfrau python size %d\n",img->size());
+            //}
+            //else {
+            //    printf("Jungfrau img.get() failed\n");
+            //}
+	
+            //shared_ptr<Psana::Jungfrau::ElementV2> imgRaw = evt.get(m_srcJungfrau);
+            //if (imgRaw.get()) printf("Jungfrau Raw: size %d\n",img->size());
+	
+            boost::shared_ptr<Event> evtp = evt.shared_from_this();
+            boost::shared_ptr<Env> envp = env.shared_from_this();
+
+            cEventData *eventData;
+            eventData = cheetah_ana_mod::copy_event(evtp, envp);
+            if(eventData != NULL) {
+                cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+            }
+            return;
+
 		//printf("Event (cheetah_ana_mod::event)\n");
 		
-		boost::shared_ptr<Event> evtp = evt.shared_from_this();
-		boost::shared_ptr<Env> envp = env.shared_from_this();
-		pthread_t thread;
-		int returnStatus;
+		//boost::shared_ptr<Event> evtp = evt.shared_from_this();
+		//boost::shared_ptr<Env> envp = env.shared_from_this();
+		//pthread_t thread;
+		//int returnStatus;
 		
 		//	Wait until we have a spare thread in the thread pool
-		sem_wait(&availableAnaThreads);
+		//sem_wait(&availableAnaThreads);
 		
 
 		// Create a new thread for copying data from this psana event
-		returnStatus = pthread_create(&thread, NULL, threaded_event, (void*) new AnaModEventData(this, evtp, envp));		
+		//returnStatus = pthread_create(&thread, NULL, threaded_event, (void*) new AnaModEventData(this, evtp, envp));
 
 		
 		// Push thread to stack of thread creation was successful
-		if (returnStatus == 0) {
-			pthread_mutex_lock(&pthread_queue_mutex);
-			runningThreads.push(thread);
-			pthread_mutex_unlock(&pthread_queue_mutex);
-		}
-		else {
-			printf("Error: thread creation failed (frame skipped)\n");
-		}
+		//if (returnStatus == 0) {
+		//	pthread_mutex_lock(&pthread_queue_mutex);
+		//	runningThreads.push(thread);
+		//	pthread_mutex_unlock(&pthread_queue_mutex);
+		//}
+		//else {
+		//	printf("Error: thread creation failed (frame skipped)\n");
+		//}
 	}
 	// End of psana event method
 

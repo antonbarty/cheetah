@@ -331,6 +331,30 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pixelSize = 172e-6;
 		
 	}
+    else if(strcmp(detectorType, "jungfrau1M") == 0) {
+        strcpy(detectorType, "jungfrau1M");
+        asic_nx = 256;
+        asic_ny = 256;
+        nasics_x = 4;
+        nasics_y = 4;
+        asic_nn = asic_nx*asic_ny;
+        pix_nx = asic_nx * nasics_x;
+        pix_ny = asic_ny * nasics_y;
+        pix_nn = pix_nx * pix_ny;
+        pixelSize = 100e-6;
+    }
+    else if(strcmp(detectorType, "epix100a") == 0) {
+        strcpy(detectorType, "epix100a");
+        asic_nx = 768;
+        asic_ny = 704;
+        nasics_x = 1;
+        nasics_y = 1;
+        asic_nn = asic_nx*asic_ny;
+        pix_nx = asic_nx * nasics_x;
+        pix_ny = asic_ny * nasics_y;
+        pix_nn = pix_nx * pix_ny;
+        pixelSize = 100e-6;
+    }
 	else {
 		printf("Error: unknown detector name %s\n", detectorName);
 		printf("Detector type %s\n", detectorType);

@@ -169,6 +169,14 @@ void addToRadialAverageStack(cEventData *eventData, cGlobal *global, int powderC
     pthread_mutex_t mutex = detector->radialStack_mutex[powderClass];
 	
     
+    cDataVersion dataV_r(&eventData->detector[detIndex], &global->detector[detIndex], global->detector[detIndex].saveVersion, cDataVersion::DATA_FORMAT_RADIAL_AVERAGE);
+    while(dataV_r.next()) {
+        float    *data_r = dataV_r.getData();
+        for(long i=0; i<radial_nn; i++) {
+            radialAverage[i] = (float) data_r[i];
+        }
+    }
+    
     // Data offsets
 	pthread_mutex_lock(&mutex);
 	stackCounter = detector->radialStackCounter[powderClass];
@@ -253,7 +261,7 @@ void saveRadialAverageStack(cGlobal *global, int powderClass, int detIndex) {
     printf("Saving radial stack: %s\n", filename);
     
     
-    writeSimpleHDF5(filename, detector->radialAverageStack[powderClass], detector->radial_nn, nRows, H5T_NATIVE_FLOAT);
+    writeSimpleHDF5(filename, detector->radialAverageStack[powderClass], detector->radial_nn, nRows, (hid_t) H5T_NATIVE_FLOAT);
     for(long i=0; i<global->nPowderClasses; i++) {
         fflush(global->powderlogfp[i]);
 		fflush(global->framelist[i]);

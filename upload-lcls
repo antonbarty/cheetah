@@ -1,0 +1,3 @@
+rsync -av ./source/ psexport:/reg/g/cfel/cheetah/install/cheetah-dev/source/ 
+
+rsync -av ./source/ psexport:/reg/g/cfel/cheetah/install/cheetah-dev-scons/source/ 

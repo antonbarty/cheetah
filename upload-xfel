@@ -1,0 +1,2 @@
+rsync -av ./source/ max-cfel:cheetah/cheetah-exfel-install/source/.
+

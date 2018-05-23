@@ -3,7 +3,8 @@
 // This Class's Header --
 //-----------------------
 #include "cheetah_psana.h"
-#include <cheetah.h>
+#include "cheetah.h"
+//#include <cheetah.h>
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -43,7 +44,7 @@ namespace cheetah_ana_pkg {
 	volatile static long frameNumber = 0;
 
 	// Copy event data
-	void cheetah_ana_mod::copy_event(boost::shared_ptr<Event> evtp, boost::shared_ptr<Env> envp) {
+	cEventData* cheetah_ana_mod::copy_event(boost::shared_ptr<Event> evtp, boost::shared_ptr<Env> envp) {
 		frameNumberIncludingSkipped ++;
 		float random_float = (float)rand()/(float)RAND_MAX;
 		Event& evt = *evtp;
@@ -66,7 +67,7 @@ namespace cheetah_ana_pkg {
 		if (cheetahGlobal.skipFract > random_float && frameNumberIncludingSkipped > cheetahGlobal.nInitFrames && cheetahGlobal.calibrated) {
 			printf("Skipping a frame (%ld)\n",frameNumberIncludingSkipped);
 			skip();
-			return;
+			return NULL;
 		}
 	  
 	 
@@ -99,7 +100,8 @@ namespace cheetah_ana_pkg {
 		 */
 		if(cheetahGlobal.ioSpeedTest==1) {
 			printf("*** r%04u:%li (%3.1fHz): I/O Speed test #1 (psana event rate)\n", cheetahGlobal.runNumber, frameNumber, cheetahGlobal.datarate);		
-			pthread_exit(NULL);
+			//pthread_exit(NULL);
+            return NULL;
 		}
 
 		
@@ -941,7 +943,8 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: CSPAD frame data not available for detector ID %li, skipping event.\n", frameNumber, cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
 			/*
@@ -968,7 +971,8 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: Warning: CSPAD 2x2 frame data not available for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
 			
@@ -1017,10 +1021,75 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: Rayonix frame data not available for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
-			
+	
+            /*
+             *    Jungfrau1M, pre-processed by psana-python and returned to the event store
+             */
+            else if (strcmp(cheetahGlobal.detector[detIndex].detectorType, "jungfrau1M") == 0) {
+                long    pix_nx = cheetahGlobal.detector[detIndex].pix_nx;
+                long    pix_ny = cheetahGlobal.detector[detIndex].pix_ny;
+                long    pix_nn = cheetahGlobal.detector[detIndex].pix_nn;
+
+                //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");    // <-- for images
+                shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");    // <-- for calibrated data
+                
+                if (img.get()) {
+                    //const ndarray<float, 3> jungfrau_data = *img->data();
+
+                    long    np = img->shape()[0];
+                    long    ny = img->shape()[1];
+                    long    nx = img->shape()[2];
+
+                    // Make it a little less chatty
+                    //printf("Jungfrau python size %d\n",img->size());
+                    //cout << "Jungfrau shape: " << np << "x" << ny << "x" << nx << endl;
+
+                    //memcpy(&eventData->detector[detIndex].data_raw[0], &img->data()[0], pix_nn*sizeof(float));
+                    memcpy(&eventData->detector[detIndex].data_raw[0], img->data(), pix_nn*sizeof(float));
+                    eventData->detector[detIndex].data_raw_is_float = true;
+                }
+                else {
+                    printf("Event %li: Jungfrau img.get() failed for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
+                    cheetahDestroyEvent(eventData);
+                    //pthread_exit(NULL);
+                    //return NULL;
+                }
+            }
+
+            /*
+             *    Epix 100, pre-processed by psana-python and returned to the event store
+             */
+            else if (strcmp(cheetahGlobal.detector[detIndex].detectorType, "epix100a") == 0) {
+                long    pix_nn = cheetahGlobal.detector[detIndex].pix_nn;
+                
+                shared_ptr< ndarray<float, 2> > img = evt.get(m_srcEpix, "epix_img");    // <-- for images
+                //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");    // <-- for calibrated data
+                
+                if (img.get()) {
+                    //const ndarray<float, 3> jungfrau_data = *img->data();
+                    
+                    long    ny = img->shape()[0];
+                    long    nx = img->shape()[1];
+                    
+                    // Make it a little less chatty
+                    //printf("Epix python size %d\n",img->size());
+                    //cout << "Epix shape: " << ny << "x" << nx << endl;
+                    
+                    //memcpy(&eventData->detector[detIndex].data_raw[0], &img->data()[0], pix_nn*sizeof(float));
+                    memcpy(&eventData->detector[detIndex].data_raw[0], img->data(), pix_nn*sizeof(float));
+                    eventData->detector[detIndex].data_raw_is_float = true;
+                }
+                else {
+                    printf("Event %li: Epix img.get() failed for detector ID %li, skipping event.\n", frameNumber,cheetahGlobal.detector[detIndex].detectorID);
+                    cheetahDestroyEvent(eventData);
+                    //pthread_exit(NULL);
+                    //return NULL;
+                }
+            }
 			
 			/*
 			 *
@@ -1060,7 +1129,8 @@ namespace cheetah_ana_pkg {
 				else {
 					printf("Event %li: Warning: pnCCD frame data not available (detectorID=%li), skipping event.\n", frameNumber, cheetahGlobal.detector[detIndex].detectorID);
 					cheetahDestroyEvent(eventData);
-					pthread_exit(NULL);
+					//pthread_exit(NULL);
+                    return NULL;
 				}
 			}
 			
@@ -1070,7 +1140,8 @@ namespace cheetah_ana_pkg {
 			else {
 				printf("Detector type type %s not recognised\n", cheetahGlobal.detector[detIndex].detectorType);
 				cheetahDestroyEvent(eventData);
-				pthread_exit(NULL);
+				//pthread_exit(NULL);
+                return NULL;
 			}
 
 		}	// end loop over detectors
@@ -1325,7 +1396,7 @@ namespace cheetah_ana_pkg {
 
 		
 		
-		pthread_exit(eventData);
+		return eventData;
 	}
 
 	

@@ -17,7 +17,8 @@
 #include <queue>
 #include <semaphore.h>
 
-#include <cheetah.h>
+#include "cheetah.h"
+//#include <cheetah.h>
 
 //----------------------
 // Base Class Headers --
@@ -79,8 +80,9 @@ namespace cheetah_ana_pkg {
         /// Method which is called with event data, this is the only required
         /// method, all other methods are optional
         virtual void event(PSEvt::Event& evt, PSEnv::Env& env);
-		void copy_event(boost::shared_ptr<Event> evt, boost::shared_ptr<Env> env);
-		
+		cEventData* copy_event(boost::shared_ptr<Event> evt, boost::shared_ptr<Env> env);
+        //void copy_event(boost::shared_ptr<Event> evt, boost::shared_ptr<Env> env);
+
         /// Method which is called at the end of the calibration cycle
         virtual void endCalibCycle(Event& evt, Env& env);
         
@@ -109,6 +111,8 @@ namespace cheetah_ana_pkg {
 
 
 		std::string m_key;
+		Source m_srcJungfrau;
+        Source m_srcEpix;
 		Source m_srcCspad0;
 		Source m_srcCspad1;
 		Source m_srcRayonix0;
