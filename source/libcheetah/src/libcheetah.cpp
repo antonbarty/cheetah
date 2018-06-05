@@ -33,7 +33,25 @@
 void spawnPython(char*);
 void* pythonWorker(void*);
 #endif
+*/
 
+
+herr_t cheetahHDF5ErrorHandler(hid_t,void *)
+{
+    // print the error message
+    //H5Eprint1(stderr);
+    printf("[FAIL] *******************************************************\n");
+    printf("[FAIL] cheetahHDF5ErrorHandler triggered (libcheetah.cpp )\n");
+    H5Eprint(H5E_DEFAULT, stdout);
+
+    // abort such that we get a stack trace to debug
+    printf("[FAIL] Abort triggered in HDF5 error handler for stack trace  \n");
+    printf("[FAIL] *******************************************************\n");
+    abort();
+}
+
+ 
+ 
 
 /*
  *  libCheetah initialisation function
@@ -59,11 +77,24 @@ int cheetahInit(cGlobal *global) {
 		setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 	}
 	
+    // Check that HDF5 library is thread safe
+    hbool_t H5_is_ts;
+    H5is_library_threadsafe(&H5_is_ts);
+    if(H5_is_ts < 0) {
+        printf("[FAIL] HDF5 library is not threadsafe\n");
+        printf("Exiting\n");
+        exit(1);
+    }
+    else {
+        printf("[OK] HDF5 threadsafe check passed\n");
+    }
+
+    
 	global->self = global;
 	//global->defaultConfiguration();
 	global->parseConfigFile(global->configFile);
 	if(global->validateConfiguration()){
-		ERROR("Validation of given configuration failed");
+		ERROR("[FAIL] Validation of given configuration failed");
 		return 1;
 	}
 
@@ -86,7 +117,7 @@ int cheetahInit(cGlobal *global) {
 	// Initialise streak finder (will skip contents if streakfinder not in use)
 	initStreakFinder(global);
 
-	printf("Cheetah clean initialisation\n");
+	printf("[OK] Cheetah clean initialisation\n");
 	return 0;
 }
 

@@ -1,8 +1,15 @@
 //
 //  Created by Anton Barty on 24/8/17.
-//	Distributed under the GPLv3 license
+//  Coded by Helen Ginn and Anton Barty
+//  Distributed under the GPLv3 license
 //
-
+//  Created and funded as a part of academic research; proper academic attribution expected.
+//  Feel free to reuse or modify this code under the GPLv3 license, but please ensure that users cite the following paper reference:
+//  Barty, A. et al. "Cheetah: software for high-throughput reduction and analysis of serial femtosecond X-ray diffraction data."
+//  J Appl Crystallogr 47, 1118–1131 (2014)
+//
+//  The above statement may not be modified except by permission of the original authors listed above
+//
 
 //#include <iostream>
 #include <stdio.h>
@@ -83,7 +90,7 @@ void cAgipdReader::setScheme(char *scheme) {
 
     // Orville, September 2017
     if(_scheme == "XFEL2017") {
-        std::cout << "\tSetting AGIPD data scheme to XFEL2012\n";
+        std::cout << "\tSetting AGIPD data scheme to XFEL2017\n";
         setFirstPulse(0);
         setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(2);        // For interleaved data we need to correct the cellID by 2, else not
@@ -280,6 +287,7 @@ void cAgipdReader::open(char *baseFilename){
 	}
 	std::cout << " [OK]" <<  std::endl;
 	
+    
 	std::cout << "\tChecking all data is of the same type";
 	rawDetectorData = module[_referenceModule].rawDetectorData;
 	for(long i=0; i<nAGIPDmodules; i++) {
@@ -288,7 +296,8 @@ void cAgipdReader::open(char *baseFilename){
 
 		if(module[i].rawDetectorData != rawDetectorData) {
 			std::cout << std::endl;
-			std::cout << "\tInconsistent data, some is RAW and some is not: " << i << std::endl;
+            std::cout << "\tInconsistent data, some is RAW and some is not\n";
+            std::cout << "\tError found for module: " << i << std::endl;
 			exit(1);
 		}
 	}
@@ -452,12 +461,9 @@ void cAgipdReader::close(void){
 	
 	// Clean up memory
 	if(data != NULL) {
-		free(data);
-		free(badpixMask);
-		free(digitalGain);
-		data = NULL;
-		badpixMask = NULL;
-		digitalGain = NULL;
+		free(data); data = NULL;
+		free(badpixMask); badpixMask = NULL;
+		free(digitalGain); digitalGain = NULL;
 	}
 	std::cout << "\tAGIPD reader closed " << std::endl;
 }
@@ -496,13 +502,6 @@ bool cAgipdReader::nextFramePrivate() {
 		if(currentPulse % _pulseIDmodulo > 0)
 			continue;
 		
-		
-        // Skip first _newFileSkip trains in a file (corrupted)
-        //if(currentTrain < _newFileSkip) {
-        //    continue;
-        //}
-		
-
 		success = readFrame(currentTrain, currentPulse);
 
 		if (lastModule >= 0) {
@@ -510,21 +509,28 @@ bool cAgipdReader::nextFramePrivate() {
 		}
 	}
     
-	// Statistics on bad pixels, etc...
+	// Statistics on bad pixels etc.
     if(true) {
         long    pixelsInGainLevel[3] = {0,0,0};
-        long    nbad=0;
-
+        
+        // Pixels in each gain mode
         for(long p=0; p<nn; p++) {
             if(true) {
                 if(digitalGain[p]<0 || digitalGain[p] > 2 ){
-                    std::cout << "Bad digital gain value: " << digitalGain[p] << std::endl;
+                    std::cout << "Bad digital gain value " << digitalGain[p] << " at p=" << p << std::endl;
+                    continue;
                 }
             }
             pixelsInGainLevel[digitalGain[p]] += 1;
+        }
+
+        // Bad pixels
+        long    nbad=0;
+        for(long p=0; p<nn; p++) {
             if(badpixMask[p] != 0)
                 nbad++;
         }
+        
         std::cout << "nPixels in gain mode (0,1,2) = (";
         std::cout << pixelsInGainLevel[0] << ", ";
         std::cout << pixelsInGainLevel[1] << ", ";
@@ -600,10 +606,8 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 		// Copy across
 		cellID[moduleID] = module[moduleID].cellID;
 		statusID[moduleID] = module[moduleID].statusID;
-        //std::cout << "memcpy data" << std::endl;
-		memcpy(pdata[moduleID], module[moduleID].data, modulenn*sizeof(float));
-		
-        //std::cout << "memcpy gain" << std::endl;
+
+        memcpy(pdata[moduleID], module[moduleID].data, modulenn*sizeof(float));
 		memcpy(pgain[moduleID], module[moduleID].digitalGain, modulenn*sizeof(uint16_t));
 
 		lastModule = (int)moduleID;
@@ -622,8 +626,7 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
 
 	if (lastModule >= 0)
 	{
-		std::cout << "Read train " << trainID << ", pulseID " << pulseID << " with "
-        << moduleCount << " modules";
+		std::cout << "Read train " << trainID << ", pulseID " << pulseID << " with " << moduleCount << " modules";
 	}
 
     
@@ -634,7 +637,6 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
             std::cout << cellID[moduleID] << ",";
         }
         std::cout << "]"; // << std::endl;
-
     }
     
     std::cout << std::endl;

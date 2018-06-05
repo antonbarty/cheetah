@@ -1,6 +1,14 @@
 //
 //  Created by Anton Barty on 24/8/17.
-//	Distributed under the GPLv3 license
+//  Coded by Helen Ginn and Anton Barty
+//  Distributed under the GPLv3 license
+//
+//  Created and funded as a part of academic research; proper academic attribution expected.
+//  Feel free to reuse or modify this code under the GPLv3 license, but please ensure that users cite the following paper reference:
+//  Barty, A. et al. "Cheetah: software for high-throughput reduction and analysis of serial femtosecond X-ray diffraction data."
+//  J Appl Crystallogr 47, 1118–1131 (2014)
+//
+//  The above statement may not be modified except by permission of the original authors listed above
 //
 
 
@@ -174,6 +182,7 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 	//H5LTget_dataset_info(h5_file_id, h5_pulseId_field, dims, &dataclass, &datasize);
 	//nframes = dims[0];
 	// Image data gives number of frames, logical block size, stack depth
+    std::cout << "\tHDF5 data field: " << h5_image_data_field <<std::endl;
 	int success = H5LTget_dataset_info(h5_file_id, h5_image_data_field.c_str(), dims, &dataclass, &datasize);
 
 	if (success < 0) {
@@ -198,13 +207,15 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 
     
     // Check the index length
-    int success2 = H5LTget_dataset_info(h5_file_id, h5_index_first_field.c_str(), dims, &dataclass, &datasize);
-    int success3 = H5LTget_dataset_info(h5_file_id, h5_index_count_field.c_str(), dims, &dataclass, &datasize);
-    if (success2 < 0 || success3 < 0) {
-        std::cout << "Get index info for image - failed. Module set to blank.\n";
-        fileOK = false;
-        noData = true;
-        return;
+    if(false) {
+        int success2 = H5LTget_dataset_info(h5_file_id, h5_index_first_field.c_str(), dims, &dataclass, &datasize);
+        int success3 = H5LTget_dataset_info(h5_file_id, h5_index_count_field.c_str(), dims, &dataclass, &datasize);
+        if (success2 < 0 || success3 < 0) {
+            std::cout << "Get index info for image - failed. Module set to blank.\n";
+            fileOK = false;
+            noData = true;
+            return;
+        }
     }
     
     nindex = dims[0];
@@ -332,7 +343,6 @@ void cAgipdModuleReader::readDarkcal(char *filename){
 
 
 	calibrator = new cAgipdCalibrator(darkcalFilename, *this);
-	//calibrator->setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
 	calibrator->readCalibrationData();
 }
 // cAgipdModuleReader::readDarkcal
@@ -353,7 +363,7 @@ void cAgipdModuleReader::readGaincal(char *filename){
 	std::cout << "Oops... Nothing implemented for reading gain.." << std::endl;
 	exit(1);
 }
-// cAgipdModuleReader::readDarkcal
+// cAgipdModuleReader::readGaincal
 
 
 void cAgipdModuleReader::readImageStack(void){
@@ -449,11 +459,12 @@ void cAgipdModuleReader::readFrameRaw(long frameNum) {
     // Read data from hyperslab in RAW data file (which is unit16_t, so convert it to float)
 	uint16_t *tempdata = NULL;
 	tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
-
-	if (!tempdata) {
+	
+    if (!tempdata) {
 		return;
 	}
-
+    
+    // Convert uint16_t to float
 	data = (float *)malloc(n0 * n1 * sizeof(float));
 	for (int i = 0; i < n0 * n1; i++) {
 		data[i] = tempdata[i];
@@ -467,7 +478,7 @@ void cAgipdModuleReader::readFrameRaw(long frameNum) {
 	digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
 
 	// Bad pixel mask added by raw data calibration, or left alone if uncalibrated
-    // Pixel good = 0, pixel bad = anything else
+    // Pixel good = 0, pixel bad = anything else; deliberate use of calloc() to zero the array
 	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
 
 	
@@ -494,7 +505,7 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 		return;
 	}
 	
-	// Define hyperslab in RAW data file
+	// Define hyperslab in CALIB data file
 	hsize_t     slab_start[4];
 	hsize_t		slab_size[4];
 	slab_start[0] = frameNum;
@@ -514,7 +525,10 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
     
 	// Read data directly from hyperslab in corrected data file (which is already a float)
 	data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_IEEE_F32LE, sizeof(float));
-	
+    if (!data) {
+        return;
+    }
+
 	// Digital gain is in a different field and is H5T_STD_U8LE Dataset {7500, 512, 128}
 	// Default format is uint16_t so we must convert
 	uint8_t *tempgain = NULL;
@@ -547,7 +561,7 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
     
     // Check for screwy intensity values: Sometimes we get +/- 1e9 appearing
     // Bad form to hard code this, but for now it's just a test case
-    if(true) {
+    if(false) {
         for (long i = 0; i < nn; i++) {
             if(data[i] > 1e7 || data[i] < -1e6) {
                 data[i] = 0;
@@ -556,11 +570,6 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
         }
     }
     
-    
-	//printf("%li gain switched pixels (%f%%); ", nhigh, (100.*nhigh)/nn);
-	//printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
-
-	
 	// Update timestamp, status bits and other stuff
 	trainID = trainIDlist[frameNum];
 	pulseID = pulseIDlist[frameNum];
@@ -576,11 +585,11 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 // void cAgipdCalibrator::applyCalibration(int cellID, float *aduData, uint16_t *gainData){...}
 void cAgipdModuleReader::applyCalibration(long frameNum) {
     
-    // Apply calibrations to raw data, not pre-calibrated data
+    // Apply calibrations to raw data, skip if we have pre-calibrated data
     if(rawDetectorData == false)
         return;
     
-    // No calibrator = no calibration
+    // No calibrator = no calibration; return and zero out digital gain
     if(calibrator == NULL) {
         memset(digitalGain, 0, nn*sizeof(uint16_t));
 		return;
@@ -591,11 +600,14 @@ void cAgipdModuleReader::applyCalibration(long frameNum) {
 	cellID = cellIDlist[frameNum];
 	
 	int thisCell = cellID;
+    
+    // For interleaved gain data (2017) we need to apply this correction to the cellID
 	if(cellIDcorrection	!= 1 && cellIDcorrection != 0) {
-		thisCell = cellID / cellIDcorrection;		// For interleaved gain data we need to apply this correciton
+		thisCell = cellID / cellIDcorrection;
 	};
 
-	// New way
+    
+	// Apply calibrator for this cell
 	calibrator->applyCalibration(thisCell, data, digitalGain, badpixMask);
 
 }

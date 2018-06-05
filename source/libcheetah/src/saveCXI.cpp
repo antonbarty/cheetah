@@ -584,20 +584,6 @@ namespace CXI{
 }
 
 
-herr_t cheetahHDF5ErrorHandler(hid_t,void *)
-{
-	// print the error message
-	//H5Eprint1(stderr);
-	printf("******************************************\n");
-	printf("saveCXI::cheetahHDF5ErrorHandler triggered\n");
-	H5Eprint(H5E_DEFAULT, stdout);
-	
-	// abort such that we get a stack trace to debug
-	printf("Abort triggered in saveCXI.cpp\n");
-	printf("******************************************\n");
-	abort();
-}
-
 
 
 template <class T>
@@ -2042,7 +2028,8 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
     using CXI::Node;
     char sBuffer[1024];
 	
-
+    
+    // Stuff only needed for SWMR mode
     #ifdef H5F_ACC_SWMR_WRITE
 	bool didDecreaseActive = false;
 	if(global->cxiSWMR){
@@ -2094,6 +2081,7 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
     
     
     
+    
 	
 	
 	/*
@@ -2104,6 +2092,24 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	pthread_mutex_lock(&global->framefp_mutex);
 	fprintf(global->cleanedfp, "r%04u/%s/%s, %li, %i, %g, %g, %g, %g, %g\n",global->runNumber, eventData->eventSubdir, eventData->eventname, eventData->frameNumber, eventData->nPeaks, eventData->peakNpix, eventData->peakTotal, eventData->peakResolution, eventData->peakResolutionA, eventData->peakDensity);
 	pthread_mutex_unlock(&global->framefp_mutex);
+    
+    
+    // Stuff only needed for SWMR mode
+    #ifdef H5F_ACC_SWMR_WRITE
+        if(global->cxiSWMR){
+            if(global->cxiFlushPeriod && (stackSlice % global->cxiFlushPeriod) == 0){
+                H5Fflush(cxi->hid(),H5F_SCOPE_LOCAL);
+            }
+            
+            if (didDecreaseActive) {
+                pthread_mutex_lock(&global->nActiveThreads_mutex);
+                global->nActiveCheetahThreads++;
+                pthread_mutex_unlock(&global->nActiveThreads_mutex);
+            }
+            pthread_mutex_unlock(&global->swmr_mutex);
+        }
+    #endif
+
 }
 
 
@@ -2497,22 +2503,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
     //}
     
 
-    
-    #ifdef H5F_ACC_SWMR_WRITE
-    if(global->cxiSWMR){
-        if(global->cxiFlushPeriod && (stackSlice % global->cxiFlushPeriod) == 0){
-            H5Fflush(cxi->hid(),H5F_SCOPE_LOCAL);
-        }
-        
-        if (didDecreaseActive) {
-            pthread_mutex_lock(&global->nActiveThreads_mutex);
-            global->nActiveCheetahThreads++;
-            pthread_mutex_unlock(&global->nActiveThreads_mutex);
-        }
-        pthread_mutex_unlock(&global->swmr_mutex);
-    }
-    #endif
-    
+     
 }
 
 /*
@@ -2780,20 +2771,6 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
     }
 
 	
-    #ifdef H5F_ACC_SWMR_WRITE
-    if(global->cxiSWMR){
-        if(global->cxiFlushPeriod && (stackSlice % global->cxiFlushPeriod) == 0){
-            H5Fflush(cxi->hid(),H5F_SCOPE_LOCAL);
-        }
-        
-        if (didDecreaseActive) {
-            pthread_mutex_lock(&global->nActiveThreads_mutex);
-            global->nActiveCheetahThreads++;
-            pthread_mutex_unlock(&global->nActiveThreads_mutex);
-        }
-        pthread_mutex_unlock(&global->swmr_mutex);
-    }
-    #endif
     
 }
 

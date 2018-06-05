@@ -332,7 +332,7 @@ void cGlobal::setup()
 		else if (strcmp(pumpLaserScheme, "LP41") == 0) {
 			nPowderClasses = 5;
 		}
-		else if (strcmp(pumpLaserScheme, "xfel_pulseid") == 0) {
+		else if (strcmp(pumpLaserScheme, "xfelPulseID") == 0) {
 			nPowderClasses = 15;
 			if(!(nPowderClasses < MAX_POWDER_CLASSES)) {
 				printf("Warning: Requested more powder classes than space allocated\n");
