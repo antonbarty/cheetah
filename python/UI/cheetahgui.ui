@@ -310,6 +310,7 @@
     <addaction name="menu_cheetah_processselected"/>
     <addaction name="menu_cheetah_relabel"/>
     <addaction name="menu_cheetah_autorun"/>
+    <addaction name="menu_modify_ini_files"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -723,6 +724,11 @@
   <action name="menu_powder_all_avg">
    <property name="text">
     <string>Virtual powder all (background corrected averavge)</string>
+   </property>
+  </action>
+  <action name="menu_modify_ini_files">
+   <property name="text">
+    <string>Modify .ini files</string>
    </property>
   </action>
  </widget>

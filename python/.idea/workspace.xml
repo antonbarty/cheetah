@@ -3,14 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/UI/cxiview_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cxiview_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/cheetahgui.ui" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cheetahgui.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/cheetahgui_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cheetahgui_ui.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cheetah-gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/cheetah-gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/crawler_merge.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/crawler_merge.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/gui_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/gui_locations.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/gui_locations.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/cheetah-euxfel/agipd_module_reader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/cheetah-euxfel/agipd_module_reader.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/libcheetah/include/cheetahmodules.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/include/cheetahmodules.h" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/saveFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/saveFrame.cpp" afterDir="false" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -32,8 +27,8 @@
       <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="358">
-              <caret line="402" column="22" lean-forward="true" selection-start-line="402" selection-start-column="22" selection-end-line="402" selection-end-column="22" />
+            <state relative-caret-position="748">
+              <caret line="246" column="5" lean-forward="true" selection-start-line="246" selection-start-column="5" selection-end-line="246" selection-end-column="5" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
@@ -45,7 +40,7 @@
         <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="285">
-              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+              <caret line="19" selection-start-line="19" selection-end-line="19" />
             </state>
           </provider>
         </entry>
@@ -53,8 +48,8 @@
       <file leaf-file-name="gui_setup_new_experiment.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/gui_setup_new_experiment.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="465">
-              <caret line="38" column="40" selection-start-line="38" selection-start-column="40" selection-end-line="38" selection-end-column="40" />
+            <state relative-caret-position="377">
+              <caret line="323" column="40" lean-forward="true" selection-start-line="323" selection-start-column="40" selection-end-line="323" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -63,7 +58,7 @@
         <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="701">
-              <caret line="203" column="31" lean-forward="true" selection-start-line="203" selection-start-column="31" selection-end-line="203" selection-end-column="31" />
+              <caret line="203" column="31" selection-start-line="203" selection-start-column="31" selection-end-line="203" selection-end-column="31" />
             </state>
           </provider>
         </entry>
@@ -72,7 +67,7 @@
         <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="581">
-              <caret line="51" column="17" lean-forward="true" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
+              <caret line="51" column="17" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -118,8 +113,8 @@
         <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
         <option value="$PROJECT_DIR$/cxiview.py" />
         <option value="$PROJECT_DIR$/lib/gui_locations.py" />
-        <option value="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" />
         <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
+        <option value="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" />
         <option value="$PROJECT_DIR$/cheetah-gui.py" />
       </list>
     </option>
@@ -607,35 +602,35 @@
     <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="285">
-          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="581">
-          <caret line="51" column="17" lean-forward="true" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_setup_new_experiment.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="465">
-          <caret line="38" column="40" selection-start-line="38" selection-start-column="40" selection-end-line="38" selection-end-column="40" />
+          <caret line="51" column="17" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="701">
-          <caret line="203" column="31" lean-forward="true" selection-start-line="203" selection-start-column="31" selection-end-line="203" selection-end-column="31" />
+          <caret line="203" column="31" selection-start-line="203" selection-start-column="31" selection-end-line="203" selection-end-column="31" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_setup_new_experiment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="377">
+          <caret line="323" column="40" lean-forward="true" selection-start-line="323" selection-start-column="40" selection-end-line="323" selection-end-column="40" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="358">
-          <caret line="402" column="22" lean-forward="true" selection-start-line="402" selection-start-column="22" selection-end-line="402" selection-end-column="22" />
+        <state relative-caret-position="748">
+          <caret line="246" column="5" lean-forward="true" selection-start-line="246" selection-start-column="5" selection-end-line="246" selection-end-column="5" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
           </folding>

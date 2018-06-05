@@ -281,6 +281,8 @@ class Ui_MainWindow(object):
         self.menu_calib_XFELdetcorr.setObjectName("menu_calib_XFELdetcorr")
         self.menu_powder_all_avg = QtWidgets.QAction(MainWindow)
         self.menu_powder_all_avg.setObjectName("menu_powder_all_avg")
+        self.menu_modify_ini_files = QtWidgets.QAction(MainWindow)
+        self.menu_modify_ini_files.setObjectName("menu_modify_ini_files")
         self.menuFile.addAction(self.menu_file_command)
         self.menuFile.addAction(self.menu_file_startcrawler)
         self.menuFile.addAction(self.menu_file_newgeometry)
@@ -290,6 +292,7 @@ class Ui_MainWindow(object):
         self.menuCheetah.addAction(self.menu_cheetah_processselected)
         self.menuCheetah.addAction(self.menu_cheetah_relabel)
         self.menuCheetah.addAction(self.menu_cheetah_autorun)
+        self.menuCheetah.addAction(self.menu_modify_ini_files)
         self.menuAnalysis.addAction(self.menu_analysis_hitrate)
         self.menuAnalysis.addAction(self.menu_analysis_resolution)
         self.menuAnalysis.addAction(self.menu_analysis_saturation)
@@ -451,4 +454,5 @@ class Ui_MainWindow(object):
         self.menu_powder_all.setText(_translate("MainWindow", "Virtual powder all (background subtracted sum)"))
         self.menu_calib_XFELdetcorr.setText(_translate("MainWindow", "Run XFEL detector calibration script"))
         self.menu_powder_all_avg.setText(_translate("MainWindow", "Virtual powder all (background corrected averavge)"))
+        self.menu_modify_ini_files.setText(_translate("MainWindow", "Modify .ini files"))
 

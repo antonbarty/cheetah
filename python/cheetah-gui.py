@@ -235,6 +235,12 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
     #end setup_new_experiment
 
+    #
+    #   Modifies fields in all .ini files after initial template extraction
+    #
+    def modify_ini_files(self):
+        gui_setup_new_experiment.modify_cheetah_config_files(self)
+    # end modify_ini_files
 
     #
     #   Select an experiment, or find a new one
@@ -955,6 +961,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_cheetah_processselected.triggered.connect(self.run_cheetah)
         self.ui.menu_cheetah_relabel.triggered.connect(self.relabel_dataset)
         self.ui.menu_cheetah_autorun.triggered.connect(self.autorun)
+        self.ui.menu_modify_ini_files.triggered.connect(self.modify_ini_files)
 
         # Calibrations
         self.ui.menu_calib_darkcal.triggered.connect(self.show_darkcal)
