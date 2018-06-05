@@ -75,7 +75,7 @@ void updateNoisyPixelBuffer(cEventData*, cGlobal*,int);
 void nameEvent(cEventData*, cGlobal*);
 void writeHDF5(cEventData*, cGlobal*);
 void writePeakFile(cEventData*, cGlobal*);
-void writeSimpleHDF5(const char*, const void*, long, long, long);
+//void writeSimpleHDF5(const char*, const void*, long, long, long);
 void writeSimpleHDF5(const char*, const void*, long, long, hid_t);
 void writeSimpleHDF5(const char*, const void*, long, long, hid_t, const char*,long);
 void writeSpectrumInfoHDF5(const char*, const void*, const void*, int, int, const void*, int, int);

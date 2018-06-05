@@ -215,7 +215,7 @@ def crawler_merge(info):
     result = {
         'Run' : run_out,
         'Dataset' : dataset_out,
-        'XTC' : datastatus_out,
+        'Rawdata' : datastatus_out,
         'Cheetah' : cheetahstatus_out,
         'CrystFEL' : crystfel_out,
         'H5Directory' : h5dir_out,
@@ -228,6 +228,6 @@ def crawler_merge(info):
 
 
     # Write dict to CSV file
-    keys_to_save = ['Run', 'Dataset','XTC','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%','Recipe']
+    keys_to_save = ['Run', 'Dataset','Rawdata','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%','Recipe']
     cfel_file.dict_to_csv('crawler.txt', result, keys_to_save)
 

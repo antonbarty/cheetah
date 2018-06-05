@@ -17,7 +17,7 @@ import lib.cfel_filetools as cfel_file
 import lib.cfel_detcorr as cfel_detcorr
 import lib.gui_dialogs as gui_dialogs
 import lib.gui_locations as gui_locations
-import lib.gui_configuration as gui_configuration
+import lib.gui_setup_new_experiment as gui_setup_new_experiment
 import lib.gui_crystfel_bridge as gui_crystfel
 
 
@@ -105,7 +105,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
                 # Coloring of table elements
                 self.table.item(row,col).setBackground(PyQt5.QtGui.QColor(255,255,255))
-                if key=='XTC':
+                if key=='Rawdata':
                     if item=='Ready':
                         self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(200, 255, 200))
                     if item == 'Copying' or item == 'Restoring':
@@ -226,11 +226,12 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         dir = cfel_file.dialog_pickfile(directory=True, qtmainwin=self)
         if dir == '':
             self.exit_gui()
-        print('Selected directory: ')
+        print('Selected directory: ', dir)
         os.chdir(dir)
 
         # Use LCLS schema for now; will need modification to run anywhere else; do this later
-        gui_configuration.extract_lcls_template(self)
+        #gui_setup_new_experiment.extract_lcls_template(self)
+        gui_setup_new_experiment.extract_template(self)
 
     #end setup_new_experiment
 
@@ -433,7 +434,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         cfel_file.spawn_subprocess(cmdarr) #, shell=True)
 
     def modify_beamline_config(self):
-        gui_configuration.modify_cheetah_config_files(self)
+        gui_setup_new_experiment.modify_cheetah_config_files(self)
 
     def relabel_dataset(self):
 
@@ -888,7 +889,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         #   Where are we?
         #
         compute_location = gui_locations.determine_location()
-        self.compute_location = gui_locations.set_location_configuration(compute_location )
+        self.compute_location = gui_locations.set_location_configuration(compute_location)
 
 
         #

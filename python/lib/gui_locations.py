@@ -55,6 +55,8 @@ def determine_location():
         print("Unable to determine location from hostname")
         location = 'None'
 
+    print("self.location set to: ", location)
+
     return location
 
 

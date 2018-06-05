@@ -4,8 +4,13 @@
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/UI/cxiview_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cxiview_ui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cxiview.py" beforeDir="false" afterPath="$PROJECT_DIR$/cxiview.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/radialAverage.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/radialAverage.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cheetah-gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/cheetah-gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/crawler_merge.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/crawler_merge.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/gui_configuration.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/gui_locations.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/gui_locations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/cheetah-euxfel/agipd_module_reader.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/cheetah-euxfel/agipd_module_reader.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/libcheetah/include/cheetahmodules.h" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/include/cheetahmodules.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/saveFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/saveFrame.cpp" afterDir="false" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,38 +29,32 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/cxiview.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="381">
-              <caret line="852" selection-start-line="852" selection-end-line="852" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cfel_filetools.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="6540">
-              <caret line="448" column="34" selection-start-line="448" selection-start-column="34" selection-end-line="448" selection-end-column="34" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cfel_imgtools.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/lib/cfel_imgtools.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="570">
-              <caret line="39" selection-start-line="39" selection-end-line="39" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="false">
+      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="301">
-              <caret line="148" column="8" selection-start-line="148" selection-start-column="8" selection-end-line="148" selection-end-column="8" />
+            <state relative-caret-position="358">
+              <caret line="402" column="22" lean-forward="true" selection-start-line="402" selection-start-column="22" selection-end-line="402" selection-end-column="22" />
+              <folding>
+                <element signature="e#96#105#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gui_locations.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="285">
+              <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="gui_setup_new_experiment.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/gui_setup_new_experiment.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="465">
+              <caret line="38" column="40" selection-start-line="38" selection-start-column="40" selection-end-line="38" selection-end-column="40" />
             </state>
           </provider>
         </entry>
@@ -63,17 +62,17 @@
       <file leaf-file-name="crawler_merge.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="2070">
-              <caret line="142" column="20" selection-start-line="142" selection-start-column="20" selection-end-line="142" selection-end-column="20" />
+            <state relative-caret-position="701">
+              <caret line="203" column="31" lean-forward="true" selection-start-line="203" selection-start-column="31" selection-end-line="203" selection-end-column="31" />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="maskMakerGUI.py" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/CsPadMaskMaker/maskMakerGUI.py">
+      <file leaf-file-name="cfel_filetools.py" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="405">
-              <caret line="33" column="25" selection-start-line="33" selection-start-column="25" selection-end-line="33" selection-end-column="25" />
+            <state relative-caret-position="581">
+              <caret line="51" column="17" lean-forward="true" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
             </state>
           </provider>
         </entry>
@@ -94,6 +93,8 @@
       <find>playPushButton</find>
       <find>refresh_timer</find>
       <find>timer</find>
+      <find>gui_configuration</find>
+      <find>XTC</find>
     </findStrings>
     <replaceStrings>
       <replace>gui_locations</replace>
@@ -111,22 +112,23 @@
         <option value="$PROJECT_DIR$/lib/gui_configuration.py" />
         <option value="$PROJECT_DIR$/lib/crawler_exfel.py" />
         <option value="$PROJECT_DIR$/peakogram.py" />
-        <option value="$PROJECT_DIR$/lib/gui_locations.py" />
         <option value="$PROJECT_DIR$/lib/cfel_geometry.py" />
         <option value="$PROJECT_DIR$/cheetah-crawler.py" />
         <option value="$PROJECT_DIR$/lib/cfel_imgtools.py" />
         <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
-        <option value="$PROJECT_DIR$/cheetah-gui.py" />
-        <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
         <option value="$PROJECT_DIR$/cxiview.py" />
+        <option value="$PROJECT_DIR$/lib/gui_locations.py" />
+        <option value="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" />
+        <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
+        <option value="$PROJECT_DIR$/cheetah-gui.py" />
       </list>
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="50" />
+    <option name="x" value="770" />
     <option name="y" value="23" />
-    <option name="width" value="1425" />
-    <option name="height" value="1027" />
+    <option name="width" value="1806" />
+    <option name="height" value="1391" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
@@ -135,7 +137,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -146,22 +147,18 @@
             <path>
               <item name="python" type="b2602c69:ProjectViewProjectNode" />
               <item name="python" type="462c0819:PsiDirectoryNode" />
-              <item name="CsPadMaskMaker" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="python" type="462c0819:PsiDirectoryNode" />
               <item name="lib" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RunDashboard">
     <option name="ruleStates">
@@ -176,56 +173,7 @@
     </option>
   </component>
   <component name="RunManager">
-    <configuration default="true" type="PythonConfigurationType" factoryName="Python">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="python" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <method />
-    </configuration>
-    <configuration default="true" type="Tox" factoryName="Tox">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="python" />
-      <method />
-    </configuration>
     <configuration default="true" type="tests" factoryName="Attests">
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="" />
-      <option name="IS_MODULE_SDK" value="false" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <module name="python" />
-      <option name="SCRIPT_NAME" value="" />
-      <option name="CLASS_NAME" value="" />
-      <option name="METHOD_NAME" value="" />
-      <option name="FOLDER_NAME" value="" />
-      <option name="TEST_TYPE" value="TEST_SCRIPT" />
-      <option name="PATTERN" value="" />
-      <option name="USE_PATTERN" value="false" />
-      <method />
-    </configuration>
-    <configuration default="true" type="tests" factoryName="Doctests">
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <envs />
@@ -303,27 +251,27 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="50" y="23" width="1425" height="1027" extended-state="0" />
+    <frame x="770" y="23" width="1806" height="1391" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5424974" visible="true" weight="0.3031579" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.54062265" visible="true" weight="0.23920266" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" weight="0.3287841" />
+      <window_info anchor="bottom" id="Run" order="2" />
       <window_info anchor="bottom" id="Version Control" order="7" />
       <window_info anchor="bottom" id="Python Console" order="7" />
-      <window_info anchor="bottom" id="Run" order="2" />
-      <window_info x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.45750263" side_tool="true" visible="true" weight="0.3031579" />
+      <window_info active="true" x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.45937738" side_tool="true" visible="true" weight="0.23920266" />
       <window_info anchor="bottom" id="Terminal" order="7" />
-      <window_info id="Favorites" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
+      <window_info id="Favorites" order="1" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="right" id="Commander" order="0" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
       <window_info anchor="right" id="Data View" order="3" weight="0.32998565" />
-      <window_info anchor="bottom" id="Message" order="0" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
-      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32843652" />
+      <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
+      <window_info anchor="bottom" id="Message" order="0" />
     </layout>
   </component>
   <component name="Vcs.Log.UiProperties">
@@ -354,13 +302,6 @@
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="9225">
-          <caret line="629" column="22" lean-forward="true" selection-start-line="629" selection-start-column="6" selection-end-line="629" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/cxiview.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="2205">
@@ -613,20 +554,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2685">
-          <caret line="186" column="38" selection-start-line="186" selection-start-column="38" selection-end-line="186" selection-end-column="38" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1380">
-          <caret line="92" column="21" selection-start-line="92" selection-start-column="21" selection-end-line="92" selection-end-column="21" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/streamfile_parser/Streamfile.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="15">
@@ -669,31 +596,49 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="15">
+          <caret line="852" selection-start-line="852" selection-end-line="853" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py" />
+    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" lean-forward="true" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="6540">
-          <caret line="448" column="34" selection-start-line="448" selection-start-column="34" selection-end-line="448" selection-end-column="34" />
+        <state relative-caret-position="581">
+          <caret line="51" column="17" lean-forward="true" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_setup_new_experiment.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="465">
+          <caret line="38" column="40" selection-start-line="38" selection-start-column="40" selection-end-line="38" selection-end-column="40" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="2070">
-          <caret line="142" column="20" selection-start-line="142" selection-start-column="20" selection-end-line="142" selection-end-column="20" />
+        <state relative-caret-position="701">
+          <caret line="203" column="31" lean-forward="true" selection-start-line="203" selection-start-column="31" selection-end-line="203" selection-end-column="31" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="301">
-          <caret line="148" column="8" selection-start-line="148" selection-start-column="8" selection-end-line="148" selection-end-column="8" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/cxiview.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="381">
-          <caret line="852" selection-start-line="852" selection-end-line="852" />
+        <state relative-caret-position="358">
+          <caret line="402" column="22" lean-forward="true" selection-start-line="402" selection-start-column="22" selection-end-line="402" selection-end-column="22" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
