@@ -36,7 +36,7 @@ def extract_template(self):
 
 
     print('Unable to determine which template to extract')
-    print('extrct_template in gui_setup_new_experiment.py')
+    print('extract_template in gui_setup_new_experiment.py')
     self.exit_gui()
 
     #end extract_template()
@@ -178,11 +178,10 @@ def extract_lcls_template(self):
 
 
 #
-#   Extract the LCLS template and modify to suit determined experiment
+#   Extract the EuXFEL template and modify to suit determined experiment
 #
 def extract_euxfel_template(self):
     #   Deduce experiment number, etc using de-referenced paths
-    #   Assumes the file path follows the pattern:   /reg/d/psdm/cxi/cxij4915/scratch/...
     realdir = os.getcwd()
     print('os.getcwd() = ', realdir)
 
@@ -293,18 +292,6 @@ def extract_euxfel_template(self):
     cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1\"" + expt + "\"/", file]
     cfel_file.spawn_subprocess(cmd, wait=True)
 
-    xtcsedstr = str.replace(datadir, '/', '\\/')
-    cmd = ["sed", "-i", "-r", "s/(XTCDIR=).*/\\1\"" + xtcsedstr + "\"/", file]
-    cfel_file.spawn_subprocess(cmd, wait=True)
-
-    h5sedstr = str.replace(userdir, '/', '\\/') + '\/hdf5'
-    cmd = ["sed", "-i", "-r", "s/(H5DIR=).*/\\1\"" + h5sedstr + "\"/", file]
-    cfel_file.spawn_subprocess(cmd, wait=True)
-
-    confsedstr = str.replace(userdir, '/', '\\/') + '\/process'
-    cmd = ["sed", "-i", "-r", "s/(CONFIGDIR=).*/\\1\"" + confsedstr + "\"/", file]
-    cfel_file.spawn_subprocess(cmd, wait=True)
-
     print('>-------------------------<')
     cmd = ['head', file]
     cfel_file.spawn_subprocess(cmd, wait=True)
@@ -312,8 +299,6 @@ def extract_euxfel_template(self):
 
     print("Working directory: ")
     print(os.getcwd() + '/cheetah')
-    #end extract_lcls_template()
-
 
     return
     #end extract_euxfel_template()
