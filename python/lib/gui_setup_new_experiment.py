@@ -208,7 +208,7 @@ def extract_euxfel_template(self):
     absdir = absroot + '/scratch/' + tempdir
 
     datadir = absroot + '/raw'
-    userdir = absdir
+    userdir = absdir + '/cheetah'
 
     print('Deduced experiment information:')
     print('    Sensed directory: ', realdir)
