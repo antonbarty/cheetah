@@ -194,6 +194,11 @@ int main(int argc, char* argv[]) {
 				std::cout << "Skipping pulse 0 in train (in cheetah-euxfel.cpp)" << std::endl;
 				continue;
 			}
+            
+            if(agipd.currentCell >= 62) {
+                std::cout << "!! Hack for Orville June 2018: Skipping pulses beyond 62 in train (in cheetah-euxfel.cpp)" << std::endl;
+                continue;
+            }
 			
 
 			// Set up new Cheetah event
