@@ -43,6 +43,7 @@ public:
 
 	/** @brief Path to the global configuration file */
 	char     configFile[MAX_FILENAME_LENGTH];
+    char     calibFile[MAX_FILENAME_LENGTH];
 	char     configOutFile[MAX_FILENAME_LENGTH];
 	/** @brief Default photon energy. */
 	float    defaultPhotonEnergyeV;

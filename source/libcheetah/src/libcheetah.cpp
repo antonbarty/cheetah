@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <hdf5.h>
 #include <math.h>
 #include <pthread.h>
@@ -91,7 +92,21 @@ int cheetahInit(cGlobal *global) {
     
 	global->self = global;
 	//global->defaultConfiguration();
+    
+    // Parse standard cheetah.ini configuration file
 	global->parseConfigFile(global->configFile);
+    
+    // If there is an instrument calibration specified, load it second
+    // Calibration file is optional, and being loaded second anything in here overrides what is in the cheetah.ini
+    if(strcmp(global->calibFile,"None") != 0 ) {
+        // Check file exists
+        struct stat buffer;
+        if (stat(global->calibFile, &buffer)==0) {
+            global->parseConfigFile(global->calibFile);
+        }
+    }
+
+    // Check we have not asked for incompatible options
 	if(global->validateConfiguration()){
 		ERROR("[FAIL] Validation of given configuration failed");
 		return 1;

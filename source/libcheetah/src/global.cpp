@@ -48,6 +48,7 @@ cGlobal::cGlobal(void)
     
     // ini file to use
     strcpy(configFile, "cheetah.ini");
+    strcpy(calibFile, "None");
     strcpy(configOutFile, "cheetah.out");
 
     // Default experiment info (in case beamline data is missing...)

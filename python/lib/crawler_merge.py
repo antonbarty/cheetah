@@ -119,6 +119,7 @@ def crawler_merge(info):
     nindexed_out = []
     hitrate_out = []
     inifile_out = []
+    calibfile_out = []
 
 
     #
@@ -141,12 +142,16 @@ def crawler_merge(info):
         dataset = '---'
         h5dir = '---'
         inifile='---'
+        calibfile='---'
         if datasets != {}:
             if run in datasets['Run']:
                 i = datasets['Run'].index(run)
                 dataset = datasets['DatasetID'][i].strip()
                 h5dir = datasets['Directory'][i].strip()
                 inifile= datasets['iniFile'][i].strip()
+                if('calibFile' in datasets.keys()):
+                    calibfile= datasets['calibFile'][i].strip()
+
 
         # Stuff contained in Cheetah status file
         # Match on dataset directory (to handle one run having multiple output directories)
@@ -206,7 +211,7 @@ def crawler_merge(info):
         crystfel_out.append(crystfel_status)
         nindexed_out.append(indexrate)
         inifile_out.append(inifile)
-
+        calibfile_out.append(calibfile)
 
     #
     # Output should be:
@@ -223,11 +228,12 @@ def crawler_merge(info):
         'Nhits' : nhits_out,
         'Nindex' : nindexed_out,
         'Hitrate%' : hitrate_out,
-        'Recipe' : inifile_out
+        'Recipe' : inifile_out,
+        'Calibration' : calibfile_out
     }
 
 
     # Write dict to CSV file
-    keys_to_save = ['Run', 'Dataset','Rawdata','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%','Recipe']
+    keys_to_save = ['Run', 'Dataset','Rawdata','Cheetah','CrystFEL','H5Directory','Nprocessed','Nhits','Nindex','Hitrate%','Recipe','Calibration']
     cfel_file.dict_to_csv('crawler.txt', result, keys_to_save)
 
