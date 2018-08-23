@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/python.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/python.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cheetah-gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/cheetah-gui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/crawler_merge.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/crawler_merge.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/gui_dialogs.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/gui_dialogs.py" afterDir="false" />
     </list>
     <ignored path="python.iws" />
@@ -23,19 +21,19 @@
     <session id="754038913">
       <usages-collector id="statistics.lifecycle.project">
         <counts>
-          <entry key="project.closed" value="1" />
+          <entry key="project.closed" value="2" />
           <entry key="project.open.time.5" value="2" />
           <entry key="project.opened" value="2" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
-          <entry key="py" value="470" />
+          <entry key="py" value="909" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Python" value="470" />
+          <entry key="Python" value="909" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
@@ -58,8 +56,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="523">
-              <caret line="329" column="59" lean-forward="true" selection-start-line="329" selection-start-column="59" selection-end-line="329" selection-end-column="59" />
+            <state relative-caret-position="223">
+              <caret line="322" column="32" lean-forward="true" selection-start-line="322" selection-start-column="32" selection-end-line="322" selection-end-column="32" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
@@ -70,8 +68,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="676">
-              <caret line="140" column="34" lean-forward="true" selection-start-line="140" selection-start-column="34" selection-end-line="140" selection-end-column="34" />
+            <state relative-caret-position="166">
+              <caret line="106" column="42" selection-start-line="106" selection-start-column="42" selection-end-line="106" selection-end-column="42" />
             </state>
           </provider>
         </entry>
@@ -97,8 +95,8 @@
       <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1800">
-              <caret line="124" column="5" selection-start-line="124" selection-start-column="5" selection-end-line="124" selection-end-column="5" />
+            <state relative-caret-position="1098">
+              <caret line="112" selection-start-line="112" selection-end-line="112" />
             </state>
           </provider>
         </entry>
@@ -132,6 +130,7 @@
       <find>XTC</find>
       <find>self.lastini</find>
       <find>config</find>
+      <find>self.lastcalib</find>
     </findStrings>
     <replaceStrings>
       <replace>gui_locations</replace>
@@ -156,8 +155,8 @@
         <option value="$PROJECT_DIR$/lib/gui_locations.py" />
         <option value="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" />
         <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
-        <option value="$PROJECT_DIR$/cheetah-gui.py" />
         <option value="$PROJECT_DIR$/lib/gui_dialogs.py" />
+        <option value="$PROJECT_DIR$/cheetah-gui.py" />
       </list>
     </option>
   </component>
@@ -191,12 +190,6 @@
               <item name="python" type="b2602c69:ProjectViewProjectNode" />
               <item name="python" type="462c0819:PsiDirectoryNode" />
               <item name="cheetah-gui.py" type="8704e2dd:PyFileNode" />
-            </path>
-            <path>
-              <item name="python" type="b2602c69:ProjectViewProjectNode" />
-              <item name="python" type="462c0819:PsiDirectoryNode" />
-              <item name="cheetah-gui.py" type="8704e2dd:PyFileNode" />
-              <item name="cheetah_gui" type="dd8bbb05:PyElementNode" />
             </path>
           </expand>
           <select />
@@ -305,9 +298,9 @@
     <frame x="967" y="23" width="1806" height="1391" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.53502697" visible="true" weight="0.23865546" />
+      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.53502697" visible="true" weight="0.23865546" />
       <window_info id="Favorites" order="1" side_tool="true" />
-      <window_info x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.46497306" side_tool="true" visible="true" weight="0.23865546" />
+      <window_info active="true" x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.46497306" side_tool="true" visible="true" weight="0.23865546" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" weight="0.32843652" />
       <window_info anchor="bottom" id="Run" order="2" />
@@ -474,22 +467,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1800">
-          <caret line="124" column="5" selection-start-line="124" selection-start-column="5" selection-end-line="124" selection-end-column="5" />
+        <state relative-caret-position="1098">
+          <caret line="112" selection-start-line="112" selection-end-line="112" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="676">
-          <caret line="140" column="34" lean-forward="true" selection-start-line="140" selection-start-column="34" selection-end-line="140" selection-end-column="34" />
+        <state relative-caret-position="166">
+          <caret line="106" column="42" selection-start-line="106" selection-start-column="42" selection-end-line="106" selection-end-column="42" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="523">
-          <caret line="329" column="59" lean-forward="true" selection-start-line="329" selection-start-column="59" selection-end-line="329" selection-end-column="59" />
+        <state relative-caret-position="223">
+          <caret line="322" column="32" lean-forward="true" selection-start-line="322" selection-start-column="32" selection-end-line="322" selection-end-column="32" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
           </folding>

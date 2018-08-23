@@ -101,7 +101,17 @@ def crawler_merge(info):
 
     # Find unique run identifiers
     # (some runs may be missing from some of the tables)
-    all_runs = data['run'] + cheetah['run'] + crystfel['run'] + datasets['Run']
+    all_runs = []
+    if 'run' in data.keys():
+        all_runs += data['run']
+    if 'run' in cheetah.keys():
+        all_runs += cheetah['run']
+    if 'run' in crystfel.keys():
+        all_runs += crystfel['run']
+    if 'Run' in datasets.keys():
+        all_runs += datasets['Run']
+
+
     uniq_runs = list(sorted(set(all_runs)))
     #print(uniq_runs)
 

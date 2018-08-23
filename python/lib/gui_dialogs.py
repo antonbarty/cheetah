@@ -104,7 +104,7 @@ class run_cheetah_gui(PyQt5.QtWidgets.QDialog):
         inifile_list = sorted(inifile_list)
         lastini = dialog_info['lastini']
         lasttag = dialog_info['lasttag']
-        lastcalib = dialog_info['lastini']
+        lastcalib = dialog_info['lastcalib']
 
 
         layout = PyQt5.QtWidgets.QVBoxLayout(self)

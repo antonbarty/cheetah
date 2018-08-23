@@ -335,12 +335,15 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             print("Try again...")
             return
 
+        if 'calibFile' not in dataset_csv.keys():
+            print('Adding calibFile to datasets.csv')
+            dataset_csv['calibFile'] = dataset_csv['iniFile']
 
         # Process all selected runs
         runs = self.selected_runs()
         for i, run in enumerate(runs['run']):
             print('------------ Start Cheetah process script ------------')
-            cmdarr = [self.config['process'], run, inifile, dataset]
+            cmdarr = [self.config['process'], run, inifile, calibfile, dataset]
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
             # Format output directory string
@@ -362,9 +365,14 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             #Update Dataset and Cheetah status in table
             table_row = runs['row'][i]
             self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(dataset))
-            self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
             self.table.setItem(table_row, 3, PyQt5.QtWidgets.QTableWidgetItem('Submitted'))
+            self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
+
+            self.table.setItem(table_row, 10, PyQt5.QtWidgets.QTableWidgetItem(inifile))
+            self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(calibfile))
+
             self.table.item(table_row, 3).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
+
 
             # Update dataset file
             if run in dataset_csv['Run']:

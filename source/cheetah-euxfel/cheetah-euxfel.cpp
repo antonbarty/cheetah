@@ -396,7 +396,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, no_argument, NULL, 0 }
 	};
-	const char optString[] = "i:e:f:vgh?";
+    const char optString[] = "i:c:e:f:vgh?";
 	
 	int opt;
 	int longIndex;
