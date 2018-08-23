@@ -1,2 +1,6 @@
+# C-code
 rsync -av ./source/ max-cfel:cheetah/cheetah-exfel-install/source/.
+
+# Python
+rsync -av ./python/ max-cfel:cheetah/python/.
 

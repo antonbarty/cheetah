@@ -104,6 +104,7 @@ class run_cheetah_gui(PyQt5.QtWidgets.QDialog):
         inifile_list = sorted(inifile_list)
         lastini = dialog_info['lastini']
         lasttag = dialog_info['lasttag']
+        lastcalib = dialog_info['lastini']
 
 
         layout = PyQt5.QtWidgets.QVBoxLayout(self)
@@ -141,6 +142,19 @@ class run_cheetah_gui(PyQt5.QtWidgets.QDialog):
         layout.addLayout(layout3)
 
 
+        # Another combo box for list of calibration files
+        # (These are just a different type of .ini file from the same list)
+        layout4 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label4 = PyQt5.QtWidgets.QLabel()
+        self.label4.setText("Calibration file: ")
+        self.cb2 = PyQt5.QtWidgets.QComboBox()
+        self.cb2.addItem(lastcalib)
+        self.cb2.addItems(inifile_list)
+        layout4.addWidget(self.label4)
+        layout4.addWidget(self.cb2)
+        layout.addLayout(layout4)
+
+
         # Default OK and Cancel buttons
         self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setOrientation(PyQt5.QtCore.Qt.Horizontal)
@@ -154,7 +168,8 @@ class run_cheetah_gui(PyQt5.QtWidgets.QDialog):
     def getCheetahIni(self):
         selection = {
             'dataset' : self.le.text(),
-            'inifile': self.cb.currentText()
+            'inifile': self.cb.currentText(),
+            'calibfile': self.cb2.currentText()
         }
         return selection
 

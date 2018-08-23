@@ -309,6 +309,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         dialog_info = {
             'inifile_list' : inifile_list,
             'lastini' : self.lastini,
+            'lastcalib' : self.lastcalib,
             'lasttag' : self.lasttag
         }
         # Dialog box for dataset label and ini file
@@ -321,9 +322,10 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         # Extract values from return dict
         dataset = gui['dataset']
         inifile = gui['inifile']
+        calibfile = gui['calibfile']
         self.lasttag = dataset
         self.lastini = inifile
-
+        self.lastcalib = calibfile
 
         dataset_csv = cfel_file.csv_to_dict('datasets.csv')
 
@@ -343,7 +345,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
             # Format output directory string
             # This clumsily selects between using run numbers and using directory names
-            # We need to fix this up sometime
+            # Need to fix this up sometime
             print("Location: ", self.compute_location['location'])
             if 'LCLS' in self.compute_location['location']:
                 dir = 'r{:04d}'.format(int(run))
@@ -370,18 +372,20 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 dataset_csv['DatasetID'][ds_indx] = dataset
                 dataset_csv['Directory'][ds_indx] = dir
                 dataset_csv['iniFile'][ds_indx] = inifile
+                dataset_csv['calibFile'][ds_indx] = calibfile
             else:
                 dataset_csv['Run'].append(run)
                 dataset_csv['DatasetID'].append(dataset)
                 dataset_csv['Directory'].append(dir)
                 dataset_csv['iniFile'].append(inifile)
+                dataset_csv['calibFile'].append(calibfile)
             print('------------ Finish Cheetah process script ------------')
 
         # Sort dataset file to keep it in order
 
 
         # Save datasets file
-        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
+        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile', 'calibFile']
         cfel_file.dict_to_csv('datasets.csv', dataset_csv, keys_to_save)
     #end run_cheetah()
 
@@ -512,7 +516,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
 
     def autorun(self):
-        print("Autorun selected")
+        print("Autorun selected but not implemented :-( ")
 
     def set_new_geometry(self):
         gfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='Geometry files (*.h5 *.geom);;All files (*.*)', qtmainwin=self)
@@ -848,6 +852,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             config.update({'cheetahini': 'darkcal.ini'})
         if not 'cheetahtag' in config.keys():
             config.update({'cheetahtag': 'darkcal'})
+        if not 'cheetahcalib' in config.keys():
+            config.update({'cheetahcalib': 'None'})
 
 
         return config
@@ -931,6 +937,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         print("Loading configuration file: ./crawler.config")
         self.config = self.parse_config()
         self.lastini = self.config['cheetahini']
+        self.lastcalib = self.config['cheetahcalib']
         self.lasttag = self.config['cheetahtag']
         self.lastindex = '../process/index_cell.sh'
         self.lastcell = None
