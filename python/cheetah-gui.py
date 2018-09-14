@@ -369,7 +369,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
 
             self.table.setItem(table_row, 10, PyQt5.QtWidgets.QTableWidgetItem(inifile))
-            self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(calibfile))
+            self.table.setItem(table_row, 11, PyQt5.QtWidgets.QTableWidgetItem(calibfile))
 
             self.table.item(table_row, 3).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
 
@@ -497,6 +497,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 dataset_csv['DatasetID'].append(newlabel)
                 dataset_csv['Directory'].append(newdir)
                 dataset_csv['iniFile'].append('---')
+                dataset_csv['calibFile'].append('---')
 
             # Rename the directory
             if olddir != '---':
@@ -518,7 +519,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
         # Sort dataset file to keep it in order
         # Save datasets file
-        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
+        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile', 'calibFile']
         cfel_file.dict_to_csv('datasets.csv', dataset_csv, keys_to_save)
 
 

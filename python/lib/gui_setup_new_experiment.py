@@ -289,7 +289,8 @@ def extract_euxfel_template(self):
     file = 'cheetah/process/process'
     print('Modifying ', file)
 
-    cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1\"" + expt + "\"/", file]
+    exptstr = instr+'/'+run+'/'+expt
+    cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1\"" + exptstr + "\"/", file]
     cfel_file.spawn_subprocess(cmd, wait=True)
 
     print('>-------------------------<')
