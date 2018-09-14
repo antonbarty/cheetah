@@ -228,9 +228,14 @@ namespace cheetah_ana_pkg {
 		//
 		//cout << "*** beginJob ***" << endl;
 		time(&startT);
+        // We do not have access to parameters passed on the command line so use these standard names...
+        strcpy(cheetahGlobal.configFile, "cheetah.ini");
+        strcpy(cheetahGlobal.calibFile, "calib.ini");
+
 		if (cheetahInit(&cheetahGlobal)){
 			exit(0);
 		}
+
 		
 		// Initialise signal handler when using .cxi file (so we can close it clenaly)
 		if(cheetahGlobal.saveCXI){
@@ -263,17 +268,17 @@ namespace cheetah_ana_pkg {
 		printf("Begin run (cheetah_ana_mod::beginRun)\n");
 
 		cout << "Experiment = " << env.experiment() << endl;
-		//cout << "*** beginRun ***" << endl;
+        strcpy(cheetahGlobal.experimentID, env.experiment().c_str());
+
 		int runNumber = 0;
 		PSTime::Time evtTime;
 		boost::shared_ptr<PSEvt::EventId> eventId = evt.get();
-		
 		if (eventId.get()) {
 			runNumber = eventId->run();
 		}
 
+        cout << "Run = " << runNumber << endl;
 		cheetahGlobal.runNumber = runNumber;
-		strcpy(cheetahGlobal.experimentID, env.experiment().c_str());
 
 
 		cheetahNewRun(&cheetahGlobal);

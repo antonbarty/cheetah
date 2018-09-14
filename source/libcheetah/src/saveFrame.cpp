@@ -794,7 +794,7 @@ void writePeakFile(cEventData *eventData, cGlobal *global){
 //    writeSimpleHDF5(filename, data, width, height, type, NULL, -1);
 //}
 
-void writeSimpleHDF5(const char *filename, const void *data, long width, long height, int type)  {
+void writeSimpleHDF5(const char *filename, const void *data, long width, long height, hid_t type)  {
     writeSimpleHDF5(filename, data, width, height, type, NULL, -1);
 }
 

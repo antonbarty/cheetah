@@ -3,9 +3,12 @@
   <component name="ChangeListManager">
     <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/cheetah-gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/cheetah-gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../source/cheetah-euxfel/cheetah-euxfel.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/cheetah-euxfel/cheetah-euxfel.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/cxiview.ui" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cxiview.ui" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/UI/cxiview_ui.py" beforeDir="false" afterPath="$PROJECT_DIR$/UI/cxiview_ui.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cxiview.py" beforeDir="false" afterPath="$PROJECT_DIR$/cxiview.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/cheetah_psana/src/cheetah_psana.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/cheetah_psana/src/cheetah_psana.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../source/libcheetah/src/saveFrame.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/../source/libcheetah/src/saveFrame.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../upload-lcls" beforeDir="false" />
     </list>
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -55,14 +58,23 @@
   </component>
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
-      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="true">
+      <file leaf-file-name="cheetah-gui.py" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="273">
+            <state relative-caret-position="15">
               <caret line="498" column="52" selection-start-line="498" selection-start-column="52" selection-end-line="498" selection-end-column="52" />
               <folding>
                 <element signature="e#96#105#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="cxiview.py" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/cxiview.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="357">
+              <caret line="150" lean-forward="true" selection-start-line="150" selection-end-line="150" />
             </state>
           </provider>
         </entry>
@@ -126,6 +138,7 @@
       <find>self.lastcalib</find>
       <find>'Directory'</find>
       <find>'datasets.csv'</find>
+      <find>actionAutoscale</find>
     </findStrings>
     <replaceStrings>
       <replace>gui_locations</replace>
@@ -146,12 +159,12 @@
         <option value="$PROJECT_DIR$/cheetah-crawler.py" />
         <option value="$PROJECT_DIR$/lib/cfel_imgtools.py" />
         <option value="$PROJECT_DIR$/lib/cfel_filetools.py" />
-        <option value="$PROJECT_DIR$/cxiview.py" />
         <option value="$PROJECT_DIR$/lib/gui_locations.py" />
         <option value="$PROJECT_DIR$/lib/crawler_merge.py" />
         <option value="$PROJECT_DIR$/lib/gui_dialogs.py" />
         <option value="$PROJECT_DIR$/lib/gui_setup_new_experiment.py" />
         <option value="$PROJECT_DIR$/cheetah-gui.py" />
+        <option value="$PROJECT_DIR$/cxiview.py" />
       </list>
     </option>
   </component>
@@ -281,15 +294,16 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1680" height="1027" extended-state="6" />
+    <frame x="0" y="23" width="1680" height="1027" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.52990556" visible="true" weight="0.23809524" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.5288562" visible="true" weight="0.23809524" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" weight="0.3287841" />
       <window_info anchor="bottom" id="Version Control" order="9" />
       <window_info anchor="bottom" id="Python Console" order="8" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.47009444" side_tool="true" visible="true" weight="0.23809524" />
+      <window_info x="567" y="69" width="301" height="783" id="Structure" order="2" sideWeight="0.47114375" side_tool="true" visible="true" weight="0.23809524" />
       <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info id="Favorites" order="1" side_tool="true" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
@@ -321,15 +335,48 @@
           <url>file://$PROJECT_DIR$/cxiview.py</url>
           <line>10</line>
         </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/cxiview.py</url>
-          <line>879</line>
-          <option name="timeStamp" value="1" />
-        </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7470">
+          <caret line="498" column="52" selection-start-line="498" selection-start-column="52" selection-end-line="498" selection-end-column="52" />
+          <folding>
+            <element signature="e#96#105#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_dialogs.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1530">
+          <caret line="106" selection-start-line="106" selection-end-line="106" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/gui_locations.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="285">
+          <caret line="19" selection-start-line="19" selection-end-line="19" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1770">
+          <caret line="122" selection-start-line="122" selection-end-line="122" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/lib/cfel_filetools.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="51" column="17" selection-start-line="51" selection-start-column="17" selection-end-line="51" selection-end-column="17" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="7470">
@@ -573,17 +620,10 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/cxiview.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="15">
-          <caret line="852" selection-start-line="852" selection-end-line="853" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/lib/gui_configuration.py" />
     <entry file="file://$PROJECT_DIR$/cheetah-gui.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="273">
+        <state relative-caret-position="15">
           <caret line="498" column="52" selection-start-line="498" selection-start-column="52" selection-end-line="498" selection-end-column="52" />
           <folding>
             <element signature="e#96#105#0" expanded="true" />
@@ -620,5 +660,12 @@
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/gui_setup_new_experiment.py" />
+    <entry file="file://$PROJECT_DIR$/cxiview.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="357">
+          <caret line="150" lean-forward="true" selection-start-line="150" selection-end-line="150" />
+        </state>
+      </provider>
+    </entry>
   </component>
 </project>
