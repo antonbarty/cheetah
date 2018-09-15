@@ -400,11 +400,18 @@ namespace cheetah_ana_pkg {
         boost::shared_ptr<Event> evtp = evt.shared_from_this();
         boost::shared_ptr<Env> envp = env.shared_from_this();
         cEventData *eventData;
+        pthread_t thread;
 
+        //
         // Single-threaded or multi-threaded event copy
-        // (python-psana does not appear to be thread safe)
-        //if(false) {
-        if(cheetahGlobal.nEventCopyThreads == 0) {
+        //
+        // New python-psana does not appear to be thread safe
+        // running event_copy threads results in ememory leaks as the threads die after event creation without releasing memory.
+        // Conclusion: Limit to single threaded for now
+        //
+        
+        //if(cheetahGlobal.nEventCopyThreads == 0) {
+        if(true) {
             eventData = cheetah_ana_mod::copy_event(evtp, envp);
             if(eventData != NULL) {
                 cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
@@ -412,7 +419,6 @@ namespace cheetah_ana_pkg {
             return;
         }
         else {
-            pthread_t thread;
             int returnStatus;
             
             //	Wait until we have a spare thread in the thread pool
@@ -429,6 +435,7 @@ namespace cheetah_ana_pkg {
             }
             else {
             	printf("Error: cheetah_ana_mod::copy_event thread creation failed (frame skipped)\n");
+                sem_post(&availableAnaThreads);
             }
         }
 	}
@@ -451,23 +458,23 @@ namespace cheetah_ana_pkg {
 	void *cheetah_caller(void*){
 		while(runCheetahCaller){
 			pthread_mutex_lock(&pthread_queue_mutex);
+            bool empty = runningThreads.empty();
 			
 			//	Sleep if empty (unlikely to happen after the beginning)
-			if(runningThreads.empty()){
+			if(empty){
 				pthread_mutex_unlock(&pthread_queue_mutex);
 				usleep(10000);
 				continue;
 			}
 			
+            cEventData *eventData;
 			pthread_t thread = runningThreads.front();
 			runningThreads.pop();
-            cEventData *eventData;
+            pthread_mutex_unlock(&pthread_queue_mutex);
 			pthread_join(thread,(void **)&eventData);
 			sem_post(&availableAnaThreads);
-            pthread_mutex_unlock(&pthread_queue_mutex);
 
 			if (eventData != NULL) {
-                // Comment out for testing, but then be aware of memory leaks
 				cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 			}
             else {
