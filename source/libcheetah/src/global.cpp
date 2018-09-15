@@ -254,7 +254,7 @@ cGlobal::cGlobal(void)
     // Timeout of thread activity, if set to 0 or negative no timeout
     threadTimeoutInSeconds = 5 * 60.;
 
-    anaModThreads = 8;
+    nEventCopyThreads = 8;
 
     // Saving to subdirectories
     subdirFileCount = -1;
@@ -1007,8 +1007,8 @@ int cGlobal::parseConfigTag(char *tag, char *value)
     else if (!strcmp(tag, "threadtimeoutinseconds")) {
         threadTimeoutInSeconds = atof(value);
     }
-    else if (!strcmp(tag, "anamodthreads")) {
-        anaModThreads = atoi(value);
+    else if (!strcmp(tag, "neventcopythreads")) {
+        nEventCopyThreads = atoi(value);
     }
     else if (!strcmp(tag, "usehelperthreads")) {
         useHelperThreads = atoi(value);

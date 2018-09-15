@@ -23,7 +23,7 @@ def extract_template(self):
     realdir = os.getcwd()
 
     # LCLS
-    if realdir.startswith("/reg/d/"):
+    if realdir.startswith("/reg/"):
         print("Extracting template for LCLS...")
         extract_lcls_template(self)
         return

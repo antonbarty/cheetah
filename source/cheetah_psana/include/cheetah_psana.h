@@ -151,7 +151,7 @@ namespace cheetah_ana_pkg {
     extern pthread_t cheetahCallerThread;
 	extern pthread_mutex_t pthread_queue_mutex;
     extern sem_t availableAnaThreads;
-    void * threaded_event(void* threadData);
+    void * threaded_copy_event(void* threadData);
     void * cheetah_caller(void * threadData);
 } // namespace cheetah_ana_pkg
 

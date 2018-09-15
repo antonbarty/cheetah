@@ -364,7 +364,7 @@ public:
 	int      threadSafetyLevel;
 
 	// Number of threads in cheetah_ana_mod
-	int      anaModThreads;
+	int      nEventCopyThreads;
 
 	pthread_t  *threadID;
 	pthread_mutex_t  hitclass_mutex;

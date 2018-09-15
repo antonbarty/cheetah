@@ -164,8 +164,6 @@ namespace cheetah_ana_pkg {
 		}
 		//setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
 
-        fprintf(stderr,"Test1\n");
-
         
 		// get the values from configuration or use defaults
         
@@ -192,12 +190,18 @@ namespace cheetah_ana_pkg {
 
 		finishedAnaThreads = 0;
 
-        runCheetahCaller = false;
-        //runCheetahCaller = true;
-        //int returnStatus = pthread_create(&cheetahCallerThread, NULL, cheetah_caller, &pthread_queue_mutex);
-		//if (returnStatus != 0) { // creation successful
-		//	printf("Error: thread creation failed\n");
-		//}
+        //
+        // Start the process which calls event processing once event copying is done
+        //
+        //runCheetahCaller = false;
+        runCheetahCaller = true;
+        int returnStatus = pthread_create(&cheetahCallerThread, NULL, cheetah_caller, &pthread_queue_mutex);
+		if (returnStatus == 0) {
+            printf("[OK] CheetahCaller thread creation successful\n");
+		}
+        else {
+            printf("[Error] CheetahCaller thread creation failed\n");
+        }
         
         fprintf(stderr,"cheetah_ana_mod::cheetah_ana_mod completed\n");
         fflush (stdout);
@@ -246,7 +250,8 @@ namespace cheetah_ana_pkg {
 			signal(SIGBUS, sig_handler);
 		}
 		// Initialize signal that keeps track of available threads
-		sem_init(&availableAnaThreads,0,cheetahGlobal.anaModThreads);
+        printf("nEventCopyThreads = %li\n", cheetahGlobal.nEventCopyThreads);
+		sem_init(&availableAnaThreads,0,cheetahGlobal.nEventCopyThreads);
 
 
 		/* We need to know the names of the TOF detector source
@@ -379,52 +384,53 @@ namespace cheetah_ana_pkg {
 	//	Start the threads which will copy across data into Cheetah structure and process
 	//--------------
 	void cheetah_ana_mod::event(PSEvt::Event& evt, PSEnv::Env& env) {
-            //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for images
-            //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
-            //if (img.get()) {
-            //    printf("Jungfrau python size %d\n",img->size());
-            //}
-            //else {
-            //    printf("Jungfrau img.get() failed\n");
-            //}
-	
-            //shared_ptr<Psana::Jungfrau::ElementV2> imgRaw = evt.get(m_srcJungfrau);
-            //if (imgRaw.get()) printf("Jungfrau Raw: size %d\n",img->size());
-	
-            boost::shared_ptr<Event> evtp = evt.shared_from_this();
-            boost::shared_ptr<Env> envp = env.shared_from_this();
+        //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for images
+        //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
+        //if (img.get()) {
+        //    printf("Jungfrau python size %d\n",img->size());
+        //}
+        //else {
+        //    printf("Jungfrau img.get() failed\n");
+        //}
 
-            cEventData *eventData;
+        //shared_ptr<Psana::Jungfrau::ElementV2> imgRaw = evt.get(m_srcJungfrau);
+        //if (imgRaw.get()) printf("Jungfrau Raw: size %d\n",img->size());
+
+        //printf("Event (cheetah_ana_mod::event)\n");
+        boost::shared_ptr<Event> evtp = evt.shared_from_this();
+        boost::shared_ptr<Env> envp = env.shared_from_this();
+        cEventData *eventData;
+
+        // Single-threaded or multi-threaded event copy
+        // (python-psana does not appear to be thread safe)
+        //if(false) {
+        if(cheetahGlobal.nEventCopyThreads == 0) {
             eventData = cheetah_ana_mod::copy_event(evtp, envp);
             if(eventData != NULL) {
                 cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
             }
             return;
+        }
+        else {
+            pthread_t thread;
+            int returnStatus;
+            
+            //	Wait until we have a spare thread in the thread pool
+            sem_wait(&availableAnaThreads);
+            
+            // Create a new thread for copying data from this psana event
+            returnStatus = pthread_create(&thread, NULL, threaded_copy_event, (void*) new AnaModEventData(this, evtp, envp));
 
-		//printf("Event (cheetah_ana_mod::event)\n");
-		
-		//boost::shared_ptr<Event> evtp = evt.shared_from_this();
-		//boost::shared_ptr<Env> envp = env.shared_from_this();
-		//pthread_t thread;
-		//int returnStatus;
-		
-		//	Wait until we have a spare thread in the thread pool
-		//sem_wait(&availableAnaThreads);
-		
-
-		// Create a new thread for copying data from this psana event
-		//returnStatus = pthread_create(&thread, NULL, threaded_event, (void*) new AnaModEventData(this, evtp, envp));
-
-		
-		// Push thread to stack of thread creation was successful
-		//if (returnStatus == 0) {
-		//	pthread_mutex_lock(&pthread_queue_mutex);
-		//	runningThreads.push(thread);
-		//	pthread_mutex_unlock(&pthread_queue_mutex);
-		//}
-		//else {
-		//	printf("Error: thread creation failed (frame skipped)\n");
-		//}
+            // Push thread to stack of thread creation was successful
+            if (returnStatus == 0) {
+            	pthread_mutex_lock(&pthread_queue_mutex);
+            	runningThreads.push(thread);
+            	pthread_mutex_unlock(&pthread_queue_mutex);
+            }
+            else {
+            	printf("Error: cheetah_ana_mod::copy_event thread creation failed (frame skipped)\n");
+            }
+        }
 	}
 	// End of psana event method
 
@@ -432,7 +438,7 @@ namespace cheetah_ana_pkg {
 	//--------------
 	// Thread for copying data (passes execution to copy_event)
 	//--------------
-	void *threaded_event(void* threadData){
+	void *threaded_copy_event(void* threadData){
 		boost::shared_ptr<AnaModEventData> data((AnaModEventData*) threadData);
 		data->module->copy_event(data->evtp, data->envp);
 		return 0;
@@ -445,25 +451,28 @@ namespace cheetah_ana_pkg {
 	void *cheetah_caller(void*){
 		while(runCheetahCaller){
 			pthread_mutex_lock(&pthread_queue_mutex);
-			bool empty = runningThreads.empty();
 			
 			//	Sleep if empty (unlikely to happen after the beginning)
-			if(empty){
+			if(runningThreads.empty()){
 				pthread_mutex_unlock(&pthread_queue_mutex);
 				usleep(10000);
 				continue;
 			}
 			
 			pthread_t thread = runningThreads.front();
-			cEventData *eventData;
 			runningThreads.pop();
-			pthread_mutex_unlock(&pthread_queue_mutex);
+            cEventData *eventData;
 			pthread_join(thread,(void **)&eventData);
 			sem_post(&availableAnaThreads);
-			
+            pthread_mutex_unlock(&pthread_queue_mutex);
+
 			if (eventData != NULL) {
+                // Comment out for testing, but then be aware of memory leaks
 				cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
 			}
+            else {
+                printf("Error: threaded cheetah_ana_mod::copy_event failed (frame skipped)\n");
+            }
 		}
 		pthread_exit(NULL);
 		return 0;
@@ -574,8 +583,8 @@ namespace cheetah_ana_pkg {
 	}
 
 	void cheetah_ana_mod::waitForAnaModWorkers(){
-		while(finishedAnaThreads < cheetahGlobal.anaModThreads){			
-			printf("Waiting for %d ana mod workers to finish.\n", cheetahGlobal.anaModThreads-finishedAnaThreads);
+		while(finishedAnaThreads < cheetahGlobal.nEventCopyThreads){			
+			printf("Waiting for %d ana mod workers to finish.\n", cheetahGlobal.nEventCopyThreads-finishedAnaThreads);
 			//wait for a thread to finish
 			sem_wait(&availableAnaThreads);
 			finishedAnaThreads++;
