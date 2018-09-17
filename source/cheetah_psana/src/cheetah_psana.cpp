@@ -142,27 +142,14 @@ namespace cheetah_ana_pkg {
 	{
 		startT = 0;
 
+        printf("************************************************************\n");
+        printf("    Starting Cheetah for LCLS\n");
+        printf("    J Appl Crystallogr 47, 1118–1131 (2014) \n");
+        printf("    https://barty@stash.desy.de/scm/cheetah/cheetah.git\n");
+        printf("************************************************************\n");
 		printf("Constructor (cheetah_ana_mod::cheetah_ana_mod)\n");
 
 
-
-		
-		// Check if we're using psana of the same git commit
-		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
-			fprintf(stderr,    "*******************************************************************************************\n");
-			fprintf(stderr,"*** WARNING %s:%d ***\n",__FILE__,__LINE__);
-
-			if(getenv("PSANA_GIT_SHA")){
-				fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
-				fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
-			}
-            else{
-				fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
-			}
-			fprintf(stderr,    "*******************************************************************************************\n");
-			//sleep(10);
-		}
-		//setenv("CHEETAH_ANA_MOD_GIT_SHA",GIT_SHA1,0);
 
         
 		// get the values from configuration or use defaults

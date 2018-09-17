@@ -60,7 +60,8 @@ herr_t cheetahHDF5ErrorHandler(hid_t,void *)
 int cheetahInit(cGlobal *global) {
     
 	// Check if we're using psana of the same git commit
-	if(strcmp(global->facility, "EuXFEL")) {
+	/*
+    if(strcmp(global->facility, "EuXFEL")) {
 		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
 			fprintf(stderr,    "*******************************************************************************************\n");
 			fprintf(stderr,"*** Note %s:%d ***\n",__FILE__,__LINE__);
@@ -77,6 +78,7 @@ int cheetahInit(cGlobal *global) {
 		}
 		setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 	}
+     */
 	
     // Check that HDF5 library is thread safe
     hbool_t H5_is_ts;
