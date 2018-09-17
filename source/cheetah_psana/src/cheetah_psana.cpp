@@ -21,6 +21,8 @@
 //#include <cheetah.h>
 #include "cheetah_psana.h"
 #include "cheetah.h"
+#include "myTimer.h"
+
 //-----------------
 // C/C++ Headers --
 //-----------------
@@ -48,6 +50,10 @@
 // LCLS event codes
 #define beamCode 140
 #define verbose 0
+
+// Timing tests
+cMyTimer timer_evtRate;
+cMyTimer timer_dataLoad;
 
 //-----------------------------------------------------------------------
 // Local Macros, Typedefs, Structures, Unions and Forward Declarations --
@@ -363,6 +369,7 @@ namespace cheetah_ana_pkg {
 
 		}
         fflush (stdout);
+        timer_evtRate.start();
 	}
 
 	//--------------
@@ -371,6 +378,7 @@ namespace cheetah_ana_pkg {
 	//	Start the threads which will copy across data into Cheetah structure and process
 	//--------------
 	void cheetah_ana_mod::event(PSEvt::Event& evt, PSEnv::Env& env) {
+        timer_evtRate.stop();
         //shared_ptr< ndarray<float, 2> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for images
         //shared_ptr< ndarray<float, 3> > img = evt.get(m_srcJungfrau, "jungfrau_img");	// <-- for calibrated data
         //if (img.get()) {
@@ -396,14 +404,14 @@ namespace cheetah_ana_pkg {
         // running event_copy threads results in ememory leaks as the threads die after event creation without releasing memory.
         // Conclusion: Limit to single threaded for now
         //
-        
+
+        timer_dataLoad.start();
         //if(cheetahGlobal.nEventCopyThreads == 0) {
         if(true) {
             eventData = cheetah_ana_mod::copy_event(evtp, envp);
             if(eventData != NULL) {
                 cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
             }
-            return;
         }
         else {
             int returnStatus;
@@ -425,6 +433,9 @@ namespace cheetah_ana_pkg {
                 sem_post(&availableAnaThreads);
             }
         }
+        timer_dataLoad.stop();
+        printf("evtWait %lf sec, evtCopy %lf sec\n", timer_evtRate.duration, timer_dataLoad.duration);
+        timer_evtRate.start();
 	}
 	// End of psana event method
 
