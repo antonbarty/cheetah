@@ -33,6 +33,9 @@
 void *worker(void *threadarg)
 {
 
+    cMyTimer timer_worker;
+    timer_worker.start();
+
     // Turn threadarg into a more useful form
     cGlobal *global;
     cEventData *eventData;
@@ -338,6 +341,10 @@ void *worker(void *threadarg)
     DEBUG2("Write data to h5");
 
     updateDatarate(global);
+    timer_worker.stop();
+    global->timeProfile.addToTimer(timer_worker.duration, global->timeProfile.TIMER_WORKER);
+
+
 
     if (global->saveCXI == 1) {
         //writeCXIHitstats(eventData, global);
@@ -416,9 +423,16 @@ void *worker(void *threadarg)
     global->nprocessedframes += 1;
     global->nrecentprocessedframes += 1;
 
+    //
     // Save some types of information from time to time (for example, powder patterns get updated while running)
+    //
+    
     if (global->saveInterval != 0 && (global->nprocessedframes % global->saveInterval) == 0
             && (global->nprocessedframes > global->detector[0].startFrames + 50)) {
+
+        cMyTimer timer_flush;
+        timer_flush.start();
+
         DEBUG3("Save data.");
 
         // Assemble, downsample and radially average powder
@@ -443,8 +457,12 @@ void *worker(void *threadarg)
 
         global->updateLogfile();
         global->writeStatus("Not finished");
+
+        timer_flush.stop();
+        global->timeProfile.addToTimer(timer_worker.duration, global->timeProfile.TIMER_FLUSH);
     }
     pthread_mutex_unlock(&global->saveinterval_mutex);
+
 
     // Decrement thread pool counter by one
     pthread_mutex_lock(&global->nActiveThreads_mutex);

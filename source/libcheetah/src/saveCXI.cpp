@@ -2028,6 +2028,11 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
     using CXI::Node;
     char sBuffer[1024];
 	
+    cMyTimer timer_cxiWait;
+    cMyTimer timer_cxiWrite;
+
+    timer_cxiWait.start();
+    
     
     // Stuff only needed for SWMR mode
     #ifdef H5F_ACC_SWMR_WRITE
@@ -2070,15 +2075,20 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	global->nFramesSavedPerClass[eventData->powderClass] += 1;
     global->nCXIHits += 1;
     pthread_mutex_unlock(&global->saveCXI_mutex);       // Moved up here on 23 May, should work.... revert if problems
+    timer_cxiWait.stop();
 
-    
     
     /*
      *  Write CXI and results data
      */
+    timer_cxiWrite.start();
     writeCXIData(cxi, eventData, global, stackSlice);
     writeResultsData(results, eventData, global, stackSlice);
-    
+    timer_cxiWrite.stop();
+    global->timeProfile.addToTimer(timer_cxiWait.duration, global->timeProfile.TIMER_H5WAIT);
+    global->timeProfile.addToTimer(timer_cxiWrite.duration, global->timeProfile.TIMER_H5WRITE);
+
+
     
     
     #ifdef H5F_ACC_SWMR_WRITE

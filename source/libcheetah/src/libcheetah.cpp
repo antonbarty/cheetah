@@ -529,7 +529,24 @@ void cheetahExit(cGlobal *global) {
 	// Destroy memory and destroy mutexes
 	global->freeMemory();
 	destroyStreakFinder(global);
+    
+    // Processing time
+    double dtime;
+    float fps;
+    int hrs, mins, secs;
 
+    time (&global->tend);
+    dtime = difftime(global->tend, global->tstart);
+    hrs = (int) floor(dtime / 3600);
+    mins = (int) floor((dtime - 3600 * hrs) / 60);
+    secs = (int) floor(dtime - 3600 * hrs - 60 * mins);
+    fps = global->nprocessedframes / dtime;
+    printf("Wall time: %ihr %imin %isec (%2.1f fps)\n", hrs, mins, secs, fps);
+
+    // Timing profile
+    global->timeProfile.reportTimers();
+
+    
     global->writeStatus("Finished");    
     printf("Cheetah clean exit\n");
 }

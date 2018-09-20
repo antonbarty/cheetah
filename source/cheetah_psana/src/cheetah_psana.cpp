@@ -148,7 +148,7 @@ namespace cheetah_ana_pkg {
 
         printf("************************************************************\n");
         printf("    Starting Cheetah for LCLS\n");
-        printf("    J Appl Crystallogr 47, 1118–1131 (2014) \n");
+        printf("    J Appl Crystallogr 47, 1118-1131 (2014) \n");
         printf("    https://barty@stash.desy.de/scm/cheetah/cheetah.git\n");
         printf("************************************************************\n");
 		printf("Constructor (cheetah_ana_mod::cheetah_ana_mod)\n");

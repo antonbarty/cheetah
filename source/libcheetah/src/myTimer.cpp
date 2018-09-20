@@ -3,7 +3,7 @@
 //  libcheetah
 //
 //  Created by Anton Barty on 17.09.18.
-//  Copyright © 2018 Anton Barty. All rights reserved.
+//  Copyright (c) 2018 Anton Barty. All rights reserved.
 //
 
 
@@ -13,12 +13,12 @@
 #include <sys/time.h>
 #include <stdint.h>
 #include <pthread.h>
+#include <stdio.h>
 
 #include "myTimer.h"
 
 //#include <chrono>
 //#include <atomic>
-
 
 /*
  Standard C:
@@ -145,14 +145,14 @@ void cTimingProfiler::resetTimers(void) {
 
 
 // Add value to the specified timer (thread-safe)
-void addToTimer(double time, int field) {
+void cTimingProfiler::addToTimer(double time, int field) {
     pthread_mutex_lock(&counter_mutex);
     elapsed_time[field] += time;
     pthread_mutex_unlock(&counter_mutex);
 }
 
 // Report on timer status
-void reportTimers(void){
+void cTimingProfiler::reportTimers(void){
     
     // Add up total measured time for percentage calculation
     double total=0;
@@ -168,22 +168,5 @@ void reportTimers(void){
         printf("\t%s %0.2lf sec (%0.2lf %%)\n",message[i].c_str(), elapsed_time[i], percent);
     }
 }
-
-
-
-/*
-class cTimingProfiler {
-    
-public:
-    enum {
-        TIMER_EVENTWAIT=0,
-        TIMER_EVENTDATA,
-        TIMER_CALC,
-        TIMER_H5WAIT,
-        TIMER_H5WRITE,
-        TIMER_FLUSH,
-        TIMER_NTYPES
-    };
-    
 
 
