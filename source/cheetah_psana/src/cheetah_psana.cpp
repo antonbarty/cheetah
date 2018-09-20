@@ -13,15 +13,13 @@
 //
 //------------------------------------------------------------------------
 
-#include <stdlib.h>
 //-----------------------
 // This Class's Header --
 //-----------------------
-//#include <cheetah_psana.h>
-//#include <cheetah.h>
+#include <stdlib.h>
 #include "cheetah_psana.h"
 #include "cheetah.h"
-#include "myTimer.h"
+
 
 //-----------------
 // C/C++ Headers --
@@ -435,6 +433,8 @@ namespace cheetah_ana_pkg {
         }
         timer_dataLoad.stop();
         printf("evtWait %lf sec, evtCopy %lf sec\n", timer_evtRate.duration, timer_dataLoad.duration);
+        cheetahGlobal.timeProfile.addToTimer(timer_evtRate.duration, cheetahGlobal.timeProfile.TIMER_EVENTWAIT);
+        cheetahGlobal.timeProfile.addToTimer(timer_dataLoad.duration, cheetahGlobal.timeProfile.TIMER_EVENTDATA);
         timer_evtRate.start();
 	}
 	// End of psana event method

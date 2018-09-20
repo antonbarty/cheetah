@@ -11,10 +11,14 @@
 
 //#include <stdlib.h>
 //#include <chrono>
+#include <string>
+#include <pthread.h>
 
 
 
-
+/*
+ *  Simple start/stop timer
+ */
 class cMyTimer {
     
 public:
@@ -34,9 +38,51 @@ private:
     double getTimeInSeconds_double(void);
 
     
-    // Needs c++11, not compatible with psana?
+    // std::chrono needs c++11, not compatible with psana?
     //std::chrono::high_resolution_clock::time_point start_clock;
     //std::chrono::high_resolution_clock::time_point end_clock;
+};
+
+
+
+/*
+ *  Housekeeper for keeping track of how long spent in different parts of code
+ */
+class cTimingProfiler {
+    
+public:
+    enum {
+        TIMER_EVENTWAIT=0,
+        TIMER_EVENTDATA,
+        TIMER_CALC,
+        TIMER_H5WAIT,
+        TIMER_H5WRITE,
+        TIMER_FLUSH,
+        TIMER_NTYPES
+    };
+    
+private:
+    std::string message[TIMER_NTYPES] = {
+        "Waiting for next event: ",
+        "Reading event data: ",
+        "Cheetah calculations: ",
+        "Waiting to write .cxi/.h5 file: ",
+        "Writing .cxi/h5 file: ",
+        "Flushing files: "
+    };
+
+
+public:
+    cTimingProfiler();
+    
+    void addToTimer(double, int);
+    void reportTimers(void);
+    void resetTimers(void);
+    
+private:
+    double   elapsed_time[TIMER_NTYPES];
+    pthread_mutex_t counter_mutex;
+
 };
 
 

@@ -1687,6 +1687,11 @@ void cGlobal::updateLogfile(void)
     fflush (framefp);
     fflush (cleanedfp);
     fflush (peaksfp);
+    
+    
+    // Report on overall timing
+    timeProfile.reportTimers();
+
     /*
      for(long i=0; i<nPowderClasses; i++) {
      if (powderlogfp[i] != NULL) fflush(powderlogfp[i]);

@@ -12,6 +12,8 @@
 #include <time.h>
 #include <sys/time.h>
 #include <stdint.h>
+#include <pthread.h>
+
 #include "myTimer.h"
 
 //#include <chrono>
@@ -68,10 +70,29 @@ cMyTimer::cMyTimer(){
 
 
 double cMyTimer::getTimeInSeconds_double(void){
-    struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
     
-    return ts.tv_sec + ((float)ts.tv_nsec)*1e-9;
+    // Usage of clock_gettime is pretty straight forward
+    if(false) {
+        struct timespec ts;
+        clock_gettime(CLOCK_MONOTONIC, &ts);
+        return ts.tv_sec + ((float)ts.tv_nsec)*1e-9;
+    }
+    
+    // Fallback strategy is gettimeofday which reports wall time (not CPU time)
+    if(true) {
+        struct timeval tv;
+        if (gettimeofday (&tv, NULL) == 0)
+            return tv.tv_sec + ((float)tv.tv_usec)*1e-6;
+        else
+            return 0;
+    }
+    
+    // High resolution clock requires C++11, which does not play nice with psana
+    if(false) {
+        //high_resolution_clock::time_point t1 = high_resolution_clock::now();
+        //high_resolution_clock::time_point t2 = high_resolution_clock::now();
+        //duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+    }
 }
 
 
@@ -103,5 +124,66 @@ void cMyTimer::resume(void){
     start_clock = getTimeInSeconds_double();
     //start_clock = std::chrono::high_resolution_clock::now();
 }
+
+
+
+
+/*
+ *  Keep track of time spent in different parts of code
+ */
+cTimingProfiler::cTimingProfiler() {
+    pthread_mutex_init(&counter_mutex, NULL);
+    resetTimers();
+}
+
+// Reset couters to 0
+void cTimingProfiler::resetTimers(void) {
+    for(long i=0; i<TIMER_NTYPES; i++) {
+        elapsed_time[i] = 0;
+    }
+}
+
+
+// Add value to the specified timer (thread-safe)
+void addToTimer(double time, int field) {
+    pthread_mutex_lock(&counter_mutex);
+    elapsed_time[field] += time;
+    pthread_mutex_unlock(&counter_mutex);
+}
+
+// Report on timer status
+void reportTimers(void){
+    
+    // Add up total measured time for percentage calculation
+    double total=0;
+    double percent;
+    for(long i=0; i<TIMER_NTYPES; i++) {
+        total += elapsed_time[i];
+    }
+    
+    // Print summary
+    printf("Execution time summary: \n");
+    for(long i=0; i<TIMER_NTYPES; i++) {
+        percent = 100*elapsed_time[i] / total;
+        printf("\t%s %0.2lf sec (%0.2lf %%)\n",message[i].c_str(), elapsed_time[i], percent);
+    }
+}
+
+
+
+/*
+class cTimingProfiler {
+    
+public:
+    enum {
+        TIMER_EVENTWAIT=0,
+        TIMER_EVENTDATA,
+        TIMER_CALC,
+        TIMER_H5WAIT,
+        TIMER_H5WRITE,
+        TIMER_FLUSH,
+        TIMER_NTYPES
+    };
+    
 
 

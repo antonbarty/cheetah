@@ -15,6 +15,7 @@
 #include <vector>
 #include <semaphore.h>
 
+#include "myTimer.h"
 #include "detectorObject.h"
 #include "tofDetector.h"
 #include "peakDetect.h"
@@ -35,17 +36,13 @@ public:
 
     char    facility[MAX_FILENAME_LENGTH];
     
-	/** @brief Default constructor (set default values) */
 	cGlobal();
 
-	/** @brief What's this? */
 	cGlobal     *self;
 
-	/** @brief Path to the global configuration file */
 	char     configFile[MAX_FILENAME_LENGTH];
     char     calibFile[MAX_FILENAME_LENGTH];
 	char     configOutFile[MAX_FILENAME_LENGTH];
-	/** @brief Default photon energy. */
 	float    defaultPhotonEnergyeV;
 
 	float    fixedPhotonEnergyeV;
@@ -471,25 +468,9 @@ public:
 	ProcessRateMonitor processRateMonitor;
 	// 
 public:
-	/**
-	 * @brief Set the default configuration.
-	 **/
 	void defaultConfiguration(void);
-	/**
-	 * @brief Parse a global configuration file, update things.
-	 *
-	 * \usage Should be called only at the beginning of an analysis job.
-	 *
-	 * \param configFilePath The full path to the configuration file.
-	 **/
 	void parseConfigFile(char * configFilePath);
-	/**
-	 * @brief TODO: does this work now?
-	 **/
 	void parseCommandLineArguments(int, char**);
-	/**
-	 * @brief What's this for?
-	 **/
 	void setup(void);
 	void updateCalibrated(void);
 	int	 validateConfiguration(void);
@@ -505,10 +486,10 @@ public:
 	void waitForThreadsToFinish(float);
 	void waitForThreadsToFinish(void);
 	
-	/**
-	 * @brief Read text file with list of hits.
-	 **/
-	void readHits(char *filename);
+    void readHits(char *filename);
+
+    
+    cTimingProfiler timeProfile;
 
 private:
 	int parseConfigTag(char*, char*);
