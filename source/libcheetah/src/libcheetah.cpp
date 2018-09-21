@@ -530,6 +530,8 @@ void cheetahExit(cGlobal *global) {
 	global->freeMemory();
 	destroyStreakFinder(global);
     
+
+
     // Processing time
     double dtime;
     float fps;
@@ -541,10 +543,11 @@ void cheetahExit(cGlobal *global) {
     mins = (int) floor((dtime - 3600 * hrs) / 60);
     secs = (int) floor(dtime - 3600 * hrs - 60 * mins);
     fps = global->nprocessedframes / dtime;
-    printf("Wall time: %ihr %imin %isec (%2.1f fps)\n", hrs, mins, secs, fps);
 
     // Timing profile
     global->timeProfile.reportTimers();
+    printf("Elapsed wall time: %ihr %imin %isec\n", hrs, mins, secs);
+    printf("Average frame rate: %2.1f fps\n", fps);
 
     
     global->writeStatus("Finished");    

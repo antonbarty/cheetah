@@ -341,6 +341,8 @@ void *worker(void *threadarg)
     DEBUG2("Write data to h5");
 
     updateDatarate(global);
+    
+    // End of worker timer
     timer_worker.stop();
     global->timeProfile.addToTimer(timer_worker.duration, global->timeProfile.TIMER_WORKER);
 
@@ -457,6 +459,7 @@ void *worker(void *threadarg)
 
         global->updateLogfile();
         global->writeStatus("Not finished");
+
 
         timer_flush.stop();
         global->timeProfile.addToTimer(timer_worker.duration, global->timeProfile.TIMER_FLUSH);

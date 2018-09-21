@@ -162,7 +162,7 @@ void cTimingProfiler::reportTimers(void){
     }
     
     // Print summary
-    printf("Execution time summary: \n");
+    printf("Execution timing summary: \n");
     for(long i=0; i<TIMER_NTYPES; i++) {
         percent = 100*elapsed_time[i] / total;
         printf("\t%s %0.2lf sec (%0.2lf %%)\n",message[i].c_str(), elapsed_time[i], percent);

@@ -107,6 +107,10 @@ int main(int argc, char* argv[]) {
 	
 	std::cout << "----------------" << std::endl;
 
+    // Timing stuff
+    cMyTimer timer_dataLoad;
+    cMyTimer timer_evtCopy;
+
 	
 	// Initialize Cheetah
 	std::cout << "Setting up Cheetah" << std::endl;
@@ -181,7 +185,10 @@ int main(int argc, char* argv[]) {
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
 		agipd.resetCurrentFrame();
+        timer_dataLoad.start();
 		while (agipd.nextFrame()) {
+            timer_dataLoad.stop();
+
 			
             // Incrememnt the frame number
             frameNumber++;
@@ -207,6 +214,7 @@ int main(int argc, char* argv[]) {
 
             
 			// Set up new Cheetah event
+            timer_evtCopy.start();
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
 
@@ -256,18 +264,22 @@ int main(int argc, char* argv[]) {
 					   
             
             // Copy AGIPD bad pixel mask into Cheetah event
+            // We do nothing with the gain information beyond checking how many pixels in each gain stage
             for (long i = 0; i < cheetahGlobal.detector[detId].pix_nn; i++) {
                 if(agipd.badpixMask[i] != 0) {
                     eventData->detector[detId].pixelmask[i] = PIXEL_IS_BAD;
                 }
             }
-            
-            // We do nothing with the gain information beyond here
-            
+            timer_evtCopy.stop();
 
 
 			// Process event
 			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+            
+            // Timing
+            cheetahGlobal.timeProfile.addToTimer(timer_evtCopy.duration, cheetahGlobal.timeProfile.TIMER_EVENTCOPY);
+            cheetahGlobal.timeProfile.addToTimer(timer_dataLoad.duration, cheetahGlobal.timeProfile.TIMER_EVENTDATA);
+            timer_dataLoad.start();
 		}
         // end agipd.nextFrame()
 	

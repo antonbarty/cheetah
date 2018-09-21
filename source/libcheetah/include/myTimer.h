@@ -52,6 +52,7 @@ public:
     enum {
         TIMER_EVENTWAIT=0,
         TIMER_EVENTDATA,
+        TIMER_EVENTCOPY,
         TIMER_WORKER,
         TIMER_H5WAIT,
         TIMER_H5WRITE,
@@ -63,7 +64,8 @@ private:
     std::string message[TIMER_NTYPES] = {
         "Waiting for next event: ",
         "Reading event data: ",
-        "Cheetah calculations: ",
+        "Copying event data: ",
+        "Cheetah worker (multithreaded): ",
         "Waiting to write .cxi/.h5 file: ",
         "Writing .cxi/h5 file: ",
         "Flushing files: "
