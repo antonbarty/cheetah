@@ -290,7 +290,8 @@ def extract_euxfel_template(self):
     print('Modifying ', file)
 
     exptstr = instr+'/'+run+'/'+expt
-    cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1\"" + exptstr + "\"/", file]
+    expsedstr = str.replace(exptstr, '/', '\\/')
+    cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1" + expsedstr + "/", file]
     cfel_file.spawn_subprocess(cmd, wait=True)
 
     print('>-------------------------<')
