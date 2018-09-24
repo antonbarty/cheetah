@@ -344,7 +344,7 @@ void *worker(void *threadarg)
     
     // End of worker timer
     timer_worker.stop();
-    global->timeProfile.addToTimer(timer_worker.duration, global->timeProfile.TIMER_WORKER);
+    global->timeProfile.addToTimer(timer_worker.duration, global->timeProfile.TIMER_WORKERRUN);
 
 
 

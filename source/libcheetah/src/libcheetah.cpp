@@ -385,6 +385,9 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
 	 *	In non-threaded mode, the worker does not clean up its own eventData structure when done:
      *      eventData remains available after the worker exits and must be explicitly freed by the user
      */
+    cMyTimer timer_workerWait;
+    timer_workerWait.start();
+
     if(eventData->useThreads == 0) {
         worker((void *)eventData);
     }
@@ -420,6 +423,8 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
 			}
 				
 		}
+
+        
         
         // Set detached state
         pthread_attr_init(&threadAttribute);
@@ -442,8 +447,11 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
         }
 		pthread_mutex_unlock(&global->nActiveThreads_mutex);
         pthread_attr_destroy(&threadAttribute);
-//		pthread_mutex_lock(&global->process_mutex);
+        //        pthread_mutex_lock(&global->process_mutex);
     }
+    
+    timer_workerWait.stop();
+    global->timeProfile.addToTimer(timer_workerWait.duration, global->timeProfile.TIMER_WAITFORWORKERTHREAD);
 }
 
 
