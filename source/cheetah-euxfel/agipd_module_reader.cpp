@@ -117,8 +117,8 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
 	std::cout << "Opening " << filename << std::endl;
 	cAgipdModuleReader::filename = filename;
 	
-	bool check = fileCheckAndOpen(filename);
-	if (check == false) {
+	h5_file_id = fileCheckAndOpen(filename);
+	if (h5_file_id == NULL) {
         std::cout << "\tWarning: Non-existent or dodgy file - will be skipped" << std::endl;
         // This means:
         // fileOK=false;
@@ -217,13 +217,30 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
     }
     
     nindex = dims[0];
+    
+    
+    // Add here for opening datasets and setting cache sizes
+    h5_ridiculousCacheSize = 100*1024*1024;
+    if (rawDetectorData) {
+        raw_image_dataset.open(filename, (char *) h5_image_data_field.c_str());
+        raw_image_dataset.setChunkCacheSize();
+    }
+    else {
+        proc_image_dataset.open(filename, (char *) h5_image_data_field.c_str());
+        proc_gain_dataset.open(filename, (char *) h5_image_gain_field.c_str());
+        proc_mask_dataset.open(filename, (char *) h5_image_mask_field.c_str());
+        proc_image_dataset.setChunkCacheSize();
+        proc_gain_dataset.setChunkCacheSize();
+        proc_mask_dataset.setChunkCacheSize();
+    }
+    //printf("Debug exit in cAgipdReader::open\n");
+    //exit(1);
 
     
 	printf("\tNumber of frames: %li\n", nframes);
 	printf("\tImage block size: %lix%li\n", n0, n1);
 	printf("\tStack depth: %li\n", nstack);
     printf("\tIndex depth: %li\n", nindex);
-
 };
 // cAgipdReader::open
 
@@ -246,6 +263,14 @@ void cAgipdModuleReader::close(void) {
 		std::cout << "\tClosing " << filename << "\n";
 	}
 
+
+    // Close datasets
+    raw_image_dataset.close();
+    proc_image_dataset.close();
+    proc_gain_dataset.close();
+    proc_mask_dataset.close();
+
+    
 	// Free array memory
 	if(data != NULL) {
 		std::cout << "\tFreeing memory " << filename << "\n";
@@ -456,7 +481,13 @@ void cAgipdModuleReader::readFrameRaw(long frameNum) {
 
     // Read data from hyperslab in RAW data file (which is unit16_t, so convert it to float)
 	uint16_t *tempdata = NULL;
-	tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+    if(useNewDatasetReader) {
+        tempdata = (uint16_t*) raw_image_dataset.checkAllocReadHyperslab(ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+    }
+    else {
+        tempdata = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+
+    }
 	
     if (!tempdata) {
 		return;
@@ -473,8 +504,12 @@ void cAgipdModuleReader::readFrameRaw(long frameNum) {
 	// For the first few experiments digital gain is actually in the next analog memory location: location configured via gainDataOffset
 	slab_start[0] += gainDataOffset[0];
 	slab_start[1] += gainDataOffset[1];
-	digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
-
+    if(useNewDatasetReader) {
+        digitalGain = (uint16_t*) raw_image_dataset.checkAllocReadHyperslab(ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+    }
+    else {
+        digitalGain = (uint16_t*) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U16LE, sizeof(uint16_t));
+    }
 	// Bad pixel mask added by raw data calibration, or left alone if uncalibrated
     // Pixel good = 0, pixel bad = anything else; deliberate use of calloc() to zero the array
 	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
@@ -522,7 +557,12 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
     //std::cout << "ndims=" << ndims << ", size=[" << slab_size[0] << ", " << slab_size[1] << ", " << slab_size[2] << std::endl;
     
 	// Read data directly from hyperslab in corrected data file (which is already a float)
-	data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_IEEE_F32LE, sizeof(float));
+    if(useNewDatasetReader) {
+        data = (float *) proc_image_dataset.checkAllocReadHyperslab(ndims, slab_start, slab_size, H5T_IEEE_F32LE, sizeof(float));
+    }
+    else {
+        data = (float *) checkAllocReadHyperslab((char *)h5_image_data_field.c_str(), ndims, slab_start, slab_size, H5T_IEEE_F32LE, sizeof(float));
+    }
     if (!data) {
         return;
     }
@@ -530,7 +570,12 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	// Digital gain is in a different field and is H5T_STD_U8LE Dataset {7500, 512, 128}
 	// Default format is uint16_t so we must convert
 	uint8_t *tempgain = NULL;
-	tempgain = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+    if(useNewDatasetReader) {
+        tempgain = (uint8_t*) proc_gain_dataset.checkAllocReadHyperslab(ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+    }
+    else {
+        tempgain = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_gain_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+    }
 	digitalGain = (uint16_t *)malloc(nn * sizeof(uint16_t));
 	for (int i = 0; i < nn; i++) {
 		digitalGain[i] = tempgain[i];
@@ -543,7 +588,12 @@ void cAgipdModuleReader::readFrameXFELCalib(long frameNum) {
 	//slab_size[3] = 3;
 	//ndims = 4;
 	uint8_t *tempmask = NULL;
-	tempmask = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+    if(useNewDatasetReader) {
+        tempmask = (uint8_t*) proc_mask_dataset.checkAllocReadHyperslab(ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+    }
+    else {
+        tempmask = (uint8_t*) checkAllocReadHyperslab((char *)h5_image_mask_field.c_str(), ndims, slab_start, slab_size, H5T_STD_U8LE, sizeof(uint8_t));
+    }
 	badpixMask = (uint16_t *)calloc(nn, sizeof(uint16_t));
     // Copy across mask
     long nbad = 0;

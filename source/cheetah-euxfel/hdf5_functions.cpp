@@ -20,6 +20,7 @@
 #include <sstream>
 
 
+
 /*
  *	Get dataset dimensions (but do not read the data)
  */
@@ -314,7 +315,7 @@ void* cHDF5Functions::checkAllocReadHyperslab(char fieldName[], int ndims, hsize
 }
 // cAgipdReader::checkAllocReadHyperslab
 
-bool cHDF5Functions::fileCheckAndOpen(char *filename)
+hid_t cHDF5Functions::fileCheckAndOpen(char *filename)
 {
 	// Does the file exist?
 	FILE *testfp;
@@ -324,7 +325,7 @@ bool cHDF5Functions::fileCheckAndOpen(char *filename)
 		printf("Module set to blank.\n");
         fileOK = false;
 		noData = true;
-		return false;
+		return NULL;
 	}
 	else
 	{
@@ -339,21 +340,270 @@ bool cHDF5Functions::fileCheckAndOpen(char *filename)
 		printf("Module set to blank.\n");
         fileOK = false;
         noData = true;
-		return false;
+		return NULL;
 	}
 
+    // Set a more sensible cache size
+    long    sensibleCacheSize = 64*1024*1024;
+    hid_t dapl = H5Pcreate(H5P_FILE_ACCESS);
+    //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 256*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
+    //H5Pset_chunk_cache(dapl_id, 12421, 16*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
+    H5Pset_cache(dapl, NULL, 12421, sensibleCacheSize, 1);
+    printf("\tFile cache set to %0.1f MB\n", sensibleCacheSize/(1024.*1024.));
+
+    
+    
 	// Open the file
-	h5_file_id = H5Fopen(filename,H5F_ACC_RDONLY,H5P_DEFAULT);
-	if(h5_file_id < 0){
+    hid_t file_id;
+	//file_id = H5Fopen(filename,H5F_ACC_RDONLY,H5P_DEFAULT);
+    file_id = H5Fopen(filename,H5F_ACC_RDONLY,dapl);
+	if(file_id < 0){
 		printf("cAgipdReader::open: Could not open HDF5 file (%s)\n",filename);
 		printf("Module set to blank.\n");
 		noData = true;
-		return false;
+		return NULL;
 	}
 	//std::cout << "\tFile found\n";
     
     // If we get this far without error...
     fileOK = true;
     noData = false;
-	return true;
+	return file_id;
 }
+
+
+/*
+ *  Functions related to cHDF5dataset
+ */
+
+cHDF5dataset::cHDF5dataset() {
+    
+}
+cHDF5dataset::~cHDF5dataset(){
+    close();
+}
+
+// Open dataset
+void cHDF5dataset::open(char *filename, char *dataset) {
+    
+    // Open and check file
+    h5_file_id = fileCheckAndOpen(filename);
+    if (!h5_file_id) {
+        datasetOK = false;
+        return;
+    }
+    
+    h5_filename = filename;
+    h5_fieldname = dataset;
+
+    
+    // Open the dataset
+    h5_dataset_id = H5Dopen(h5_file_id, dataset, H5P_DEFAULT);
+    if (h5_dataset_id < 0) {
+        datasetOK = false;
+    }
+    h5_dataspace_id = H5Dget_space(h5_dataset_id);
+    
+    
+    // Retrieve dataset dimensions
+    h5_ndims = H5Sget_simple_extent_ndims(h5_dataspace_id);
+    h5_dims = (hsize_t*) calloc(h5_ndims, sizeof(hsize_t));
+    H5Sget_simple_extent_dims(h5_dataspace_id, h5_dims, NULL);
+    
+    // Size and type of one element
+    hid_t h5_type;
+    h5_type = H5Dget_type(h5_dataset_id);
+    h5_size = H5Tget_size(h5_type);
+    
+    // Set this only once all has opened OK
+    datasetOK = true;
+    
+    
+    // Debugging
+    if(true) {
+        printf("Opening dataset\n");
+        printf("\tFile %s\n", filename);
+        printf("\tDataset %s\n", dataset);
+        printf("\tDimensions (");
+        for(int i=0; i<h5_ndims; i++, printf(" x ")) printf("%li", h5_dims[i]);
+        //for(int i=0; i<h5_ndims; i++) printf("%li x ", h5_dims[i]);
+        printf(") of size %i bytes\n", h5_size);
+    }
+}
+
+
+void cHDF5dataset::setChunkCacheSize(void){
+    
+    
+    // Is the dataset chuncked to begin with?
+    hid_t plist;
+    plist = H5Dget_create_plist(h5_dataset_id);
+    if (H5D_CHUNKED != H5Pget_layout(plist)) {
+        printf("\tDataset %s is not chunked\n", h5_fieldname.c_str());
+        return;
+    }
+    
+    // If so, find out the chunk dimensions
+    int chunk_ndims;
+    hsize_t chunk_dims[10];
+    chunk_ndims = H5Pget_chunk(plist, 10, chunk_dims);
+    printf("\tChunk dimensions (");
+    for(int i=0; i<chunk_ndims; i++) printf("%li x ", chunk_dims[i]);
+    printf(")");
+    
+    
+    // Figure out required chunk memory
+    long    chunk_mem=1;
+    for(int i=0; i<chunk_ndims; i++) chunk_mem *= chunk_dims[i];
+    chunk_mem *= h5_size;
+    printf(" = %0.1f MB \n", (float) chunk_mem / (1024.*1024.));
+    
+    // Make sure we allocate a sensible cache size
+    chunk_mem *= 2;
+    if(chunk_mem < h5_minCacheSize) {
+        chunk_mem = h5_minCacheSize;
+        printf("\tchunk_mem less than a sensible size, will set to %li bytes\n", chunk_mem);
+    }
+    if(chunk_mem > h5_ridiculousCacheSize) {
+        chunk_mem = h5_ridiculousCacheSize;
+        printf("\tchunk_mem more than a sensible size, will set to %li bytes\n", chunk_mem);
+    }
+    //printf("\tWill set chunk buffer to %0.1f MB \n", (float) chunk_mem / (1024.*1024.));
+
+    
+    // Looks like we need to close and re-open the dataset with a new chunck cache.  So be it...
+    H5Dclose(h5_dataset_id);
+    H5Sclose(h5_dataspace_id);
+    
+
+    // Set up property list
+    hid_t dapl = H5Pcreate(H5P_DATASET_ACCESS);
+    H5Pset_chunk_cache(dapl, 12421, chunk_mem, 1);
+    //H5Pset_chunk_cache(dapl, 12421, chunk_mem, H5D_CHUNK_CACHE_W0_DEFAULT);
+    //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 256*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
+    
+    
+    // Open the dataset again with new property list
+    h5_dataset_id = H5Dopen(h5_file_id, (char*) h5_fieldname.c_str(), dapl);
+    if (h5_dataset_id < 0) {
+        datasetOK = false;
+        return;
+    }
+    h5_dataspace_id = H5Dget_space(h5_dataset_id);
+
+    printf("\tDataset reopened with dataset cache of %0.1f MB \n", (float) chunk_mem / (1024.*1024.));
+
+}
+
+
+void* cHDF5dataset::checkAllocReadHyperslab(int ndims, hsize_t *slab_start, hsize_t *slab_size, hid_t h5_type_id, size_t targetsize){
+    
+    
+    // Checks
+    if(h5_ndims != ndims) {
+        std::cout << "\tcheckAllocReadHyperslab error: dimensions of data sets do not match requested dimensions (oops)\n";
+        std::cout << "\tndims=" << ndims << ", h5_ndims=" << h5_ndims << std::endl;
+        std::cout << "\tIn field " << h5_fieldname << std::endl;
+        return NULL;
+    }
+    
+    for(int i=0; i<h5_ndims; i++) {
+        if(slab_start[i] < 0 || slab_start[i]+slab_size[i] > h5_dims[i]){
+            std::cout << "\tcheckAllocReadHyperslab error: One array dimension runs out of bounds (oops), dim=" << i << std::endl;
+            return NULL;
+        }
+    }
+    
+    
+
+    /*
+     *    Define and select the hyperslab to use for reading.
+     *
+     *    herr_t H5Sselect_hyperslab(hid_t space_id, H5S_seloper_t op, const hsize_t *start, const hsize_t *stride, const hsize_t *count, const hsize_t *block )
+     *    selection operator op determines how the new selection is to be combined with the already existing selection for the dataspace. H5S_SELECT_SET    Replaces the existing selection with the parameters from this call.
+     *    start array specifies the offset of the starting element of the specified hyperslab.
+     *    count array determines how many blocks to select from the dataspace, in each dimension.
+     *    stride array determines how many elements to move in each dimension.  If the stride parameter is NULL, a contiguous hyperslab is selected (as if each value in the stride array were set to 1).
+     *    block array determines the size of the element block selected from the dataspace. If the block parameter is set to NULL, the block size defaults to a single element in each dimension
+     */
+    hsize_t        count[4];
+    count[0] = 1;
+    count[1] = 1;
+    count[2] = 1;
+    count[3] = 1;
+    H5Sselect_hyperslab(h5_dataspace_id, H5S_SELECT_SET, slab_start, NULL, count, slab_size);
+    
+    
+    // Allocate space into which data will be read
+    long nelements = 1;
+    for(int i = 0;i<ndims;i++)
+        nelements *= slab_size[i];
+    
+    void *databuffer = malloc(nelements*targetsize);;
+    
+    
+    // Define how to map the hyperslab into memory
+    // See https://support.hdfgroup.org/HDF5/doc/RM/RM_H5D.html#Dataset-Read
+    hid_t        memspace_id;
+    hsize_t     start_mem[4];
+    start_mem[0] = 0;
+    start_mem[1] = 0;
+    start_mem[2] = 0;
+    start_mem[3] = 0;
+    memspace_id = H5Screate_simple(ndims, slab_size, NULL);
+    H5Sselect_hyperslab (memspace_id, H5S_SELECT_SET, start_mem, NULL, slab_size, NULL);
+    
+    
+    /*
+     * Read the data using the previously defined hyperslab.
+     */
+    H5Dread(h5_dataset_id, h5_type_id, memspace_id, h5_dataspace_id, H5P_DEFAULT, databuffer);
+    
+    
+    // Cleanup
+    H5Sclose (memspace_id);
+    
+    // Return
+    return databuffer;
+
+    
+}
+
+
+
+
+void cHDF5dataset::close(void){
+    
+    // Do nothing on closing a non-open dataset
+    if(datasetOK == false) {
+        return;
+    }
+    
+    // Close datasets
+    H5Dclose(h5_dataset_id);
+    H5Sclose(h5_dataspace_id);
+    
+    // Cleanup stale IDs
+    hid_t ids[256];
+    long n_ids = H5Fget_obj_ids(h5_file_id, H5F_OBJ_ALL, 256, ids);
+    for (long i=0; i<n_ids; i++ ) {
+        hid_t id;
+        H5I_type_t type;
+        id = ids[i];
+        type = H5Iget_type(id);
+        if ( type == H5I_GROUP )
+            H5Gclose(id);
+        if ( type == H5I_DATASET )
+            H5Dclose(id);
+        if ( type == H5I_DATASPACE )
+            H5Sclose(id);
+        if ( type == H5I_DATATYPE )
+            H5Dclose(id);
+    }
+    
+    // Close HDF5 file
+    H5Fclose(h5_file_id);
+    h5_file_id = 0;
+    
+    datasetOK = false;
+};
