@@ -344,19 +344,20 @@ hid_t cHDF5Functions::fileCheckAndOpen(char *filename)
 	}
 
     // Set a more sensible cache size
-    long    sensibleCacheSize = 64*1024*1024;
     hid_t dapl = H5Pcreate(H5P_FILE_ACCESS);
+    long    sensibleCacheSize = 16*1024*1024;
+    H5Pset_cache(dapl, NULL, 521, sensibleCacheSize, 1);
+    //printf("\tFile cache set to %0.1f MB\n", sensibleCacheSize/(1024.*1024.));
+    //H5Pset_cache(dapl, NULL, 12421, sensibleCacheSize, 1);
     //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 256*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
     //H5Pset_chunk_cache(dapl_id, 12421, 16*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
-    H5Pset_cache(dapl, NULL, 12421, sensibleCacheSize, 1);
-    printf("\tFile cache set to %0.1f MB\n", sensibleCacheSize/(1024.*1024.));
 
     
     
 	// Open the file
     hid_t file_id;
-	//file_id = H5Fopen(filename,H5F_ACC_RDONLY,H5P_DEFAULT);
-    file_id = H5Fopen(filename,H5F_ACC_RDONLY,dapl);
+	file_id = H5Fopen(filename,H5F_ACC_RDONLY,H5P_DEFAULT);
+    //file_id = H5Fopen(filename,H5F_ACC_RDONLY,dapl);
 	if(file_id < 0){
 		printf("cAgipdReader::open: Could not open HDF5 file (%s)\n",filename);
 		printf("Module set to blank.\n");
@@ -385,6 +386,13 @@ cHDF5dataset::~cHDF5dataset(){
 
 // Open dataset
 void cHDF5dataset::open(char *filename, char *dataset) {
+
+    // Debugging verbosity
+    if(true) {
+        printf("Opening dataset\n");
+        printf("\tFile %s\n", filename);
+        printf("\tDataset %s\n", dataset);
+    }
     
     // Open and check file
     h5_file_id = fileCheckAndOpen(filename);
@@ -421,9 +429,6 @@ void cHDF5dataset::open(char *filename, char *dataset) {
     
     // Debugging
     if(true) {
-        printf("Opening dataset\n");
-        printf("\tFile %s\n", filename);
-        printf("\tDataset %s\n", dataset);
         printf("\tDimensions (");
         for(int i=0; i<h5_ndims; i++, printf(" x ")) printf("%li", h5_dims[i]);
         //for(int i=0; i<h5_ndims; i++) printf("%li x ", h5_dims[i]);
@@ -459,7 +464,7 @@ void cHDF5dataset::setChunkCacheSize(void){
     printf(" = %0.1f MB \n", (float) chunk_mem / (1024.*1024.));
     
     // Make sure we allocate a sensible cache size
-    chunk_mem *= 2;
+    chunk_mem *= 1.2;
     if(chunk_mem < h5_minCacheSize) {
         chunk_mem = h5_minCacheSize;
         printf("\tchunk_mem less than a sensible size, will set to %li bytes\n", chunk_mem);
@@ -471,18 +476,18 @@ void cHDF5dataset::setChunkCacheSize(void){
     //printf("\tWill set chunk buffer to %0.1f MB \n", (float) chunk_mem / (1024.*1024.));
 
     
+
+    // Set up property list
+    hid_t dapl = H5Pcreate(H5P_DATASET_ACCESS);
+    H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, chunk_mem, 1);
+    //H5Pset_chunk_cache(dapl, 12421, chunk_mem, H5D_CHUNK_CACHE_W0_DEFAULT);
+    //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 256*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
+    
     // Looks like we need to close and re-open the dataset with a new chunck cache.  So be it...
     H5Dclose(h5_dataset_id);
     H5Sclose(h5_dataspace_id);
     
 
-    // Set up property list
-    hid_t dapl = H5Pcreate(H5P_DATASET_ACCESS);
-    H5Pset_chunk_cache(dapl, 12421, chunk_mem, 1);
-    //H5Pset_chunk_cache(dapl, 12421, chunk_mem, H5D_CHUNK_CACHE_W0_DEFAULT);
-    //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 256*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
-    
-    
     // Open the dataset again with new property list
     h5_dataset_id = H5Dopen(h5_file_id, (char*) h5_fieldname.c_str(), dapl);
     if (h5_dataset_id < 0) {
@@ -561,12 +566,10 @@ void* cHDF5dataset::checkAllocReadHyperslab(int ndims, hsize_t *slab_start, hsiz
     
     
     // Cleanup
-    H5Sclose (memspace_id);
+    H5Sclose(memspace_id);
     
     // Return
     return databuffer;
-
-    
 }
 
 
@@ -579,11 +582,23 @@ void cHDF5dataset::close(void){
         return;
     }
     
-    // Close datasets
+    // Close datasets and HDF5 file
     H5Dclose(h5_dataset_id);
     H5Sclose(h5_dataspace_id);
+    H5Fclose(h5_file_id);
+    h5_file_id = 0;
+    datasetOK = false;
+
+
+    // Free this little array to avoid a tiny memory leak
+    free(h5_dims);
+    
+
+    return;
+    
     
     // Cleanup stale IDs
+    /*
     hid_t ids[256];
     long n_ids = H5Fget_obj_ids(h5_file_id, H5F_OBJ_ALL, 256, ids);
     for (long i=0; i<n_ids; i++ ) {
@@ -600,10 +615,7 @@ void cHDF5dataset::close(void){
         if ( type == H5I_DATATYPE )
             H5Dclose(id);
     }
+     */
     
-    // Close HDF5 file
-    H5Fclose(h5_file_id);
-    h5_file_id = 0;
     
-    datasetOK = false;
 };

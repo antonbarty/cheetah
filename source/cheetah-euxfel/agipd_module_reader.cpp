@@ -224,15 +224,26 @@ void cAgipdModuleReader::open(char filename[], int mNum) {
     if (rawDetectorData) {
         raw_image_dataset.open(filename, (char *) h5_image_data_field.c_str());
         raw_image_dataset.setChunkCacheSize();
+        if(raw_image_dataset.datasetOK == false) {
+            fileOK = false;
+            noData = true;
+            return;
+        }
     }
     else {
         proc_image_dataset.open(filename, (char *) h5_image_data_field.c_str());
-        proc_gain_dataset.open(filename, (char *) h5_image_gain_field.c_str());
-        proc_mask_dataset.open(filename, (char *) h5_image_mask_field.c_str());
         proc_image_dataset.setChunkCacheSize();
+        proc_gain_dataset.open(filename, (char *) h5_image_gain_field.c_str());
         proc_gain_dataset.setChunkCacheSize();
+        proc_mask_dataset.open(filename, (char *) h5_image_mask_field.c_str());
         proc_mask_dataset.setChunkCacheSize();
+        if(proc_image_dataset.datasetOK == false || proc_gain_dataset.datasetOK == false || proc_mask_dataset.datasetOK == false) {
+            fileOK = false;
+            noData = true;
+            return;
+        }
     }
+    
     //printf("Debug exit in cAgipdReader::open\n");
     //exit(1);
 
@@ -265,10 +276,14 @@ void cAgipdModuleReader::close(void) {
 
 
     // Close datasets
-    raw_image_dataset.close();
-    proc_image_dataset.close();
-    proc_gain_dataset.close();
-    proc_mask_dataset.close();
+    if (rawDetectorData) {
+        raw_image_dataset.close();
+    }
+    else {
+        proc_image_dataset.close();
+        proc_gain_dataset.close();
+        proc_mask_dataset.close();
+    }
 
     
 	// Free array memory

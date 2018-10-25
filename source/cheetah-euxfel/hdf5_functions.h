@@ -31,8 +31,9 @@ public:
     bool        fileOK=false;
 	bool        noData=true;
     bool        useNewDatasetReader=true;
+    bool        use_h5LT=true;      // H5LT is convenient but not threadsafe
     
-    long        h5_minCacheSize = 10*1024*1024;
+    long        h5_minCacheSize = 2*1024*1024;
     long        h5_ridiculousCacheSize=200*1024*1024;
 
 protected:
