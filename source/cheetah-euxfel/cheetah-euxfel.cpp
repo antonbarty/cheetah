@@ -462,8 +462,8 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 					global->dataFormat = true;
 					std::cout << "Data format will be " << global->dataFormat << std::endl;
 				}
-
 				break;
+                
 			default:
 				/* You won't actually get here. */
 				break;
