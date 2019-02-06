@@ -479,9 +479,11 @@ void cHDF5dataset::setChunkCacheSize(void){
 
     // Set up property list
     hid_t dapl = H5Pcreate(H5P_DATASET_ACCESS);
-    H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, chunk_mem, 1);
+    H5Pset_chunk_cache(dapl, 7, chunk_mem, 1);
+    //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, chunk_mem, 1);
     //H5Pset_chunk_cache(dapl, 12421, chunk_mem, H5D_CHUNK_CACHE_W0_DEFAULT);
     //H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 256*1024*1024, H5D_CHUNK_CACHE_W0_DEFAULT);
+    // The default value of H5D_CHUNK_CACHE_NSLOTS_DEFAULT is 521.
     
     // Looks like we need to close and re-open the dataset with a new chunck cache.  So be it...
     H5Dclose(h5_dataset_id);
