@@ -1460,6 +1460,7 @@ static CXI::Node *createResultsSkeleton(const char *filename, cGlobal *global){
     event_data->createStack("event_identifier",H5T_NATIVE_CHAR,CXI::stringSize);
     event_data->createStack("hit",H5T_NATIVE_INT);
     event_data->createStack("nPeaks",H5T_NATIVE_INT);
+    event_data->createStack("hitScore",H5T_NATIVE_FLOAT);
 
 	
     //
@@ -1995,7 +1996,7 @@ void closeCXIFiles(cGlobal * global){
 
 
 
-void writeCXIHitstats(cEventData *info, cGlobal *global ){
+void writeCXIHitstats(cEventData *eventData, cGlobal *global ){
 	DEBUG2("Writing Hitstats.");
 
 	#ifdef H5F_ACC_SWMR_WRITE
@@ -2004,11 +2005,13 @@ void writeCXIHitstats(cEventData *info, cGlobal *global ){
 	}
 	#endif
 	/* Get the existing CXI file or open a new one */
-	CXI::Node * cxi = getResultsFileByName(global, info, info->powderClass);
+	CXI::Node *results = getResultsFileByName(global, eventData, eventData->powderClass);
 
 	pthread_mutex_lock(&global->saveCXI_mutex);
-	(*cxi)["event_data"]["hit"].write(&info->hit,global->nCXIEvents);
-	(*cxi)["event_data"]["nPeaks"].write(&info->nPeaks,global->nCXIEvents);
+	(*results)["event_data"]["hit"].write(&eventData->hit,global->nCXIEvents);
+	(*results)["event_data"]["nPeaks"].write(&eventData->nPeaks,global->nCXIEvents);
+    (*results)["event_data"]["hitScore"].write(&eventData->hitScore,global->nCXIEvents);
+
 	global->nCXIEvents += 1;
 	#ifdef H5F_ACC_SWMR_WRITE
 	if(global->cxiSWMR){
@@ -2028,6 +2031,11 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
     using CXI::Node;
     char sBuffer[1024];
 	
+    cMyTimer timer_cxiWait;
+    cMyTimer timer_cxiWrite;
+
+    timer_cxiWait.start();
+    
     
     // Stuff only needed for SWMR mode
     #ifdef H5F_ACC_SWMR_WRITE
@@ -2070,19 +2078,37 @@ void writeCXI(cEventData *eventData, cGlobal *global ){
 	global->nFramesSavedPerClass[eventData->powderClass] += 1;
     global->nCXIHits += 1;
     pthread_mutex_unlock(&global->saveCXI_mutex);       // Moved up here on 23 May, should work.... revert if problems
+    timer_cxiWait.stop();
 
-    
     
     /*
      *  Write CXI and results data
      */
+    timer_cxiWrite.start();
     writeCXIData(cxi, eventData, global, stackSlice);
     writeResultsData(results, eventData, global, stackSlice);
+    timer_cxiWrite.stop();
+    global->timeProfile.addToTimer(timer_cxiWait.duration, global->timeProfile.TIMER_H5WAIT);
+    global->timeProfile.addToTimer(timer_cxiWrite.duration, global->timeProfile.TIMER_H5WRITE);
+
+
     
     
-    
-    
-	
+    #ifdef H5F_ACC_SWMR_WRITE
+        if(global->cxiSWMR){
+            if(global->cxiFlushPeriod && (stackSlice % global->cxiFlushPeriod) == 0){
+                H5Fflush(cxi->hid(),H5F_SCOPE_LOCAL);
+            }
+            
+            if (didDecreaseActive) {
+                pthread_mutex_lock(&global->nActiveThreads_mutex);
+                global->nActiveCheetahThreads++;
+                pthread_mutex_unlock(&global->nActiveThreads_mutex);
+            }
+            pthread_mutex_unlock(&global->swmr_mutex);
+        }
+    #endif
+
 	
 	/*
 	 *	Update text file log
@@ -2503,7 +2529,7 @@ void writeCXIData(CXI::Node *cxi, cEventData *eventData, cGlobal *global, uint s
     //}
     
 
-     
+
 }
 
 /*
@@ -2656,6 +2682,15 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         //detector2["sum"].write(&eventData->detector[detIndex].sum,stackSlice);
     }
     
+    
+    /*
+     *  Hit score
+     * this is done in writeCXIHitstats(cEventData *eventData, cGlobal *global ){}
+     */
+    //float hitScore = eventData->hitScore;
+    //Node &result = root["event_data"];
+    //result["hitScore"].write(&hitScore, stackSlice);
+
   
     /*
      *  Peaks
@@ -2665,27 +2700,27 @@ void writeResultsData(CXI::Node *results, cEventData *eventData, cGlobal *global
         long nPeaks = eventData->peaklist.nPeaks;
         long powderClass = eventData->powderClass;
         
-        Node &result = root["event_data"].child("peaks",resultIndex);
+        Node &peaks = root["event_data"].child("peaks",resultIndex);
         
-        result["powderClass"].write(&powderClass, stackSlice);
-        result["nPeaks"].write(&nPeaks, stackSlice);
-        result["peakTotal"].write(&eventData->peakTotal,stackSlice);
-        result["peakResolution"].write(&eventData->peakResolution,stackSlice);
-        result["peakResolutionA"].write(&eventData->peakResolutionA,stackSlice);
-        result["peakDensity"].write(&eventData->peakDensity,stackSlice);
-        result["imageClass"].write(&eventData->powderClass,stackSlice);
-        result["hit"].write(&eventData->hit,stackSlice);
+        peaks["nPeaks"].write(&nPeaks, stackSlice);
+        peaks["powderClass"].write(&powderClass, stackSlice);
+        peaks["peakTotal"].write(&eventData->peakTotal,stackSlice);
+        peaks["peakResolution"].write(&eventData->peakResolution,stackSlice);
+        peaks["peakResolutionA"].write(&eventData->peakResolutionA,stackSlice);
+        peaks["peakDensity"].write(&eventData->peakDensity,stackSlice);
+        peaks["imageClass"].write(&eventData->powderClass,stackSlice);
+        peaks["hit"].write(&eventData->hit,stackSlice);
         
-        result["peakXPosAssembled"].write(eventData->peaklist.peak_com_x_assembled, stackSlice, nPeaks, true);
-        result["peakYPosAssembled"].write(eventData->peaklist.peak_com_y_assembled, stackSlice, nPeaks, true);
+        peaks["peakXPosAssembled"].write(eventData->peaklist.peak_com_x_assembled, stackSlice, nPeaks, true);
+        peaks["peakYPosAssembled"].write(eventData->peaklist.peak_com_y_assembled, stackSlice, nPeaks, true);
         
-        result["peakXPosRaw"].write(eventData->peaklist.peak_com_x, stackSlice, nPeaks, true);
-        result["peakYPosRaw"].write(eventData->peaklist.peak_com_y, stackSlice, nPeaks, true);
+        peaks["peakXPosRaw"].write(eventData->peaklist.peak_com_x, stackSlice, nPeaks, true);
+        peaks["peakYPosRaw"].write(eventData->peaklist.peak_com_y, stackSlice, nPeaks, true);
         
-        result["peakTotalIntensity"].write(eventData->peaklist.peak_totalintensity, stackSlice, nPeaks, true);
-        result["peakMaximumValue"].write(eventData->peaklist.peak_maxintensity, stackSlice, nPeaks, true);
-        result["peakSNR"].write(eventData->peaklist.peak_snr, stackSlice, nPeaks, true);
-        result["peakNPixels"].write(eventData->peaklist.peak_npix, stackSlice, nPeaks, true);
+        peaks["peakTotalIntensity"].write(eventData->peaklist.peak_totalintensity, stackSlice, nPeaks, true);
+        peaks["peakMaximumValue"].write(eventData->peaklist.peak_maxintensity, stackSlice, nPeaks, true);
+        peaks["peakSNR"].write(eventData->peaklist.peak_snr, stackSlice, nPeaks, true);
+        peaks["peakNPixels"].write(eventData->peaklist.peak_npix, stackSlice, nPeaks, true);
     }
     
 

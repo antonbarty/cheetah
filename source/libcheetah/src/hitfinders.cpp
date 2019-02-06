@@ -110,7 +110,7 @@ int hitfinder(cEventData *eventData, cGlobal *global)
         case 12: // Use list of hits as hitfinding algorithm
             nameEvent(eventData, global);
             // containsEvent returns bool, but is typeCasted to int according to
-            // standard conversion (§4.7/4 from the C++ Standard):
+            // standard conversion (4.7/4 from the C++ Standard):
             // (bool containsEvent()) ? 1 : 0
             // http://stackoverflow.com/questions/5369770/bool-to-int-conversion
             hit = (int) containsEvent((std::string) eventData->eventname, global);

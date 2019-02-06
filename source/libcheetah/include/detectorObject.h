@@ -25,7 +25,7 @@
 #include "cheetah_extensions_yaroslav/pythonWrapperConversions.h"
 #include "cheetah_extensions_yaroslav/mask.h"
 
-#define MAX_DETECTORS 2
+#define MAX_DETECTORS 5
 #define MAX_FILENAME_LENGTH 1024
 
 /*

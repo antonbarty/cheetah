@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
+#include <sys/stat.h>
 #include <hdf5.h>
 #include <math.h>
 #include <pthread.h>
@@ -59,23 +60,25 @@ herr_t cheetahHDF5ErrorHandler(hid_t,void *)
 int cheetahInit(cGlobal *global) {
     
 	// Check if we're using psana of the same git commit
-	if(strcmp(global->facility, "EuXFEL")) {
+	/*
+    if(strcmp(global->facility, "EuXFEL")) {
 		if(!getenv("PSANA_GIT_SHA") || strcmp(getenv("PSANA_GIT_SHA"),GIT_SHA1)){
 			fprintf(stderr,    "*******************************************************************************************\n");
-			fprintf(stderr,"*** WARNING %s:%d ***\n",__FILE__,__LINE__);
+			fprintf(stderr,"*** Note %s:%d ***\n",__FILE__,__LINE__);
 			
 			if(getenv("PSANA_GIT_SHA")){
 				fprintf(stderr,"***        Using psana from git commit %s         ***\n",getenv("PSANA_GIT_SHA"));
 				fprintf(stderr,"***        and cheetah_ana_mod from git commit %s ***\n",GIT_SHA1);
 			}
 			else{
-				fprintf(stderr,"***         Using a psana version not compiled with cheetah!                            ***\n");
+				fprintf(stderr,"***         Using a psana version not compiled with cheetah                            ***\n");
 			}
 			fprintf(stderr,    "*******************************************************************************************\n");
 			sleep(10);
 		}
 		setenv("LIBCHEETAH_GIT_SHA",GIT_SHA1,0);
 	}
+     */
 	
     // Check that HDF5 library is thread safe
     hbool_t H5_is_ts;
@@ -88,11 +91,33 @@ int cheetahInit(cGlobal *global) {
     else {
         printf("[OK] HDF5 threadsafe check passed\n");
     }
-
     
 	global->self = global;
 	//global->defaultConfiguration();
+    
+    // Parse standard cheetah.ini configuration file
+    printf("Reading usual cheetah configuration file: %s\n",global->configFile );
 	global->parseConfigFile(global->configFile);
+    
+    // If there is an instrument calibration specified, load it second
+    // Calibration file is optional, and being loaded second anything in here overrides what is in the cheetah.ini
+    printf("Reading cheetah calibration file: %s\n",global->calibFile );
+    if(strcmp(global->calibFile,"None") != 0 ) {
+        // Check file exists
+        struct stat buffer;
+        if (stat(global->calibFile, &buffer)==0) {
+            global->parseConfigFile(global->calibFile);
+        }
+        else {
+            printf("   Skipping: Calibration file does not exist: %s\n",global->calibFile );
+        }
+    }
+    else {
+        printf("   Skipping: calibration filename is: %s\n",global->calibFile );
+    }
+
+    
+    // Check we have not asked for incompatible options
 	if(global->validateConfiguration()){
 		ERROR("[FAIL] Validation of given configuration failed");
 		return 1;
@@ -118,6 +143,7 @@ int cheetahInit(cGlobal *global) {
 	initStreakFinder(global);
 
 	printf("[OK] Cheetah clean initialisation\n");
+    fflush (stdout);
 	return 0;
 }
 
@@ -168,6 +194,7 @@ void cheetahNewRun(cGlobal *global) {
 		}
     }
     pthread_mutex_unlock(&global->powderfp_mutex);
+    fflush (stdout);
 }
 
 
@@ -358,6 +385,9 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
 	 *	In non-threaded mode, the worker does not clean up its own eventData structure when done:
      *      eventData remains available after the worker exits and must be explicitly freed by the user
      */
+    cMyTimer timer_workerWait;
+    timer_workerWait.start();
+
     if(eventData->useThreads == 0) {
         worker((void *)eventData);
     }
@@ -393,6 +423,8 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
 			}
 				
 		}
+
+        
         
         // Set detached state
         pthread_attr_init(&threadAttribute);
@@ -415,8 +447,11 @@ void cheetahProcessEvent(cGlobal *global, cEventData *eventData){
         }
 		pthread_mutex_unlock(&global->nActiveThreads_mutex);
         pthread_attr_destroy(&threadAttribute);
-//		pthread_mutex_lock(&global->process_mutex);
+        //        pthread_mutex_lock(&global->process_mutex);
     }
+    
+    timer_workerWait.stop();
+    global->timeProfile.addToTimer(timer_workerWait.duration, global->timeProfile.TIMER_WAITFORWORKERTHREAD);
 }
 
 
@@ -502,7 +537,27 @@ void cheetahExit(cGlobal *global) {
 	// Destroy memory and destroy mutexes
 	global->freeMemory();
 	destroyStreakFinder(global);
+    
 
+
+    // Processing time
+    double dtime;
+    float fps;
+    int hrs, mins, secs;
+
+    time (&global->tend);
+    dtime = difftime(global->tend, global->tstart);
+    hrs = (int) floor(dtime / 3600);
+    mins = (int) floor((dtime - 3600 * hrs) / 60);
+    secs = (int) floor(dtime - 3600 * hrs - 60 * mins);
+    fps = global->nprocessedframes / dtime;
+
+    // Timing profile
+    global->timeProfile.reportTimers();
+    printf("Elapsed wall time: %ihr %imin %isec\n", hrs, mins, secs);
+    printf("Average frame rate: %2.1f fps\n", fps);
+
+    
     global->writeStatus("Finished");    
     printf("Cheetah clean exit\n");
 }

@@ -48,6 +48,7 @@ cGlobal::cGlobal(void)
     
     // ini file to use
     strcpy(configFile, "cheetah.ini");
+    strcpy(calibFile, "None");
     strcpy(configOutFile, "cheetah.out");
 
     // Default experiment info (in case beamline data is missing...)
@@ -253,7 +254,7 @@ cGlobal::cGlobal(void)
     // Timeout of thread activity, if set to 0 or negative no timeout
     threadTimeoutInSeconds = 5 * 60.;
 
-    anaModThreads = 8;
+    nEventCopyThreads = 8;
 
     // Saving to subdirectories
     subdirFileCount = -1;
@@ -1006,8 +1007,8 @@ int cGlobal::parseConfigTag(char *tag, char *value)
     else if (!strcmp(tag, "threadtimeoutinseconds")) {
         threadTimeoutInSeconds = atof(value);
     }
-    else if (!strcmp(tag, "anamodthreads")) {
-        anaModThreads = atoi(value);
+    else if (!strcmp(tag, "neventcopythreads")) {
+        nEventCopyThreads = atoi(value);
     }
     else if (!strcmp(tag, "usehelperthreads")) {
         useHelperThreads = atoi(value);
@@ -1686,6 +1687,11 @@ void cGlobal::updateLogfile(void)
     fflush (framefp);
     fflush (cleanedfp);
     fflush (peaksfp);
+    
+    
+    // Report on overall timing
+    timeProfile.reportTimers();
+
     /*
      for(long i=0; i<nPowderClasses; i++) {
      if (powderlogfp[i] != NULL) fflush(powderlogfp[i]);
