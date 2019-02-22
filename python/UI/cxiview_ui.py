@@ -11,7 +11,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.resize(1400, 1200)
+        MainWindow.resize(1400, 1005)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayout = QtWidgets.QGridLayout(self.centralwidget)
@@ -161,6 +161,7 @@ class Ui_MainWindow(object):
         self.menuView.setObjectName("menuView")
         MainWindow.setMenuBar(self.menuBar)
         self.actionSave_data = QtWidgets.QAction(MainWindow)
+        self.actionSave_data.setEnabled(True)
         self.actionSave_data.setObjectName("actionSave_data")
         self.actionSave_image = QtWidgets.QAction(MainWindow)
         self.actionSave_image.setObjectName("actionSave_image")
@@ -190,10 +191,13 @@ class Ui_MainWindow(object):
         self.actionAutoscale.setObjectName("actionAutoscale")
         self.menu_view_photonconversion = QtWidgets.QAction(MainWindow)
         self.menu_view_photonconversion.setObjectName("menu_view_photonconversion")
+        self.actionSave_data_assembled = QtWidgets.QAction(MainWindow)
+        self.actionSave_data_assembled.setObjectName("actionSave_data_assembled")
         self.menuFile.addAction(self.actionRefresh_file_list)
         self.menuFile.addAction(self.actionLoad_geometry)
         self.menuFile.addAction(self.actionSave_image)
         self.menuFile.addAction(self.actionSave_data)
+        self.menuFile.addAction(self.actionSave_data_assembled)
         self.menuFile.addSeparator()
         self.menuFile.addAction(self.actionQuit)
         self.menuCXI.addAction(self.actionDefault_particle_display_settings)
@@ -234,7 +238,7 @@ class Ui_MainWindow(object):
         self.menuCXI.setTitle(_translate("MainWindow", "Particles"))
         self.menuCrystals.setTitle(_translate("MainWindow", "Crystals"))
         self.menuView.setTitle(_translate("MainWindow", "View"))
-        self.actionSave_data.setText(_translate("MainWindow", "Save data"))
+        self.actionSave_data.setText(_translate("MainWindow", "Save data (raw)"))
         self.actionSave_image.setText(_translate("MainWindow", "Save image"))
         self.actionLoad_geometry.setText(_translate("MainWindow", "Load geometry"))
         self.actionRefresh_file_list.setText(_translate("MainWindow", "Refresh file list"))
@@ -246,5 +250,6 @@ class Ui_MainWindow(object):
         self.actionAuto_scale_levels.setText(_translate("MainWindow", "Lock histogram scale"))
         self.actionAutoscale.setText(_translate("MainWindow", "Auto-scale image"))
         self.menu_view_photonconversion.setText(_translate("MainWindow", "Photon count conversion"))
+        self.actionSave_data_assembled.setText(_translate("MainWindow", "Save data (assembled)"))
 
 from pyqtgraph import ImageView

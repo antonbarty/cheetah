@@ -119,6 +119,16 @@ void cAgipdReader::setScheme(char *scheme) {
         setNewFileSkip(0);
     }
 
+    // March 2018
+    else if(_scheme == "XFEL2018b") {
+        std::cout << "\tSetting AGIPD data scheme to XFEL2018b\n";
+        setFirstPulse(8);
+        setPulseIDmodulo(8);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setCellIDcorrection(1);        // Data is not interleaved
+        setGainDataOffset(0,1);        // Gain data hyperslab offset relative to image data
+        setNewFileSkip(0);
+    }
+
     
 	// Default (current) scheme
 	else {

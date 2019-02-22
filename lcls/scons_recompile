@@ -1,0 +1,21 @@
+#!/bin/bash
+
+#
+# Source this script to do a recompilation of psconda cheetah
+#
+
+# Copy across changed files
+rsync -av source/libcheetah/ ana-1.3.49/cheetah/.
+rsync -av source/cheetah_psana/ ana-1.3.49/cheetah_psana/.
+rsync -av source/pspython/jungfrau/ ana-1.3.49/jungfrau/.
+#rsync -av jungfrau/ ana-1.3.49/jungfrau/.
+
+# Set up environment and recompile
+cd ana-1.3.49
+source /reg/g/psdm/etc/psconda.sh
+source conda_setup
+
+scons
+
+cd ..
+

@@ -63,6 +63,7 @@ void handler(int sig) {
 struct tCheetahEuXFELparams {
 	std::vector<std::string> inputFiles;
 	std::string iniFile;
+    std::string calibFile;
     std::string exptName;
 	std::string dataFormat;
     int frameStride;
@@ -80,7 +81,7 @@ void waitForCheetahWorkers(cGlobal*);
 
 // Main entry point for EuXFEL version of Cheetah
 // Usage:
-// > cheetah-euxfel -i inifile.ini <*AGIPD00*.h5>
+// > cheetah-euxfel -i inifile.ini -c calib.ini <*AGIPD00*.h5>
 //
 int main(int argc, char* argv[]) {
 	
@@ -98,12 +99,17 @@ int main(int argc, char* argv[]) {
 	std::cout << "----------------" << std::endl;
 	std::cout << "Program name: " << argv[0] << std::endl;
 	std::cout << "cheetah.ini file: " << CheetahEuXFELparams.iniFile << std::endl;
+    std::cout << "calib.ini file: " << CheetahEuXFELparams.calibFile << std::endl;
 	std::cout << "Input files: " << std::endl;
 	for(int i=0; i< CheetahEuXFELparams.inputFiles.size(); i++) {
 		std::cout << "\t " << CheetahEuXFELparams.inputFiles[i] << std::endl;
 	}
 	
 	std::cout << "----------------" << std::endl;
+
+    // Timing stuff
+    cMyTimer timer_dataLoad;
+    cMyTimer timer_evtCopy;
 
 	
 	// Initialize Cheetah
@@ -115,6 +121,7 @@ int main(int argc, char* argv[]) {
 
     strcpy(cheetahGlobal.facility,"EuXFEL");
 	strcpy(cheetahGlobal.configFile, CheetahEuXFELparams.iniFile.c_str());
+    strcpy(cheetahGlobal.calibFile, CheetahEuXFELparams.calibFile.c_str());
 	strcpy(cheetahGlobal.experimentID, CheetahEuXFELparams.exptName.c_str());
 
 	cheetahInit(&cheetahGlobal);
@@ -178,7 +185,10 @@ int main(int argc, char* argv[]) {
 		// Process frames in this file
 		std::cout << "Reading individual frames\n";
 		agipd.resetCurrentFrame();
+        timer_dataLoad.start();
 		while (agipd.nextFrame()) {
+            timer_dataLoad.stop();
+
 			
             // Incrememnt the frame number
             frameNumber++;
@@ -194,9 +204,17 @@ int main(int argc, char* argv[]) {
 				std::cout << "Skipping pulse 0 in train (in cheetah-euxfel.cpp)" << std::endl;
 				continue;
 			}
-			
+            
+            if(false) {
+                if(agipd.currentCell >= 62) {
+                    std::cout << "!! Hack for Orville June 2018: Skipping pulses beyond 62 in train (in cheetah-euxfel.cpp)" << std::endl;
+                    continue;
+                }
+            }
 
+            
 			// Set up new Cheetah event
+            timer_evtCopy.start();
 			cEventData * eventData = cheetahNewEvent(&cheetahGlobal);
 			eventData->frameNumber = frameNumber;
 
@@ -246,18 +264,22 @@ int main(int argc, char* argv[]) {
 					   
             
             // Copy AGIPD bad pixel mask into Cheetah event
+            // We do nothing with the gain information beyond checking how many pixels in each gain stage
             for (long i = 0; i < cheetahGlobal.detector[detId].pix_nn; i++) {
                 if(agipd.badpixMask[i] != 0) {
                     eventData->detector[detId].pixelmask[i] = PIXEL_IS_BAD;
                 }
             }
-            
-            // We do nothing with the gain information beyond here
-            
+            timer_evtCopy.stop();
 
 
 			// Process event
 			cheetahProcessEventMultithreaded(&cheetahGlobal, eventData);
+            
+            // Timing
+            cheetahGlobal.timeProfile.addToTimer(timer_evtCopy.duration, cheetahGlobal.timeProfile.TIMER_EVENTCOPY);
+            cheetahGlobal.timeProfile.addToTimer(timer_dataLoad.duration, cheetahGlobal.timeProfile.TIMER_EVENTDATA);
+            timer_dataLoad.start();
 		}
         // end agipd.nextFrame()
 	
@@ -346,7 +368,7 @@ void print_help(void){
     std::cout << "Cheetah interface for EuXFEL\n";
     std::cout << "Anton Barty, Helen Ginn, September 2015-\n";
     std::cout << std::endl;
-    std::cout << "usage: cheetah-euxfel -i <INIFILE> *AGIPD00.s*.h5 \n";
+    std::cout << "usage: cheetah-euxfel -i <INIFILE> -c calib.ini *AGIPD00.s*.h5 \n";
     std::cout << std::endl;
     std::cout << "\t--inifile=<file)     Specifies cheetah.ini file to use\n";
     std::cout << "\t--experiment=<name>  String specifying the experiment name (used for lableling and setting the file layout)\n";
@@ -366,6 +388,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 	
     // Defaults
     global->iniFile = "cheetah.ini";
+    global->calibFile = "None";
     global->exptName = "XFEL";
 	global->dataFormat = "XFEL2012";
     global->frameStride = -1;
@@ -377,6 +400,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
     // three legitimate values: no_argument, required_argument and optional_argument
 	const struct option longOpts[] = {
 		{ "inifile", required_argument, NULL, 'i' },
+        { "calibfile", required_argument, NULL, 'c' },
         { "stride", required_argument, NULL, 0 },
         { "skip", required_argument, NULL, 0 },
         { "experiment", required_argument, NULL, 'e' },
@@ -386,7 +410,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 		{ "help", no_argument, NULL, 'h' },
 		{ NULL, no_argument, NULL, 0 }
 	};
-	const char optString[] = "i:e:f:vgh?";
+    const char optString[] = "i:c:e:f:vgh?";
 	
 	int opt;
 	int longIndex;
@@ -397,8 +421,12 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 				break;
 			case 'i':
 				global->iniFile = optarg;
-                std::cout << ".ini file set to " << global->iniFile << std::endl;
+                std::cout << "cheetah.ini file set to " << global->iniFile << std::endl;
 				break;
+            case 'c':
+                global->calibFile = optarg;
+                std::cout << "calib.ini file set to " << global->calibFile << std::endl;
+                break;
 			case 'e':
 				global->exptName = optarg;
 				std::cout << "Experiment name set to " << global->exptName << std::endl;
@@ -434,8 +462,8 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 					global->dataFormat = true;
 					std::cout << "Data format will be " << global->dataFormat << std::endl;
 				}
-
 				break;
+                
 			default:
 				/* You won't actually get here. */
 				break;
@@ -457,6 +485,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
 	}
 
 	std::cout << "cheetah.ini file: " << global->iniFile << std::endl;
+    std::cout << "calib.ini file: " << global->calibFile << std::endl;
 
 }
 

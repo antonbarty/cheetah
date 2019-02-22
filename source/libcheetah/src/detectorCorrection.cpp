@@ -1034,7 +1034,7 @@ void pnccdLineMasking(cEventData *eventData,cGlobal *global){
  * When numbering the 1024 CAMEX channels of a CCD from 1 to 1024, these are channels 513 and 1024. 
  * CAMEX channel 513 is not bonded to a physical detector channel. It herefore does not contain any photon data, 
  * but only CAMEX noise, and should be excluded from scientific analysis. The data of the physical detector channel n 
- * for 512 ≤ n ≤ 1022 is in CAMEX channel n + 1. CAMEX channel 1024 is bonded to both detector channels 1023 and 1024. 
+ * for 512 <= n <= 1022 is in CAMEX channel n + 1. CAMEX channel 1024 is bonded to both detector channels 1023 and 1024. 
  * This channel therefore contains the summed signal of detector channels 1023 and 1024. Depending on the analysis goal, 
  * this channel may be excluded from further analysis, treated as the sum that it actually is, or may be even split into two 
  * channels under some assumptions.

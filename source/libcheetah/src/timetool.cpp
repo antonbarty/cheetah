@@ -124,7 +124,7 @@ void saveTimeToolStack(cGlobal *global, int powderClass) {
 	
     sprintf(filename,"r%04u-TimeTool-class%i-stack%li.h5", global->runNumber, powderClass, stackNum);
     printf("Saving time tool stack: %s\n", filename);
-    writeSimpleHDF5(filename, stack, length, nRows, H5T_NATIVE_FLOAT);
+    writeSimpleHDF5(filename, stack, length, nRows, (hid_t) H5T_NATIVE_FLOAT);
 	
 	
 	// Flush stack index buffer

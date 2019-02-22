@@ -310,6 +310,7 @@
     <addaction name="menu_cheetah_processselected"/>
     <addaction name="menu_cheetah_relabel"/>
     <addaction name="menu_cheetah_autorun"/>
+    <addaction name="menu_modify_ini_files"/>
    </widget>
    <widget class="QMenu" name="menuAnalysis">
     <property name="title">
@@ -344,6 +345,7 @@
     <addaction name="menu_powder_blank"/>
     <addaction name="menu_powder_all_det"/>
     <addaction name="menu_powder_all"/>
+    <addaction name="menu_powder_all_avg"/>
    </widget>
    <widget class="QMenu" name="menuLogs">
     <property name="title">
@@ -711,12 +713,22 @@
   </action>
   <action name="menu_powder_all">
    <property name="text">
-    <string>Virtual powder all (background subtracted)</string>
+    <string>Virtual powder all (background subtracted sum)</string>
    </property>
   </action>
   <action name="menu_calib_XFELdetcorr">
    <property name="text">
     <string>Run XFEL detector calibration script</string>
+   </property>
+  </action>
+  <action name="menu_powder_all_avg">
+   <property name="text">
+    <string>Virtual powder all (background corrected averavge)</string>
+   </property>
+  </action>
+  <action name="menu_modify_ini_files">
+   <property name="text">
+    <string>Modify .ini files</string>
    </property>
   </action>
  </widget>

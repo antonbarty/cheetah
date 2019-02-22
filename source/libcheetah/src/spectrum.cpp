@@ -129,7 +129,7 @@ void saveFEEspectrumStack(cGlobal *global, int powderClass) {
 	
     sprintf(filename,"r%04u-FEEspectrum-class%i-stack%li.h5", global->runNumber, powderClass, stackNum);
     printf("Saving FEE spectral stack of length %li: %s with length\n", speclength, filename);
-    writeSimpleHDF5(filename, stack, speclength, nRows, H5T_NATIVE_FLOAT);
+    writeSimpleHDF5(filename, stack, speclength, nRows,(hid_t)  H5T_NATIVE_FLOAT);
 	
 	
 	// Flush stack index buffer
@@ -286,7 +286,7 @@ void saveEspectrumStack(cGlobal *global, int powderClass) {
 	
     sprintf(filename,"r%04u-espectrumstack-class%i-stack%li.h5", global->runNumber, powderClass, stackNum);
     printf("Saving spectral stack: %s\n", filename);
-    writeSimpleHDF5(filename, stack, speclength, nRows, H5T_NATIVE_FLOAT);
+    writeSimpleHDF5(filename, stack, speclength, nRows, (hid_t) H5T_NATIVE_FLOAT);
 	
 	pthread_mutex_unlock(&mutex);
 	
@@ -358,7 +358,7 @@ void saveIntegratedRunSpectrum(cGlobal *global) {
 		sprintf(filename,"r%04u-energySpectrum-darkcal.h5", global->runNumber);
 		printf("Saving energy spectrum darkcal to file: %s\n", filename);
         
-		writeSimpleHDF5(filename, espectrumDark, global->espectrumWidth, global->espectrumLength, H5T_NATIVE_DOUBLE);
+		writeSimpleHDF5(filename, espectrumDark, global->espectrumWidth, global->espectrumLength, (hid_t) H5T_NATIVE_DOUBLE);
 
 		pthread_mutex_unlock(&global->espectrumRun_mutex);
 		pthread_mutex_unlock(&global->nespechits_mutex);

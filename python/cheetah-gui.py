@@ -17,7 +17,7 @@ import lib.cfel_filetools as cfel_file
 import lib.cfel_detcorr as cfel_detcorr
 import lib.gui_dialogs as gui_dialogs
 import lib.gui_locations as gui_locations
-import lib.gui_configuration as gui_configuration
+import lib.gui_setup_new_experiment as gui_setup_new_experiment
 import lib.gui_crystfel_bridge as gui_crystfel
 
 
@@ -105,7 +105,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
                 # Coloring of table elements
                 self.table.item(row,col).setBackground(PyQt5.QtGui.QColor(255,255,255))
-                if key=='XTC':
+                if key=='Rawdata':
                     if item=='Ready':
                         self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(200, 255, 200))
                     if item == 'Copying' or item == 'Restoring':
@@ -226,14 +226,21 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         dir = cfel_file.dialog_pickfile(directory=True, qtmainwin=self)
         if dir == '':
             self.exit_gui()
-        print('Selected directory: ')
+        print('Selected directory: ', dir)
         os.chdir(dir)
 
         # Use LCLS schema for now; will need modification to run anywhere else; do this later
-        gui_configuration.extract_lcls_template(self)
+        #gui_setup_new_experiment.extract_lcls_template(self)
+        gui_setup_new_experiment.extract_template(self)
 
     #end setup_new_experiment
 
+    #
+    #   Modifies fields in all .ini files after initial template extraction
+    #
+    def modify_ini_files(self):
+        gui_setup_new_experiment.modify_cheetah_config_files(self)
+    # end modify_ini_files
 
     #
     #   Select an experiment, or find a new one
@@ -302,6 +309,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         dialog_info = {
             'inifile_list' : inifile_list,
             'lastini' : self.lastini,
+            'lastcalib' : self.lastcalib,
             'lasttag' : self.lasttag
         }
         # Dialog box for dataset label and ini file
@@ -314,9 +322,10 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         # Extract values from return dict
         dataset = gui['dataset']
         inifile = gui['inifile']
+        calibfile = gui['calibfile']
         self.lasttag = dataset
         self.lastini = inifile
-
+        self.lastcalib = calibfile
 
         dataset_csv = cfel_file.csv_to_dict('datasets.csv')
 
@@ -326,17 +335,20 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             print("Try again...")
             return
 
+        if 'calibFile' not in dataset_csv.keys():
+            print('Adding calibFile to datasets.csv')
+            dataset_csv['calibFile'] = dataset_csv['iniFile']
 
         # Process all selected runs
         runs = self.selected_runs()
         for i, run in enumerate(runs['run']):
             print('------------ Start Cheetah process script ------------')
-            cmdarr = [self.config['process'], run, inifile, dataset]
+            cmdarr = [self.config['process'], run, inifile, calibfile, dataset]
             cfel_file.spawn_subprocess(cmdarr, shell=True)
 
             # Format output directory string
             # This clumsily selects between using run numbers and using directory names
-            # We need to fix this up sometime
+            # Need to fix this up sometime
             print("Location: ", self.compute_location['location'])
             if 'LCLS' in self.compute_location['location']:
                 dir = 'r{:04d}'.format(int(run))
@@ -353,9 +365,14 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             #Update Dataset and Cheetah status in table
             table_row = runs['row'][i]
             self.table.setItem(table_row, 1, PyQt5.QtWidgets.QTableWidgetItem(dataset))
-            self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
             self.table.setItem(table_row, 3, PyQt5.QtWidgets.QTableWidgetItem('Submitted'))
+            self.table.setItem(table_row, 5, PyQt5.QtWidgets.QTableWidgetItem(dir))
+
+            self.table.setItem(table_row, 10, PyQt5.QtWidgets.QTableWidgetItem(inifile))
+            self.table.setItem(table_row, 11, PyQt5.QtWidgets.QTableWidgetItem(calibfile))
+
             self.table.item(table_row, 3).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
+
 
             # Update dataset file
             if run in dataset_csv['Run']:
@@ -363,18 +380,20 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 dataset_csv['DatasetID'][ds_indx] = dataset
                 dataset_csv['Directory'][ds_indx] = dir
                 dataset_csv['iniFile'][ds_indx] = inifile
+                dataset_csv['calibFile'][ds_indx] = calibfile
             else:
                 dataset_csv['Run'].append(run)
                 dataset_csv['DatasetID'].append(dataset)
                 dataset_csv['Directory'].append(dir)
                 dataset_csv['iniFile'].append(inifile)
+                dataset_csv['calibFile'].append(calibfile)
             print('------------ Finish Cheetah process script ------------')
 
         # Sort dataset file to keep it in order
 
 
         # Save datasets file
-        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
+        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile', 'calibFile']
         cfel_file.dict_to_csv('datasets.csv', dataset_csv, keys_to_save)
     #end run_cheetah()
 
@@ -433,7 +452,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         cfel_file.spawn_subprocess(cmdarr) #, shell=True)
 
     def modify_beamline_config(self):
-        gui_configuration.modify_cheetah_config_files(self)
+        gui_setup_new_experiment.modify_cheetah_config_files(self)
 
     def relabel_dataset(self):
 
@@ -478,6 +497,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 dataset_csv['DatasetID'].append(newlabel)
                 dataset_csv['Directory'].append(newdir)
                 dataset_csv['iniFile'].append('---')
+                dataset_csv['calibFile'].append('---')
 
             # Rename the directory
             if olddir != '---':
@@ -499,13 +519,13 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
         # Sort dataset file to keep it in order
         # Save datasets file
-        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile']
+        keys_to_save = ['Run', 'DatasetID', 'Directory', 'iniFile', 'calibFile']
         cfel_file.dict_to_csv('datasets.csv', dataset_csv, keys_to_save)
 
 
 
     def autorun(self):
-        print("Autorun selected")
+        print("Autorun selected but not implemented :-( ")
 
     def set_new_geometry(self):
         gfile = cfel_file.dialog_pickfile(path='../calib/geometry', filter='Geometry files (*.h5 *.geom);;All files (*.*)', qtmainwin=self)
@@ -590,40 +610,49 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #   Powder menu items
     #
     def show_powder_hits(self):
-        file = '*detector0-class1-sum.h5'
+        file = '*detector?-class1-sum.h5'
         field = 'data/non_assembled_detector_and_photon_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_blanks(self):
-        file = '*detector0-class0-sum.h5'
+        file = '*detector?-class0-sum.h5'
         field = 'data/non_assembled_detector_and_photon_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_hits_det(self):
-        file = '*detector0-class1-sum.h5'
+        file = '*detector?-class1-sum.h5'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_blanks_det(self):
-        file = '*detector0-class0-sum.h5'
+        file = '*detector?-class0-sum.h5'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
     def show_powder_peaks_hits(self):
-        file = '*detector0-class1-sum.h5'
+        file = '*detector?-class1-sum.h5'
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
 
     def show_powder_peaks_blanks(self):
-        file = '*detector0-class0-sum.h5'
+        file = '*detector?-class0-sum.h5'
         field = 'data/peakpowder'
         self.show_selected_images(file, field)
 
     def show_powder_all_det(self):
-        file = '*detector0-class*-sum.h5'
+        file = '*detector?-class*-sum.h5'
         field = 'data/non_assembled_detector_corrected'
         self.show_selected_images(file, field)
 
+    def show_powder_all(self):
+        file = '*detector?-class*-sum.h5'
+        field = 'data/non_assembled_detector_and_photon_corrected'
+        self.show_selected_images(file, field)
+
+    def show_powder_all_avg(self):
+        file = '*detector?-class*-sum.h5'
+        field = 'data/non_assembled_detector_and_photon_corrected_average'
+        self.show_selected_images(file, field)
 
 
     #
@@ -643,7 +672,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #   Calibration menu items
     #
     def show_darkcal(self):
-        file = '*detector0-darkcal.h5'
+        file = '*detector?-darkcal.h5'
         field = 'data/data'
         self.show_selected_images(file, field)
 
@@ -832,6 +861,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             config.update({'cheetahini': 'darkcal.ini'})
         if not 'cheetahtag' in config.keys():
             config.update({'cheetahtag': 'darkcal'})
+        if not 'cheetahcalib' in config.keys():
+            config.update({'cheetahcalib': 'None'})
 
 
         return config
@@ -879,7 +910,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         #   Where are we?
         #
         compute_location = gui_locations.determine_location()
-        self.compute_location = gui_locations.set_location_configuration(compute_location )
+        self.compute_location = gui_locations.set_location_configuration(compute_location)
 
 
         #
@@ -915,6 +946,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         print("Loading configuration file: ./crawler.config")
         self.config = self.parse_config()
         self.lastini = self.config['cheetahini']
+        self.lastcalib = self.config['cheetahcalib']
         self.lasttag = self.config['cheetahtag']
         self.lastindex = '../process/index_cell.sh'
         self.lastcell = None
@@ -945,6 +977,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_cheetah_processselected.triggered.connect(self.run_cheetah)
         self.ui.menu_cheetah_relabel.triggered.connect(self.relabel_dataset)
         self.ui.menu_cheetah_autorun.triggered.connect(self.autorun)
+        self.ui.menu_modify_ini_files.triggered.connect(self.modify_ini_files)
 
         # Calibrations
         self.ui.menu_calib_darkcal.triggered.connect(self.show_darkcal)
@@ -992,8 +1025,9 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.menu_powder_blank_det.triggered.connect(self.show_powder_blanks_det)
         self.ui.menu_powder_peaks_hits.triggered.connect(self.show_powder_peaks_hits)
         self.ui.menu_powder_peaks_blank.triggered.connect(self.show_powder_peaks_blanks)
-        self.ui.menu_powder_all.triggered.connect(self.show_powder_all_det)
+        self.ui.menu_powder_all.triggered.connect(self.show_powder_all)
         self.ui.menu_powder_all_det.triggered.connect(self.show_powder_all_det)
+        self.ui.menu_powder_all_avg.triggered.connect(self.show_powder_all_avg)
 
         # Log menu actions
         self.ui.menu_log_batch.triggered.connect(self.view_batch_log)

@@ -128,8 +128,12 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
 
         # Apply geometry to image and display
         img_data = cxi['data']
+
         if self.geometry_ok:
-            self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
+            try:
+                self.img_to_draw = cfel_img.pixel_remap(img_data, self.geometry['x'], self.geometry['y'], dx=1.0)
+            except:
+                self.img_to_draw = numpy.transpose(img_data)
         else:
             self.img_to_draw = numpy.transpose(img_data)
         self.ui.imageView.setImage(self.img_to_draw, autoLevels=False, autoRange=False)
@@ -140,18 +144,17 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
             if self.ui.actionHistogram_clip.isChecked() == True:
                 # Histogram equalisation (saturate top 0.1% of pixels)
                 bottom, top  = cfel_img.histogram_clip_levels(img_data.ravel(),0.0002)
-            else:
-                # Scale from 0 to maximum intensity value
-                top = numpy.nanmax(img_data.ravel())
-                bottom = 0
-
-            self.ui.imageView.setLevels(bottom,top)
         else:
             top = numpy.nanmax(img_data.ravel())
             bottom = numpy.nanmin(img_data.ravel())
-
         #end autoscale
 
+        # Force minimum to be zero?
+        if self.ui.action_Imagefloorzero.isChecked():
+            bottom = 0
+
+        # Set image scale
+        self.ui.imageView.setLevels(bottom,top)
 
 
         # Set the histogram widget scale bar to behave politely and not jump around
@@ -449,14 +452,13 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.shuffle_mode == False:
             self.shuffle_mode = True
             self.ui.shufflePushButton.setText("Stop")
-            self.refresh_timer.timeout.connect(self.random_pattern)   
             self.random_pattern()
-            self.refresh_timer.start(1000)
+            self.shuffle_timer.start(1000)
 
         else: 
             self.shuffle_mode = False
             self.ui.shufflePushButton.setText("Shuffle")
-            self.refresh_timer.stop()
+            self.shuffle_timer.stop()
     #end shuffle()
 
 
@@ -467,14 +469,13 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         if self.play_mode == False:
             self.play_mode = True
             self.ui.playPushButton.setText("Stop")
-            self.refresh_timer.timeout.connect(self.next_pattern)   
             self.next_pattern()
-            self.refresh_timer.start(1000)
+            self.play_timer.start(1000)
 
         else: 
             self.play_mode = False
             self.ui.playPushButton.setText("Play")
-            self.refresh_timer.stop()
+            self.play_timer.stop()
     #end play()
 
 
@@ -821,7 +822,7 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # Sanity check: Do geometry and data shape match?
         if self.geometry_ok and (temp['data'].flatten().shape != self.geometry['x'].shape):
             print("Error: Shape of geometry and image data do not match")
-            print('Data size: ', temp.data.flatten().shape)
+            print('Data size: ', temp['data'].flatten().shape)
             print('Geometry size: ', self.geometry['x'].shape)
             print('Displaying images without geometry applied')
             self.geometry_ok = False
@@ -848,6 +849,12 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.qtintvalidator.setRegExp(self.intregex)
         self.ui.jumpToLineEdit.setValidator(self.qtintvalidator)
 
+        # Keyboard shortcuts
+        self.ui.nextPushButton.setShortcut(PyQt5.QtGui.QKeySequence(PyQt5.QtCore.Qt.Key_Right))
+        self.ui.previousPushButton.setShortcut(PyQt5.QtGui.QKeySequence(PyQt5.QtCore.Qt.Key_Left))
+        self.ui.randomPushButton.setShortcut(PyQt5.QtGui.QKeySequence(PyQt5.QtCore.Qt.Key_Space))
+
+
         # Check boxes on bottom line
         self.ui.foundPeaksCheckBox.setChecked(False)
         self.ui.predictedPeaksCheckBox.setChecked(False)
@@ -863,8 +870,10 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         self.ui.actionAutoscale.setChecked(True)
         self.ui.actionHistogram_clip.setChecked(True)
         self.ui.actionAuto_scale_levels.setChecked(True)
+        self.ui.action_Imagefloorzero.setChecked(True)
         self.ui.actionHistogram_clip.triggered.connect(self.draw_things)
         self.ui.actionAuto_scale_levels.triggered.connect(self.draw_things)
+        self.ui.action_Imagefloorzero.triggered.connect(self.draw_things)
 
         # File menu
         self.ui.actionSave_image.triggered.connect(self.action_save_png)
@@ -885,7 +894,10 @@ class cxiview(PyQt5.QtWidgets.QMainWindow):
         # Flags needed for play and shuffle (can probably do this better)
         self.shuffle_mode = False
         self.play_mode = False 
-        self.refresh_timer = PyQt5.QtCore.QTimer()
+        self.shuffle_timer= PyQt5.QtCore.QTimer()
+        self.play_timer = PyQt5.QtCore.QTimer()
+        self.play_timer.timeout.connect(self.next_pattern)
+        self.shuffle_timer.timeout.connect(self.random_pattern)
 
 
         # Put menu inside the window on Macintosh and elsewhere

@@ -136,7 +136,13 @@ private:
 
 	cAgipdCalibrator *calibrator;
 	float		*calibGainFactor;
-	
+    
+    // Persistent chunked data sets
+    cHDF5dataset    raw_image_dataset;
+    cHDF5dataset    proc_image_dataset;
+    cHDF5dataset    proc_gain_dataset;
+    cHDF5dataset    proc_mask_dataset;
+
 
 
 // Private functions

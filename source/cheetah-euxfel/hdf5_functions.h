@@ -18,6 +18,8 @@
 #define __agipd__hdf5_functions__
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <string>
 #include <hdf5.h>
 #include <hdf5_hl.h>
 
@@ -28,14 +30,59 @@ public:
 	int	        verbose;
     bool        fileOK=false;
 	bool        noData=true;
+    bool        useNewDatasetReader=true;
+    bool        use_h5LT=true;      // H5LT is convenient but not threadsafe
+    
+    long        h5_minCacheSize = 2*1024*1024;
+    long        h5_ridiculousCacheSize=200*1024*1024;
 
 protected:
-	void*		checkNeventsAllocRead(char[], long, hid_t, size_t);
-	void*		checkAllocReadDataset(char[], int*, hsize_t*, hid_t, size_t);
-	void*		checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
-	void 		getDatasetDims(char[], int*, hsize_t*);
-	void 		getDatasetDims(char[], int*, hsize_t*, H5T_class_t*, size_t*);
-	bool        fileCheckAndOpen(char *filename);	
+    hid_t        fileCheckAndOpen(char *filename);
+    void*        checkNeventsAllocRead(char[], long, hid_t, size_t);
+    void*        checkAllocReadDataset(char[], int*, hsize_t*, hid_t, size_t);
+    void*        checkAllocReadHyperslab(char[], int, hsize_t*, hsize_t*, hid_t, size_t);
+    void         getDatasetDims(char[], int*, hsize_t*);
+    void         getDatasetDims(char[], int*, hsize_t*, H5T_class_t*, size_t*);
+    
+    
 };
+// end cHDF5Functions
+
+/*
+ *  This class duplicates some of the above functionalty but enables the dataset
+ *  to remain open across the reading of multiple images
+ */
+class cHDF5dataset : public cHDF5Functions {
+public:
+    bool     datasetOK=false;
+    
+    cHDF5dataset();
+    ~cHDF5dataset();
+    
+    void    open(char[],char[]);
+    void    setChunkCacheSize(void);
+    void*   checkAllocReadHyperslab(int, hsize_t*, hsize_t*, hid_t, size_t);
+    void    close(void);
+    
+private:
+    hid_t       h5_file_id;
+    hid_t       h5_dataset_id;
+    hid_t       h5_dataspace_id;
+    hid_t       h5_dapl;        // dapl = Data Access Property List
+    int         h5_ndims;
+    hsize_t     *h5_dims;
+    hid_t       h5_type;
+    size_t      h5_size;
+
+    std::string h5_filename;
+    std::string h5_fieldname;
+    
+    long        h5_chunksize;
+    long        h5_chunksize_bytes;
+};
+// end cHDF5dataset
+
+    
+
 
 #endif /* defined(__agipd__hdf5_functions__) */

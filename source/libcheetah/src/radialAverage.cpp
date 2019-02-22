@@ -42,10 +42,19 @@ void calculateRadialAverage(cEventData *eventData, cGlobal *global) {
 				uint16_t *pixelmask_r = dataV_r.getPixelmask();
 				uint16_t *pixelmask_2d = dataV_2d.getPixelmask();				
 				calculateRadialAverage(data_2d, pixelmask_2d, data_r, pixelmask_r, pix_r, radial_nn, pix_nn);
-			}
-		}
+            }
+            
+            // Copy to other array
+            cPixelDetectorCommon     *detector = &global->detector[detIndex];
+            float   *data_r = dataV_r.getData();
+            long    radial_nn = detector->radial_nn;
+            float   *radialAverage = eventData->detector[detIndex].radialAverage_detCorr;
+            for(long i=0; i<radial_nn; i++) {
+                radialAverage[i] = (float) data_r[i];
+            }
+        }
 	}
-	
+    // End detector loop
 }
 
 template <class T>
@@ -169,6 +178,15 @@ void addToRadialAverageStack(cEventData *eventData, cGlobal *global, int powderC
     pthread_mutex_t mutex = detector->radialStack_mutex[powderClass];
 	
     
+    // Moved into calculate_radial_average where it belongs
+    //cDataVersion dataV_r(&eventData->detector[detIndex], &global->detector[detIndex], global->detector[detIndex].saveVersion, cDataVersion::DATA_FORMAT_RADIAL_AVERAGE);
+    //while(dataV_r.next()) {
+    //    float    *data_r = dataV_r.getData();
+    //    for(long i=0; i<radial_nn; i++) {
+    //        radialAverage[i] = (float) data_r[i];
+    //    }
+    //}
+    
     // Data offsets
 	pthread_mutex_lock(&mutex);
 	stackCounter = detector->radialStackCounter[powderClass];
@@ -253,7 +271,7 @@ void saveRadialAverageStack(cGlobal *global, int powderClass, int detIndex) {
     printf("Saving radial stack: %s\n", filename);
     
     
-    writeSimpleHDF5(filename, detector->radialAverageStack[powderClass], detector->radial_nn, nRows, H5T_NATIVE_FLOAT);
+    writeSimpleHDF5(filename, detector->radialAverageStack[powderClass], detector->radial_nn, nRows, (hid_t) H5T_NATIVE_FLOAT);
     for(long i=0; i<global->nPowderClasses; i++) {
         fflush(global->powderlogfp[i]);
 		fflush(global->framelist[i]);

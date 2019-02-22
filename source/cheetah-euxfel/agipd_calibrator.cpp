@@ -234,9 +234,8 @@ void cAgipdCalibrator::readCalibrationData()
     
     
     // Check opening of file
-    bool check;
-    check = fileCheckAndOpen((char *)_filename.c_str());
-    if (check) {
+    h5_file_id = fileCheckAndOpen((char *)_filename.c_str());
+    if (h5_file_id != NULL) {
         std::cout << "\tFile check OK\n";
     }
     else {
@@ -369,9 +368,8 @@ void cAgipdCalibrator::readDESYCalibrationData()
     
 
 	// Check opening of file
-	bool check;
-	check = fileCheckAndOpen((char *)_filename.c_str());
-	if (check) {
+	h5_file_id = fileCheckAndOpen((char *)_filename.c_str());
+	if (h5_file_id != NULL) {
 		std::cout << "\tFile check OK\n";
 	}
 	else {
