@@ -9,7 +9,20 @@ import glob
 import csv
 import lib.cfel_filetools as cfel_file
 
-
+def are_agipd_files_ready (files): 
+   highest_sn = 0 
+   for pn in range(0,16): 
+       files_panel_pn = sorted([ x for x in files if 'AGIPD{:02d}'.format(pn) in x ]) 
+       if len(files_panel_pn) != 0:
+          highest_sn = int(files_panel_pn[-1].split('.')[0].split('S')[-1]) 
+       else:
+          return False
+   for pn in range(0,16): 
+      for sn in range (0, highest_sn): 
+          pattern_to_search = 'AGIPD{pn:02d}-S{sn:05d}.h5'.format(pn=pn, sn=sn) 
+          if not any(pattern_to_search in x for x in files): 
+              return False 
+   return True                                                                                                                                                             
 
 def scan_data(data_dir):
     #print("Crawler data: ", data_dir)
@@ -58,25 +71,14 @@ def scan_data(data_dir):
 
         run = dir[1:]
 
-        pattern = data_dir + dir + '/*AGIPD*'
+        pattern = data_dir + '/' + dir + '/*AGIPD*'
         files = glob.glob(pattern)
         #files = os.path.basename(files)
 
-        # No AGIPD files?
-        if len(files) is 0:
-            run_indx = run_list.index(run)
-            status[run_indx] = 'Empty'
-
-        # Incomplete copying? Check number of files
-        pattern2 = data_dir + dir + '/*AGIPD00*'
-        files2 = glob.glob(pattern2)
-        n_agipd00 = len(files2)
-
-        if len(files) is not 16*n_agipd00:
+        if not are_agipd_files_ready(files):
             run_indx = run_list.index(run)
             status[run_indx] = 'Copying'
-
-        if len(files) is 16*n_agipd00:
+        else:
             run_indx = run_list.index(run)
             status[run_indx] = 'Ready'
 
