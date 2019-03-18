@@ -2,7 +2,7 @@
 
 # Form implementation generated from reading ui file 'cxiview.ui'
 #
-# Created by: PyQt5 UI code generator 5.6
+# Created by: PyQt5 UI code generator 5.9.2
 #
 # WARNING! All changes made in this file will be lost!
 
@@ -193,6 +193,10 @@ class Ui_MainWindow(object):
         self.menu_view_photonconversion.setObjectName("menu_view_photonconversion")
         self.actionSave_data_assembled = QtWidgets.QAction(MainWindow)
         self.actionSave_data_assembled.setObjectName("actionSave_data_assembled")
+        self.action_Imagefloorzero = QtWidgets.QAction(MainWindow)
+        self.action_Imagefloorzero.setCheckable(True)
+        self.action_Imagefloorzero.setChecked(True)
+        self.action_Imagefloorzero.setObjectName("action_Imagefloorzero")
         self.menuFile.addAction(self.actionRefresh_file_list)
         self.menuFile.addAction(self.actionLoad_geometry)
         self.menuFile.addAction(self.actionSave_image)
@@ -204,8 +208,9 @@ class Ui_MainWindow(object):
         self.menuCrystals.addAction(self.actionDefault_crystal_display_settings)
         self.menuCrystals.addAction(self.actionCircle_Cheetah_peaks)
         self.menuView.addAction(self.actionAutoscale)
-        self.menuView.addAction(self.actionHistogram_clip)
         self.menuView.addAction(self.actionAuto_scale_levels)
+        self.menuView.addAction(self.actionHistogram_clip)
+        self.menuView.addAction(self.action_Imagefloorzero)
         self.menuView.addAction(self.menu_view_photonconversion)
         self.menuBar.addAction(self.menuFile.menuAction())
         self.menuBar.addAction(self.menuColours.menuAction())
@@ -251,5 +256,6 @@ class Ui_MainWindow(object):
         self.actionAutoscale.setText(_translate("MainWindow", "Auto-scale image"))
         self.menu_view_photonconversion.setText(_translate("MainWindow", "Photon count conversion"))
         self.actionSave_data_assembled.setText(_translate("MainWindow", "Save data (assembled)"))
+        self.action_Imagefloorzero.setText(_translate("MainWindow", "Image floor is zero"))
 
 from pyqtgraph import ImageView
