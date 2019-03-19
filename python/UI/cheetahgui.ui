@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>785</width>
-    <height>855</height>
+    <width>1100</width>
+    <height>900</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -236,7 +236,7 @@
         </column>
         <column>
          <property name="text">
-          <string>XTC</string>
+          <string>Rawdata</string>
          </property>
         </column>
         <column>
@@ -274,6 +274,16 @@
           <string>Hitrate%</string>
          </property>
         </column>
+        <column>
+         <property name="text">
+          <string>Recipe</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Calibration</string>
+         </property>
+        </column>
        </widget>
       </item>
       <item>
@@ -288,7 +298,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>785</width>
+     <width>1100</width>
      <height>22</height>
     </rect>
    </property>

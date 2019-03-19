@@ -419,7 +419,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
 
     def view_hits(self):
         file = '*.cxi'
-        field = '/entry_1/data_1/data'
+        field = '/entry_1/instrument_1/detector_1/data'
         # Quick hack for P11 data
         if 'p11' in self.config['xtcdir']:
             file = '*.cbf*.h5'
@@ -627,6 +627,12 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     def show_powder_blanks_det(self):
         file = '*detector?-class0-sum.h5'
         field = 'data/non_assembled_detector_corrected'
+        self.show_selected_images(file, field)
+
+    def show_powder_blanks_button(self):
+        # will show either detector corrected or photon corrected depending on what's in the file
+        file = '*detector?-class0-sum.h5'
+        field = 'data/data'
         self.show_selected_images(file, field)
 
     def show_powder_peaks_hits(self):
@@ -963,7 +969,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.button_runCheetah.clicked.connect(self.run_cheetah)
         self.ui.button_index.clicked.connect(self.crystfel_indexpdb)
         self.ui.button_viewhits.clicked.connect(self.view_hits)
-        self.ui.button_blanksum.clicked.connect(self.show_powder_blanks_det)
+        self.ui.button_blanksum.clicked.connect(self.show_powder_blanks_button)
         self.ui.button_virtualpowder.clicked.connect(self.show_powder_peaks_hits)
         self.ui.button_peakogram.clicked.connect(self.view_peakogram)
 

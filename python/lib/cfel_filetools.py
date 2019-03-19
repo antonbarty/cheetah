@@ -370,9 +370,9 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
         try:
             photon_energy_eV = hdf5_fh['/instrument/photon_energy_eV'][frameID]
         except:
-            photon_energy_eV = 'nan'
+            photon_energy_eV = np.nan
     else:
-        photon_energy_eV = 'nan'
+        photon_energy_eV = np.nan
 
 
     # Camera length
@@ -380,9 +380,9 @@ def read_cxi(filename, frameID=0, data=False, mask=False, peaks=False, photon_en
         try:
             EncoderValue = hdf5_fh['/instrument/detector_1/EncoderValue'][frameID]
         except:
-            EncoderValue = 'nan'
+            EncoderValue = np.nan
     else:
-        EncoderValue = 'nan'
+        EncoderValue = np.nan
 
     # Array dimensions
     if slab_size == True:
