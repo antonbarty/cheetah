@@ -96,17 +96,17 @@ static char h5_image_mask_suffix[] = "mask";
  *      /INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/cellId Dataset {15000/Inf, 1}
  *      /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/cellId Dataset {44352/Inf, 1}
  */
-void setDetectorString(std::string detName) {
+void cAgipdModuleReader::setDetectorString(std::string detName) {
     std::string     tempStr;
-    std::cout << "\tSetting detector name: " << detName;
+    std::cout << "\tSetting detector name: " << detName << std::endl;
 
     tempStr = "/INSTRUMENT/"+detName+"/DET/";
     strcpy(h5_instrument_prefix, tempStr.c_str());
-    std::cout << "\t\th5_instrument_prefix = " << h5_instrument_prefix;
+    std::cout << "\t\th5_instrument_prefix = " << h5_instrument_prefix << std::endl;
 
     tempStr = "/INDEX/"+detName+"/DET/";
     strcpy(h5_index_prefix, tempStr.c_str());
-    std::cout << "\t\th5_instrument_prefix = " << h5_index_prefix;
+    std::cout << "\t\th5_instrument_prefix = " << h5_index_prefix << std::endl;
 };
 
 
