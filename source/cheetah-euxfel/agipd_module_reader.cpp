@@ -85,9 +85,29 @@ static char h5_index_first_suffix[] = "CH0:xtdf/image/first";
 static char h5_index_count_suffix[] = "CH0:xtdf/image/count";
 
 
-// These two in processed data only
+// These two fields are in processed data only
 static char h5_image_gain_suffix[] = "gain";
 static char h5_image_mask_suffix[] = "mask";
+
+
+/*
+ *  Change detector string in H5 fields (above)
+ *  These change between instruments, eg:
+ *      /INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/cellId Dataset {15000/Inf, 1}
+ *      /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/cellId Dataset {44352/Inf, 1}
+ */
+void setDetectorString(std::string detName) {
+    std::string     tempStr;
+    std::cout << "\tSetting detector name: " << detName;
+
+    tempStr = "/INSTRUMENT/"+detName+"/DET/";
+    strcpy(h5_instrument_prefix, tempStr.c_str());
+    std::cout << "\t\th5_instrument_prefix = " << h5_instrument_prefix;
+
+    tempStr = "/INDEX/"+detName+"/DET/";
+    strcpy(h5_index_prefix, tempStr.c_str());
+    std::cout << "\t\th5_instrument_prefix = " << h5_index_prefix;
+};
 
 
 cAgipdModuleReader::cAgipdModuleReader(void){

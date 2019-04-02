@@ -81,6 +81,7 @@ void cAgipdReader::setScheme(char *scheme) {
 	// Barty, September 2017
 	if(_scheme == "XFEL2012") {
 		std::cout << "\tSetting AGIPD data scheme to XFEL2012\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
         setFirstPulse(0);
 		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setCellIDcorrection(2);		// For interleaved data we need to correct the cellID by 2, else not
@@ -91,6 +92,7 @@ void cAgipdReader::setScheme(char *scheme) {
     // Orville, September 2017
     if(_scheme == "XFEL2017") {
         std::cout << "\tSetting AGIPD data scheme to XFEL2017\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
         setFirstPulse(0);
         setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(2);        // For interleaved data we need to correct the cellID by 2, else not
@@ -102,6 +104,7 @@ void cAgipdReader::setScheme(char *scheme) {
     // Fromme, November 2017
     else if(_scheme == "XFEL2066") {
 		std::cout << "\tSetting AGIPD data scheme to XFEL2066\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
         setFirstPulse(0);
 		setPulseIDmodulo(4);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setCellIDcorrection(1);		// Data is not interleaved
@@ -112,6 +115,7 @@ void cAgipdReader::setScheme(char *scheme) {
     // March 2018
     else if(_scheme == "XFEL2018a") {
         std::cout << "\tSetting AGIPD data scheme to XFEL2018a\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
         setFirstPulse(4);
         setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(1);        // Data is not interleaved
@@ -122,6 +126,7 @@ void cAgipdReader::setScheme(char *scheme) {
     // March 2018
     else if(_scheme == "XFEL2018b") {
         std::cout << "\tSetting AGIPD data scheme to XFEL2018b\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
         setFirstPulse(8);
         setPulseIDmodulo(8);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(1);        // Data is not interleaved
@@ -129,20 +134,35 @@ void cAgipdReader::setScheme(char *scheme) {
         setNewFileSkip(0);
     }
 
+    // MID, April 2019
+    else if(_scheme == "MID2019") {
+        std::cout << "\tSetting AGIPD data scheme to MID2019\n";
+        setDetectorString("MID_DET_AGIPD1M-1");
+        setFirstPulse(0);
+        setPulseIDmodulo(8);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setCellIDcorrection(1);        // Data is not interleaved
+        setGainDataOffset(0,1);        // Gain data hyperslab offset relative to image data
+        setNewFileSkip(0);
+    }
+
+    
     
 	// Default (current) scheme
     // Defaults will be used if none of the above are found
+    // Update this to the current most likely scenario for new experiments
 	else {
 		std::cout << "\tSetting AGIPD data scheme to Default\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
 		setFirstPulse(0);
-		setPulseIDmodulo(8);		// Good frames occur when pulseID % _pulseIDmodulo == 0
-		setCellIDcorrection(2);		// For interleaved data we need to correct the cellID by 2, else not
-		setGainDataOffset(1,0);		// Gain data hyperslab offset relative to image data = frameNum+1
+		setPulseIDmodulo(4);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		setCellIDcorrection(1);		// For interleaved data we need to correct the cellID by 2, else not
+		setGainDataOffset(0,1);		// Gain data hyperslab offset relative to image data = frameNum+1
 		//setNewFileSkip(60);
 	}
 
 
     // Print this out in case anyone reads the log file as first step in debugging
+    std::cout << "\tDetector name string: " << _detName << std::endl;
     std::cout << "\tData frames on PulseId modulo: " << _pulseIDmodulo << std::endl;
     std::cout << "\tSkip pulseIDs in train less than: " << _firstPulseId << std::endl;
 	std::cout << "\tCellId correction: " << _cellIDcorrection << std::endl;
@@ -258,6 +278,7 @@ void cAgipdReader::open(char *baseFilename){
 			printf("Module %0.2li:\n", i);
 		}
 		module[i].verbose = 0;
+        module[i].setDetectorString(_detName);
 		module[i].open((char *) moduleFilename[i].data(), i);
 		module[i].readHeaders();
 		module[i].readDarkcal((char *)darkcalFilename[i].c_str());

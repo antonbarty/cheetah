@@ -83,6 +83,7 @@ public:
 	void setGainDataOffset(int d0, int d1) {gainDataOffset[0] = d0; gainDataOffset[1] = d1; }
 	void setCellIDcorrection(int mod) { cellIDcorrection = mod; if (cellIDcorrection <= 0) cellIDcorrection = 1; }
 	void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
+    void setDetectorString(std::string detName);
 
 	
 // Pubic variables

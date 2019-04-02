@@ -59,6 +59,7 @@ public:
 	void setCellIDcorrection(int mod) { _cellIDcorrection = mod; if (_cellIDcorrection <= 0) _cellIDcorrection = 1; }
     void setNewFileSkip(int skip) { _newFileSkip = skip; if (_newFileSkip < 0) _newFileSkip = 0; }
 	void setGainDataOffset(int d0, int d1) {_gainDataOffset[0] = d0; _gainDataOffset[1] = d1; }
+    void setDetectorString(std::string detName) {_detName = detName;}
 	
 	
 	void setDoNotApplyGainSwitch(bool _val) {_doNotApplyGainSwitch = _val; }
@@ -127,8 +128,9 @@ private:
 	std::string			gaincalFilename[nAGIPDmodules];
 	
     /* Things that change between experiments */
-    std::string         _scheme;
-	int                 _firstPulseId;              // Number of pulses to skip at start of pulse train
+    std::string         _scheme;            // Scheme to use
+    std::string         _detName = "SPB_DET_AGIPD1M-1";           // Detector name string, by default set this to SPB
+	int                 _firstPulseId;      // Number of pulses to skip at start of pulse train
 	int					_pulseIDmodulo;		// Good frames occur when pulseID % _pulseIDmodulo == 0
 	int					_cellIDcorrection; 	// For interleaved data we need to divide cellID by 2, otherwise not
     int                 _stride;            // Step over frames with this spacing
