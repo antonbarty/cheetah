@@ -44,6 +44,16 @@
  *	/INSTRUMENT/SPB_DET_AGIPD1M-1/DET/0CH0:xtdf/image/trainId Dataset {15000/Inf, 1}
  */
 
+/*
+ *  AGIPD at MID
+ *  h5ls -r RAW-R0001-AGIPD00-S00001.h5
+ *  /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/cellId Dataset {44352/Inf, 1}
+ *  /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/data Dataset {44352/Inf, 2, 512, 128}
+ *  /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/length Dataset {44352/Inf, 1}
+ *  /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/pulseId Dataset {44352/Inf, 1}
+ *  /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/status Dataset {44352/Inf, 1}
+ *  /INSTRUMENT/MID_DET_AGIPD1M-1/DET/0CH0:xtdf/image/trainId Dataset {44352/Inf, 1}
+ */
 
 /*
 // LPD at FXE

@@ -131,6 +131,7 @@ void cAgipdReader::setScheme(char *scheme) {
 
     
 	// Default (current) scheme
+    // Defaults will be used if none of the above are found
 	else {
 		std::cout << "\tSetting AGIPD data scheme to Default\n";
 		setFirstPulse(0);
@@ -140,14 +141,15 @@ void cAgipdReader::setScheme(char *scheme) {
 		//setNewFileSkip(60);
 	}
 
-	std::cout << "\tData frames on PulseId modulo: " << _pulseIDmodulo << std::endl;
+
+    // Print this out in case anyone reads the log file as first step in debugging
+    std::cout << "\tData frames on PulseId modulo: " << _pulseIDmodulo << std::endl;
     std::cout << "\tSkip pulseIDs in train less than: " << _firstPulseId << std::endl;
 	std::cout << "\tCellId correction: " << _cellIDcorrection << std::endl;
 	std::cout << "\tGain data offset: (" << _gainDataOffset[0] << ", " << _gainDataOffset[1] << ")" << std::endl;
     std::cout << "****** End AGIPD configuration ******\n";
 
 	
-    // Defaults will be used if none of the above are found
     return;
 }
 
