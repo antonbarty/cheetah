@@ -40,8 +40,8 @@ static const unsigned CSPAD_nASICS_Y = 8;   // 8 ASICs down in raw data stresm
 // AGIPD 1M //
 static const unsigned AGIPD1M_ASIC_NX = 128;  // ASIC nx = extent of one ASIC in x
 static const unsigned AGIPD1M_ASIC_NY = 512;  // ASIC ny = extent of one ASIC in y
-static const unsigned AGIPD1M_nASICS_X = 1;   // 8 ASICs across in raw data stream
-static const unsigned AGIPD1M_nASICS_Y = 16;   // 8 ASICs down in raw data stresm
+static const unsigned AGIPD1M_nASICS_X = 1;   // 1 ASICs across in raw data stream
+static const unsigned AGIPD1M_nASICS_Y = 16;   // 16 ASICs down in raw data stresm
 
 //  CSPAD 2x2 //
 static const unsigned CSPAD2x2_nASICS_X = 2;   // 2 ASICs across in raw data stream

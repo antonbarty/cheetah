@@ -37,6 +37,7 @@ cAgipdReader::cAgipdReader(void){
 	goodImages4ThisTrain = -1;
 	_firstPulseId = 0;
     _stride = 1;
+    _pulseIDmodulo = 1;
     _newFileSkip = 0;
 	_doNotApplyGainSwitch = false;
 	
@@ -127,8 +128,8 @@ void cAgipdReader::setScheme(char *scheme) {
     else if(_scheme == "XFEL2018b") {
         std::cout << "\tSetting AGIPD data scheme to XFEL2018b\n";
         setDetectorString("SPB_DET_AGIPD1M-1");
-        setFirstPulse(8);
-        setPulseIDmodulo(8);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setFirstPulse(0);
+        setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(1);        // Data is not interleaved
         setGainDataOffset(0,1);        // Gain data hyperslab offset relative to image data
         setNewFileSkip(0);
@@ -139,7 +140,7 @@ void cAgipdReader::setScheme(char *scheme) {
         std::cout << "\tSetting AGIPD data scheme to MID2019\n";
         setDetectorString("MID_DET_AGIPD1M-1");
         setFirstPulse(0);
-        setPulseIDmodulo(8);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setPulseIDmodulo(4);        // Good frames occur when pulseID % _pulseIDmodulo == 0
         setCellIDcorrection(1);        // Data is not interleaved
         setGainDataOffset(0,1);        // Gain data hyperslab offset relative to image data
         setNewFileSkip(0);
@@ -154,7 +155,7 @@ void cAgipdReader::setScheme(char *scheme) {
 		std::cout << "\tSetting AGIPD data scheme to Default\n";
         setDetectorString("SPB_DET_AGIPD1M-1");
 		setFirstPulse(0);
-		setPulseIDmodulo(4);		// Good frames occur when pulseID % _pulseIDmodulo == 0
+		setPulseIDmodulo(1);		// Good frames occur when pulseID % _pulseIDmodulo == 0
 		setCellIDcorrection(1);		// For interleaved data we need to correct the cellID by 2, else not
 		setGainDataOffset(0,1);		// Gain data hyperslab offset relative to image data = frameNum+1
 		//setNewFileSkip(60);

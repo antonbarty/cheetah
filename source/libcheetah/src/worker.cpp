@@ -139,6 +139,11 @@ void *worker(void *threadarg)
     pnccdLineInterpolation(eventData, global);
     pnccdLineMasking(eventData, global);
 
+    // AGIPD corrections
+    // (Largely re-uses selected cspad corrections)
+    agipdModuleSubtract(eventData, global);
+    
+    
     // Apply gain correction
     applyGainCorrection(eventData, global);
 

@@ -194,11 +194,42 @@ void cspadModuleSubtract(cEventData *eventData, cGlobal *global, int flag){
 					long span = 16384;
 					cspadModuleSubtractHistogram(data, mask, span, asic_nx, asic_ny, nasics_x, nasics_y);
 				}
-			
-			}
-		}
-	}
+            }
+        }
+    }
 }
+
+
+void agipdModuleSubtract(cEventData *eventData, cGlobal *global){
+    
+    
+    DETECTOR_LOOP {
+        int flag = global->detector[detIndex].cmModule;
+        if(strcmp(global->detector[detIndex].detectorType, "agipd-1M") == 0) {
+            DEBUG3("AGIPD module subtraction. (detectorID=%ld)",global->detector[detIndex].detectorID);
+            // Dereference datector arrays
+            float        threshold = global->detector[detIndex].cmFloor;
+            float        *data = eventData->detector[detIndex].data_detCorr;
+            uint16_t    *mask = eventData->detector[detIndex].pixelmask;
+            long        asic_nx = global->detector[detIndex].asic_nx;
+            long        asic_ny = global->detector[detIndex].asic_ny;
+            long        nasics_x = global->detector[detIndex].nasics_x;
+            long        nasics_y = global->detector[detIndex].nasics_y;
+            
+            if(flag==1 || flag==2) {
+                cspadModuleSubtractMedian(data, mask, threshold, asic_nx, asic_ny, nasics_x, nasics_y);
+                printf("AGIPD module correction (median)\n");
+            }
+            else if(flag==3) {
+                long span = 16384;
+                cspadModuleSubtractHistogram(data, mask, span, asic_nx, asic_ny, nasics_x, nasics_y);
+                printf("AGIPD module correction (histogram)\n");
+            }
+        }
+    }
+}
+
+
 
 /*
  *	Subtract the median value on each ASIC
@@ -209,6 +240,8 @@ void cspadModuleSubtractMedian(float *data, uint16_t *mask, float threshold, lon
 	long		mval;
 	long		counter;
 	float		median;
+    float       mean;
+    float       correction;
 					  
 	// Create median buffer
 	float	*buffer; 
@@ -220,6 +253,7 @@ void cspadModuleSubtractMedian(float *data, uint16_t *mask, float threshold, lon
 		for(long mj=0; mj<nasics_y; mj++){
 			
 			// Zero array
+            mean = 0;
 			for(long i=0; i<asic_nx*asic_ny; i++)
 				buffer[i] = 0;
 			
@@ -231,31 +265,40 @@ void cspadModuleSubtractMedian(float *data, uint16_t *mask, float threshold, lon
 					e += i + mi*asic_nx;
 					if( isBitOptionUnset(mask[e],PIXEL_IS_BAD) ) {
 						buffer[counter++] = data[e];
+                        mean += data[e];
 					}
 				}
 			}
 			
             // Calculate background using median value 
 			//median = kth_smallest(buffer, global->asic_nx*global->asic_ny, mval);
+            
 			if(counter>0) {
 				mval = lrint(counter*threshold);
                 if(mval < 0) 
                     mval = 1;
 				median = kth_smallest(buffer, counter, mval);
+                mean /= counter;
 			}
-			else 
+            else {
 				median = 0;
+                mean = 0;
+            }
+            //printf("%f %f ", median, mean);
 
+            correction = median;
+            
 			// Subtract median value
 			for(long j=0; j<asic_ny; j++){
 				for(long i=0; i<asic_nx; i++){
 					e = (j + mj*asic_ny) * (asic_nx*nasics_x);
 					e += i + mi*asic_nx;
-					data[e] -= median;
+					data[e] -= correction;
 				}
 			}
 		}
 	}
+    //printf("\n");
 	free(buffer);
 }
 
@@ -291,7 +334,7 @@ void cspadModuleSubtractHistogram(float *data, uint16_t *mask, long hist_span, l
 				for(long i=0; i<asic_nx; i++){
 					e = (j + mj*asic_ny) * (asic_nx*nasics_x);
 					e += i + mi*asic_nx;
-					if( isBitOptionUnset(mask[e],PIXEL_IS_BAD) ) {
+					if( isBitOptionUnset(mask[e],PIXEL_IS_BAD) && data[e] != 0 ) {
 						hist_index = lrint(data[e]) + hist_offset;
 						if(hist_index >= 0 && hist_index < 2*hist_span)
 							histogram[hist_index] += 1;
@@ -313,9 +356,11 @@ void cspadModuleSubtractHistogram(float *data, uint16_t *mask, long hist_span, l
 				hist_max_position -= hist_offset;
 			else
 				hist_max_position = 0;
+
+            printf("%f ", hist_max_position);
+
 			
-			
-			// Subtract median value
+			// Subtract offset value
 			for(long j=0; j<asic_ny; j++){
 				for(long i=0; i<asic_nx; i++){
 					e = (j + mj*asic_ny) * (asic_nx*nasics_x);
@@ -324,6 +369,7 @@ void cspadModuleSubtractHistogram(float *data, uint16_t *mask, long hist_span, l
 				}
 			}
 		}
+        printf("\n");
 	}
 	free(histogram);
 }

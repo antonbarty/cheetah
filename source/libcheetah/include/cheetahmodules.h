@@ -56,6 +56,9 @@ void pnccdOffsetCorrection(float*, uint16_t*);
 void pnccdOffsetCorrection(float*);
 void pnccdFixWiringError(float*);
 
+void agipdModuleSubtract(cEventData *eventData, cGlobal *global);
+
+
 // backgroundCorrection.cpp
 void initPhotonCorrection(cEventData *eventData, cGlobal *global);
 void subtractLocalBackground(cEventData*, cGlobal*);

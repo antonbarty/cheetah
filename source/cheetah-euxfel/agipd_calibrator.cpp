@@ -263,7 +263,7 @@ void cAgipdCalibrator::readCalibrationData()
     if(dims[0] != nGains) {
         std::cout << "Error in AnalogOffset number of gain stages: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
     }
-    if(dims[1] < 0 || dims[1] > 128) {
+    if(dims[1] < 0 || dims[1] > 352) {
         std::cout << "Odd: Suspiciouly large number of memory cells: " << dims[1] << std::endl;
     }
     if(dims[2] != _myModule->n1 || dims[3] != _myModule->n0) {
@@ -394,7 +394,7 @@ void cAgipdCalibrator::readDESYCalibrationData()
 	if(dims[0] != nGains) {
 		std::cout << "Error in number of gain stages: expect nGains=" << nGains << "; but nGains=" << dims[0] << std::endl;
 	}
-	if(dims[1] > 128) {
+	if(dims[1] > 352) {
 		std::cout << "Odd: Suspiciouly large number of memory cells: " << dims[1] << std::endl;
 	}
 	if(dims[2] != _myModule->n1 || dims[3] != _myModule->n0) {
