@@ -635,6 +635,13 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         field = 'data/data'
         self.show_selected_images(file, field)
 
+    def show_powder_hits_button(self):
+        # will show either detector corrected or photon corrected depending on what's in the file
+        file = '*detector?-class1-sum.h5'
+        field = 'data/data'
+        self.show_selected_images(file, field)
+
+
     def show_powder_peaks_hits(self):
         file = '*detector?-class1-sum.h5'
         field = 'data/peakpowder'
@@ -970,6 +977,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.ui.button_index.clicked.connect(self.crystfel_indexpdb)
         self.ui.button_viewhits.clicked.connect(self.view_hits)
         self.ui.button_blanksum.clicked.connect(self.show_powder_blanks_button)
+        self.ui.button_hitsum.clicked.connect(self.show_powder_hits_button)
         self.ui.button_virtualpowder.clicked.connect(self.show_powder_peaks_hits)
         self.ui.button_peakogram.clicked.connect(self.view_peakogram)
 
