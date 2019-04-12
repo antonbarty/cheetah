@@ -75,9 +75,16 @@ def scan_data(data_dir):
         files = glob.glob(pattern)
         #files = os.path.basename(files)
 
+        # Case of no AGIPD files (but run directory has been created)
+        if len(files) is 0:
+            run_indx = run_list.index(run)
+            status[run_indx] = 'noAGIPD'
+            continue
+
+        # Check whether all AGIPD files are there
         if not are_agipd_files_ready(files):
             run_indx = run_list.index(run)
-            status[run_indx] = 'Copying'
+            status[run_indx] = 'Incomplete'
         else:
             run_indx = run_list.index(run)
             status[run_indx] = 'Ready'

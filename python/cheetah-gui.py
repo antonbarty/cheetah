@@ -108,7 +108,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 if key=='Rawdata':
                     if item=='Ready':
                         self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(200, 255, 200))
-                    if item == 'Copying' or item == 'Restoring':
+                    if item == 'Copying' or item == 'Restoring' or item == 'Incomplete':
                         self.table.item(row, col).setBackground(PyQt5.QtGui.QColor(255, 255, 100))
 
                 if key=='Cheetah':
