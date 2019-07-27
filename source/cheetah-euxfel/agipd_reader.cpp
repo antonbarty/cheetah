@@ -124,7 +124,7 @@ void cAgipdReader::setScheme(char *scheme) {
         setNewFileSkip(0);
     }
 
-    // March 2018
+    // August 2018
     else if(_scheme == "XFEL2018b") {
         std::cout << "\tSetting AGIPD data scheme to XFEL2018b\n";
         setDetectorString("SPB_DET_AGIPD1M-1");
@@ -146,7 +146,17 @@ void cAgipdReader::setScheme(char *scheme) {
         setNewFileSkip(0);
     }
 
-    
+    // August 2018
+    else if(_scheme == "XFEL2019") {
+        std::cout << "\tSetting AGIPD data scheme to XFEL2019\n";
+        setDetectorString("SPB_DET_AGIPD1M-1");
+        setFirstPulse(0);
+        setPulseIDmodulo(1);        // Good frames occur when pulseID % _pulseIDmodulo == 0
+        setCellIDcorrection(1);        // Data is not interleaved
+        setGainDataOffset(0,1);        // Gain data hyperslab offset relative to image data
+        setNewFileSkip(0);
+    }
+
     
 	// Default (current) scheme
     // Defaults will be used if none of the above are found

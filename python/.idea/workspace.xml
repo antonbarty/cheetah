@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/cheetah-gui.py" beforeDir="false" afterPath="$PROJECT_DIR$/cheetah-gui.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/crawler_exfel.py" beforeDir="false" afterPath="$PROJECT_DIR$/lib/crawler_exfel.py" afterDir="false" />
-    </list>
+    <list default="true" id="961801e7-89c1-4137-9b2e-249b3198b0b5" name="Default" comment="" />
     <ignored path="python.iws" />
     <ignored path=".idea/workspace.xml" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -46,8 +43,8 @@
       <file leaf-file-name="crawler_merge.py" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="1770">
-              <caret line="122" selection-start-line="122" selection-end-line="122" />
+            <state relative-caret-position="495">
+              <caret line="37" column="23" lean-forward="true" selection-start-line="37" selection-start-column="23" selection-end-line="37" selection-end-column="23" />
             </state>
           </provider>
         </entry>
@@ -416,8 +413,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/lib/crawler_merge.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1770">
-          <caret line="122" selection-start-line="122" selection-end-line="122" />
+        <state relative-caret-position="495">
+          <caret line="37" column="23" lean-forward="true" selection-start-line="37" selection-start-column="23" selection-end-line="37" selection-end-column="23" />
         </state>
       </provider>
     </entry>

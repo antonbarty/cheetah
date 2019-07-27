@@ -390,7 +390,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
     global->iniFile = "cheetah.ini";
     global->calibFile = "None";
     global->exptName = "XFEL";
-	global->dataFormat = "XFEL2012";
+	global->dataFormat = "default";
     global->frameStride = -1;
     global->frameSkip = -1;
 	global->nogainswitch = false;
