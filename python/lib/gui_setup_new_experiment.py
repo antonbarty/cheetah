@@ -168,9 +168,10 @@ def extract_lcls_template(self):
 
 
     #
-    # Modify the configuration files
+    # Dialog box to further modify the configuration files
+    # (Detector name, encoders, etc)
     #
-    modify_cheetah_config_files(self)
+    modify_LCLS_cheetah_config_files(self)
 
     return
     #end extract_lcls_template()
@@ -260,7 +261,7 @@ def extract_euxfel_template(self):
     print('Fixing permissions...')
     cmd = ['chmod', '-R', 'ug+w', 'cheetah/']
     cfel_file.spawn_subprocess(cmd, wait=True)
-    cmd = ['chmod', 'ug+x', 'cheetah/process/process', 'cheetah/process/hitfinder']
+    cmd = ['chmod', 'ug+x', 'cheetah/process/process', 'cheetah/process/hitfinder', 'cheetah/process/cheetahparallel.py', 'cheetah/calib/agipd/scripts/preprocess-dk']
     cfel_file.spawn_subprocess(cmd, wait=True)
     print("Done")
 
@@ -275,8 +276,8 @@ def extract_euxfel_template(self):
     print('Modifying ', file)
 
     # Replace XTC directory with the correct location using sed
-    xtcsedstr = str.replace(datadir, '/', '\\/')
-    cmd = ["sed", "-i", "-r", "s/(xtcdir=).*/\\1" + xtcsedstr + "/", file]
+    sedstr_data = str.replace(datadir, '/', '\\/')
+    cmd = ["sed", "-i", "-r", "s/(xtcdir=).*/\\1" + sedstr_data + "/", file]
     cfel_file.spawn_subprocess(cmd, wait=True)
 
     print('>-------------------------<')
@@ -290,8 +291,8 @@ def extract_euxfel_template(self):
     print('Modifying ', file)
 
     exptstr = instr+'/'+run+'/'+expt
-    expsedstr = str.replace(exptstr, '/', '\\/')
-    cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1" + expsedstr + "/", file]
+    sedstr_exp= str.replace(exptstr, '/', '\\/')
+    cmd = ["sed", "-i", "-r", "s/(expt=).*/\\1" + sedstr_exp + "/", file]
     cfel_file.spawn_subprocess(cmd, wait=True)
 
     print('>-------------------------<')
@@ -299,18 +300,37 @@ def extract_euxfel_template(self):
     cfel_file.spawn_subprocess(cmd, wait=True)
     print('>-------------------------<')
 
+
+    # Modify calibration script template
+    file = 'cheetah/calib/agipd/scripts/preprocess-dk'
+    print('Modifying ', file)
+    sedstr_data = str.replace(absroot, '/', '\\/')
+    cmd = ["sed", "-i", "-r", "s/(--input_dir ).*/\\1" + sedstr_data + "/", file]
+    cfel_file.spawn_subprocess(cmd, wait=True)
+
     print("Working directory: ")
     print(os.getcwd() + '/cheetah')
+
+
+    #
+    # Dialog box to further modify the configuration files
+    # (Detector name, encoders, etc)
+    #
+    print("Test here")
+    modify_EuXFEL_cheetah_config_files(self)
+
 
     return
     #end extract_euxfel_template()
 
 
+
+
 #
-#   Modify a bunch of configuration files
-#   Separate function so that it can be called from the menu as well as on startup
+#   Further modification to a bunch of configuration files
+#   Called as a separate function so that it can be called from the menu as well as on startup
 #
-def modify_cheetah_config_files(self):
+def modify_LCLS_cheetah_config_files(self):
 
     # Dialog box
     result, ok = gui_dialogs.configure_cheetah_lcls_gui.configure_cheetah_dialog()
@@ -364,6 +384,55 @@ def modify_cheetah_config_files(self):
 
 
     print("Done modifying configuration scripts")
+
+    return
+    #end modify_cheetah_config_files()
+
+
+#
+#   Further modification to a bunch of configuration files
+#   Called as a separate function so that it can be called from the menu as well as on startup
+#
+def modify_EuXFEL_cheetah_config_files(self):
+
+    # Dialog box
+    result, ok = gui_dialogs.configure_cheetah_euxfel_gui.configure_cheetah_dialog()
+
+    if ok == False:
+        print('Configuration scripts remain unchanged')
+        return
+
+
+    # This is needed because on startup we are one directory up from cheetah/gui, but when running we are in cheetah/gui
+    dir = os.getcwd()
+    if "cheetah/gui" in dir:
+        prefix = '..'
+    else:
+        prefix = 'cheetah'
+
+
+    print(result)
+    detectorType = result["detectorType"]
+    detectorName = result["detectorName"]
+
+    # Modify detector type and name in .ini files
+    print("Modifying detector type and name...")
+    for file in glob.iglob(prefix+'/process/*.ini'):
+        cmd = ["sed", "-i", "-r", "/^detectorType/s/(detectorType=).*/\\1" + detectorType + "/", file]
+        cfel_file.spawn_subprocess(cmd, wait=True)
+        cmd = ["sed", "-i", "-r", "/^detectorName/s/(detectorName=).*/\\1" + detectorName + "/", file]
+        cfel_file.spawn_subprocess(cmd, wait=True)
+
+
+
+    # Modify detector name in AGIPD preprocess-dk script
+    file = prefix+'/calib/agipd/scripts/preprocess-dk'
+    print('Modifying ', file)
+    cmd = ["sed", "-i", "-r", "s/(--detector_string ).*/\\1" + detectorName + "/", file]
+    cfel_file.spawn_subprocess(cmd, wait=True)
+
+
+
 
     return
     #end modify_cheetah_config_files()

@@ -229,8 +229,6 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         print('Selected directory: ', dir)
         os.chdir(dir)
 
-        # Use LCLS schema for now; will need modification to run anywhere else; do this later
-        #gui_setup_new_experiment.extract_lcls_template(self)
         gui_setup_new_experiment.extract_template(self)
 
     #end setup_new_experiment
@@ -239,7 +237,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     #   Modifies fields in all .ini files after initial template extraction
     #
     def modify_ini_files(self):
-        gui_setup_new_experiment.modify_cheetah_config_files(self)
+        gui_setup_new_experiment.modify_LCLS_cheetah_config_files(self)
     # end modify_ini_files
 
     #
@@ -452,7 +450,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         cfel_file.spawn_subprocess(cmdarr) #, shell=True)
 
     def modify_beamline_config(self):
-        gui_setup_new_experiment.modify_cheetah_config_files(self)
+        gui_setup_new_experiment.modify_LCLS_cheetah_config_files(self)
 
     def relabel_dataset(self):
 

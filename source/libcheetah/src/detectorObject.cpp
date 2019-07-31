@@ -254,7 +254,7 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
 		pix_nn = pix_nx * pix_ny;
 		pixelSize = 110e-6;
 	}
-	else if(strcmp(detectorType, "agipd-1M") == 0 || strcmp(detectorName, "agipd-1M") == 0 ) {
+	else if(strcmp(detectorType, "agipd-1M") == 0 ) {
 		strcpy(detectorType, "agipd-1M");
 		asic_nx = AGIPD1M_ASIC_NX;
 		asic_ny = AGIPD1M_ASIC_NY;

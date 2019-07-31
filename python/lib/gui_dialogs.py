@@ -182,7 +182,7 @@ class run_cheetah_gui(PyQt5.QtWidgets.QDialog):
         return (selection, result == PyQt5.QtWidgets.QDialog.Accepted)
 
 #
-#   Dialog box for configuring Cheetah options
+#   Dialog box for configuring Cheetah options at LCLS
 #
 class configure_cheetah_lcls_gui(PyQt5.QtWidgets.QDialog):
     def __init__(self, parent=None):
@@ -200,7 +200,7 @@ class configure_cheetah_lcls_gui(PyQt5.QtWidgets.QDialog):
 
         # Add a useful label
         self.label1a = PyQt5.QtWidgets.QLabel()
-        self.label1a.setText("Change the following in relevent locations:")
+        self.label1a.setText("Change the following fields in relevent locations:")
         layout.addWidget(self.label1a)
 
 
@@ -248,7 +248,7 @@ class configure_cheetah_lcls_gui(PyQt5.QtWidgets.QDialog):
 
         # Get out of here
         self.label1b = PyQt5.QtWidgets.QLabel()
-        self.label1b.setText("(Cancel will make no changes and retain existing values)")
+        self.label1b.setText("(Cancel will make no changes to configuration files)")
         layout.addWidget(self.label1b)
 
 
@@ -277,6 +277,95 @@ class configure_cheetah_lcls_gui(PyQt5.QtWidgets.QDialog):
         result = dialog.exec_()
         selection = dialog.getCheetahConfig()
         return (selection, result == PyQt5.QtWidgets.QDialog.Accepted)
+
+
+#
+#   Dialog box for configuring Cheetah options at EuXFEL
+#
+class configure_cheetah_euxfel_gui(PyQt5.QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(configure_cheetah_euxfel_gui, self).__init__(parent)
+
+        detectorTypes = ['agipd-1M']
+        detectorNames = ['SPB_DET_AGIPD1M-1', 'MID_DET_AGIPD1M-1']
+        detectorZEncoder = ['None']
+
+
+        layout = PyQt5.QtWidgets.QVBoxLayout(self)
+        self.setWindowTitle("Configure for EuXFEL instrument")
+
+        # Add a useful label
+        self.label1a = PyQt5.QtWidgets.QLabel()
+        self.label1a.setText("Change the following fields in relevent locations:")
+        layout.addWidget(self.label1a)
+
+
+        # Combo box for detector type
+        layout2 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label2 = PyQt5.QtWidgets.QLabel()
+        self.label2.setText("Detector type: ")
+        self.cb2 = PyQt5.QtWidgets.QComboBox()
+        self.cb2.addItems(detectorTypes)
+        self.cb2.setEditable(True)
+        layout2.addWidget(self.label2)
+        layout2.addWidget(self.cb2)
+        layout.addLayout(layout2)
+
+        # Combo box for detector name
+        layout3 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label3 = PyQt5.QtWidgets.QLabel()
+        self.label3.setText("Detector name: ")
+        self.cb3 = PyQt5.QtWidgets.QComboBox()
+        self.cb3.addItems(detectorNames)
+        self.cb3.setEditable(True)
+        layout3.addWidget(self.label3)
+        layout3.addWidget(self.cb3)
+        layout.addLayout(layout3)
+
+        # Combo box for detector distance encoder
+        layout4 = PyQt5.QtWidgets.QHBoxLayout()
+        self.label4 = PyQt5.QtWidgets.QLabel()
+        self.label4.setText("Detector distance encoder: ")
+        self.cb4 = PyQt5.QtWidgets.QComboBox()
+        self.cb4.addItems(detectorZEncoder)
+        self.cb4.setEditable(True)
+        layout4.addWidget(self.label4)
+        layout4.addWidget(self.cb4)
+        layout.addLayout(layout4)
+
+
+        # Get out of here
+        self.label1b = PyQt5.QtWidgets.QLabel()
+        self.label1b.setText("(Cancel will make no changes to configuration files)")
+        layout.addWidget(self.label1b)
+
+
+        # Default OK and Cancel buttons
+        self.buttonBox = PyQt5.QtWidgets.QDialogButtonBox(self)
+        self.buttonBox.setOrientation(PyQt5.QtCore.Qt.Horizontal)
+        self.buttonBox.setStandardButtons(
+            PyQt5.QtWidgets.QDialogButtonBox.Ok | PyQt5.QtWidgets.QDialogButtonBox.Cancel)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+        layout.addWidget(self.buttonBox)
+
+    # get selected text
+    def getCheetahConfig(self):
+        selection = {
+            'detectorType' : self.cb2.currentText(),
+            'detectorName' : self.cb3.currentText(),
+            'detectorZEncoder' : self.cb4.currentText()
+        }
+        return selection
+
+    # static method to create the dialog and return
+    @staticmethod
+    def configure_cheetah_dialog(parent=None):
+        dialog = configure_cheetah_euxfel_gui(parent=parent)
+        result = dialog.exec_()
+        selection = dialog.getCheetahConfig()
+        return (selection, result == PyQt5.QtWidgets.QDialog.Accepted)
+
 
 
 #

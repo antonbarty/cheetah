@@ -91,7 +91,7 @@ int main(int argc, char* argv[]) {
 	std::cout << "Cheetah interface for EuXFEL\n";
 	std::cout << "Anton Barty and Helen Ginn, September 2015-\n";
 
-	// Parse configurations
+	// Parse main configuration from command line
 	parse_config(argc, argv, &CheetahEuXFELparams);
 	
 	
@@ -128,13 +128,30 @@ int main(int argc, char* argv[]) {
 	
 
 	//static char testfile[]="RAW-R0283-AGIPD00-S00000.h5";
-	
+    
+    // Currently we only handle AGIPD-1M at EuXFEL
+    if(strcmp(cheetahGlobal.detector[0].detectorType, "agipd-1M") != 0) {
+        std::cout << "EuXFEL Cheetah currently configured only for AGIPD_1M detectors" << std::endl;
+        std::cout << "cheetahGlobal.detector[0].detectorType = " << cheetahGlobal.detector[0].detectorType << std::endl;
+        exit(1);
+    };
+    
 	
 	// Initialise AGIPD frame reading stuff
 	cAgipdReader agipd;
 	agipd.verbose=1;
     agipd.setScheme((char*) CheetahEuXFELparams.dataFormat.c_str());
+    
+    
+    // Set MID or SPB detector string
+    // while also handling the legacy case where "agipd-1M" meant to assume "SPB_DET_AGIPD1M-1"
+    // Do it here because cheetahGlobal is not passed to agipd.setScheme(...)
+    if(strcmp(cheetahGlobal.detector[0].detectorName, "agipd-1M") != 0) {
+        std::cout << "Setting AGIPD detector string = " << cheetahGlobal.detector[0].detectorName << std::endl;
+        agipd.setDetectorString(cheetahGlobal.detector[0].detectorName);
+    }
 
+    
     // Set command line option overrides
     //if(CheetahEuXFELparams.frameSkip != -1)
     //    agipd.setSkip(CheetahEuXFELparams.frameSkip);
@@ -389,7 +406,7 @@ void parse_config(int argc, char *argv[], tCheetahEuXFELparams *global) {
     // Defaults
     global->iniFile = "cheetah.ini";
     global->calibFile = "None";
-    global->exptName = "XFEL";
+    global->exptName = "EuXFEL";
 	global->dataFormat = "default";
     global->frameStride = -1;
     global->frameSkip = -1;
