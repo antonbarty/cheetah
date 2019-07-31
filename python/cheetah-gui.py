@@ -325,7 +325,13 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
         self.lastini = inifile
         self.lastcalib = calibfile
 
-        dataset_csv = cfel_file.csv_to_dict('datasets.csv')
+        try:
+            dataset_csv = cfel_file.csv_to_dict('datasets.csv')
+        except:
+            print('Error occured reading datasets.csv (blank file?)')
+            print('Check file contents.  Will return and do nothing.')
+            return
+
 
         # Failing to read the dataset file looses all information (bad)
         if len(dataset_csv['DatasetID']) is 0:
