@@ -25,8 +25,8 @@ cAgipdReader::cAgipdReader(void){
 	badpixMask = NULL;
 	digitalGain = NULL;
 	rawDetectorData = true;
-	currentTrain = 0;
-	currentPulse = 0;
+	currentTrainID = 0;
+	currentPulseID = 0;
 	minTrain = 0;
 	maxTrain = 0;
 	minPulse = 0;
@@ -283,7 +283,7 @@ void cAgipdReader::open(char *baseFilename){
 	
 	
 	
-	// Open all module files and read the header
+	// Open all module files, read the header, read calibrations...
 	for(long i=0; i<nAGIPDmodules; i++) {
 		if(verbose) {
 			printf("Module %0.2li:\n", i);
@@ -298,7 +298,7 @@ void cAgipdReader::open(char *baseFilename){
 		//module[i].setDoNotApplyGainSwitch(_doNotApplyGainSwitch);
 	}
 
-	// Det up size and layout of the assembled data stack
+	// Set up size and layout of the assembled data stack
 	// Use module[0] as the reference and stack the modules one on top of another
 	nframes = module[_referenceModule].nframes;
 	modulen[0] = module[_referenceModule].n0;
@@ -319,11 +319,19 @@ void cAgipdReader::open(char *baseFilename){
 		if (module[i].noData)
 			continue;
 
+        if(module[i].nframes == 0) {
+            moduleOK[i] = false;
+            continue;
+        }
+        
 		if(module[i].nframes != module[_referenceModule].nframes) {
 			std::cout << "\tInconsistent number of frames between modules " << _referenceModule << " and " << i << std::endl;
 			std::cout << "\t" << module[i].nframes << " != " << module[_referenceModule].nframes << std::endl;
-            std::cout << "\tsetting moduleOK[i] = false\n";
-			moduleOK[i] = false;
+            std::cout << "\tUsing module anyway\n";
+            moduleOK[i] = true;
+
+            //std::cout << "\tsetting moduleOK[i] = false\n";
+			//moduleOK[i] = false;
 		}
 		else {
 			moduleOK[i] = true;
@@ -369,10 +377,13 @@ void cAgipdReader::open(char *baseFilename){
 
 	
 	std::cout << "\tChecking for mismatched timestamps" << std::endl;
-	//std::vector<long> allTrainIDs;
 
     
-    // Check for start and end trainID and pulseID
+    // Find TrainID and PulseID ranges in this file: Used later for iterating over trains and pulses
+    // There will be duplicate trainIDs (for each pulse in the train) while pulseID should cycle
+    // Sometimes we get silly values for trainID so need to check for those and make sure not to get stuck iterating over silly values
+    std::vector<long> allTrainIDs, uniqueTrainIDs;
+    std::vector<long> allPulseIDs, uniquePulseIDs;
     minTrain = INT_MAX;
     maxTrain = INT_MIN;
     minPulse = INT_MAX;
@@ -406,28 +417,56 @@ void cAgipdReader::open(char *baseFilename){
             // Silly values to be ignored
             if(trainID <= 0)
                 continue;
-
-			if (trainID < minTrain) minTrain = trainID;
-			if (trainID > maxTrain) maxTrain = trainID;
-
-			if (pulseID < minPulse) minPulse = pulseID;
-			if (pulseID > maxPulse) maxPulse = pulseID;
+            
+            allTrainIDs.push_back(trainID);
+            allPulseIDs.push_back(pulseID);
 
 			if (cellID < minCell) minCell = cellID;
 			if (cellID > maxCell) maxCell = cellID;
 		}
 	}
 
-	currentTrain = minTrain;
-	currentPulse = minPulse;
+    std::cout << "****** trainID diagnostics ******\n";
+    std::cout << "Number of trainIDs (including duplicates): " << allTrainIDs.size() << std::endl;
 
+    // Find unique trainIDs
+    uniqueTrainIDs = allTrainIDs;
+    std::sort(uniqueTrainIDs.begin(), uniqueTrainIDs.end());
+    std::vector<long>::iterator lastUniqueID = std::unique(uniqueTrainIDs.begin(), uniqueTrainIDs.end());
+    uniqueTrainIDs.erase(lastUniqueID, uniqueTrainIDs.end());
+
+    // Find unique pulseIDs
+    uniquePulseIDs = allPulseIDs;
+    std::sort(uniquePulseIDs.begin(), uniquePulseIDs.end());
+    lastUniqueID = std::unique(uniquePulseIDs.begin(), uniquePulseIDs.end());
+    uniquePulseIDs.erase(lastUniqueID, uniquePulseIDs.end());
+    
+    // Range of train and pulse IDs
+    minTrain = *std::min_element(uniqueTrainIDs.begin(), uniqueTrainIDs.end());
+    maxTrain = *std::max_element(uniqueTrainIDs.begin(), uniqueTrainIDs.end());
+    minPulse = *std::min_element(uniquePulseIDs.begin(), uniquePulseIDs.end());
+    maxPulse = *std::max_element(uniquePulseIDs.begin(), uniquePulseIDs.end());
+    
+    
+    // Information output
     std::cout << "****** Begin AGIPD configuration ******\n";
+    std::cout << "Number of unique trainIDs: " << uniqueTrainIDs.size() << std::endl;
+    std::cout << "Number of unique pulseIDs: " << uniquePulseIDs.size() << std::endl;
+    std::cout << "trainIDs range from " << minTrain << " to " << maxTrain  << std::endl;
+    std::cout << "pulseIDs range from " << minPulse << " to " << maxPulse  << std::endl;
 
-	std::cout << "Trains extend from IDs " << minTrain << " to " << maxTrain << std::endl;
-	std::cout << "Pulses extend from IDs " << minPulse << " to " << maxPulse << std::endl;
-    std::cout << "Current train set to minimum, " << minTrain << std::endl;
-	std::cout << "Current pulse set to minimum, " << minPulse << std::endl;
-	std::cout << "Cells of module readout extend from IDs " << minCell << " to " << maxCell << std::endl;
+    
+    trainIDlist = uniqueTrainIDs;
+    pulseIDlist = uniquePulseIDs;
+    currentTrainIt = trainIDlist.begin();
+    currentPulseIt = pulseIDlist.begin();
+	currentTrainID = *currentTrainIt;
+	currentPulseID = *currentPulseIt;
+
+
+    std::cout << "First train is " << currentTrainID << std::endl;
+	std::cout << "First pulse is " << currentPulseID << std::endl;
+	std::cout << "Cells of module readout extend from call IDs " << minCell << " to " << maxCell << std::endl;
 
     
     // This is what happens with a blank set of files
@@ -519,23 +558,45 @@ bool cAgipdReader::nextFrame() {
 	return nextFramePrivate();
 }
 
+/*
+trainIDlist = uniqueTrainIDs;
+pulseIDlist = uniquePulseIDs;
+currentTrainIt = uniqueTrainIDs.begin();
+currentPulseIt = uniquePulseIDs.begin();
+currentTrainID = *currentTrainIt;
+currentPulseID = *currentPulseIt;
+*/
 
 bool cAgipdReader::nextFramePrivate() {
 	lastModule = -1;
 	bool success = true;
 
 	while (lastModule < 0 && success) {
+        
         // Go to next pulse; if next pulse is off end of train then go to next train
-        currentPulse++;
-		if (currentPulse >= maxPulse) {
-			currentPulse = minPulse;
-			currentTrain++;
-			goodImages4ThisTrain = -1;
-		}
+        currentPulseIt++;
+        if(currentPulseIt == pulseIDlist.end() ) {
+            std::cout << "End of train, moving to start of next train";
+            currentPulseIt = pulseIDlist.begin();
+            currentTrainIt++;
+            goodImages4ThisTrain = -1;
+        }
+        
+        // If we are off the end of the train list, return false
+        if(currentTrainIt == trainIDlist.end() ) {
+            std::cout << "***************************************";
+            std::cout << "Off end of train iterator";
+            std::cout << "Signalling end of available frames for this set of runs";
+            std::cout << "***************************************";
+            return false;
+        }
+        
+        currentTrainID = *currentTrainIt;
+        currentPulseID = *currentPulseIt;
 		
-		// Skip to first useful pulse in a train (corrupted)
+		// Option to skip first few pulses in a train (sometimes they are corrupted)
         if(true) {
-            if(currentPulse < _firstPulseId) {
+            if(currentPulseID < _firstPulseId) {
                 //std::cout << "Skipping pulse currentPulse in train " << currentTrain << std::endl;
                 continue;
             }
@@ -543,10 +604,10 @@ bool cAgipdReader::nextFramePrivate() {
 
 		//	PulseID is taken from the AGIPD firmware --> used for determining which are good data frames
 		//  Good frames occur when pulseID % _pulseIDmodulo == 0
-		if(currentPulse % _pulseIDmodulo > 0)
+		if(currentPulseID % _pulseIDmodulo > 0)
 			continue;
 		
-		success = readFrame(currentTrain, currentPulse);
+		success = readFrame(currentTrainID, currentPulseID);
 
 		if (lastModule >= 0) {
 			goodImages4ThisTrain++;
@@ -582,15 +643,15 @@ bool cAgipdReader::nextFramePrivate() {
         printf("%li bad pixels (%f%%)\n", nbad, (100.*nbad)/nn);
     }
 
-    std::cout << "Returning image number " << goodImages4ThisTrain << " in train "  << currentTrain << std::endl;
+    std::cout << "Returning image number " << goodImages4ThisTrain << " in train "  << currentTrainID << std::endl;
     return success;
 }
 
 
 // Go back to the start of the queue
 void cAgipdReader::resetCurrentFrame() {
-	currentPulse = minPulse;
-	currentTrain = minTrain;
+	currentPulseID = minPulse;
+	currentTrainID = minTrain;
 }
 
 
@@ -607,12 +668,12 @@ void cAgipdReader::setModuleToBlank(int moduleID) {
 
 bool cAgipdReader::readFrame(long trainID, long pulseID)
 {
-	if (trainID < minTrain || trainID >= maxTrain) {
+	if (trainID < minTrain || trainID > maxTrain) {
 		std::cout << "\treadFrame::trainID out of bounds " << trainID << std::endl;
 		return false;
 	}
 
-	if (pulseID < minPulse || pulseID >= maxPulse) {
+	if (pulseID < minPulse || pulseID > maxPulse) {
 		std::cout << "\treadFrame::pulseID out of bounds " << pulseID << std::endl;
 		return false;
 	}
@@ -685,8 +746,8 @@ bool cAgipdReader::readFrame(long trainID, long pulseID)
     
     std::cout << std::endl;
     
-	currentTrain = trainID;
-	currentPulse = pulseID;
+	currentTrainID = trainID;
+	currentPulseID = pulseID;
 	currentCell = module[0].cellID;
 
 	return true;
