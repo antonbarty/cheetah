@@ -1,11 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Bucket
+   uuid = "99D133D0-3217-469B-9891-99AB953681E3"
    type = "1"
    version = "2.0">
    <Breakpoints>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "70B525E1-5321-4351-B944-E4F907044AE9"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -22,6 +24,7 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "3A75C346-8FE4-404F-A55B-6A9164D494B7"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -31,13 +34,14 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "727"
             endingLineNumber = "727"
-            landmarkName = "createCXISkeleton(const char *filename, cGlobal *global)"
+            landmarkName = "createCXISkeleton(filename, global)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
+            uuid = "66C86C42-811F-4C9F-B2F6-981C69BF2DF1"
             shouldBeEnabled = "Yes"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
@@ -47,7 +51,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "798"
             endingLineNumber = "798"
-            landmarkName = "createCXISkeleton(const char *filename, cGlobal *global)"
+            landmarkName = "createCXISkeleton(filename, global)"
             landmarkType = "9">
          </BreakpointContent>
       </BreakpointProxy>

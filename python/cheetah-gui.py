@@ -297,8 +297,12 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
     def run_cheetah(self):
 
         # Find .ini files for dropdown list
+        # Then add .yaml files for Alexandra
         inifile_list = []
         for file in glob.iglob('../process/*.ini'):
+            basename = os.path.basename(file)
+            inifile_list.append(basename)
+        for file in glob.iglob('../process/*.yaml'):
             basename = os.path.basename(file)
             inifile_list.append(basename)
         #inifile_list = ['test1.ini','test2.ini']

@@ -217,7 +217,7 @@ int main(int argc, char* argv[]) {
 
 			
 			// First pulse in a train is junk
-			if(agipd.currentPulse == 0) {
+			if(agipd.currentPulseID == 0) {
 				std::cout << "Skipping pulse 0 in train (in cheetah-euxfel.cpp)" << std::endl;
 				continue;
 			}
@@ -236,7 +236,7 @@ int main(int argc, char* argv[]) {
 			eventData->frameNumber = frameNumber;
 
             // Add a sensible event name
-            std::string eventName = CheetahEuXFELparams.inputFiles[fnum] + "_" + i_to_str(agipd.currentTrain) + "_" + i_to_str(agipd.currentPulse);
+            std::string eventName = CheetahEuXFELparams.inputFiles[fnum] + "_" + i_to_str(agipd.currentTrainID) + "_" + i_to_str(agipd.currentPulseID);
 			strcpy(eventData->eventname,eventName.c_str());
             
             // Copy other information into event (extract from EuXFEL data once it's available)
@@ -250,17 +250,17 @@ int main(int argc, char* argv[]) {
 			//eventData->detectorZ = 15e-3;
 			
 			// Add train and pulse ID to event data.
-			eventData->trainID = agipd.currentTrain;
-			eventData->pulseID = agipd.currentPulse;
+			eventData->trainID = agipd.currentTrainID;
+			eventData->pulseID = agipd.currentPulseID;
 			eventData->cellID = agipd.currentCell;
 			
 			
             // Sort by XFEL pulse ID.
             // This may not always be a good idea as the number of pulses is currently set to a maximum 15 elsewhere
 			if(strcmp(cheetahGlobal.pumpLaserScheme, "xfelpulseid") == 0) {
-				if(agipd.currentPulse >= 0 && agipd.currentPulse < cheetahGlobal.nPowderClasses-1) {
-					eventData->pumpLaserCode = agipd.currentPulse;
-					eventData->powderClass = agipd.currentPulse;
+				if(agipd.currentPulseID >= 0 && agipd.currentPulseID < cheetahGlobal.nPowderClasses-1) {
+					eventData->pumpLaserCode = agipd.currentPulseID;
+					eventData->powderClass = agipd.currentPulseID;
 				}
 				else {
 					continue;

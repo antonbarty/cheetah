@@ -356,8 +356,8 @@ void cPixelDetectorCommon::configure(cGlobal * global) {
         pixelSize = 100e-6;
     }
 	else {
-		printf("Error: unknown detector name %s\n", detectorName);
-		printf("Detector type %s\n", detectorType);
+		printf("Error: unknown detector type %s\n", detectorType);
+		printf("Detector name %s\n", detectorName);
 		printf("cPixelDetectorCommon::configure()\n");
 		printf("Quitting\n");
 		exit(1);

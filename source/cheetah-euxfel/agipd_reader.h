@@ -72,8 +72,8 @@ public:
 	long		nframes;
 
 	bool        firstModule;
-	long        currentTrain;
-	long        currentPulse;
+	long        currentTrainID;
+	long        currentPulseID;
 	uint16_t	currentCell;
 	
 	// Calibration files (set to "No_file_specified" in constructor)
@@ -141,6 +141,11 @@ private:
 
 
 	/* Housekeeping for trains and pulses */
+    std::vector<long>   trainIDlist;
+    std::vector<long>   pulseIDlist;
+    std::vector<long>::iterator currentTrainIt;
+    std::vector<long>::iterator currentPulseIt;
+
 	long                minTrain;
 	long                maxTrain;
 	long                minPulse;
