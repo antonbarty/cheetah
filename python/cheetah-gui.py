@@ -322,7 +322,7 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
             return
 
         # Extract values from return dict
-        dataset = gui['dataset']
+        dataset = gui['dataset'].strip()
         inifile = gui['inifile']
         calibfile = gui['calibfile']
         self.lasttag = dataset
@@ -366,7 +366,8 @@ class cheetah_gui(PyQt5.QtWidgets.QMainWindow):
                 dir = 'r{:04d}'.format(int(run))
             else:
                 dir = run
-            dir += '-'+dataset
+            if dataset != '':
+                dir += '-'+dataset
             print('Output directory: ', dir)
 
 
