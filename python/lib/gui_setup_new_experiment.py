@@ -23,7 +23,9 @@ def extract_template(self):
     realdir = os.getcwd()
 
     # LCLS
-    if realdir.startswith("/reg/"):
+    # /reg/d = old LCLS data farm (2010-2020)
+    # /cds/data = new Stanford Data Facility (2021+)
+    if realdir.startswith("/reg/d") or realdir.startswith("/cds/data"):
         print("Extracting template for LCLS...")
         extract_lcls_template(self)
         return
@@ -50,19 +52,35 @@ def extract_lcls_template(self):
     #   Deduce experiment number, etc using de-referenced paths
     #   Assumes the file path follows the pattern:   /reg/d/psdm/cxi/cxij4915/scratch/...
     realdir = os.getcwd()
+    ss = realdir.split('/')
 
     #   Now for some LCLS-specific stuff
-    ss = realdir.split('/')
-    ss = ss[1:]
+    # /reg/d = old LCLS data farm (2010-2020)
+    if realdir.startswith("/reg/d"):
+        ss = ss[1:]
 
-    ss[1] = 'd'
-    ss[2] = 'psdm'
-    instr = ss[3]
-    expt = ss[4]
-    xtcdir = '/' + str.join('/', ss[0:5]) + '/xtc'
-    userdir = '/' + str.join('/', ss) + '/cheetah'
+        ss[1] = 'd'
+        ss[2] = 'psdm'
+        instr = ss[3]
+        expt = ss[4]
+        xtcdir = '/' + str.join('/', ss[0:5]) + '/xtc'
+        userdir = '/' + str.join('/', ss) + '/cheetah'
 
-    print('Deduced experiment information:')
+    # /cds/data = new Stanford Data Facility (2021+)
+    else if realdir.startswith("/cds/data"):
+        ss = ss[1:]
+        instr = ss[3]
+        expt = ss[4]
+        xtcdir = '/' + str.join('/', ss[0:5]) + '/xtc'
+        userdir = '/' + str.join('/', ss) + '/cheetah'
+
+    else:
+        print('***********************')
+        print('Unknown file case: chaos may ensue')
+        print(realdir)
+        print('***********************')
+
+print('Deduced experiment information:')
     print('    Relative path: ', dir)
     print('    Absolute path: ', realdir)
     print('    Instrument: ', instr)
