@@ -67,7 +67,7 @@ def extract_lcls_template(self):
         userdir = '/' + str.join('/', ss) + '/cheetah'
 
     # /cds/data = new Stanford Data Facility (2021+)
-    else if realdir.startswith("/cds/data"):
+    elif realdir.startswith("/cds/data"):
         ss = ss[1:]
         instr = ss[3]
         expt = ss[4]
@@ -80,7 +80,7 @@ def extract_lcls_template(self):
         print(realdir)
         print('***********************')
 
-print('Deduced experiment information:')
+    print('Deduced experiment information:')
     print('    Relative path: ', dir)
     print('    Absolute path: ', realdir)
     print('    Instrument: ', instr)

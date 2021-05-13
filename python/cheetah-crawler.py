@@ -35,7 +35,7 @@ class cheetah_crawler(PyQt5.QtWidgets.QMainWindow):
         # Now some special cases
         if '/reg/d/' in self.data_dir:
             self.datatype = 'XTC'
-        if '/cds/data/' in self.data_dir
+        if '/cds/data/' in self.data_dir:
             self.datatype = 'XTC'
         if '/gpfs/exfel/' in self.data_dir:
             self.datatype = 'exfel'
